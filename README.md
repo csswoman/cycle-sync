@@ -1,20 +1,71 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# 🌙 CycleSync: Holistic Health & Cycle Tracking
 
-# Run and deploy your AI Studio app
+CycleSync is a premium, AI-powered health assistant designed specifically for women's holistic wellness. It synchronizes nutrition, fitness, and mental health with the natural phases of the menstrual cycle, with specialized support for PCOS management.
 
-This contains everything you need to run your app locally.
+![CycleSync Banner](https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6)
 
-View your app in AI Studio: https://ai.studio/apps/drive/1vOVLU28d_C4ZYGOEs1GHbz6x4W830CtO
+## ✨ key Features
 
-## Run Locally
+- **🧠 Smart AI Assistant**: Powered by Google Gemini with a custom fallback system across multiple models (`Gemini 2.5 Flash`, `2.0 Flash`, `Lite`).
+  - **Multimodal capabilities**: Analyze meal photos for nutrition insight and exercise videos for form correction.
+- **📊 Advanced Analytics**: Track mood, energy, and symptoms across cycles to identify hormonal patterns.
+- **⚡ Personalized Dashboards**: Daily plans that adapt to your current cycle phase (Menstrual, Follicular, Ovulatory, Luteal).
+- **🧘 Specialized Toolkits**:
+  - **PCOS Care**: Tailored advice for insulin sensitivity and hormonal balance.
+  - **Sync-Nourishment**: Meal ideas optimized for each phase.
+  - **Adaptive Routines**: Exercise recommendations based on your readiness score.
+- **🔒 Privacy First**: Designed with local data persistence in mind, ensuring your health data stays on your device.
 
-**Prerequisites:**  Node.js
+## 🏗️ Architecture & Best Practices
 
+The project follows a modern, scalable architecture based on **SOLID principles**:
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+- **Feature-Based Structure**: Organized by domain functionality (Cycle, Health, Assistant) rather than technical layers.
+- **Custom Hooks & Services**: Business logic and API interactions (like Gemini) are decoupled from UI components using the Dependency Inversion principle.
+- **Atomic UI Components**: Reusable, consistent components (Buttons, Cards, Badges) built with a custom design system.
+- **TypeScript First**: Full type safety across the entire application.
+
+## 🚀 Tech Stack
+
+- **Framework**: [React](https://reactjs.org/) + [Vite](https://vitejs.dev/)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
+- **AI Engine**: [Google Generative AI (Gemini)](https://ai.google.dev/)
+- **Styling**: Vanilla CSS with modern Glassmorphism and vibrant aesthetics.
+- **Icons**: [Google Material Symbols](https://fonts.google.com/icons)
+
+## 🛠️ Getting Started
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/) (v18 or higher recommended)
+
+### Installation
+
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Create a `.env.local` file in the root directory and add your Gemini API Key:
+   ```env
+   VITE_GEMINI_API_KEY=your_api_key_here
+   ```
+4. Run the development server:
+   ```bash
+   npm run dev
+   ```
+
+## 📂 Project Structure
+
+```text
+src/
+├── components/         # Reusable structural and UI elements
+├── features/           # Domain-driven features (Dashboard, Cycle, etc.)
+├── hooks/              # Reusable business logic/custom hooks
+├── services/           # External API clients
+├── types/              # Global TypeScript interfaces
+└── assets/             # Global styles and static files
+```
+
+---
+*Developed with love for holistic health and tech excellence.*
