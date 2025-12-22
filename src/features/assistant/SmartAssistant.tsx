@@ -98,6 +98,20 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ onClose }) => {
     }
   };
 
+  const handleUnifiedFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.type.startsWith('image/')) {
+      handleImageSelect(e);
+      setActiveTab(AssistantTab.IMAGE);
+    } else if (file.type.startsWith('video/')) {
+      handleVideoSelect(e);
+      setActiveTab(AssistantTab.VIDEO);
+    }
+  };
+
+
   return (
     <div className="flex flex-col h-full overflow-hidden bg-background-dark/95 backdrop-blur-xl border border-surface-dark shadow-2xl rounded-2xl">
       <div className="p-4 border-b border-surface-dark flex items-center justify-between bg-surface-dark/50">
@@ -137,6 +151,7 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ onClose }) => {
             setInputText={setInputText}
             isChatLoading={isChatLoading}
             onSend={onSend}
+            onFileSelect={handleUnifiedFileSelect}
           />
         )}
 
