@@ -1,0 +1,5 @@
+{
+  "name": "CycleSync",
+  "description": "A holistic health tracking application with AI-powered insights for cycle tracking, mood logging, and wellness analysis using Gemini 3 Pro.",
+  "requestFramePermissions": []
+}
