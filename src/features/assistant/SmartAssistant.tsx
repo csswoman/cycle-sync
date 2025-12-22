@@ -5,13 +5,19 @@ import { Button } from '@/components/ui/Button';
 import { ChatTab } from './components/ChatTab';
 import { ImageTab } from './components/ImageTab';
 import { VideoTab } from './components/VideoTab';
+import { useLanguage } from '@/i18n/LanguageContext';
 
 interface SmartAssistantProps {
   onClose: () => void;
 }
 
 const SmartAssistant: React.FC<SmartAssistantProps> = ({ onClose }) => {
+  const { language, t } = useLanguage();
   const [activeTab, setActiveTab] = useState<AssistantTab>(AssistantTab.CHAT);
+
+  const initialGreeting = language === 'es'
+    ? '¡Hola! Soy tu asistente de CycleSync. ¿Cómo puedo ayudarte con tu salud hoy?'
+    : 'Hi! I am your CycleSync Assistant. How can I help you with your health today?';
 
   const {
     messages,
@@ -22,8 +28,8 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ onClose }) => {
     handleImageAnalysis,
     handleVideoAnalysis
   } = useGeminiAssistant([
-    { id: '1', role: 'model', text: 'Hi Sarah! I am your CycleSync Assistant. How can I help you with your health today?' }
-  ]);
+    { id: '1', role: 'model', text: initialGreeting }
+  ], language);
 
   const [inputText, setInputText] = useState('');
 
@@ -126,9 +132,9 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ onClose }) => {
 
       <div className="flex p-2 gap-1 bg-secondary/30 border-b border-border">
         {[
-          { id: AssistantTab.CHAT, label: 'Chat' },
-          { id: AssistantTab.IMAGE, label: 'Image' },
-          { id: AssistantTab.VIDEO, label: 'Video' }
+          { id: AssistantTab.CHAT, label: t.chat },
+          { id: AssistantTab.IMAGE, label: t.image },
+          { id: AssistantTab.VIDEO, label: t.video }
         ].map(tab => (
           <button
             key={tab.id}

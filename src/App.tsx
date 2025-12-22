@@ -10,8 +10,11 @@ import PCOSCare from '@/features/health/PCOSCare';
 import Routines from '@/features/health/Routines';
 import Nutrition from '@/features/health/Nutrition';
 import { View } from '@/types';
+import { useLanguage } from '@/i18n/LanguageContext';
+import type { Language } from '@/i18n/translations';
 
 function App() {
+  const { language, setLanguage, t } = useLanguage();
   const [currentView, setCurrentView] = useState<View>(View.DASHBOARD);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
@@ -30,6 +33,25 @@ function App() {
     } else {
       document.documentElement.classList.remove('dark');
       localStorage.setItem('theme', 'light');
+    }
+  };
+
+  const toggleLanguage = () => {
+    setLanguage(language === 'en' ? 'es' : 'en');
+  };
+
+  const getViewTitle = () => {
+    switch (currentView) {
+      case View.DASHBOARD: return t.overview;
+      case View.LOG: return t.dailyLog;
+      case View.TRENDS: return t.trends;
+      case View.SETTINGS: return t.settings;
+      case View.ARCHETYPE_SELECTION: return t.personalizeExperience;
+      case View.CYCLE_SETUP: return t.setupProfile;
+      case View.PCOS: return t.pcosToolkit;
+      case View.ROUTINES: return t.routines;
+      case View.NUTRITION: return t.mealIdeas;
+      default: return 'CycleSync';
     }
   };
 
@@ -56,20 +78,20 @@ function App() {
               <span className="material-symbols-outlined">menu</span>
             </button>
             <h2 className="text-foreground text-xl font-bold tracking-tight">
-              {currentView === View.DASHBOARD && 'Overview'}
-              {currentView === View.LOG && 'Daily Log'}
-              {currentView === View.TRENDS && 'Trends'}
-              {currentView === View.SETTINGS && 'Settings'}
-              {currentView === View.ARCHETYPE_SELECTION && 'Personalize Experience'}
-              {currentView === View.CYCLE_SETUP && 'Setup Profile'}
-              {currentView === View.PCOS && 'PCOS Toolkit'}
-              {currentView === View.ROUTINES && 'Entrenamientos'}
-              {currentView === View.NUTRITION && 'Meal Ideas'}
-              {/* Fallback for other views if needed */}
-              {(currentView !== View.DASHBOARD && currentView !== View.LOG && currentView !== View.TRENDS && currentView !== View.SETTINGS && currentView !== View.ARCHETYPE_SELECTION && currentView !== View.CYCLE_SETUP && currentView !== View.PCOS && currentView !== View.ROUTINES && currentView !== View.NUTRITION) && 'CycleSync'}
+              {getViewTitle()}
             </h2>
           </div>
-          <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3">
+            {/* Language Switcher */}
+            <button
+              onClick={toggleLanguage}
+              className="flex items-center gap-2 bg-secondary hover:bg-surface-hover transition-all rounded-xl px-4 py-2.5 text-sm font-semibold text-foreground shadow-sm border border-border/50 group"
+            >
+              <span className="material-symbols-outlined text-[20px]">language</span>
+              <span className="hidden sm:inline font-bold">{language.toUpperCase()}</span>
+            </button>
+
+            {/* Dark Mode Toggle */}
             <button
               onClick={toggleDarkMode}
               className="flex items-center gap-2 bg-secondary hover:bg-surface-hover transition-all rounded-xl px-4 py-2.5 text-sm font-semibold text-foreground shadow-sm border border-border/50 group"
@@ -77,12 +99,13 @@ function App() {
               <span className="material-symbols-outlined text-[20px] transition-transform group-hover:rotate-12">
                 {isDarkMode ? 'light_mode' : 'dark_mode'}
               </span>
-              <span className="hidden sm:inline">{isDarkMode ? 'Light Mode' : 'Dark Mode'}</span>
+              <span className="hidden sm:inline">{isDarkMode ? t.lightMode : t.darkMode}</span>
             </button>
-            <div className="flex items-center gap-3 pl-6 border-l border-border">
+
+            <div className="flex items-center gap-3 pl-3 border-l border-border">
               <div className="text-right hidden sm:block">
                 <p className="text-foreground text-sm font-bold">Elena R.</p>
-                <p className="text-muted-foreground text-xs font-medium">Powerhouse Archetype</p>
+                <p className="text-muted-foreground text-xs font-medium">{t.powerhouseArchetype}</p>
               </div>
               <div className="bg-center bg-no-repeat bg-cover rounded-full size-11 border-2 border-border shadow-xl shadow-primary/10 ring-2 ring-primary/5"
                 style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuDsvySV6JHheB_2QTPrBxRW-WlPhII5ihPXtZ2SqR5vH__HjdCIoXlg4RBVuiMjUJha1iy3-K9NkNDQ1CxG4KKvsX_FZREjkfrapXJnVo0SBCzf4It_WPpVEv-VVa2yUaJW8wdnBPZZ7jOLxqycpnqA1FnmDOtVQL5m425jGmxqs5fXaeIJsf3h0JJRa5X2PZ05aJc5wKTudNG6YUveRY7twSunxCalqn3X2-wpQvlaVz2DeQ5SqfMo8x-MrPI_JLz7jro6j8aJaCQ")' }}>
@@ -104,7 +127,7 @@ function App() {
           <div className="flex-1 flex items-center justify-center text-muted-foreground">
             <div className="text-center">
               <span className="material-symbols-outlined text-6xl mb-4 opacity-50">construction</span>
-              <p>This feature is coming soon.</p>
+              <p>{t.thisFeatureIsComingSoon}</p>
             </div>
           </div>
         )}

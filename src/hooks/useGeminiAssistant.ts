@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ChatMessage } from '@/types';
 import { sendChatMessage, analyzeImage, analyzeVideo } from '@/services/geminiService';
 
-export const useGeminiAssistant = (initialMessages: ChatMessage[]) => {
+export const useGeminiAssistant = (initialMessages: ChatMessage[], language: 'en' | 'es' = 'en') => {
     const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
     const [isChatLoading, setIsChatLoading] = useState(false);
     const [isImageLoading, setIsImageLoading] = useState(false);
@@ -27,7 +27,7 @@ export const useGeminiAssistant = (initialMessages: ChatMessage[]) => {
                 parts: [{ text: m.text }]
             }));
 
-            const responseText = await sendChatMessage(text, history);
+            const responseText = await sendChatMessage(text, history, language);
 
             const botMessage: ChatMessage = {
                 id: (Date.now() + 1).toString(),
@@ -38,10 +38,13 @@ export const useGeminiAssistant = (initialMessages: ChatMessage[]) => {
         } catch (error) {
             console.error("Assistant Error:", error);
             const errorMessage = error instanceof Error ? error.message : "Unknown error";
+            const errorText = language === 'es'
+                ? `Error: ${errorMessage}. Por favor verifica tu clave API y conexión.`
+                : `Error: ${errorMessage}. Please check your API key and connection.`;
             setMessages(prev => [...prev, {
                 id: Date.now().toString(),
                 role: 'model',
-                text: `Error: ${errorMessage}. Please check your API key and connection.`
+                text: errorText
             }]);
         } finally {
             setIsChatLoading(false);

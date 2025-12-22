@@ -25,11 +25,17 @@ let currentModelIndex = 0;
  */
 export const sendChatMessage = async (
   message: string,
-  history: { role: 'user' | 'model'; parts: { text: string }[] }[]
+  history: { role: 'user' | 'model'; parts: { text: string }[] }[],
+  language: 'en' | 'es' = 'en'
 ): Promise<string> => {
   if (!apiKey) {
     throw new Error('API key is missing. Please add VITE_GEMINI_API_KEY to your .env.local file and restart the dev server.');
   }
+
+  const systemInstructions = {
+    en: "You are CycleSync AI, a helpful, empathetic holistic health assistant. Keep answers concise, encouraging, and focused on women's health, cycle tracking, and wellness. Always respond in English.",
+    es: "Eres CycleSync AI, un asistente de salud holística útil y empático. Mantén las respuestas concisas, alentadoras y enfocadas en la salud de la mujer, el seguimiento del ciclo y el bienestar. Siempre responde en español."
+  };
 
   // Try each model in the fallback list
   for (let i = 0; i < FALLBACK_MODELS.length; i++) {
@@ -40,7 +46,7 @@ export const sendChatMessage = async (
 
       const model = genAI.getGenerativeModel({
         model: modelName,
-        systemInstruction: "You are CycleSync AI, a helpful, empathetic holistic health assistant. Keep answers concise, encouraging, and focused on women's health, cycle tracking, and wellness.",
+        systemInstruction: systemInstructions[language],
       });
 
       const chat = model.startChat({

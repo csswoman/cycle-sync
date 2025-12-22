@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { ChatMessage } from '@/types';
 import { Button } from '@/components/ui/Button';
+import { useLanguage } from '@/i18n/LanguageContext';
 
 interface ChatTabProps {
     messages: ChatMessage[];
@@ -19,6 +20,7 @@ export const ChatTab: React.FC<ChatTabProps> = ({
     onSend,
     onFileSelect,
 }) => {
+    const { t } = useLanguage();
     const chatContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -78,7 +80,7 @@ export const ChatTab: React.FC<ChatTabProps> = ({
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
                         onKeyDown={(e) => e.key === 'Enter' && onSend()}
-                        placeholder="Pregunta sobre técnica, lugares..."
+                        placeholder={t.typeMessage}
                         className="flex-1 bg-transparent border-none text-foreground text-sm placeholder-muted-foreground focus:ring-0 py-3.5"
                     />
                 </div>
