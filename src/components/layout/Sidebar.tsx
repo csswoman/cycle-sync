@@ -6,21 +6,40 @@ interface SidebarProps {
   onViewChange: (view: View) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange }) => {
-  const getLinkClass = (view: View) => {
-    const base = "flex items-center gap-3 px-3 py-3 rounded-xl transition-colors cursor-pointer group";
-    if (currentView === view) {
-      return `${base} bg-primary/20 text-white`;
-    }
-    return `${base} hover:bg-surface-dark text-text-secondary hover:text-white`;
-  };
+interface NavItemProps {
+  view: View;
+  label: string;
+  icon: string;
+  currentView: View;
+  onViewChange: (view: View) => void;
+}
 
-  const getIconClass = (view: View) => {
-    if (currentView === view) {
-      return "material-symbols-outlined text-primary fill-1";
-    }
-    return "material-symbols-outlined text-text-secondary group-hover:text-white";
-  };
+const NavItem: React.FC<NavItemProps> = ({ view, label, icon, currentView, onViewChange }) => {
+  const isActive = currentView === view;
+  return (
+    <div
+      onClick={() => onViewChange(view)}
+      className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-colors cursor-pointer group ${isActive ? 'bg-primary/20 text-white' : 'hover:bg-surface-dark text-text-secondary hover:text-white'
+        }`}
+    >
+      <span className={`material-symbols-outlined ${isActive ? 'text-primary fill-1' : 'text-text-secondary group-hover:text-white'}`}>
+        {icon}
+      </span>
+      <p className={`text-sm ${isActive ? 'font-bold text-white' : 'font-medium'}`}>{label}</p>
+    </div>
+  );
+};
+
+const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange }) => {
+  const navItems = [
+    { view: View.DASHBOARD, label: 'Dashboard', icon: 'dashboard' },
+    { view: View.LOG, label: 'Daily Log', icon: 'edit_calendar' },
+    { view: View.ROUTINES, label: 'Rutinas', icon: 'fitness_center' },
+    { view: View.NUTRITION, label: 'Nutrición', icon: 'restaurant' },
+    { view: View.TRENDS, label: 'Trends', icon: 'trending_up' },
+    { view: View.PCOS, label: 'PCOS Care', icon: 'spa' },
+  ];
+
 
   return (
     <aside className="w-64 flex-shrink-0 border-r border-surface-dark bg-background-dark hidden md:flex flex-col justify-between p-4">
@@ -38,35 +57,9 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange }) => {
 
         {/* Nav Menu */}
         <nav className="flex flex-col gap-2">
-          <div onClick={() => onViewChange(View.DASHBOARD)} className={getLinkClass(View.DASHBOARD)}>
-            <span className={getIconClass(View.DASHBOARD)}>dashboard</span>
-            <p className={`text-sm ${currentView === View.DASHBOARD ? 'font-bold' : 'font-medium'}`}>Dashboard</p>
-          </div>
-
-          <div onClick={() => onViewChange(View.LOG)} className={getLinkClass(View.LOG)}>
-            <span className={getIconClass(View.LOG)}>edit_calendar</span>
-            <p className={`text-sm ${currentView === View.LOG ? 'font-bold' : 'font-medium'}`}>Daily Log</p>
-          </div>
-
-          <div onClick={() => onViewChange(View.ROUTINES)} className={getLinkClass(View.ROUTINES)}>
-            <span className={getIconClass(View.ROUTINES)}>fitness_center</span>
-            <p className={`text-sm ${currentView === View.ROUTINES ? 'font-bold' : 'font-medium'}`}>Rutinas</p>
-          </div>
-
-          <div onClick={() => onViewChange(View.NUTRITION)} className={getLinkClass(View.NUTRITION)}>
-            <span className={getIconClass(View.NUTRITION)}>restaurant</span>
-            <p className={`text-sm ${currentView === View.NUTRITION ? 'font-bold' : 'font-medium'}`}>Nutrición</p>
-          </div>
-
-          <div onClick={() => onViewChange(View.TRENDS)} className={getLinkClass(View.TRENDS)}>
-            <span className={getIconClass(View.TRENDS)}>trending_up</span>
-            <p className={`text-sm ${currentView === View.TRENDS ? 'font-bold' : 'font-medium'}`}>Trends</p>
-          </div>
-
-          <div onClick={() => onViewChange(View.PCOS)} className={getLinkClass(View.PCOS)}>
-            <span className={getIconClass(View.PCOS)}>spa</span>
-            <p className={`text-sm ${currentView === View.PCOS ? 'font-bold' : 'font-medium'}`}>PCOS Care</p>
-          </div>
+          {navItems.map((item) => (
+            <NavItem key={item.view} {...item} currentView={currentView} onViewChange={onViewChange} />
+          ))}
         </nav>
       </div>
 
@@ -79,10 +72,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange }) => {
           Personalize Experience
         </button>
 
-        <div onClick={() => onViewChange(View.SETTINGS)} className={getLinkClass(View.SETTINGS)}>
-          <span className={getIconClass(View.SETTINGS)}>settings</span>
-          <p className={`text-sm ${currentView === View.SETTINGS ? 'font-bold' : 'font-medium'}`}>Settings</p>
-        </div>
+        <NavItem view={View.SETTINGS} label="Settings" icon="settings" currentView={currentView} onViewChange={onViewChange} />
       </div>
     </aside>
   );
