@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { AssistantTab, ChatMessage } from '../types';
-import { sendChatMessage, analyzeImage, analyzeVideo } from '../services/geminiService';
+import { AssistantTab, ChatMessage } from '@/types';
+import { useGeminiAssistant } from '@/hooks/useGeminiAssistant';
+import { Button } from '@/components/ui/Button';
 
 interface SmartAssistantProps {
   onClose: () => void;
@@ -9,25 +10,30 @@ interface SmartAssistantProps {
 const SmartAssistant: React.FC<SmartAssistantProps> = ({ onClose }) => {
   const [activeTab, setActiveTab] = useState<AssistantTab>(AssistantTab.CHAT);
 
-  // Chat State
-  const [messages, setMessages] = useState<ChatMessage[]>([
+  const {
+    messages,
+    isChatLoading,
+    isImageLoading,
+    isVideoLoading,
+    handleSendMessage,
+    handleImageAnalysis,
+    handleVideoAnalysis
+  } = useGeminiAssistant([
     { id: '1', role: 'model', text: 'Hi Sarah! I am your CycleSync Assistant. How can I help you with your health today?' }
   ]);
+
   const [inputText, setInputText] = useState('');
-  const [isChatLoading, setIsChatLoading] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
   // Image State
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [imagePrompt, setImagePrompt] = useState('');
   const [imageResult, setImageResult] = useState('');
-  const [isImageLoading, setIsImageLoading] = useState(false);
 
   // Video State
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   const [videoPrompt, setVideoPrompt] = useState('');
   const [videoResult, setVideoResult] = useState('');
-  const [isVideoLoading, setIsVideoLoading] = useState(false);
 
   // Scroll to bottom of chat
   useEffect(() => {
@@ -36,44 +42,11 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ onClose }) => {
     }
   }, [messages]);
 
-  const handleSendMessage = async () => {
+  const onSend = async () => {
     if (!inputText.trim()) return;
-
-    const newMessage: ChatMessage = {
-      id: Date.now().toString(),
-      role: 'user',
-      text: inputText
-    };
-
-    setMessages(prev => [...prev, newMessage]);
+    const text = inputText;
     setInputText('');
-    setIsChatLoading(true);
-
-    try {
-      // Format history for Gemini API
-      // Gemini requires history to start with 'user'. We skip the initial greeting if present.
-      const validHistoryMessages = messages.at(0)?.role === 'model' ? messages.slice(1) : messages;
-
-      const history = validHistoryMessages.map(m => ({
-        role: m.role,
-        parts: [{ text: m.text }]
-      }));
-
-      const responseText = await sendChatMessage(newMessage.text, history);
-
-      const botMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: 'model',
-        text: responseText
-      };
-      setMessages(prev => [...prev, botMessage]);
-    } catch (error) {
-      console.error("Assistant Error:", error);
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      setMessages(prev => [...prev, { id: Date.now().toString(), role: 'model', text: `Error: ${errorMessage}. Please check your API key and connection.` }]);
-    } finally {
-      setIsChatLoading(false);
-    }
+    await handleSendMessage(text);
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -88,23 +61,20 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ onClose }) => {
     }
   };
 
-  const handleAnalyzeImage = async () => {
+  const onAnalyzeImage = async () => {
     if (!selectedImage) return;
-    setIsImageLoading(true);
     try {
-      const result = await analyzeImage(selectedImage, imagePrompt);
+      const result = await handleImageAnalysis(selectedImage, imagePrompt);
       setImageResult(result);
     } catch (error) {
       setImageResult("Failed to analyze image.");
-    } finally {
-      setIsImageLoading(false);
     }
   };
 
   const handleVideoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Check file size (approx 10MB limit for browser based base64 reliability)
+      // Check file size (approx 10MB limit)
       if (file.size > 10 * 1024 * 1024) {
         alert("Video file too large for this demo. Please use a clip under 10MB.");
         return;
@@ -118,16 +88,13 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ onClose }) => {
     }
   };
 
-  const handleAnalyzeVideo = async () => {
+  const onAnalyzeVideo = async () => {
     if (!selectedVideo) return;
-    setIsVideoLoading(true);
     try {
-      const result = await analyzeVideo(selectedVideo, videoPrompt);
+      const result = await handleVideoAnalysis(selectedVideo, videoPrompt);
       setVideoResult(result);
     } catch (error) {
       setVideoResult("Failed to analyze video.");
-    } finally {
-      setIsVideoLoading(false);
     }
   };
 
@@ -197,17 +164,18 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ onClose }) => {
                 type="text"
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                onKeyDown={(e) => e.key === 'Enter' && onSend()}
                 placeholder="Type a message..."
                 className="flex-1 bg-surface-dark border-transparent rounded-xl text-white text-sm placeholder-text-secondary focus:border-primary focus:ring-0"
               />
-              <button
-                onClick={handleSendMessage}
+              <Button
+                onClick={onSend}
                 disabled={isChatLoading || !inputText.trim()}
-                className="bg-primary hover:bg-primary-hover disabled:opacity-50 text-white p-2.5 rounded-xl transition-colors flex items-center justify-center"
-              >
-                <span className="material-symbols-outlined text-[20px]">send</span>
-              </button>
+                variant="primary"
+                className="!p-2.5 !rounded-xl"
+                isLoading={isChatLoading}
+                icon="send"
+              />
             </div>
           </div>
         )}
@@ -248,14 +216,15 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ onClose }) => {
                     placeholder="Prompt (e.g. nutrition check)"
                     className="w-full bg-surface-dark border-transparent rounded-lg text-white text-sm placeholder-text-secondary focus:border-primary focus:ring-0"
                   />
-                  <button
-                    onClick={handleAnalyzeImage}
+                  <Button
+                    onClick={onAnalyzeImage}
                     disabled={!selectedImage || isImageLoading}
-                    className="w-full bg-primary hover:bg-primary-hover disabled:opacity-50 text-white px-4 py-2 rounded-lg transition-colors font-medium text-sm flex items-center justify-center gap-2"
+                    className="w-full"
+                    isLoading={isImageLoading}
+                    icon="auto_awesome"
                   >
-                    {isImageLoading ? <span className="material-symbols-outlined animate-spin text-sm">refresh</span> : <span className="material-symbols-outlined text-sm">auto_awesome</span>}
                     Analyze
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>
@@ -308,14 +277,15 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ onClose }) => {
                     placeholder="Prompt (e.g. check squat form)"
                     className="w-full bg-surface-dark border-transparent rounded-lg text-white text-sm placeholder-text-secondary focus:border-primary focus:ring-0"
                   />
-                  <button
-                    onClick={handleAnalyzeVideo}
+                  <Button
+                    onClick={onAnalyzeVideo}
                     disabled={!selectedVideo || isVideoLoading}
-                    className="w-full bg-primary hover:bg-primary-hover disabled:opacity-50 text-white px-4 py-2 rounded-lg transition-colors font-medium text-sm flex items-center justify-center gap-2"
+                    className="w-full"
+                    isLoading={isVideoLoading}
+                    icon="auto_awesome"
                   >
-                    {isVideoLoading ? <span className="material-symbols-outlined animate-spin text-sm">refresh</span> : <span className="material-symbols-outlined text-sm">auto_awesome</span>}
                     Analyze Video
-                  </button>
+                  </Button>
                 </div>
               </div>
             </div>

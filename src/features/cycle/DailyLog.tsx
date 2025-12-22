@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mood } from '../types';
+import { Mood } from '@/types';
 
 const DailyLog: React.FC = () => {
   const [selectedMood, setSelectedMood] = useState<Mood>(Mood.GOOD);
@@ -52,14 +52,14 @@ const DailyLog: React.FC = () => {
               </div>
               <div className="grid grid-cols-5 gap-2 md:gap-4">
                 {moodOptions.map((option) => (
-                  <button 
+                  <button
                     key={option.type}
                     onClick={() => setSelectedMood(option.type)}
                     className="flex flex-col items-center gap-2 group focus:outline-none"
                   >
                     <div className={`size-12 md:size-14 rounded-full flex items-center justify-center border-2 transition-all
-                      ${selectedMood === option.type 
-                        ? 'bg-primary border-primary shadow-[0_0_15px_rgba(127,25,230,0.4)]' 
+                      ${selectedMood === option.type
+                        ? 'bg-primary border-primary shadow-[0_0_15px_rgba(127,25,230,0.4)]'
                         : 'bg-surface-dark border-transparent group-hover:border-primary/50'}`}
                     >
                       <span className={`material-symbols-outlined text-3xl ${selectedMood === option.type ? 'text-white' : 'text-text-secondary group-hover:text-white'}`}>
@@ -86,11 +86,11 @@ const DailyLog: React.FC = () => {
                   <span className="text-primary font-bold text-lg">{energyLevel}/10</span>
                 </div>
                 <div className="relative w-full h-8 flex items-center">
-                  <input 
-                    className="w-full h-2 bg-surface-dark rounded-lg appearance-none cursor-pointer z-10" 
-                    max="10" 
-                    min="1" 
-                    type="range" 
+                  <input
+                    className="w-full h-2 bg-surface-dark rounded-lg appearance-none cursor-pointer z-10"
+                    max="10"
+                    min="1"
+                    type="range"
                     value={energyLevel}
                     onChange={(e) => setEnergyLevel(parseInt(e.target.value))}
                   />
@@ -112,7 +112,7 @@ const DailyLog: React.FC = () => {
                   Sleep Quality
                 </h3>
                 <div className="flex items-center gap-3">
-                  <button 
+                  <button
                     onClick={() => setSleepHours(Math.max(0, sleepHours - 0.5))}
                     className="size-10 rounded-lg bg-surface-dark hover:bg-surface-dark-hover flex items-center justify-center text-white transition-colors">
                     <span className="material-symbols-outlined">remove</span>
@@ -121,7 +121,7 @@ const DailyLog: React.FC = () => {
                     <span className="text-2xl font-bold text-white">{sleepHours}</span>
                     <span className="text-xs text-text-secondary ml-1">hrs</span>
                   </div>
-                  <button 
+                  <button
                     onClick={() => setSleepHours(sleepHours + 0.5)}
                     className="size-10 rounded-lg bg-surface-dark hover:bg-surface-dark-hover flex items-center justify-center text-white transition-colors">
                     <span className="material-symbols-outlined">add</span>
@@ -148,12 +148,12 @@ const DailyLog: React.FC = () => {
                 {symptoms.map(symptom => {
                   const isActive = activeSymptoms.includes(symptom);
                   return (
-                    <button 
+                    <button
                       key={symptom}
                       onClick={() => toggleSymptom(symptom)}
                       className={`px-4 py-2 rounded-full text-sm font-medium border transition-all flex items-center gap-2
-                        ${isActive 
-                          ? 'bg-primary text-white border-primary shadow-[0_4px_10px_rgba(127,25,230,0.3)]' 
+                        ${isActive
+                          ? 'bg-primary text-white border-primary shadow-[0_4px_10px_rgba(127,25,230,0.3)]'
                           : 'bg-surface-dark text-text-secondary border-transparent hover:bg-surface-dark-hover hover:text-white'}`}
                     >
                       {isActive && <span className="material-symbols-outlined text-[18px]">check</span>}
@@ -236,7 +236,7 @@ const DailyLog: React.FC = () => {
           </div>
         </div>
       </div>
-      
+
       {/* MOBILE STICKY FOOTER BUTTON */}
       <div className="md:hidden fixed bottom-0 left-0 w-full p-4 bg-background-dark/95 backdrop-blur border-t border-surface-dark z-30">
         <button className="w-full bg-primary hover:bg-primary-hover text-white text-lg font-bold py-3 rounded-xl flex items-center justify-center gap-2 shadow-lg">

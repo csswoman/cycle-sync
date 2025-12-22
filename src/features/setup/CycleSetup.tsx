@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View } from '../types';
+import { View } from '@/types';
 
 interface CycleSetupProps {
     onNavigate: (view: View) => void;
@@ -7,7 +7,7 @@ interface CycleSetupProps {
 
 const CycleSetup: React.FC<CycleSetupProps> = ({ onNavigate }) => {
     const [step, setStep] = useState(2); // Steps: 2 (Cycle), 3 (Preferences), 4 (Profile)
-    
+
     // Form State
     const [cycleLength, setCycleLength] = useState(28);
     const [selectedTraining, setSelectedTraining] = useState<string[]>([]);
@@ -69,7 +69,7 @@ const CycleSetup: React.FC<CycleSetupProps> = ({ onNavigate }) => {
                                 <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${progressPercentage}%` }}></div>
                             </div>
                         </div>
-                        
+
                         {/* STEP 2: CYCLE DETAILS */}
                         {step === 2 && (
                             <>
@@ -118,14 +118,14 @@ const CycleSetup: React.FC<CycleSetupProps> = ({ onNavigate }) => {
                                             <p className="text-text-secondary text-sm mt-1">Days between periods</p>
                                         </div>
                                         <div className="flex items-center justify-between mt-6 bg-background-dark rounded-lg p-2 border border-surface-dark">
-                                            <button 
+                                            <button
                                                 onClick={() => setCycleLength(Math.max(20, cycleLength - 1))}
                                                 className="size-10 flex items-center justify-center rounded-md hover:bg-surface-dark text-primary transition-colors"
                                             >
                                                 <span className="material-symbols-outlined">remove</span>
                                             </button>
                                             <span className="text-2xl font-bold text-white">{cycleLength}</span>
-                                            <button 
+                                            <button
                                                 onClick={() => setCycleLength(cycleLength + 1)}
                                                 className="size-10 flex items-center justify-center rounded-md hover:bg-surface-dark text-primary transition-colors"
                                             >
@@ -133,7 +133,7 @@ const CycleSetup: React.FC<CycleSetupProps> = ({ onNavigate }) => {
                                             </button>
                                         </div>
                                     </div>
-                                    
+
                                     <div className="bg-card-dark rounded-xl p-6 border border-surface-dark shadow-sm flex flex-col justify-between">
                                         <div>
                                             <h3 className="text-lg font-bold leading-tight tracking-[-0.015em] text-white">Cycle Regularity</h3>
@@ -142,7 +142,7 @@ const CycleSetup: React.FC<CycleSetupProps> = ({ onNavigate }) => {
                                         <div className="mt-6 flex flex-col gap-3">
                                             <label className="flex items-center gap-3 cursor-pointer group">
                                                 <div className="relative flex items-center">
-                                                    <input className="peer h-5 w-5 cursor-pointer appearance-none rounded-md border border-surface-dark bg-background-dark checked:bg-primary checked:border-primary transition-all" type="checkbox"/>
+                                                    <input className="peer h-5 w-5 cursor-pointer appearance-none rounded-md border border-surface-dark bg-background-dark checked:bg-primary checked:border-primary transition-all" type="checkbox" />
                                                     <span className="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                                                         <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                                             <path clipRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" fillRule="evenodd"></path>
@@ -153,7 +153,7 @@ const CycleSetup: React.FC<CycleSetupProps> = ({ onNavigate }) => {
                                             </label>
                                             <label className="flex items-center gap-3 cursor-pointer group">
                                                 <div className="relative flex items-center">
-                                                    <input className="peer h-5 w-5 cursor-pointer appearance-none rounded-md border border-surface-dark bg-background-dark checked:bg-primary checked:border-primary transition-all" type="checkbox"/>
+                                                    <input className="peer h-5 w-5 cursor-pointer appearance-none rounded-md border border-surface-dark bg-background-dark checked:bg-primary checked:border-primary transition-all" type="checkbox" />
                                                     <span className="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
                                                         <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
                                                             <path clipRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" fillRule="evenodd"></path>
@@ -186,8 +186,8 @@ const CycleSetup: React.FC<CycleSetupProps> = ({ onNavigate }) => {
                                             { id: 'hiit', name: 'HIIT', img: 'https://images.unsplash.com/photo-1601422407692-ec4eeec1d9b3?auto=format&fit=crop&q=80&w=400' },
                                             { id: 'run', name: 'Running', img: 'https://images.unsplash.com/photo-1502904550040-7534597429ae?auto=format&fit=crop&q=80&w=400' }
                                         ].map(item => (
-                                            <div 
-                                                key={item.id} 
+                                            <div
+                                                key={item.id}
                                                 onClick={() => toggleSelection(item.id, selectedTraining, setSelectedTraining)}
                                                 className={`relative rounded-xl overflow-hidden aspect-square cursor-pointer group border-2 transition-all ${selectedTraining.includes(item.id) ? 'border-primary' : 'border-transparent'}`}
                                             >
@@ -215,8 +215,8 @@ const CycleSetup: React.FC<CycleSetupProps> = ({ onNavigate }) => {
                                             { id: 'keto', name: 'Keto / Low Carb', img: 'https://images.unsplash.com/photo-1547496502-ffa76f30d088?auto=format&fit=crop&q=80&w=400' },
                                             { id: 'paleo', name: 'Paleo', img: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&q=80&w=400' }
                                         ].map(item => (
-                                            <div 
-                                                key={item.id} 
+                                            <div
+                                                key={item.id}
                                                 onClick={() => toggleSelection(item.id, selectedFood, setSelectedFood)}
                                                 className={`relative rounded-xl overflow-hidden aspect-square cursor-pointer group border-2 transition-all ${selectedFood.includes(item.id) ? 'border-primary' : 'border-transparent'}`}
                                             >
@@ -248,7 +248,7 @@ const CycleSetup: React.FC<CycleSetupProps> = ({ onNavigate }) => {
                                     {/* Profile Picture Upload */}
                                     <div className="flex flex-col items-center gap-3">
                                         <div className="relative group">
-                                            <div 
+                                            <div
                                                 className="size-32 rounded-full bg-cover bg-center border-4 border-surface-dark shadow-xl"
                                                 style={{ backgroundImage: `url("${profilePic}")` }}
                                             ></div>
@@ -264,8 +264,8 @@ const CycleSetup: React.FC<CycleSetupProps> = ({ onNavigate }) => {
                                     <div className="flex-1 w-full flex flex-col gap-6">
                                         <div className="flex flex-col gap-2">
                                             <label className="text-white font-bold text-sm uppercase tracking-wider">Display Name</label>
-                                            <input 
-                                                type="text" 
+                                            <input
+                                                type="text"
                                                 value={userName}
                                                 onChange={(e) => setUserName(e.target.value)}
                                                 className="w-full bg-background-dark border border-surface-dark rounded-xl px-4 py-3 text-white text-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
@@ -274,7 +274,7 @@ const CycleSetup: React.FC<CycleSetupProps> = ({ onNavigate }) => {
                                         </div>
                                         <div className="flex flex-col gap-2">
                                             <label className="text-white font-bold text-sm uppercase tracking-wider">Goal Statement (Optional)</label>
-                                            <textarea 
+                                            <textarea
                                                 className="w-full bg-background-dark border border-surface-dark rounded-xl px-4 py-3 text-white text-base focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all h-24 resize-none"
                                                 placeholder="e.g. I want to feel more energetic during my luteal phase..."
                                             ></textarea>
@@ -286,13 +286,13 @@ const CycleSetup: React.FC<CycleSetupProps> = ({ onNavigate }) => {
 
                         {/* Navigation Buttons */}
                         <div className="flex items-center justify-between pt-4 mt-auto">
-                            <button 
+                            <button
                                 onClick={handleBack}
                                 className="px-6 py-3 rounded-lg text-sm font-bold text-text-secondary hover:bg-surface-dark transition-colors"
                             >
                                 Back
                             </button>
-                            <button 
+                            <button
                                 onClick={handleNext}
                                 className="px-8 py-3 rounded-lg bg-primary text-white text-sm font-bold shadow-lg shadow-primary/30 hover:bg-primary-hover transition-colors flex items-center gap-2"
                             >
@@ -315,9 +315,9 @@ const CycleSetup: React.FC<CycleSetupProps> = ({ onNavigate }) => {
                             </div>
                             <div className="relative z-10">
                                 <h3 className="text-lg font-bold mb-3 text-white">
-                                    {step === 2 ? 'Syncing training with your cycle' : 
-                                     step === 3 ? 'Tailoring your plan' : 
-                                     'Personalizing your space'}
+                                    {step === 2 ? 'Syncing training with your cycle' :
+                                        step === 3 ? 'Tailoring your plan' :
+                                            'Personalizing your space'}
                                 </h3>
                                 <p className="text-sm text-text-secondary leading-relaxed mb-4">
                                     {step === 2 && 'Your hormonal profile shifts throughout the month. Knowing your cycle phase helps us recommend phase-specific training.'}
