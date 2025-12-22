@@ -39,22 +39,22 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
                     <Card>
                         <CardHeader title="Current Phase" icon="water_drop" />
                         <CardContent>
-                            <p className="text-white text-2xl font-bold">Luteal</p>
-                            <p className="text-xs text-gray-400 mt-1">High Progesterone</p>
+                            <p className="text-foreground text-2xl font-bold">Luteal</p>
+                            <p className="text-xs text-muted-foreground mt-1">High Progesterone</p>
                         </CardContent>
                     </Card>
                     <Card>
                         <CardHeader title="Cycle Day" icon="calendar_today" />
                         <CardContent>
-                            <p className="text-white text-2xl font-bold">Day 22</p>
-                            <p className="text-xs text-gray-400 mt-1">~6 Days to Menstruation</p>
+                            <p className="text-foreground text-2xl font-bold">Day 22</p>
+                            <p className="text-xs text-muted-foreground mt-1">~6 Days to Menstruation</p>
                         </CardContent>
                     </Card>
                     <Card>
                         <CardHeader title="Archetype" icon="psychology" />
                         <CardContent>
-                            <p className="text-white text-2xl font-bold">Powerhouse</p>
-                            <p className="text-xs text-gray-400 mt-1">Focus on Consistency</p>
+                            <p className="text-foreground text-2xl font-bold">Powerhouse</p>
+                            <p className="text-xs text-muted-foreground mt-1">Focus on Consistency</p>
                         </CardContent>
                     </Card>
                 </div>
@@ -77,8 +77,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
 
                 <SectionNourishment meals={nourishmentData} />
 
-                <footer className="mt-8 pt-8 border-t border-border-dark flex flex-col items-center justify-center gap-4 text-center">
-                    <p className="text-xs text-[#ad93c8] max-w-md uppercase tracking-tighter">
+                <footer className="mt-8 pt-8 border-t border-border flex flex-col items-center justify-center gap-4 text-center">
+                    <p className="text-xs text-muted-foreground max-w-md uppercase tracking-tighter">
                         Disclaimer: This plan is generated based on your tracked data. Listen to your body first. Consult a healthcare professional for specific medical advice regarding PCOS.
                     </p>
                 </footer>

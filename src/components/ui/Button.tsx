@@ -25,12 +25,13 @@ export const Button: React.FC<ButtonProps> = ({
     const baseClasses = "inline-flex items-center justify-center gap-2 font-bold rounded-xl transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed";
 
     const variants = {
-        primary: "bg-primary text-white hover:bg-primary-hover shadow-lg shadow-primary/20",
-        secondary: "bg-surface-dark text-white hover:bg-surface-dark-hover",
-        ghost: "bg-transparent text-text-secondary hover:bg-surface-dark hover:text-white",
-        outline: "bg-transparent text-white border border-surface-dark hover:border-primary",
-        gradient: "bg-gradient-to-r from-primary to-purple-600 text-white hover:from-primary-hover hover:to-purple-700 shadow-xl shadow-primary/10",
+        primary: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg shadow-primary/20",
+        secondary: "bg-secondary text-secondary-foreground hover:bg-surface-hover",
+        ghost: "bg-transparent text-muted-foreground hover:bg-secondary hover:text-foreground",
+        outline: "bg-transparent text-foreground border border-border hover:border-primary",
+        gradient: "bg-gradient-to-r from-primary to-purple-600 text-primary-foreground hover:brightness-110 shadow-xl shadow-primary/10",
     };
+
 
     const sizes = {
         sm: "px-4 py-1.5 text-xs",

@@ -42,19 +42,21 @@ const CycleSetup: React.FC<CycleSetupProps> = ({ onNavigate }) => {
     const progressPercentage = step === 2 ? 50 : step === 3 ? 75 : 100;
 
     return (
-        <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide bg-background-dark">
+        <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide bg-background">
+
             <div className="flex justify-center py-10 px-4 md:px-10 lg:px-20">
                 <div className="w-full max-w-[1200px] flex flex-col lg:flex-row gap-10">
                     <div className="flex-1 flex flex-col gap-8">
                         <div className="flex flex-col gap-3">
                             <div className="flex gap-6 justify-between items-end">
-                                <p className="text-base font-medium text-white">Step {step} of 4: {step === 2 ? 'Cycle Details' : step === 3 ? 'Preferences' : 'Profile'}</p>
+                                <p className="text-base font-medium text-foreground">Step {step} of 4: {step === 2 ? 'Cycle Details' : step === 3 ? 'Preferences' : 'Profile'}</p>
                                 <span className="text-primary text-sm font-bold">{progressPercentage}% Complete</span>
                             </div>
-                            <div className="h-2 w-full rounded-full bg-surface-dark overflow-hidden">
+                            <div className="h-2 w-full rounded-full bg-secondary overflow-hidden">
                                 <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${progressPercentage}%` }}></div>
                             </div>
                         </div>
+
 
                         {step === 2 && <StepCycleDetails cycleLength={cycleLength} setCycleLength={setCycleLength} />}
                         {step === 3 && (
@@ -75,18 +77,19 @@ const CycleSetup: React.FC<CycleSetupProps> = ({ onNavigate }) => {
                         )}
 
                         <div className="flex items-center justify-between pt-4 mt-auto">
-                            <button onClick={handleBack} className="px-6 py-3 rounded-lg text-sm font-bold text-text-secondary hover:bg-surface-dark transition-colors">
+                            <button onClick={handleBack} className="px-6 py-3 rounded-lg text-sm font-bold text-muted-foreground hover:bg-secondary transition-colors">
                                 Back
                             </button>
-                            <button onClick={handleNext} className="px-8 py-3 rounded-lg bg-primary text-white text-sm font-bold shadow-lg shadow-primary/30 hover:bg-primary-hover transition-colors flex items-center gap-2">
+                            <button onClick={handleNext} className="px-8 py-3 rounded-lg bg-primary text-primary-foreground text-sm font-bold shadow-lg shadow-primary/30 hover:bg-primary/90 transition-colors flex items-center gap-2">
                                 <span>{step === 4 ? 'Complete Setup' : 'Next Step'}</span>
                                 {step < 4 ? <span className="material-symbols-outlined text-sm">arrow_forward</span> : <span className="material-symbols-outlined text-sm">check</span>}
                             </button>
                         </div>
+
                     </div>
 
                     <div className="w-full lg:w-[360px] flex flex-col gap-6">
-                        <div className="bg-card-dark rounded-xl p-6 border border-primary/20 flex flex-col gap-4 relative overflow-hidden group">
+                        <div className="bg-card rounded-xl p-6 border border-primary/20 flex flex-col gap-4 relative overflow-hidden group">
                             <div className="absolute -right-10 -top-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl group-hover:bg-primary/30 transition-all"></div>
                             <div className="flex items-center gap-3 text-primary mb-2">
                                 <span className="material-symbols-outlined">
@@ -95,12 +98,12 @@ const CycleSetup: React.FC<CycleSetupProps> = ({ onNavigate }) => {
                                 <h4 className="font-bold text-sm tracking-wide uppercase">Why we ask</h4>
                             </div>
                             <div className="relative z-10">
-                                <h3 className="text-lg font-bold mb-3 text-white">
+                                <h3 className="text-lg font-bold mb-3 text-foreground">
                                     {step === 2 ? 'Syncing training with your cycle' :
                                         step === 3 ? 'Tailoring your plan' :
                                             'Personalizing your space'}
                                 </h3>
-                                <p className="text-sm text-text-secondary leading-relaxed mb-4">
+                                <p className="text-sm text-muted-foreground leading-relaxed mb-4">
                                     {step === 2 && 'Your hormonal profile shifts throughout the month. Knowing your cycle phase helps us recommend phase-specific training.'}
                                     {step === 3 && 'We align your favorite activities with your energy levels. We recommend yoga during menstruation and HIIT during ovulation.'}
                                     {step === 4 && 'This helps us address you correctly and makes the dashboard feel like your personal health hub.'}
@@ -109,15 +112,17 @@ const CycleSetup: React.FC<CycleSetupProps> = ({ onNavigate }) => {
                             {step === 2 && <div className="mt-4 h-32 rounded-lg bg-cover bg-center" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuABHxzOqeeHp7_mZjabuo_gSUbETeuK_tRZ8K14baatJJwfInnd_1XmeR21PZ4WdXD60rCt7QEnPREKBMcB1Ddjxd-R7oNLSuDuUUOC779atbboBoTcF99lDyy6-SrKm_HRUVmbiOb49kqpiklkpAUaWnOi_TfKuCCJ_sGVsaiy24mBJBaH8iVrcI0OD5A0JkVYrLOmN9L5wElpQfBYt_oab77YgMOhgrNCqTMYgKx7UuNG8X15xkOwR-VcALi5KNV6cUppxGsfVEo")' }}></div>}
                         </div>
 
-                        <div className="bg-card-dark rounded-xl p-5 border border-surface-dark flex items-center gap-4">
+
+                        <div className="bg-card rounded-xl p-5 border border-border flex items-center gap-4">
                             <div className="size-10 rounded-full bg-green-500/10 flex items-center justify-center text-green-500 shrink-0">
                                 <span className="material-symbols-outlined">lock</span>
                             </div>
                             <div>
-                                <h5 className="text-sm font-bold text-white">Privacy First</h5>
-                                <p className="text-xs text-text-secondary mt-0.5">Your health data is encrypted locally and never shared with third parties.</p>
+                                <h5 className="text-sm font-bold text-foreground">Privacy First</h5>
+                                <p className="text-xs text-muted-foreground mt-0.5">Your health data is encrypted locally and never shared with third parties.</p>
                             </div>
                         </div>
+
                     </div>
                 </div>
             </div>

@@ -113,18 +113,18 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ onClose }) => {
 
 
   return (
-    <div className="flex flex-col h-full overflow-hidden bg-background-dark/95 backdrop-blur-xl border border-surface-dark shadow-2xl rounded-2xl">
-      <div className="p-4 border-b border-surface-dark flex items-center justify-between bg-surface-dark/50">
+    <div className="flex flex-col h-full overflow-hidden bg-card/95 backdrop-blur-xl border border-border shadow-2xl rounded-2xl">
+      <div className="p-4 border-b border-border flex items-center justify-between bg-secondary/50">
         <div className="flex items-center gap-2">
           <span className="material-symbols-outlined text-primary">smart_toy</span>
-          <h2 className="text-lg font-bold text-white">Smart Assistant</h2>
+          <h2 className="text-lg font-bold text-foreground">Smart Assistant</h2>
         </div>
-        <button onClick={onClose} className="text-text-secondary hover:text-white transition-colors">
+        <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
           <span className="material-symbols-outlined">close</span>
         </button>
       </div>
 
-      <div className="flex p-2 gap-1 bg-surface-dark/30 border-b border-surface-dark">
+      <div className="flex p-2 gap-1 bg-secondary/30 border-b border-border">
         {[
           { id: AssistantTab.CHAT, label: 'Chat' },
           { id: AssistantTab.IMAGE, label: 'Image' },
@@ -134,14 +134,15 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ onClose }) => {
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
             className={`flex-1 py-2 rounded-lg text-xs font-medium transition-colors ${activeTab === tab.id
-              ? 'bg-primary text-white'
-              : 'text-text-secondary hover:bg-surface-dark hover:text-white'
+              ? 'bg-primary text-primary-foreground'
+              : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
               }`}
           >
             {tab.label}
           </button>
         ))}
       </div>
+
 
       <div className="flex-1 overflow-y-auto p-4 scrollbar-hide relative">
         {activeTab === AssistantTab.CHAT && (

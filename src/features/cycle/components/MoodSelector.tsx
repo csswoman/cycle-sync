@@ -16,9 +16,9 @@ export const MoodSelector: React.FC<MoodSelectorProps> = ({ selectedMood, onMood
     ];
 
     return (
-        <div className="bg-surface-dark/40 border border-surface-dark rounded-2xl p-6 hover:border-primary/50 transition-colors">
+        <div className="bg-secondary/40 border border-border rounded-2xl p-6 hover:border-primary/50 transition-colors">
             <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
                     <span className="material-symbols-outlined text-primary">mood</span>
                     Mood & Mental State
                 </h3>
@@ -33,13 +33,13 @@ export const MoodSelector: React.FC<MoodSelectorProps> = ({ selectedMood, onMood
                         <div className={`size-12 md:size-14 rounded-full flex items-center justify-center border-2 transition-all
               ${selectedMood === option.type
                                 ? 'bg-primary border-primary shadow-[0_0_15px_rgba(127,25,230,0.4)]'
-                                : 'bg-surface-dark border-transparent group-hover:border-primary/50'}`}
+                                : 'bg-secondary border-transparent group-hover:border-primary/50'}`}
                         >
-                            <span className={`material-symbols-outlined text-3xl ${selectedMood === option.type ? 'text-white' : 'text-text-secondary group-hover:text-white'}`}>
+                            <span className={`material-symbols-outlined text-3xl ${selectedMood === option.type ? 'text-primary-foreground' : 'text-muted-foreground group-hover:text-foreground'}`}>
                                 {option.icon}
                             </span>
                         </div>
-                        <span className={`text-xs font-medium ${selectedMood === option.type ? 'text-white font-bold' : 'text-text-secondary group-hover:text-white'}`}>
+                        <span className={`text-xs font-medium ${selectedMood === option.type ? 'text-foreground font-bold' : 'text-muted-foreground group-hover:text-foreground'}`}>
                             {option.type}
                         </span>
                     </button>

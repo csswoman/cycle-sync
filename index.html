@@ -16,15 +16,43 @@
             theme: {
                 extend: {
                     colors: {
-                        "primary": "#7f19e6",
-                        "primary-hover": "#6814bd",
-                        "background-light": "#f7f6f8",
-                        "background-dark": "#1a1122",
-                        "card-dark": "#241a30",
-                        "border-dark": "#4d3465",
-                        "surface-dark": "#362447",
-                        "surface-dark-hover": "#4a3260",
-                        "text-secondary": "#ad93c8",
+                        border: "var(--border)",
+                        input: "var(--input)",
+                        ring: "var(--ring)",
+                        background: "var(--background)",
+                        foreground: "var(--foreground)",
+                        primary: {
+                            DEFAULT: "var(--primary)",
+                            hover: "var(--primary-hover)",
+                            foreground: "var(--primary-foreground)",
+                        },
+                        secondary: {
+                            DEFAULT: "var(--secondary)",
+                            foreground: "var(--secondary-foreground)",
+                        },
+                        destructive: {
+                            DEFAULT: "var(--destructive)",
+                            foreground: "var(--destructive-foreground)",
+                        },
+                        muted: {
+                            DEFAULT: "var(--muted)",
+                            foreground: "var(--muted-foreground)",
+                        },
+                        accent: {
+                            DEFAULT: "var(--accent)",
+                            foreground: "var(--accent-foreground)",
+                        },
+                        popover: {
+                            DEFAULT: "var(--popover)",
+                            foreground: "var(--popover-foreground)",
+                        },
+                        card: {
+                            DEFAULT: "var(--card)",
+                            foreground: "var(--card-foreground)",
+                        },
+                        "surface": "var(--surface)",
+                        "surface-hover": "var(--surface-hover)",
+                        "text-secondary": "var(--muted-foreground)",
                     },
                     fontFamily: {
                         "display": ["Lexend", "sans-serif"]
@@ -35,27 +63,86 @@
         }
     </script>
     <style>
+        :root {
+            --background: #fdfcfd;
+            --foreground: #1a1122;
+            --card: #ffffff;
+            --card-foreground: #1a1122;
+            --popover: #ffffff;
+            --popover-foreground: #1a1122;
+            --primary: #7f19e6;
+            --primary-hover: #6814bd;
+            --primary-foreground: #ffffff;
+            --secondary: #f3f0f7;
+            --secondary-foreground: #1a1122;
+            --muted: #f3f0f7;
+            --muted-foreground: #5e4e75;
+            --accent: #f3f0f7;
+            --accent-foreground: #1a1122;
+            --destructive: #dc2626;
+            --destructive-foreground: #ffffff;
+            --border: #e9e4f0;
+            --input: #e9e4f0;
+            --ring: #7f19e6;
+            --surface: #f3f0f7;
+            --surface-hover: #e9e4f0;
+        }
+
+        .dark {
+            --background: #11091a;
+            --foreground: #fdfcfd;
+            --card: #1c1126;
+            --card-foreground: #fdfcfd;
+            --popover: #1c1126;
+            --popover-foreground: #fdfcfd;
+            --primary: #9b4dff;
+            --primary-hover: #862dff;
+            --primary-foreground: #ffffff;
+            --secondary: #241a30;
+            --secondary-foreground: #fdfcfd;
+            --muted: #241a30;
+            --muted-foreground: #b19cbd;
+            --accent: #241a30;
+            --accent-foreground: #fdfcfd;
+            --destructive: #991b1b;
+            --destructive-foreground: #ffffff;
+            --border: #362447;
+            --input: #362447;
+            --ring: #9b4dff;
+            --surface: #241a30;
+            --surface-hover: #362447;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--foreground);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
         input[type=range] {
             -webkit-appearance: none;
+            appearance: none;
             background: transparent;
         }
 
         input[type=range]::-webkit-slider-thumb {
             -webkit-appearance: none;
+            appearance: none;
             height: 24px;
             width: 24px;
             border-radius: 50%;
-            background: #7f19e6;
+            background: var(--primary);
             cursor: pointer;
             margin-top: -10px;
             border: 2px solid #ffffff;
         }
 
+
         input[type=range]::-webkit-slider-runnable-track {
             width: 100%;
             height: 4px;
             cursor: pointer;
-            background: #4a3260;
+            background: var(--surface);
             border-radius: 2px;
         }
 
@@ -72,30 +159,31 @@
             scrollbar-width: none;
         }
 
-        /* Custom scrollbar for dark theme */
+        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
         }
 
         ::-webkit-scrollbar-track {
-            background: #1a1122;
+            background: var(--background);
         }
 
         ::-webkit-scrollbar-thumb {
-            background: #362447;
+            background: var(--surface);
             border-radius: 4px;
         }
 
         ::-webkit-scrollbar-thumb:hover {
-            background: #7f19e6;
+            background: var(--primary);
         }
     </style>
 </head>
 
-<body class="bg-background-dark text-white font-display overflow-hidden selection:bg-primary selection:text-white">
+<body class="font-display overflow-hidden selection:bg-primary selection:text-white">
     <div id="root" class="flex h-screen w-full"></div>
     <script type="module" src="/src/index.tsx"></script>
 </body>
+
 
 </html>

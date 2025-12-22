@@ -19,13 +19,13 @@ const NavItem: React.FC<NavItemProps> = ({ view, label, icon, currentView, onVie
   return (
     <div
       onClick={() => onViewChange(view)}
-      className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-colors cursor-pointer group ${isActive ? 'bg-primary/20 text-white' : 'hover:bg-surface-dark text-text-secondary hover:text-white'
+      className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all cursor-pointer group ${isActive ? 'bg-primary/10 text-primary' : 'hover:bg-secondary text-muted-foreground hover:text-foreground'
         }`}
     >
-      <span className={`material-symbols-outlined ${isActive ? 'text-primary fill-1' : 'text-text-secondary group-hover:text-white'}`}>
+      <span className={`material-symbols-outlined ${isActive ? 'text-primary fill-1' : 'text-muted-foreground group-hover:text-foreground'}`}>
         {icon}
       </span>
-      <p className={`text-sm ${isActive ? 'font-bold text-white' : 'font-medium'}`}>{label}</p>
+      <p className={`text-sm ${isActive ? 'font-bold' : 'font-medium'}`}>{label}</p>
     </div>
   );
 };
@@ -42,7 +42,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange }) => {
 
 
   return (
-    <aside className="w-64 flex-shrink-0 border-r border-surface-dark bg-background-dark hidden md:flex flex-col justify-between p-4">
+    <aside className="w-64 flex-shrink-0 border-r border-border bg-card hidden md:flex flex-col justify-between p-4 transition-colors duration-300">
       <div className="flex flex-col gap-8">
         {/* Branding */}
         <div className="flex items-center gap-3 px-2">
@@ -50,8 +50,8 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange }) => {
             style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuAocgLUy_bp-dtx4_UsakO7oMmO9SwWvxFL5p5ctYuNGWccWPUdzIe_LFZz1iBmXjm1jgPvUXGoUU-tq6F4mz663g9rbkRt69-9JgsbYCx5BBX6pgqaOezDy6JXTv7c5Jqcev7JcAB6HfRpKsCdHp7Ly5LsBOZM-u61nwmQTBpW4lBOuVopOg7Pz_gyRrO8PVV4oLjzUxa3RnNk_ECfTF0icJkyT_yfas5keNw9n6YLbX2mDRCY8g367Xn7eTiT9qrSRe0FRiUR4nc")' }}>
           </div>
           <div className="flex flex-col">
-            <h1 className="text-white text-lg font-bold leading-normal">CycleSync</h1>
-            <p className="text-text-secondary text-xs font-normal">Holistic Health</p>
+            <h1 className="text-foreground text-lg font-bold leading-normal">CycleSync</h1>
+            <p className="text-muted-foreground text-xs font-normal">Holistic Health</p>
           </div>
         </div>
 
@@ -67,7 +67,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange }) => {
         {/* Custom Experience Button */}
         <button
           onClick={() => onViewChange(View.ARCHETYPE_SELECTION)}
-          className="w-full bg-gradient-to-r from-primary to-purple-600 hover:from-primary-hover hover:to-purple-700 text-white text-sm font-bold py-3 rounded-xl shadow-lg mb-2 transition-all transform hover:scale-[1.02]"
+          className="w-full bg-gradient-to-r from-primary to-purple-600 hover:from-primary-hover hover:to-purple-700 text-primary-foreground text-sm font-bold py-3 rounded-xl shadow-lg mb-2 transition-all transform hover:scale-[1.02]"
         >
           Personalize Experience
         </button>

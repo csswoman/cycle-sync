@@ -30,12 +30,14 @@ export const StepPreferences: React.FC<StepPreferencesProps> = ({
     return (
         <div className="flex flex-col gap-8 animate-in fade-in slide-in-from-right-4 duration-500">
             <div className="flex flex-col gap-2">
-                <h1 className="text-3xl md:text-4xl font-black leading-tight tracking-[-0.033em] text-white">Customize your experience</h1>
-                <p className="text-text-secondary text-base font-normal leading-normal">Tell us about your preferences so we can tailor recommendations.</p>
+                <h1 className="text-3xl md:text-4xl font-black leading-tight tracking-[-0.033em] text-foreground">Customize your experience</h1>
+                <p className="text-muted-foreground text-base font-normal leading-normal">Tell us about your preferences so we can tailor recommendations.</p>
             </div>
 
+
             <div>
-                <h3 className="text-lg font-bold text-white mb-4">Preferred Training Styles</h3>
+                <h3 className="text-lg font-bold text-foreground mb-4">Preferred Training Styles</h3>
+
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {trainingOptions.map(item => (
                         <div
@@ -48,17 +50,19 @@ export const StepPreferences: React.FC<StepPreferencesProps> = ({
                                 <span className="text-white font-bold text-sm">{item.name}</span>
                             </div>
                             {selectedTraining.includes(item.id) && (
-                                <div className="absolute top-2 right-2 bg-primary text-white rounded-full p-1">
+                                <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">
                                     <span className="material-symbols-outlined text-sm">check</span>
                                 </div>
                             )}
+
                         </div>
                     ))}
                 </div>
             </div>
 
             <div>
-                <h3 className="text-lg font-bold text-white mb-4">Dietary Focus</h3>
+                <h3 className="text-lg font-bold text-foreground mb-4">Dietary Focus</h3>
+
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {foodOptions.map(item => (
                         <div
@@ -71,10 +75,11 @@ export const StepPreferences: React.FC<StepPreferencesProps> = ({
                                 <span className="text-white font-bold text-sm">{item.name}</span>
                             </div>
                             {selectedFood.includes(item.id) && (
-                                <div className="absolute top-2 right-2 bg-primary text-white rounded-full p-1">
+                                <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-1">
                                     <span className="material-symbols-outlined text-sm">check</span>
                                 </div>
                             )}
+
                         </div>
                     ))}
                 </div>

@@ -8,7 +8,7 @@ interface CardProps {
 }
 
 export const Card: React.FC<CardProps> = ({ children, className = '', onClick, hoverable = true }) => {
-    const baseClasses = "rounded-xl p-5 border border-border-dark bg-card-dark transition-all duration-300";
+    const baseClasses = "rounded-xl p-5 border border-border bg-card text-foreground transition-all duration-300";
     const hoverClasses = hoverable ? "hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5" : "";
     const cursorClasses = onClick ? "cursor-pointer" : "cursor-default";
 
@@ -25,7 +25,7 @@ export const Card: React.FC<CardProps> = ({ children, className = '', onClick, h
 export const CardHeader: React.FC<{ children: React.ReactNode, icon?: string, title: string }> = ({ icon, title, children }) => {
     return (
         <div className="flex items-center justify-between mb-2">
-            <p className="text-text-secondary text-sm font-medium uppercase tracking-wider">{title}</p>
+            <p className="text-muted-foreground text-sm font-medium uppercase tracking-wider">{title}</p>
             {icon && (
                 <span className="material-symbols-outlined text-primary opacity-50 group-hover:opacity-100 transition-opacity">
                     {icon}
@@ -41,5 +41,6 @@ export const CardContent: React.FC<{ children: React.ReactNode }> = ({ children 
 };
 
 export const CardFooter: React.FC<{ children: React.ReactNode, className?: string }> = ({ children, className = '' }) => {
-    return <div className={`mt-4 pt-4 border-t border-surface-dark ${className}`}>{children}</div>;
+    return <div className={`mt-4 pt-4 border-t border-border ${className}`}>{children}</div>;
 };
+
