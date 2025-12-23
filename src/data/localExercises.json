@@ -1,0 +1,93 @@
+[
+  {
+    "id": "0001",
+    "name": "3/4 sit-up",
+    "bodyPart": "waist",
+    "equipment": "body weight",
+    "target": "abs",
+    "gifUrl": "http://d205cppris7wow.cloudfront.net/videos/0001.gif",
+    "instructions": [
+      "Lie flat on your back with your knees bent and feet flat on the ground.",
+      "Place your hands behind your head with your elbows pointing outwards.",
+      "Engage your abs and slowly lift your upper body off the ground, curling forward until your torso is at a 45-degree angle.",
+      "Pause for a moment, then slowly lower your upper body back down to the starting position.",
+      "Repeat for the desired number of repetitions."
+    ]
+  },
+  {
+    "id": "0002",
+    "name": "45° side bend",
+    "bodyPart": "waist",
+    "equipment": "body weight",
+    "target": "abs",
+    "gifUrl": "http://d205cppris7wow.cloudfront.net/videos/0002.gif",
+    "instructions": [
+      "Stand with your feet shoulder-width apart and your arms extended straight down by your sides.",
+      "Keeping your back straight and your core engaged, slowly bend your torso to one side, sliding your hand down your leg towards your knee.",
+      "Pause for a moment, then slowly return to the starting position.",
+      "Repeat on the other side.",
+      "Continue alternating sides for the desired number of repetitions."
+    ]
+  },
+  {
+    "id": "0003",
+    "name": "air bike",
+    "bodyPart": "waist",
+    "equipment": "body weight",
+    "target": "abs",
+    "gifUrl": "http://d205cppris7wow.cloudfront.net/videos/0003.gif",
+    "instructions": [
+      "Lie flat on your back with your hands behind your head and your legs lifted, creating a 90-degree angle at your hips and knees.",
+      "Engage your abs and lift your upper body off the ground, bringing your right elbow towards your left knee while extending your right leg straight out.",
+      "Pause for a moment, then return to the starting position.",
+      "Repeat on the other side, bringing your left elbow towards your right knee while extending your left leg straight out.",
+      "Continue alternating sides in a pedaling motion for the desired number of repetitions."
+    ]
+  },
+  {
+    "id": "0006",
+    "name": "alternate heel touchers",
+    "bodyPart": "waist",
+    "equipment": "body weight",
+    "target": "abs",
+    "gifUrl": "http://d205cppris7wow.cloudfront.net/videos/0006.gif",
+    "instructions": [
+      "Lie flat on your back with your knees bent and feet flat on the ground.",
+      "Extend your arms straight down by your sides.",
+      "Engage your abs and lift your upper body off the ground, curing forward slightly.",
+      "Reach your right hand towards your right heel, then return to the center.",
+      "Reach your left hand towards your left heel, then return to the center.",
+      "Continue alternating sides for the desired number of repetitions."
+    ]
+  },
+  {
+    "id": "0009",
+    "name": "assisted chest dip (kneeling)",
+    "bodyPart": "chest",
+    "equipment": "leverage machine",
+    "target": "pectorals",
+    "gifUrl": "http://d205cppris7wow.cloudfront.net/videos/0009.gif",
+    "instructions": [
+      "Adjust the machine to the desired assistance level.",
+      "Kneel on the padded platform and grab the handles with your palms facing inward.",
+      "Lower your body by bending your elbows until your upper arms are parallel to the floor.",
+      "Push yourself back up to the starting position by extending your arms.",
+      "Repeat for the desired number of repetitions."
+    ]
+  },
+  {
+    "id": "0011",
+    "name": "assisted hanging knee raise with throw down",
+    "bodyPart": "waist",
+    "equipment": "leverage machine",
+    "target": "abs",
+    "gifUrl": "http://d205cppris7wow.cloudfront.net/videos/0011.gif",
+    "instructions": [
+      "Adjust the machine to the desired assistance level.",
+      "Hang from the handles with your arms extended and your legs straight down.",
+      "Engage your abs and lift your knees towards your chest.",
+      "Once your knees are at chest height, explosively throw your legs down towards the ground.",
+      "Repeat for the desired number of repetitions."
+    ]
+  }
+]

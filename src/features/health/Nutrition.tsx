@@ -1,6 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useRecipes } from '@/hooks/useRecipes';
+import { QuotaWarning } from '@/components/ui/QuotaWarning';
+import { RecipeFilters } from '@/types/recipes';
 
 const Nutrition: React.FC = () => {
+  const { recipes, loading, quotaStatus, quotaExceeded, searchRecipes } = useRecipes();
+  const [filters, setFilters] = useState<RecipeFilters>({});
+
+  const handleSearch = () => {
+    searchRecipes(filters);
+  };
+
   return (
     <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide bg-background">
       <div className="flex flex-col items-center w-full px-4 md:px-10 py-6 md:py-8 gap-8 max-w-7xl mx-auto pb-24">
@@ -37,6 +47,9 @@ const Nutrition: React.FC = () => {
             </div>
           </div>
         </section>
+
+        {/* Quota Warning */}
+        <QuotaWarning quotaStatus={quotaStatus} show={quotaExceeded} />
 
         {/* Search & Filters Area */}
         <section className="w-full flex flex-col lg:flex-row gap-6">
@@ -140,108 +153,63 @@ const Nutrition: React.FC = () => {
             </div>
             {/* Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Card 1 */}
-              <article className="group bg-card rounded-xl overflow-hidden border border-border hover:border-primary/50 transition-all shadow-md hover:shadow-xl hover:shadow-primary/10 cursor-pointer flex flex-col h-full">
-                <div className="relative h-48 w-full overflow-hidden">
-                  <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm text-primary-foreground text-xs font-bold px-2 py-1 rounded flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px]">schedule</span> 25m
+              {loading ? (
+                // Loading skeletons
+                Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="bg-card rounded-xl overflow-hidden border border-border animate-pulse">
+                    <div className="h-48 bg-secondary"></div>
+                    <div className="p-5 space-y-3">
+                      <div className="h-6 bg-secondary rounded w-3/4"></div>
+                      <div className="h-4 bg-secondary rounded w-full"></div>
+                      <div className="h-4 bg-secondary rounded w-2/3"></div>
+                    </div>
                   </div>
-                  <div className="absolute top-3 left-3 bg-primary text-primary-foreground text-xs font-bold px-2 py-1 rounded shadow-lg">
-                    Top Match
-                  </div>
-                  <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCDwDkvCjFZNikaF3jPrrnR_rjjr-iVpuiqEWsOEs6FzdHxwBA6FlA9uBwLw4hUgkcjfBPs7LREcXvF2KYhpeJWIjG71sV3l9ljRZ7fWDs5CjLqrkTKu_acwR2Nku-tjpa8fUKo04PFrXX4V_MY9I70yFYvLcxjQmoqchKh_N2iOJGe1BixpbWfwS9ihliOBc7mbIFLf-fIltzU18lZ4dGtUe4ipCOfK6E1CbESvf2f1TGsGVJi-4atYNeuBJVijc-kZwB5ktEyBcY" alt="Roasted Salmon" />
+                ))
+              ) : recipes.length > 0 ? (
+                // Dynamic recipe cards
+                recipes.map((recipe, index) => (
+                  <article key={recipe.id} className="group bg-card rounded-xl overflow-hidden border border-border hover:border-primary/50 transition-all shadow-md hover:shadow-xl hover:shadow-primary/10 cursor-pointer flex flex-col h-full">
+                    <div className="relative h-48 w-full overflow-hidden">
+                      <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm text-primary-foreground text-xs font-bold px-2 py-1 rounded flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[14px]">schedule</span> {recipe.readyInMinutes}m
+                      </div>
+                      {index === 0 && (
+                        <div className="absolute top-3 left-3 bg-primary text-primary-foreground text-xs font-bold px-2 py-1 rounded shadow-lg">
+                          Top Match
+                        </div>
+                      )}
+                      <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={recipe.image} alt={recipe.title} />
+                    </div>
+                    <div className="p-5 flex flex-col flex-1 gap-3">
+                      <div className="flex justify-between items-start">
+                        <h3 className="text-lg font-bold leading-tight text-foreground group-hover:text-primary transition-colors">{recipe.title}</h3>
+                        <button className="text-muted-foreground hover:text-primary">
+                          <span className="material-symbols-outlined">favorite</span>
+                        </button>
+                      </div>
+                      <p className="text-sm text-muted-foreground line-clamp-2">{recipe.summary?.replace(/<[^>]*>/g, '').substring(0, 120) || 'Delicious and healthy recipe'}</p>
+                      <div className="mt-auto pt-3 flex flex-wrap gap-2">
+                        {recipe.healthScore && recipe.healthScore > 80 && (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-green-500/10 text-green-500 text-xs font-medium border border-green-500/20">
+                            <span className="material-symbols-outlined text-[14px] fill-current">check_circle</span> Healthy
+                          </span>
+                        )}
+                        {recipe.diets?.map((diet) => (
+                          <span key={diet} className="inline-flex items-center gap-1 px-2 py-1 rounded bg-secondary text-muted-foreground text-xs font-medium">
+                            {diet}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </article>
+                ))
+              ) : (
+                // No recipes found
+                <div className="col-span-2 text-center py-12">
+                  <span className="material-symbols-outlined text-6xl text-muted-foreground opacity-50">restaurant</span>
+                  <p className="text-muted-foreground mt-4">No recipes found. Try adjusting your filters.</p>
                 </div>
-                <div className="p-5 flex flex-col flex-1 gap-3">
-                  <div className="flex justify-between items-start">
-                    <h3 className="text-lg font-bold leading-tight text-foreground group-hover:text-primary transition-colors">Omega-3 Power Bowl</h3>
-                    <button className="text-muted-foreground hover:text-primary"><span className="material-symbols-outlined">favorite</span></button>
-                  </div>
-                  <p className="text-sm text-muted-foreground line-clamp-2">Roasted salmon with quinoa and steamed asparagus. Rich in anti-inflammatory fats perfect for PCOS.</p>
-                  <div className="mt-auto pt-3 flex flex-wrap gap-2">
-                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-green-500/10 text-green-500 text-xs font-medium border border-green-500/20">
-                      <span className="material-symbols-outlined text-[14px] fill-current">check_circle</span> Cycle Sync
-                    </span>
-                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-secondary text-muted-foreground text-xs font-medium">
-                      GF
-                    </span>
-                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-secondary text-muted-foreground text-xs font-medium">
-                      High Protein
-                    </span>
-                  </div>
-                </div>
-              </article>
-              {/* Card 2 */}
-              <article className="group bg-card rounded-xl overflow-hidden border border-border hover:border-primary/50 transition-all shadow-md hover:shadow-xl hover:shadow-primary/10 cursor-pointer flex flex-col h-full">
-                <div className="relative h-48 w-full overflow-hidden">
-                  <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm text-primary-foreground text-xs font-bold px-2 py-1 rounded flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px]">schedule</span> 15m
-                  </div>
-                  <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnyklguMUFC_r-DfIFitZtm45BMZ2A_1xAWrQO-a0dldrN-5nslPHOi0Sz49JrIt2vWfsC14R46uDZPUQaUGOqNa_BcnKKbcD7PvmJU3sDnfVKoyx8VNYPvJYdXKMsa18Nd7JD3kl3b5e4p6crKn5zG3CdaYRmXOdVkjRujJ0p9WWy2ascjW_2PciWBXOwJqwiXdzrZKsqIh1KfWGACGQ8BuBdBuSKPMZkiyk_5q0UG8fOpGeQzaOYnFj7z9Rnqi9dG_efk8uN-Dk" alt="Spinach Salad" />
-                </div>
-                <div className="p-5 flex flex-col flex-1 gap-3">
-                  <div className="flex justify-between items-start">
-                    <h3 className="text-lg font-bold leading-tight text-foreground group-hover:text-primary transition-colors">Magnesium Boost Salad</h3>
-                    <button className="text-muted-foreground hover:text-primary"><span className="material-symbols-outlined">favorite</span></button>
-                  </div>
-                  <p className="text-sm text-muted-foreground line-clamp-2">Spinach base with pumpkin seeds, avocado, and tahini dressing to fight cramps.</p>
-                  <div className="mt-auto pt-3 flex flex-wrap gap-2">
-                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-green-500/10 text-green-500 text-xs font-medium border border-green-500/20">
-                      <span className="material-symbols-outlined text-[14px] fill-current">check_circle</span> PMS Relief
-                    </span>
-                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-secondary text-muted-foreground text-xs font-medium">
-                      Vegan
-                    </span>
-                  </div>
-                </div>
-              </article>
-              {/* Card 3 */}
-              <article className="group bg-card rounded-xl overflow-hidden border border-border hover:border-primary/50 transition-all shadow-md hover:shadow-xl hover:shadow-primary/10 cursor-pointer flex flex-col h-full">
-                <div className="relative h-48 w-full overflow-hidden">
-                  <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm text-primary-foreground text-xs font-bold px-2 py-1 rounded flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px]">schedule</span> 35m
-                  </div>
-                  <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC6tePsbDEzu5Qr35DlXs8dmytbC7fquM29PwsH3U5ZH8TOydHbMIMhDBKPTT575_4WU7YVRmJg63xYPyEHuOQ0hHm6Im1VGLZ_ro29JYpO5VHPo5SGGkUEVwPazCv8RQNKjLEkaeAL2MdIHzPwne3yrB-Q2yeNzSTTBaPoZAbnBWp28L_Lojnzf8bPxr4f75VXOX_vJckTBfZU2fMZtZpObJbvwbu8sDP3GydaYw6b0su8XmY-5QfriaKCj6g-RzT58fMH48N9-Ik" alt="Stuffed Sweet Potato" />
-                </div>
-                <div className="p-5 flex flex-col flex-1 gap-3">
-                  <div className="flex justify-between items-start">
-                    <h3 className="text-lg font-bold leading-tight text-foreground group-hover:text-primary transition-colors">Stuffed Sweet Potato</h3>
-                    <button className="text-muted-foreground hover:text-primary"><span className="material-symbols-outlined">favorite</span></button>
-                  </div>
-                  <p className="text-sm text-muted-foreground line-clamp-2">Slow-releasing carbs to stabilize blood sugar, topped with spiced chickpeas.</p>
-                  <div className="mt-auto pt-3 flex flex-wrap gap-2">
-                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-green-500/10 text-green-500 text-xs font-medium border border-green-500/20">
-                      <span className="material-symbols-outlined text-[14px] fill-current">check_circle</span> Steady Energy
-                    </span>
-                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-secondary text-muted-foreground text-xs font-medium">
-                      Low GI
-                    </span>
-                  </div>
-                </div>
-              </article>
-              {/* Card 4 */}
-              <article className="group bg-card rounded-xl overflow-hidden border border-border hover:border-primary/50 transition-all shadow-md hover:shadow-xl hover:shadow-primary/10 cursor-pointer flex flex-col h-full opacity-60 hover:opacity-100">
-                <div className="relative h-48 w-full overflow-hidden">
-                  <div className="absolute inset-0 bg-background/50 flex items-center justify-center">
-                    <span className="bg-foreground text-background px-3 py-1 rounded-full text-xs font-bold border border-border">Missing Ingredients</span>
-                  </div>
-                  <img className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9YnX-8xUU80z63tSFkoahMBHE_wBqqUIDqtnuUIxv27WqEMqaX-Mwm4fY1VJVdIXiomlCTdnZ-i92rnIMW_5luOSwQ_DiltPTGvKxW27gFNYKFVD-bXnEs8w7my1XbdrQJXRALkt-ezk_FQVPpbWl8xhuWGJl747XoyscqBO82tYVsrZFdKs6YY1PUtDKIU_N_i7fBdQim3kkGZ6hNIGeyhnacOONANioqn0SyYSneaYSS00nWDso9Pg2J8kwFvtCA-01ob2BqhQ" alt="Chia Pudding" />
-                </div>
-                <div className="p-5 flex flex-col flex-1 gap-3">
-                  <div className="flex justify-between items-start">
-                    <h3 className="text-lg font-bold leading-tight text-foreground group-hover:text-primary transition-colors">Chocolate Chia Pudding</h3>
-                    <button className="text-muted-foreground hover:text-primary"><span className="material-symbols-outlined">favorite</span></button>
-                  </div>
-                  <p className="text-sm text-muted-foreground line-clamp-2">Satisfy cravings healthily. You are missing Chia Seeds.</p>
-                  <div className="mt-auto pt-3 flex flex-wrap gap-2">
-                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-secondary text-muted-foreground text-xs font-medium">
-                      Dessert
-                    </span>
-                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded bg-red-500/10 text-red-500 text-xs font-medium border border-red-500/20">
-                      Missing 1 Item
-                    </span>
-                  </div>
-                </div>
-              </article>
+              )}
             </div>
             <div className="flex justify-center mt-4">
               <button className="text-primary font-bold text-sm hover:underline flex items-center gap-1">
@@ -258,8 +226,8 @@ const Nutrition: React.FC = () => {
             <span className="material-symbols-outlined text-[14px]">lock</span> Your health data is processed locally and never shared with third parties.
           </p>
         </footer>
-      </div>
-    </div>
+      </div >
+    </div >
   );
 };
 

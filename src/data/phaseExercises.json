@@ -1,0 +1,370 @@
+{
+  "menstrual": {
+    "label": "Fase Menstrual",
+    "goal": "Movilidad y alivio",
+    "intensity": "low",
+    "description": "Enfócate en movimientos suaves y restaurativos para aliviar cólicos y respetar la baja energía.",
+    "exercises": [
+      {
+        "id": "m-001",
+        "name": "Cat-Cow Stretch",
+        "bodyPart": "waist",
+        "equipment": "mat",
+        "target": "spine",
+        "gifUrl": "/yoga.png",
+        "instructions": [
+          "Start on your hands and knees with your wrists directly under your shoulders and your knees directly under your hips.",
+          "Inhale as you arch your back, dropping your belly towards the mat and lifting your head and tailbone towards the ceiling (Cow Pose).",
+          "Exhale as you round your spine towards the ceiling, tucking your chin towards your chest and drawing your belly button towards your spine (Cat Pose).",
+          "Repeat this movement for the desired number of repetitions."
+        ]
+      },
+      {
+        "id": "m-002",
+        "name": "Child’s Pose",
+        "bodyPart": "waist",
+        "equipment": "mat",
+        "target": "back",
+        "gifUrl": "/yoga.png",
+        "instructions": [
+          "Start on your hands and knees with your knees wider than hip-width apart and your big toes touching.",
+          "Sit back onto your heels and reach your arms forward, resting your forehead on the mat.",
+          "Relax your entire body and breathe deeply into your back.",
+          "Hold this pose for the desired amount of time."
+        ]
+      },
+      {
+        "id": "m-003",
+        "name": "Seated Forward Fold",
+        "bodyPart": "upper legs",
+        "equipment": "body weight",
+        "target": "hamstrings",
+        "gifUrl": "/yoga.png",
+        "instructions": [
+          "Sit on the floor with your legs extended straight in front of you.",
+          "Inhale and lengthen your spine.",
+          "Exhale and fold forward from your hips, reaching your hands towards your feet.",
+          "Hold onto your shins, ankles, or feet, depending on your flexibility.",
+          "Relax your head and neck and breathe deeply into the stretch."
+        ]
+      },
+      {
+        "id": "m-004",
+        "name": "Supine Spinal Twist",
+        "bodyPart": "waist",
+        "equipment": "body weight",
+        "target": "spine",
+        "gifUrl": "/yoga.png",
+        "instructions": [
+          "Lie flat on your back with your legs extended.",
+          "Bring your right knee towards your chest and cross it over your body to the left side.",
+          "Extend your right arm out to the side and look towards your right hand.",
+          "Hold the stretch for a few breaths, then switch sides."
+        ]
+      },
+      {
+        "id": "m-005",
+        "name": "Pelvic Tilts",
+        "bodyPart": "waist",
+        "equipment": "body weight",
+        "target": "abs",
+        "gifUrl": "/yoga.png",
+        "instructions": [
+          "Lie on your back with knees bent and feet flat on the floor.",
+          "Flatten your back against the floor by tightening your abdominal muscles and bending your pelvis up slightly.",
+          "Hold for up to 10 seconds.",
+          "Release and repeat."
+        ]
+      },
+      {
+        "id": "m-006",
+        "name": "Diaphragmatic Breathing",
+        "bodyPart": "chest",
+        "equipment": "body weight",
+        "target": "diaphragm",
+        "gifUrl": "/yoga.png",
+        "instructions": [
+          "Lie on your back with your knees bent and your head supported.",
+          "Place one hand on your upper chest and the other just below your rib cage.",
+          "Breathe in slowly through your nose without moving your chest.",
+          "Breathe out through pursed lips, tightening your stomach muscles."
+        ]
+      }
+    ]
+  },
+  "follicular": {
+    "label": "Fase Folicular",
+    "goal": "Construir base y energía",
+    "intensity": "medium",
+    "description": "A medida que sube el estrógeno, aumenta la intensidad con ejercicios de fuerza y resistencia.",
+    "exercises": [
+      {
+        "id": "f-001",
+        "name": "Bodyweight Squat",
+        "bodyPart": "upper legs",
+        "equipment": "body weight",
+        "target": "quads",
+        "gifUrl": "/strength.png",
+        "instructions": [
+          "Stand with feet shoulder-width apart.",
+          "Lower hips back and down as if sitting in a chair.",
+          "Keep chest up and knees tracking over toes.",
+          "Return to standing."
+        ]
+      },
+      {
+        "id": "f-002",
+        "name": "Glute Bridge",
+        "bodyPart": "upper legs",
+        "equipment": "body weight",
+        "target": "glutes",
+        "gifUrl": "/strength.png",
+        "instructions": [
+          "Lie on back with knees bent and feet flat on floor.",
+          "Lift hips toward ceiling, squeezing glutes at the top.",
+          "Lower back down with control.",
+          "Keep core engaged throughout."
+        ]
+      },
+      {
+        "id": "f-003",
+        "name": "Reverse Lunges",
+        "bodyPart": "upper legs",
+        "equipment": "body weight",
+        "target": "quads",
+        "gifUrl": "/strength.png",
+        "instructions": [
+          "Stand tall with feet together.",
+          "Step one foot back and lower knee toward ground.",
+          "Keep front knee behind toe and torso upright.",
+          "Push off back foot to return to start."
+        ]
+      },
+      {
+        "id": "f-004",
+        "name": "Incline Push-Ups",
+        "bodyPart": "chest",
+        "equipment": "bench",
+        "target": "pectorals",
+        "gifUrl": "/strength.png",
+        "instructions": [
+          "Place hands on a raised surface like a bench or sturdy chair.",
+          "Walk feet back into plank position.",
+          "Lower chest toward the surface.",
+          "Push back up to starting position."
+        ]
+      },
+      {
+        "id": "f-005",
+        "name": "Dead Bug",
+        "bodyPart": "waist",
+        "equipment": "body weight",
+        "target": "abs",
+        "gifUrl": "/strength.png",
+        "instructions": [
+          "Lie on back with arms extended toward ceiling and legs in table-top position.",
+          "Lower opposite arm and leg toward floor without letting back arch.",
+          "Return to center and switch sides."
+        ]
+      },
+      {
+        "id": "f-006",
+        "name": "Standing Side Bends",
+        "bodyPart": "waist",
+        "equipment": "body weight",
+        "target": "obliques",
+        "gifUrl": "/strength.png",
+        "instructions": [
+          "Stand tall with feet hip-width apart.",
+          "Slide one hand down the side of your leg while reaching other arm over head.",
+          "Feel the stretch in your side.",
+          "Return to center and switch sides."
+        ]
+      }
+    ]
+  },
+  "ovulatory": {
+    "label": "Fase Ovulatoria",
+    "goal": "Fuerza y rendimiento",
+    "intensity": "high",
+    "description": "Tu energía está al máximo. Es el momento perfecto para HIIT y fuerza máxima.",
+    "exercises": [
+      {
+        "id": "o-001",
+        "name": "Squats",
+        "bodyPart": "upper legs",
+        "equipment": "body weight",
+        "target": "quads",
+        "gifUrl": "/cardio.png",
+        "instructions": [
+          "Stand with feet shoulder-width apart.",
+          "Lower hips back and down.",
+          "Drive back up explosively.",
+          "Add weights for increased intensity."
+        ]
+      },
+      {
+        "id": "o-002",
+        "name": "Romanian Deadlift",
+        "bodyPart": "upper legs",
+        "equipment": "dumbbell",
+        "target": "hamstrings",
+        "gifUrl": "/strength.png",
+        "instructions": [
+          "Hold weights in front of thighs.",
+          "Hing at hips, keeping back flat and legs slightly bent.",
+          "Lower weights toward floor.",
+          "Squeeze glutes to return to standing."
+        ]
+      },
+      {
+        "id": "o-003",
+        "name": "Step-Ups",
+        "bodyPart": "upper legs",
+        "equipment": "bench",
+        "target": "quads",
+        "gifUrl": "/cardio.png",
+        "instructions": [
+          "Place one foot on a sturdy bench or box.",
+          "Drive through the heel to lift your body up.",
+          "Step back down with control.",
+          "Alternate legs or complete all reps on one side."
+        ]
+      },
+      {
+        "id": "o-004",
+        "name": "Push-Ups",
+        "bodyPart": "chest",
+        "equipment": "body weight",
+        "target": "pectorals",
+        "gifUrl": "/strength.png",
+        "instructions": [
+          "Start in plank position.",
+          "Lower chest to floor keeping elbows at 45 degrees.",
+          "Push back up to start.",
+          "Modify on knees if necessary."
+        ]
+      },
+      {
+        "id": "o-005",
+        "name": "Mountain Climbers",
+        "bodyPart": "cardio",
+        "equipment": "body weight",
+        "target": "cardiovascular system",
+        "gifUrl": "/cardio.png",
+        "instructions": [
+          "Start in plank position.",
+          "Drive knees toward chest in alternating rhythm.",
+          "Keep core steady and hips level.",
+          "Move as quickly as possible."
+        ]
+      },
+      {
+        "id": "o-006",
+        "name": "Jumping Jacks",
+        "bodyPart": "cardio",
+        "equipment": "body weight",
+        "target": "cardiovascular system",
+        "gifUrl": "/cardio.png",
+        "instructions": [
+          "Start standing with feet together.",
+          "Jump feet apart while raising arms overhead.",
+          "Jump back to start.",
+          "Repeat continuously."
+        ]
+      }
+    ]
+  },
+  "luteal": {
+    "label": "Fase Lútea",
+    "goal": "Estabilidad hormonal",
+    "intensity": "medium-low",
+    "description": "El metabolismo aumenta pero la resistencia baja. Prioriza ejercicios de fuerza controlada y bajo impacto.",
+    "exercises": [
+      {
+        "id": "l-001",
+        "name": "Goblet Squat",
+        "bodyPart": "upper legs",
+        "equipment": "kettlebell",
+        "target": "quads",
+        "gifUrl": "/strength.png",
+        "instructions": [
+          "Hold weight at chest height.",
+          "Perform a squat keeping chest up.",
+          "Elbows should track inside knees.",
+          "Focus on form and control."
+        ]
+      },
+      {
+        "id": "l-002",
+        "name": "Wall Sit",
+        "bodyPart": "upper legs",
+        "equipment": "body weight",
+        "target": "quads",
+        "gifUrl": "/strength.png",
+        "instructions": [
+          "Lean back against a wall.",
+          "Slide down until thighs are parallel to floor.",
+          "Hold position.",
+          "Keep lower back pressed against wall."
+        ]
+      },
+      {
+        "id": "l-003",
+        "name": "Standing March",
+        "bodyPart": "cardio",
+        "equipment": "body weight",
+        "target": "cardiovascular system",
+        "gifUrl": "/cardio.png",
+        "instructions": [
+          "Stand tall.",
+          "Lift one knee toward chest.",
+          "Alternate legs in a marching rhythm.",
+          "Engage core for balance."
+        ]
+      },
+      {
+        "id": "l-004",
+        "name": "Side Leg Raises",
+        "bodyPart": "upper legs",
+        "equipment": "body weight",
+        "target": "abductors",
+        "gifUrl": "/strength.png",
+        "instructions": [
+          "Stand or lie on side.",
+          "Lift top leg straight up.",
+          "Lower with control.",
+          "Repeat on both sides."
+        ]
+      },
+      {
+        "id": "l-005",
+        "name": "Bird Dog",
+        "bodyPart": "waist",
+        "equipment": "body weight",
+        "target": "core",
+        "gifUrl": "/yoga.png",
+        "instructions": [
+          "Start on hands and knees.",
+          "Extend opposite arm and leg straight out.",
+          "Hold for a second.",
+          "Return to start and switch sides."
+        ]
+      },
+      {
+        "id": "l-006",
+        "name": "Low Impact Cardio Walk",
+        "bodyPart": "cardio",
+        "equipment": "body weight",
+        "target": "cardiovascular system",
+        "gifUrl": "/cardio.png",
+        "instructions": [
+          "Walk in place or around room.",
+          "Maintain a brisk pace.",
+          "Swing arms for extra calorie burn.",
+          "Keep impact low on joints."
+        ]
+      }
+    ]
+  }
+}

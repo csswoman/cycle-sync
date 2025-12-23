@@ -32,6 +32,12 @@ export interface Translations {
     video: string;
     typeMessage: string;
     send: string;
+
+    // API Quota
+    quotaExceeded: string;
+    quotaExceededMessage: string;
+    quotaResetTime: string;
+    usingFallbackData: string;
 }
 
 export const translations: Record<Language, Translations> = {
@@ -67,6 +73,12 @@ export const translations: Record<Language, Translations> = {
         video: 'Video',
         typeMessage: 'Type your message...',
         send: 'Send',
+
+        // API Quota
+        quotaExceeded: 'Daily Limit Reached',
+        quotaExceededMessage: 'You\'ve reached the daily limit for detailed recipes. Tomorrow you\'ll have more!',
+        quotaResetTime: 'Resets at midnight',
+        usingFallbackData: 'Showing curated recipes',
     },
     es: {
         // Navigation
@@ -100,5 +112,11 @@ export const translations: Record<Language, Translations> = {
         video: 'Video',
         typeMessage: 'Escribe tu mensaje...',
         send: 'Enviar',
+
+        // API Quota
+        quotaExceeded: 'Límite Diario Alcanzado',
+        quotaExceededMessage: 'Has alcanzado el límite diario de recetas detalladas. ¡Mañana tendrás más!',
+        quotaResetTime: 'Se reinicia a medianoche',
+        usingFallbackData: 'Mostrando recetas seleccionadas',
     },
 };

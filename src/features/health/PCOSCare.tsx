@@ -1,6 +1,30 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { fetchHealthArticles } from '@/services/articlesService';
+import { Article } from '@/types/articles';
 
 const PCOSCare: React.FC = () => {
+    const [articles, setArticles] = useState<Article[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const loadArticles = async () => {
+            try {
+                setLoading(true);
+                const fetchedArticles = await fetchHealthArticles({ topic: 'PCOS', language: 'en' });
+                setArticles(fetchedArticles.slice(0, 3));
+                setError(null);
+            } catch (err) {
+                console.error('Error loading PCOS articles:', err);
+                setError('Could not load latest research. Showing cached content.');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadArticles();
+    }, []);
+
     return (
         <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide bg-background">
 
@@ -269,52 +293,51 @@ const PCOSCare: React.FC = () => {
                             View all <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
                         </button>
                     </div>
+
+                    {error && (
+                        <div className="p-4 bg-destructive/10 text-destructive rounded-xl border border-destructive/20 text-center text-sm">
+                            {error}
+                        </div>
+                    )}
+
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {/* Article 1 */}
-                        <article className="bg-card rounded-xl border border-border overflow-hidden group cursor-pointer hover:-translate-y-1 transition-transform duration-300">
-                            <div className="h-48 bg-cover bg-center relative" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuDQMLR338hINEHZbeFygpi6xDuxmZc76f4M7AuotpJF7ryeJExnavXx6kkINN6KXWtiOCECBlf7uBSQ_NJKEgVO339ze0j_M91hJBfPM69qvOwbgX8K2vgW8Q94kP6PALWYSuzpaxxB_MTuaBR5QJK4osYIr-aEsuLOJZKOwc0bdT_jzj9UztHTjwp3s5Pu_hgZY0vyDRFA2B6a74f_vYnh5mecwSv3i7MaVVJKb13WiAr6tngID128zje70DmJc_nWTTCa8of8q84")' }}>
-                                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
-                                <span className="absolute top-4 left-4 bg-black/50 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded">Nutrition</span>
+                        {loading ? (
+                            [...Array(3)].map((_, i) => (
+                                <div key={i} className="h-80 rounded-xl bg-card animate-pulse border border-border" />
+                            ))
+                        ) : (
+                            articles.map((article) => (
+                                <article
+                                    key={article.id}
+                                    className="bg-card rounded-xl border border-border overflow-hidden group cursor-pointer hover:-translate-y-1 transition-transform duration-300 flex flex-col h-full"
+                                    onClick={() => window.open(article.url, '_blank')}
+                                >
+                                    <div className="h-48 bg-cover bg-center relative" style={{ backgroundImage: `url(${article.imageUrl})` }}>
+                                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
+                                        <span className="absolute top-4 left-4 bg-black/50 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded">{article.source}</span>
+                                    </div>
+                                    <div className="p-5 flex flex-col gap-2 flex-1">
+                                        <h4 className="text-foreground text-lg font-bold leading-snug group-hover:text-primary transition-colors line-clamp-2">{article.title}</h4>
+                                        <p className="text-muted-foreground text-sm line-clamp-3">
+                                            {article.description}
+                                        </p>
+                                        <div className="mt-auto pt-4 flex items-center justify-between text-xs text-muted-foreground">
+                                            <div className="flex items-center gap-1">
+                                                <span className="material-symbols-outlined text-[14px]">schedule</span>
+                                                {new Date(article.publishedAt).toLocaleDateString()}
+                                            </div>
+                                            {article.author && <span className="line-clamp-1 max-w-[100px]">By {article.author}</span>}
+                                        </div>
+                                    </div>
+                                </article>
+                            ))
+                        )}
+
+                        {!loading && articles.length === 0 && !error && (
+                            <div className="col-span-full py-12 text-center text-muted-foreground">
+                                No articles found at the moment.
                             </div>
-                            <div className="p-5 flex flex-col gap-2">
-                                <h4 className="text-foreground text-lg font-bold leading-snug group-hover:text-primary transition-colors">Understanding Insulin Resistance</h4>
-                                <p className="text-muted-foreground text-sm line-clamp-2">Learn how stabilizing your blood sugar can significantly reduce PCOS symptoms like fatigue and cravings.</p>
-                                <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
-                                    <span className="material-symbols-outlined text-[14px]">schedule</span>
-                                    5 min read
-                                </div>
-                            </div>
-                        </article>
-                        {/* Article 2 */}
-                        <article className="bg-card rounded-xl border border-border overflow-hidden group cursor-pointer hover:-translate-y-1 transition-transform duration-300">
-                            <div className="h-48 bg-cover bg-center relative" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuA-90_TC_89mc9du131SPSBARqlNeCTU0Vsy-PuSH3Jo7HsO7GeKpEt5l5Qt99SAxq22U9t15X7i4sPn_GzW6yuSXJfqVmalDIwGIgRKMmuxZ1U7Vyn5AcqV7NCwkaQ0F4FlxOWIU-8VVxqaNDPwQ_Pnn9aJO3Wf6zZNC9-JPm5_jWwYglJm4vKRUbrQEryn3RVrDXILLgu65jQ7go2cnsl-3W0axjCprWzBJYuX8qKzA-O7ZMnCY-KzkgBl2OzLsW-c0ocibZir54")' }}>
-                                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
-                                <span className="absolute top-4 left-4 bg-black/50 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded">Exercise</span>
-                            </div>
-                            <div className="p-5 flex flex-col gap-2">
-                                <h4 className="text-foreground text-lg font-bold leading-snug group-hover:text-primary transition-colors">Why Strength Training Helps</h4>
-                                <p className="text-muted-foreground text-sm line-clamp-2">Building muscle mass improves insulin sensitivity. Discover the best lifting routines for PCOS.</p>
-                                <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
-                                    <span className="material-symbols-outlined text-[14px]">schedule</span>
-                                    7 min read
-                                </div>
-                            </div>
-                        </article>
-                        {/* Article 3 */}
-                        <article className="bg-card rounded-xl border border-border overflow-hidden group cursor-pointer hover:-translate-y-1 transition-transform duration-300">
-                            <div className="h-48 bg-cover bg-center relative" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuDvlo23g-6Z7-dXQE-P0I8saU97cxvt_eeuHkeSW-4wM9mC4FQ0PeMDp8QECdXLL5Ct9CX9T1LjPh1lYjzETRSBMhOwGuH9n2V7rfGiuLm2AJko8vUYQBDJcqzIk-sLFBHXL3aZJdAo27Za4QKfrfVPRx6G3_lZ-MyO-9rbxEb_i95mzxY_9KS57N5LeQ7fc_2Yu5rlPZXJ4rmjCnhkFarj9qigk_CvCyGFrLqVgb_umf6JMvONxvyWM-T8s6dwp5gouJxbIqDMljg")' }}>
-                                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors"></div>
-                                <span className="absolute top-4 left-4 bg-black/50 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded">Gut Health</span>
-                            </div>
-                            <div className="p-5 flex flex-col gap-2">
-                                <h4 className="text-foreground text-lg font-bold leading-snug group-hover:text-primary transition-colors">The Role of Gut Health</h4>
-                                <p className="text-muted-foreground text-sm line-clamp-2">Emerging research links gut microbiome diversity to hormone regulation and inflammation reduction.</p>
-                                <div className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
-                                    <span className="material-symbols-outlined text-[14px]">schedule</span>
-                                    6 min read
-                                </div>
-                            </div>
-                        </article>
+                        )}
                     </div>
                 </section>
             </div>
