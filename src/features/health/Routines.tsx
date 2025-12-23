@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { fetchExercises, fetchExercisesByBodyPart, fetchWorkoutVideos } from '@/services/exercisesService';
-import { Exercise, WorkoutVideo } from '@/types/exercises';
+import { Exercise, WorkoutVideo, Routine } from '@/types/exercises';
 
 import phaseData from '@/data/phaseExercises.json';
+import { supabase } from '@/lib/supabase';
 
 const Routines: React.FC = () => {
   const [recommendedExercises, setRecommendedExercises] = useState<Exercise[]>([]);
@@ -10,6 +11,8 @@ const Routines: React.FC = () => {
   const [workoutVideos, setWorkoutVideos] = useState<WorkoutVideo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userRoutines, setUserRoutines] = useState<Routine[]>([]);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     const loadData = async () => {
@@ -50,7 +53,57 @@ const Routines: React.FC = () => {
     };
 
     loadData();
+    fetchUserRoutines();
   }, []);
+
+  const fetchUserRoutines = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('routines')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setUserRoutines(data || []);
+    } catch (err) {
+      console.error('Error fetching user routines:', err);
+    }
+  };
+
+  const saveRoutine = async (name: string, description: string, exercises: Exercise[], phase: string) => {
+    try {
+      setSaving(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        alert('Debes iniciar sesión para guardar rutinas.');
+        return;
+      }
+
+      const { error } = await supabase
+        .from('routines')
+        .insert([
+          {
+            user_id: user.id,
+            name,
+            description,
+            exercises,
+            phase
+          }
+        ]);
+
+      if (error) throw error;
+      
+      alert('Rutina guardada con éxito!');
+      fetchUserRoutines();
+    } catch (err: any) {
+      alert('Error al guardar rutina: ' + err.message);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   // Helper for broken images
   const handleImageError = (e: React.SyntheticEvent<HTMLImageElement, Event>, fallback: string) => {
@@ -136,6 +189,30 @@ const Routines: React.FC = () => {
           </div>
         )}
 
+        {/* Section: My Saved Routines */}
+        {userRoutines.length > 0 && (
+          <section className="flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-foreground text-2xl font-bold tracking-tight">Mis Rutinas Guardadas</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {userRoutines.map((routine) => (
+                <div key={routine.id} className="bg-card border border-border rounded-2xl p-5 shadow-sm hover:shadow-md transition-all">
+                  <div className="flex justify-between items-start mb-3">
+                    <h3 className="text-foreground font-bold text-lg">{routine.name}</h3>
+                    <span className="px-2 py-1 rounded-lg bg-primary/10 text-primary text-[10px] font-bold uppercase">{routine.phase}</span>
+                  </div>
+                  <p className="text-muted-foreground text-sm mb-4 line-clamp-2">{routine.description}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">{routine.exercises.length} Ejercicios</span>
+                    <button className="text-primary text-sm font-bold hover:underline">Ver Rutina</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
         {/* Section 1: Recommended for Luteal Phase */}
         <section className="flex flex-col gap-4">
           <div className="flex items-center justify-between">
@@ -165,7 +242,13 @@ const Routines: React.FC = () => {
                       <div>
                         <div className="flex justify-between items-start mb-2">
                           <h3 className="text-foreground text-xl font-bold leading-tight capitalize line-clamp-1">{ex.name}</h3>
-                          <button className="text-muted-foreground hover:text-foreground"><span className="material-symbols-outlined">bookmark_add</span></button>
+                          <button 
+                            disabled={saving}
+                            onClick={() => saveRoutine(`Rutina ${ex.name}`, `Enfocado en ${ex.target} para la fase lútea.`, [ex], 'luteal')}
+                            className="text-muted-foreground hover:text-primary transition-colors disabled:opacity-50"
+                          >
+                            <span className="material-symbols-outlined font-variation-icon-fill">bookmark_add</span>
+                          </button>
                         </div>
                         <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
                           {ex.instructions[0] || `Enfócate en tu ${ex.target} usando ${ex.equipment}.`}

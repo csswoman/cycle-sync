@@ -8,9 +8,10 @@ import { SectionNourishment } from './components/SectionNourishment';
 
 interface DashboardProps {
     onNavigate: (view: View) => void;
+    userName?: string;
 }
 
-const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
+const Dashboard: React.FC<DashboardProps> = ({ onNavigate, userName }) => {
     const nourishmentData = [
         {
             title: "Salmon & Quinoa Bowl",
@@ -33,7 +34,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
     return (
         <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide">
             <div className="max-w-[1100px] mx-auto p-6 md:p-10 flex flex-col gap-8 pb-20">
-                <DashboardHeader phase="Luteal" day={22} focus="Stabilize Blood Sugar" />
+                <DashboardHeader phase="Luteal" day={22} focus="Stabilize Blood Sugar" userName={userName} />
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <Card>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { View } from '@/types';
+import { supabase } from '@/lib/supabase';
 
 interface SidebarProps {
   currentView: View;
@@ -73,6 +74,16 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange }) => {
         </button>
 
         <NavItem view={View.SETTINGS} label="Settings" icon="settings" currentView={currentView} onViewChange={onViewChange} />
+        
+        <button
+          onClick={() => supabase.auth.signOut()}
+          className="flex items-center gap-3 px-3 py-3 rounded-xl transition-all cursor-pointer group hover:bg-destructive/10 text-muted-foreground hover:text-destructive w-full mt-2"
+        >
+          <span className="material-symbols-outlined text-muted-foreground group-hover:text-destructive">
+            logout
+          </span>
+          <p className="text-sm font-medium">Logout</p>
+        </button>
       </div>
     </aside>
   );

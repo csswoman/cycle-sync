@@ -38,6 +38,38 @@ export interface Translations {
     quotaExceededMessage: string;
     quotaResetTime: string;
     usingFallbackData: string;
+
+    // Login
+    welcomeBack: string;
+    loginDescription: string;
+    emailLabel: string;
+    passwordLabel: string;
+    forgotPassword: string;
+    loginButton: string;
+    dontHaveAccount: string;
+    signUp: string;
+    dataSecurityInfo: string;
+    help: string;
+    createAccount: string;
+    registerDescription: string;
+    fullNameLabel: string;
+    confirmPasswordLabel: string;
+    registerButton: string;
+    alreadyHaveAccount: string;
+    passwordsDoNotMatch: string;
+    checkEmailTitle: string;
+    checkEmailDescription: string;
+    backToLogin: string;
+    settingsTitle: string;
+    profileSection: string;
+    saveChanges: string;
+    securitySection: string;
+    updatePasswordTitle: string;
+    newPasswordLabel: string;
+    confirmNewPasswordLabel: string;
+    updatePasswordButton: string;
+    optionalStatement: string;
+    changePhotoLabel: string;
 }
 
 export const translations: Record<Language, Translations> = {
@@ -79,6 +111,38 @@ export const translations: Record<Language, Translations> = {
         quotaExceededMessage: 'You\'ve reached the daily limit for detailed recipes. Tomorrow you\'ll have more!',
         quotaResetTime: 'Resets at midnight',
         usingFallbackData: 'Showing curated recipes',
+
+        // Login
+        welcomeBack: 'Welcome Back',
+        loginDescription: 'Log in to your CycleSync account to access your personalized cycle training.',
+        emailLabel: 'Email or Username',
+        passwordLabel: 'Password',
+        forgotPassword: 'Forgot Password?',
+        loginButton: 'Log In',
+        dontHaveAccount: "Don't have an account?",
+        signUp: 'Sign Up',
+        dataSecurityInfo: 'Your data is encrypted and stored locally.',
+        help: 'Help',
+        createAccount: 'Create Account',
+        registerDescription: 'Join CycleSync to start your personalized journey today.',
+        fullNameLabel: 'Full Name',
+        confirmPasswordLabel: 'Confirm Password',
+        registerButton: 'Create Account',
+        alreadyHaveAccount: 'Already have an account?',
+        passwordsDoNotMatch: 'Passwords do not match',
+        checkEmailTitle: 'Check your email',
+        checkEmailDescription: 'We have sent a confirmation link to your email. Please verify your account to start your personalized journey.',
+        backToLogin: 'Back to Log In',
+        settingsTitle: 'Settings',
+        profileSection: 'Profile',
+        saveChanges: 'Save Changes',
+        securitySection: 'Security',
+        updatePasswordTitle: 'Update Password',
+        newPasswordLabel: 'New Password',
+        confirmNewPasswordLabel: 'Confirm New Password',
+        updatePasswordButton: 'Update Password',
+        optionalStatement: 'Optional',
+        changePhotoLabel: 'Change Photo',
     },
     es: {
         // Navigation
@@ -118,5 +182,37 @@ export const translations: Record<Language, Translations> = {
         quotaExceededMessage: 'Has alcanzado el límite diario de recetas detalladas. ¡Mañana tendrás más!',
         quotaResetTime: 'Se reinicia a medianoche',
         usingFallbackData: 'Mostrando recetas seleccionadas',
+
+        // Login
+        welcomeBack: 'Bienvenida de nuevo',
+        loginDescription: 'Inicia sesión en tu cuenta de CycleSync para acceder a tu entrenamiento personalizado del ciclo.',
+        emailLabel: 'Correo o Usuario',
+        passwordLabel: 'Contraseña',
+        forgotPassword: '¿Olvidaste tu contraseña?',
+        loginButton: 'Iniciar Sesión',
+        dontHaveAccount: '¿No tienes una cuenta?',
+        signUp: 'Regístrate',
+        dataSecurityInfo: 'Tus datos están encriptados y se almacenan localmente.',
+        help: 'Ayuda',
+        createAccount: 'Crear Cuenta',
+        registerDescription: 'Únete a CycleSync para comenzar tu viaje personalizado hoy mismo.',
+        fullNameLabel: 'Nombre Completo',
+        confirmPasswordLabel: 'Confirmar Contraseña',
+        registerButton: 'Crear Cuenta',
+        alreadyHaveAccount: '¿Ya tienes una cuenta?',
+        passwordsDoNotMatch: 'Las contraseñas no coinciden',
+        checkEmailTitle: 'Confirma tu correo',
+        checkEmailDescription: 'Hemos enviado un enlace de confirmación a tu correo electrónico. Por favor, verifica tu cuenta para comenzar tu viaje personalizado.',
+        backToLogin: 'Volver al Inicio de Sesión',
+        settingsTitle: 'Configuración',
+        profileSection: 'Perfil',
+        saveChanges: 'Guardar Cambios',
+        securitySection: 'Seguridad',
+        updatePasswordTitle: 'Actualizar Contraseña',
+        newPasswordLabel: 'Nueva Contraseña',
+        confirmNewPasswordLabel: 'Confirmar Nueva Contraseña',
+        updatePasswordButton: 'Actualizar Contraseña',
+        optionalStatement: 'Opcional',
+        changePhotoLabel: 'Cambiar Foto',
     },
 };

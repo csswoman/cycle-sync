@@ -5,13 +5,16 @@ interface DashboardHeaderProps {
     phase: string;
     day: number;
     focus: string;
+    userName?: string;
 }
 
-export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ phase, day, focus }) => {
+export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ phase, day, focus, userName }) => {
     return (
         <header className="flex flex-col md:flex-row md:justify-between md:items-end gap-4">
             <div className="flex flex-col gap-2">
-                <h1 className="text-foreground text-3xl md:text-4xl font-black leading-tight tracking-tight">Daily Personalized Plan</h1>
+                <h1 className="text-foreground text-3xl md:text-4xl font-black leading-tight tracking-tight">
+                    {userName ? `Hi, ${userName.split(' ')[0]}!` : 'Daily Personalized Plan'}
+                </h1>
                 <div className="flex flex-wrap items-center gap-2 text-muted-foreground text-sm md:text-base">
                     <Badge variant="primary" icon="water_drop">Phase: {phase}</Badge>
                     <span className="w-1 h-1 rounded-full bg-border"></span>

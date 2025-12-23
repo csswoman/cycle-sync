@@ -9,12 +9,51 @@ import CycleSetup from '@/features/setup/CycleSetup';
 import PCOSCare from '@/features/health/PCOSCare';
 import Routines from '@/features/health/Routines';
 import Nutrition from '@/features/health/Nutrition';
+import Login from '@/features/auth/Login';
+import Register from '@/features/auth/Register';
+import CheckEmail from '@/features/auth/CheckEmail';
+import Settings from '@/features/setup/Settings';
 import { View } from '@/types';
 import { useLanguage } from '@/i18n/LanguageContext';
 import type { Language } from '@/i18n/translations';
+import { supabase } from '@/lib/supabase';
+import { useEffect } from 'react';
+
+enum AuthState {
+  LOGIN,
+  REGISTER,
+  CHECK_EMAIL,
+  PERSONALIZE,
+  AUTHENTICATED
+}
 
 function App() {
   const { language, setLanguage, t } = useLanguage();
+  const [authState, setAuthState] = useState<AuthState>(AuthState.LOGIN);
+  const [session, setSession] = useState<any>(null);
+  
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      if (session) {
+        setAuthState(AuthState.AUTHENTICATED);
+      }
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      if (session) {
+        setAuthState(AuthState.AUTHENTICATED);
+      } else {
+        setAuthState(AuthState.LOGIN);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
   const [currentView, setCurrentView] = useState<View>(View.DASHBOARD);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isAssistantOpen, setIsAssistantOpen] = useState(false);
@@ -54,6 +93,49 @@ function App() {
       default: return 'CycleSync';
     }
   };
+
+  if (authState === AuthState.LOGIN) {
+    return (
+      <Login 
+        onLogin={() => setAuthState(AuthState.AUTHENTICATED)} 
+        onSignUp={() => setAuthState(AuthState.REGISTER)}
+        onUnconfirmedEmail={() => setAuthState(AuthState.CHECK_EMAIL)}
+        isDarkMode={isDarkMode} 
+        toggleDarkMode={toggleDarkMode} 
+      />
+    );
+  }
+
+  if (authState === AuthState.REGISTER) {
+    return (
+      <Register 
+        onRegister={() => setAuthState(AuthState.CHECK_EMAIL)}
+        onBackToLogin={() => setAuthState(AuthState.LOGIN)}
+        isDarkMode={isDarkMode}
+        toggleDarkMode={toggleDarkMode}
+      />
+    );
+  }
+
+  if (authState === AuthState.CHECK_EMAIL) {
+    return (
+      <CheckEmail 
+        onBackToLogin={() => setAuthState(AuthState.LOGIN)}
+        isDarkMode={isDarkMode}
+        toggleDarkMode={toggleDarkMode}
+      />
+    );
+  }
+
+  if (authState === AuthState.PERSONALIZE) {
+    return (
+      <ArchetypeSelection 
+        onComplete={() => setAuthState(AuthState.AUTHENTICATED)} 
+        isDarkMode={isDarkMode}
+        toggleDarkMode={toggleDarkMode}
+      />
+    );
+  }
 
   return (
     <div className="flex h-screen w-full bg-background text-foreground font-display overflow-hidden relative transition-colors duration-300">
@@ -104,26 +186,43 @@ function App() {
 
             <div className="flex items-center gap-3 pl-3 border-l border-border">
               <div className="text-right hidden sm:block">
-                <p className="text-foreground text-sm font-bold">Elena R.</p>
+                <p className="text-foreground text-sm font-bold">
+                  {session?.user?.user_metadata?.full_name || 'User'}
+                </p>
                 <p className="text-muted-foreground text-xs font-medium">{t.powerhouseArchetype}</p>
               </div>
-              <div className="bg-center bg-no-repeat bg-cover rounded-full size-11 border-2 border-border shadow-xl shadow-primary/10 ring-2 ring-primary/5"
-                style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuDsvySV6JHheB_2QTPrBxRW-WlPhII5ihPXtZ2SqR5vH__HjdCIoXlg4RBVuiMjUJha1iy3-K9NkNDQ1CxG4KKvsX_FZREjkfrapXJnVo0SBCzf4It_WPpVEv-VVa2yUaJW8wdnBPZZ7jOLxqycpnqA1FnmDOtVQL5m425jGmxqs5fXaeIJsf3h0JJRa5X2PZ05aJc5wKTudNG6YUveRY7twSunxCalqn3X2-wpQvlaVz2DeQ5SqfMo8x-MrPI_JLz7jro6j8aJaCQ")' }}>
+              <div className="bg-center bg-no-repeat bg-cover rounded-full size-11 border-2 border-border shadow-xl shadow-primary/10 ring-2 ring-primary/5 flex items-center justify-center bg-secondary"
+                style={session?.user?.user_metadata?.avatar_url ? { backgroundImage: `url("${session.user.user_metadata.avatar_url}")` } : {}}>
+                {!session?.user?.user_metadata?.avatar_url && (
+                  <span className="material-symbols-outlined text-muted-foreground">person</span>
+                )}
               </div>
             </div>
           </div>
         </header>
 
         {/* View Switcher */}
-        {currentView === View.DASHBOARD && <Dashboard onNavigate={setCurrentView} />}
+        {currentView === View.DASHBOARD && (
+          <Dashboard 
+            onNavigate={setCurrentView} 
+            userName={session?.user?.user_metadata?.full_name}
+          />
+        )}
         {currentView === View.LOG && <DailyLog />}
         {currentView === View.TRENDS && <Trends />}
-        {currentView === View.ARCHETYPE_SELECTION && <ArchetypeSelection onComplete={() => setCurrentView(View.CYCLE_SETUP)} />}
+        {currentView === View.ARCHETYPE_SELECTION && (
+          <ArchetypeSelection 
+            onComplete={() => setCurrentView(View.CYCLE_SETUP)} 
+            isDarkMode={isDarkMode}
+            toggleDarkMode={toggleDarkMode}
+          />
+        )}
         {currentView === View.CYCLE_SETUP && <CycleSetup onNavigate={setCurrentView} />}
         {currentView === View.PCOS && <PCOSCare />}
         {currentView === View.ROUTINES && <Routines />}
         {currentView === View.NUTRITION && <Nutrition />}
-        {(currentView !== View.DASHBOARD && currentView !== View.LOG && currentView !== View.TRENDS && currentView !== View.ARCHETYPE_SELECTION && currentView !== View.CYCLE_SETUP && currentView !== View.PCOS && currentView !== View.ROUTINES && currentView !== View.NUTRITION) && (
+        {currentView === View.SETTINGS && <Settings />}
+        {(currentView !== View.DASHBOARD && currentView !== View.LOG && currentView !== View.TRENDS && currentView !== View.ARCHETYPE_SELECTION && currentView !== View.CYCLE_SETUP && currentView !== View.PCOS && currentView !== View.ROUTINES && currentView !== View.NUTRITION && currentView !== View.SETTINGS) && (
           <div className="flex-1 flex items-center justify-center text-muted-foreground">
             <div className="text-center">
               <span className="material-symbols-outlined text-6xl mb-4 opacity-50">construction</span>

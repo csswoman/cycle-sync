@@ -21,3 +21,13 @@ export interface WorkoutVideo {
 
 export type BodyPart = 'back' | 'cardio' | 'chest' | 'lower arms' | 'lower legs' | 'neck' | 'shoulders' | 'upper arms' | 'upper legs' | 'waist';
 export type Equipment = 'body weight' | 'cable' | 'dumbbell' | 'barbell' | 'kettlebell' | 'resistance band' | 'none';
+
+export interface Routine {
+    id: string;
+    user_id: string;
+    name: string;
+    description: string;
+    exercises: Exercise[];
+    phase: string;
+    created_at: string;
+}
