@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { supabase } from '@/lib/supabase';
+import { SettingsSection, FormField } from './components/SettingsComponents';
 
 const Settings: React.FC = () => {
     const { t } = useLanguage();
@@ -72,38 +73,26 @@ const Settings: React.FC = () => {
                 )}
 
                 {/* Profile Section */}
-                <section className="bg-card border border-border rounded-2xl p-6 md:p-8 shadow-sm">
-                    <h2 className="text-xl font-bold text-foreground mb-6 flex items-center gap-2">
-                        <span className="material-symbols-outlined">person</span>
-                        {t.profileSection}
-                    </h2>
-                    
+                <SettingsSection title={t.profileSection} icon="person">
                     <form onSubmit={handleUpdateProfile} className="flex flex-col gap-6">
-                        <div className="flex flex-col gap-1.5">
-                            <label className="text-sm font-bold text-foreground/80">{t.fullNameLabel}</label>
+                        <FormField label={t.fullNameLabel}>
                             <input
                                 className="w-full bg-secondary border border-border rounded-xl py-2.5 px-4 text-foreground focus:outline-none focus:border-primary transition-all"
                                 value={fullName}
                                 onChange={(e) => setFullName(e.target.value)}
                             />
-                        </div>
+                        </FormField>
 
-                        <div className="flex flex-col gap-3">
-                            <label className="text-sm font-bold text-foreground/80 flex items-center gap-2">
-                                {t.changePhotoLabel}
-                                <span className="bg-secondary text-[10px] px-2 py-0.5 rounded-full text-muted-foreground uppercase font-black tracking-widest">
-                                    {t.optionalStatement}
-                                </span>
-                            </label>
+                        <FormField label={t.changePhotoLabel} optional optionalLabel={t.optionalStatement}>
                             <div className="flex items-center gap-4">
-                                <div className="size-20 rounded-full bg-primary/10 flex items-center justify-center text-primary border-2 border-dashed border-primary/20">
+                                <div className="size-20 rounded-full bg-primary/10 flex items-center justify-center text-primary border-2 border-dashed border-primary/20 hover:bg-primary/20 transition-all cursor-pointer">
                                     <span className="material-symbols-outlined">add_a_photo</span>
                                 </div>
                                 <p className="text-xs text-muted-foreground max-w-[200px]">
-                                    Subir una foto personalizada para tu perfil (próximamente).
+                                    Click here or drag and drop to upload a new profile picture.
                                 </p>
                             </div>
-                        </div>
+                        </FormField>
 
                         <button
                             type="submit"
@@ -113,19 +102,13 @@ const Settings: React.FC = () => {
                             {loading ? '...' : t.saveChanges}
                         </button>
                     </form>
-                </section>
+                </SettingsSection>
 
                 {/* Security Section */}
-                <section className="bg-card border border-border rounded-2xl p-6 md:p-8 shadow-sm">
-                    <h2 className="text-xl font-bold text-foreground mb-6 flex items-center gap-2">
-                        <span className="material-symbols-outlined">shield</span>
-                        {t.securitySection}
-                    </h2>
-
+                <SettingsSection title={t.securitySection} icon="shield">
                     <form onSubmit={handleUpdatePassword} className="flex flex-col gap-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="flex flex-col gap-1.5">
-                                <label className="text-sm font-bold text-foreground/80">{t.newPasswordLabel}</label>
+                            <FormField label={t.newPasswordLabel}>
                                 <input
                                     type="password"
                                     className="w-full bg-secondary border border-border rounded-xl py-2.5 px-4 text-foreground focus:outline-none focus:border-primary transition-all"
@@ -133,9 +116,8 @@ const Settings: React.FC = () => {
                                     onChange={(e) => setNewPassword(e.target.value)}
                                     required
                                 />
-                            </div>
-                            <div className="flex flex-col gap-1.5">
-                                <label className="text-sm font-bold text-foreground/80">{t.confirmNewPasswordLabel}</label>
+                            </FormField>
+                            <FormField label={t.confirmNewPasswordLabel}>
                                 <input
                                     type="password"
                                     className="w-full bg-secondary border border-border rounded-xl py-2.5 px-4 text-foreground focus:outline-none focus:border-primary transition-all"
@@ -143,7 +125,7 @@ const Settings: React.FC = () => {
                                     onChange={(e) => setConfirmPassword(e.target.value)}
                                     required
                                 />
-                            </div>
+                            </FormField>
                         </div>
 
                         <button
@@ -154,7 +136,7 @@ const Settings: React.FC = () => {
                             {loading ? '...' : t.updatePasswordButton}
                         </button>
                     </form>
-                </section>
+                </SettingsSection>
             </div>
         </div>
     );
