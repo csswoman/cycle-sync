@@ -1,6 +1,6 @@
 import { Recipe, RecipeDetails, RecipeFilters, APIQuotaStatus, Ingredient } from '@/types/recipes';
 
-const SPOONACULAR_KEY = import.meta.env.VITE_SPOONACULAR_KEY || '';
+const SPOONACULAR_KEY = process.env.NEXT_PUBLIC_SPOONACULAR_KEY || '';
 const SPOONACULAR_BASE_URL = 'https://api.spoonacular.com';
 const DAILY_QUOTA_LIMIT = 150; // Free tier limit
 
@@ -11,6 +11,9 @@ const QUOTA_STORAGE_KEY = 'spoonacular_quota';
  * Get current quota status from localStorage
  */
 const getQuotaStatus = (): APIQuotaStatus => {
+    if (typeof window === 'undefined') {
+        return { used: 0, limit: DAILY_QUOTA_LIMIT, remaining: DAILY_QUOTA_LIMIT };
+    }
     const stored = localStorage.getItem(QUOTA_STORAGE_KEY);
     if (!stored) {
         return { used: 0, limit: DAILY_QUOTA_LIMIT, remaining: DAILY_QUOTA_LIMIT };

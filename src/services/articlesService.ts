@@ -1,6 +1,6 @@
 import { Article, ArticleFilters } from '@/types/articles';
 
-const NEWSAPI_KEY = import.meta.env.VITE_NEWSAPI_KEY || '';
+const NEWSAPI_KEY = process.env.NEXT_PUBLIC_NEWSAPI_KEY || '';
 const NEWSAPI_BASE_URL = 'https://newsapi.org/v2';
 
 // Topic to search query mapping

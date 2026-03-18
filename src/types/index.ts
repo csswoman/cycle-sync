@@ -8,7 +8,8 @@ export enum View {
   CYCLE_SETUP = 'CYCLE_SETUP',
   PCOS = 'PCOS',
   ROUTINES = 'ROUTINES',
-  NUTRITION = 'NUTRITION'
+  NUTRITION = 'NUTRITION',
+  PERIOD_HISTORY = 'PERIOD_HISTORY'
 }
 
 export enum Mood {

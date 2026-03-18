@@ -6,20 +6,67 @@ import { SettingsSection, FormField } from './components/SettingsComponents';
 const Settings: React.FC = () => {
     const { t } = useLanguage();
     const [fullName, setFullName] = useState('');
+    const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
 
     useEffect(() => {
         const getUserData = async () => {
             const { data: { user } } = await supabase.auth.getUser();
             if (user) {
                 setFullName(user.user_metadata.full_name || '');
+                setAvatarUrl(user.user_metadata.avatar_url || null);
             }
         };
         getUserData();
     }, []);
+
+    const handleAvatarClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setLoading(true);
+        setMessage(null);
+
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) throw new Error('User not found');
+
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${user.id}-${Math.random()}.${fileExt}`;
+            const filePath = `${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('avatars')
+                .upload(filePath, file);
+
+            if (uploadError) throw uploadError;
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('avatars')
+                .getPublicUrl(filePath);
+
+            const { error: updateError } = await supabase.auth.updateUser({
+                data: { avatar_url: publicUrl }
+            });
+
+            if (updateError) throw updateError;
+
+            setAvatarUrl(publicUrl);
+            setMessage({ type: 'success', text: 'Profile picture updated!' });
+        } catch (err: any) {
+            setMessage({ type: 'error', text: err.message });
+        } finally {
+            setLoading(false);
+        }
+    };
 
     const handleUpdateProfile = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -85,8 +132,22 @@ const Settings: React.FC = () => {
 
                         <FormField label={t.changePhotoLabel} optional optionalLabel={t.optionalStatement}>
                             <div className="flex items-center gap-4">
-                                <div className="size-20 rounded-full bg-primary/10 flex items-center justify-center text-primary border-2 border-dashed border-primary/20 hover:bg-primary/20 transition-all cursor-pointer">
-                                    <span className="material-symbols-outlined">add_a_photo</span>
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    className="hidden"
+                                    accept="image/*"
+                                    onChange={handleFileChange}
+                                />
+                                <div
+                                    onClick={handleAvatarClick}
+                                    className="size-20 rounded-full bg-primary/10 flex items-center justify-center text-primary border-2 border-dashed border-primary/20 hover:bg-primary/20 transition-all cursor-pointer overflow-hidden"
+                                >
+                                    {avatarUrl ? (
+                                        <img src={avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <span className="material-symbols-outlined">add_a_photo</span>
+                                    )}
                                 </div>
                                 <p className="text-xs text-muted-foreground max-w-[200px]">
                                     Click here or drag and drop to upload a new profile picture.

@@ -3,6 +3,7 @@ import { View } from '@/types';
 import { StepCycleDetails } from './components/StepCycleDetails';
 import { StepPreferences } from './components/StepPreferences';
 import { StepProfileFinalize } from './components/StepProfileFinalize';
+import { supabase } from '@/lib/supabase';
 
 interface CycleSetupProps {
     onNavigate: (view: View) => void;
@@ -26,9 +27,36 @@ const CycleSetup: React.FC<CycleSetupProps> = ({ onNavigate }) => {
         else onNavigate(View.ARCHETYPE_SELECTION);
     };
 
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file) {
+        if (!file) return;
+
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${user.id}-${Math.random()}.${fileExt}`;
+            const filePath = `${fileName}`;
+
+            const { error: uploadError } = await supabase.storage
+                .from('avatars')
+                .upload(filePath, file);
+
+            if (uploadError) throw uploadError;
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('avatars')
+                .getPublicUrl(filePath);
+
+            await supabase.auth.updateUser({
+                data: { avatar_url: publicUrl }
+            });
+
+            setProfilePic(publicUrl);
+        } catch (err) {
+            console.error('Error uploading image:', err);
+            // Fallback to local preview if upload fails
             const reader = new FileReader();
             reader.onloadend = () => setProfilePic(reader.result as string);
             reader.readAsDataURL(file);

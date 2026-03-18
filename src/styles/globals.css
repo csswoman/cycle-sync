@@ -1,0 +1,154 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #fdfcfd;
+  --foreground: #1a1122;
+  --card: #ffffff;
+  --card-foreground: #1a1122;
+  --popover: #ffffff;
+  --popover-foreground: #1a1122;
+  --primary: #7f19e6;
+  --primary-hover: #6814bd;
+  --primary-foreground: #ffffff;
+  --secondary: #f3f0f7;
+  --secondary-foreground: #1a1122;
+  --muted: #f3f0f7;
+  --muted-foreground: #5e4e75;
+  --accent: #f3f0f7;
+  --accent-foreground: #1a1122;
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --border: #e9e4f0;
+  --input: #e9e4f0;
+  --ring: #7f19e6;
+  --surface: #f3f0f7;
+  --surface-hover: #e9e4f0;
+}
+
+.dark {
+  --background: #11091a;
+  --foreground: #fdfcfd;
+  --card: #1c1126;
+  --card-foreground: #fdfcfd;
+  --popover: #1c1126;
+  --popover-foreground: #fdfcfd;
+  --primary: #9b4dff;
+  --primary-hover: #862dff;
+  --primary-foreground: #ffffff;
+  --secondary: #241a30;
+  --secondary-foreground: #fdfcfd;
+  --muted: #241a30;
+  --muted-foreground: #b19cbd;
+  --accent: #241a30;
+  --accent-foreground: #fdfcfd;
+  --destructive: #991b1b;
+  --destructive-foreground: #ffffff;
+  --border: #362447;
+  --input: #362447;
+  --ring: #9b4dff;
+  --surface: #241a30;
+  --surface-hover: #362447;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 24px;
+  width: 24px;
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  margin-top: -10px;
+  border: 2px solid #ffffff;
+}
+
+input[type='range']::-webkit-slider-runnable-track {
+  width: 100%;
+  height: 4px;
+  cursor: pointer;
+  background: var(--surface);
+  border-radius: 2px;
+}
+
+input[type='range']:focus {
+  outline: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--surface);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+
+/* animate-in utilities used across components */
+.animate-in {
+  animation-duration: 300ms;
+  animation-fill-mode: both;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fade-in {
+  animation-name: fadeIn;
+}
+
+.slide-in-from-bottom-4 {
+  animation-name: slideInFromBottom;
+}
+
+.slide-in-from-bottom-10 {
+  animation-name: slideInFromBottom;
+}
+
+.zoom-in-95 {
+  animation-name: zoomIn95;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInFromBottom {
+  from { transform: translateY(1rem); }
+  to { transform: translateY(0); }
+}
+
+@keyframes zoomIn95 {
+  from { transform: scale(0.95); }
+  to { transform: scale(1); }
+}

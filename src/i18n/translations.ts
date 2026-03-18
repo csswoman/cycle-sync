@@ -70,6 +70,16 @@ export interface Translations {
     updatePasswordButton: string;
     optionalStatement: string;
     changePhotoLabel: string;
+    periodHistory: string;
+    addPeriod: string;
+    periodStartDate: string;
+    periodEndDate: string;
+    regularityStatus: string;
+    regular: string;
+    irregular: string;
+    notEnoughData: string;
+    cycleHistoryTitle: string;
+    markDaysDescription: string;
 }
 
 export const translations: Record<Language, Translations> = {
@@ -143,6 +153,16 @@ export const translations: Record<Language, Translations> = {
         updatePasswordButton: 'Update Password',
         optionalStatement: 'Optional',
         changePhotoLabel: 'Change Photo',
+        periodHistory: 'Period History',
+        addPeriod: 'Add Period',
+        periodStartDate: 'Start Date',
+        periodEndDate: 'End Date',
+        regularityStatus: 'Cycle Regularity',
+        regular: 'Regular',
+        irregular: 'Irregular',
+        notEnoughData: 'Not enough data',
+        cycleHistoryTitle: 'Cycle History',
+        markDaysDescription: 'Log your previous periods to track regularity.',
     },
     es: {
         // Navigation
@@ -214,5 +234,15 @@ export const translations: Record<Language, Translations> = {
         updatePasswordButton: 'Actualizar Contraseña',
         optionalStatement: 'Opcional',
         changePhotoLabel: 'Cambiar Foto',
+        periodHistory: 'Historial de Periodos',
+        addPeriod: 'Agregar Periodo',
+        periodStartDate: 'Fecha de Inicio',
+        periodEndDate: 'Fecha de Fin',
+        regularityStatus: 'Regularidad del Ciclo',
+        regular: 'Regular',
+        irregular: 'Irregular',
+        notEnoughData: 'Datos insuficientes',
+        cycleHistoryTitle: 'Historial de Ciclos',
+        markDaysDescription: 'Registra tus periodos anteriores para analizar tu regularidad.',
     },
 };

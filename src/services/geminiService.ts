@@ -1,10 +1,10 @@
 import { GoogleGenerativeAI, Part } from "@google/generative-ai";
 
-const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
+const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY || '';
 
 // Validate API key on module load
 if (!apiKey) {
-  console.error('❌ VITE_GEMINI_API_KEY is not set in your .env.local file!');
+  console.error('❌ NEXT_PUBLIC_GEMINI_API_KEY is not set in your .env.local file!');
 }
 
 const genAI = new GoogleGenerativeAI(apiKey);
@@ -29,7 +29,7 @@ export const sendChatMessage = async (
   language: 'en' | 'es' = 'en'
 ): Promise<string> => {
   if (!apiKey) {
-    throw new Error('API key is missing. Please add VITE_GEMINI_API_KEY to your .env.local file and restart the dev server.');
+    throw new Error('API key is missing. Please add NEXT_PUBLIC_GEMINI_API_KEY to your .env.local file and restart the dev server.');
   }
 
   const systemInstructions = {

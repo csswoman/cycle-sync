@@ -1,6 +1,6 @@
 import { Exercise, WorkoutVideo, BodyPart, Equipment } from '@/types/exercises';
 
-const EXERCISEDB_KEY = import.meta.env.VITE_RAPIDAPI_KEY || '';
+const EXERCISEDB_KEY = process.env.NEXT_PUBLIC_RAPIDAPI_KEY || '';
 const EXERCISEDB_BASE_URL = 'https://exercisedb.p.rapidapi.com';
 
 
@@ -87,6 +87,7 @@ interface CacheEntry {
 export const fetchExercises = async (limit: number = 20): Promise<Exercise[]> => {
     // 1. Try to get from Local Storage Cache first
     try {
+        if (typeof window === 'undefined') throw new Error('SSR - skip cache');
         const cached = localStorage.getItem(CACHE_KEY);
         if (cached) {
             const { timestamp, data } = JSON.parse(cached) as CacheEntry;
@@ -130,7 +131,7 @@ export const fetchExercises = async (limit: number = 20): Promise<Exercise[]> =>
 
         // 3. Save to Cache
         try {
-            localStorage.setItem(CACHE_KEY, JSON.stringify({
+            if (typeof window !== 'undefined') localStorage.setItem(CACHE_KEY, JSON.stringify({
                 timestamp: Date.now(),
                 data: formattedData
             }));

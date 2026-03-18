@@ -22,7 +22,7 @@ export const Card: React.FC<CardProps> = ({ children, className = '', onClick, h
     );
 };
 
-export const CardHeader: React.FC<{ children: React.ReactNode, icon?: string, title: string }> = ({ icon, title, children }) => {
+export const CardHeader: React.FC<{ children?: React.ReactNode, icon?: string, title: string }> = ({ icon, title, children }) => {
     return (
         <div className="flex items-center justify-between mb-2">
             <p className="text-muted-foreground text-sm font-medium uppercase tracking-wider">{title}</p>
