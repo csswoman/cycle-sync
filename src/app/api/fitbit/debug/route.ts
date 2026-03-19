@@ -24,6 +24,7 @@ export async function GET() {
   const results: Record<string, any> = {
     token_exists: true,
     fitbit_user_id: tokenData.fitbit_user_id,
+    scope: tokenData.scope,
     expires_at: tokenData.expires_at,
     is_expired: new Date(tokenData.expires_at) <= new Date(),
   };
@@ -32,11 +33,12 @@ export async function GET() {
   results.date_used = today;
 
   const endpoints = [
-    { name: 'steps', url: `/1/user/-/activities/steps/date/${today}/1d.json` },
+    { name: 'steps_daily', url: `/1/user/-/activities/steps/date/${today}/1d.json` },
+    { name: 'steps_intraday', url: `/1/user/-/activities/steps/date/${today}/${today}/15min.json` },
     { name: 'heart', url: `/1/user/-/activities/heart/date/${today}/1d.json` },
     { name: 'sleep', url: `/1.2/user/-/sleep/date/${today}.json` },
-    { name: 'activities', url: `/1/user/-/activities/date/${today}.json` },
-    { name: 'profile', url: `/1/user/-/profile.json` },
+    { name: 'daily_activity_summary', url: `/1/user/-/activities/date/${today}.json` },
+    { name: 'activity_log_list', url: `/1/user/-/activities/list.json?afterDate=${today}&sort=asc&limit=10&offset=0` },
     { name: 'devices', url: `/1/user/-/devices.json` },
   ];
 
