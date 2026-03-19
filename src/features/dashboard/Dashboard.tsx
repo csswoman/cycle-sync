@@ -7,6 +7,7 @@ import { DashboardHeader } from './components/DashboardHeader';
 import { DailyActionPanel } from './components/DailyActionPanel';
 import { SectionMovement } from './components/SectionMovement';
 import { SectionNourishment } from './components/SectionNourishment';
+import { HabitsProgress } from './components/HabitsProgress';
 import { useCycleInfo } from '@/hooks/useCycleInfo';
 
 interface DashboardProps {
@@ -135,6 +136,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate, userName }) => {
                 />
 
                 <SectionNourishment meals={nourishmentData} />
+
+                <HabitsProgress />
 
                 <footer className="mt-8 pt-8 border-t border-border flex flex-col items-center justify-center gap-4 text-center">
                     <p className="text-xs text-muted-foreground max-w-md uppercase tracking-tighter">

@@ -12,6 +12,8 @@ export interface Translations {
     routines: string;
     mealIdeas: string;
 
+    habits: string;
+
     // Theme
     lightMode: string;
     darkMode: string;
@@ -113,6 +115,7 @@ export const translations: Record<Language, Translations> = {
         pcosToolkit: 'PCOS Toolkit',
         routines: 'Workouts',
         mealIdeas: 'Meal Ideas',
+        habits: 'Habits',
 
         // Theme
         lightMode: 'Light Mode',
@@ -213,6 +216,7 @@ export const translations: Record<Language, Translations> = {
         pcosToolkit: 'Kit de PCOS',
         routines: 'Entrenamientos',
         mealIdeas: 'Ideas de Comidas',
+        habits: 'Hábitos',
 
         // Theme
         lightMode: 'Modo Claro',

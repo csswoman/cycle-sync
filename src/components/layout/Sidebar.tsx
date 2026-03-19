@@ -58,6 +58,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
     { href: '/nutrition', label: t.mealIdeas, icon: 'restaurant' },
     { href: '/trends', label: t.trends, icon: 'trending_up' },
     { href: '/pcos', label: t.pcosToolkit, icon: 'spa' },
+    { href: '/habits', label: t.habits, icon: 'check_circle' },
   ];
 
   return (

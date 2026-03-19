@@ -9,7 +9,8 @@ export enum View {
   PCOS = 'PCOS',
   ROUTINES = 'ROUTINES',
   NUTRITION = 'NUTRITION',
-  PERIOD_HISTORY = 'PERIOD_HISTORY'
+  PERIOD_HISTORY = 'PERIOD_HISTORY',
+  HABITS = 'HABITS'
 }
 
 export enum Mood {
