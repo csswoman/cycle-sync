@@ -36,6 +36,8 @@ export async function GET() {
     { name: 'heart', url: `/1/user/-/activities/heart/date/${today}/1d.json` },
     { name: 'sleep', url: `/1.2/user/-/sleep/date/${today}.json` },
     { name: 'activities', url: `/1/user/-/activities/date/${today}.json` },
+    { name: 'profile', url: `/1/user/-/profile.json` },
+    { name: 'devices', url: `/1/user/-/devices.json` },
   ];
 
   for (const ep of endpoints) {
