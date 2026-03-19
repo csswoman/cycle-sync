@@ -61,6 +61,19 @@ interface HealthPayload {
   weight?: WeightRecord[];
 }
 
+interface HealthDataRow {
+  date: string;
+  steps?: number;
+  distance_meters?: number;
+  active_calories?: number;
+  total_calories?: number;
+  resting_heart_rate?: number | null;
+  avg_heart_rate?: number | null;
+  sleep_duration_seconds?: number;
+  sleep_stages?: unknown;
+  weight_kg?: number | null;
+}
+
 function extractToken(request: NextRequest): string | null {
   const q = request.nextUrl.searchParams.get('token');
   if (q) return q.trim();
@@ -193,8 +206,8 @@ export async function POST(request: NextRequest) {
     .eq('user_id', userId)
     .in('date', Array.from(allDates));
 
-  const existingByDate = new Map(
-    (existingRows ?? []).map((r) => [r.date, r])
+  const existingByDate = new Map<string, HealthDataRow>(
+    (existingRows ?? []).map((r) => [r.date as string, r as HealthDataRow])
   );
 
   const rows: Array<Record<string, unknown>> = [];
