@@ -64,26 +64,21 @@ export interface FitbitDailySummary {
   activeMinutes: number;
 }
 
-const FITBIT_SCOPES = [
-  'activity',
-  'heartrate',
-  'sleep',
-  'profile',
-].join('+');
+const FITBIT_SCOPES = 'activity heartrate sleep profile';
 
 export function getFitbitAuthUrl(): string {
   const clientId = process.env.NEXT_PUBLIC_FITBIT_CLIENT_ID;
   const redirectUri = `${window.location.origin}/api/auth/fitbit/callback`;
 
+  const scope = encodeURIComponent(FITBIT_SCOPES);
   const params = new URLSearchParams({
     response_type: 'code',
     client_id: clientId!,
     redirect_uri: redirectUri,
-    scope: FITBIT_SCOPES,
     expires_in: '604800',
   });
 
-  return `https://www.fitbit.com/oauth2/authorize?${params.toString()}`;
+  return `https://www.fitbit.com/oauth2/authorize?${params.toString()}&scope=${scope}`;
 }
 
 export async function fetchFitbitData(endpoint: string, accessToken: string): Promise<any> {
