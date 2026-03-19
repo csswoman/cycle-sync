@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
-const FITBIT_SCOPES = 'activity heartrate sleep profile';
+const FITBIT_SCOPES = 'activity heartrate sleep profile settings';
 
 export async function GET(request: NextRequest) {
   const clientId = process.env.FITBIT_CLIENT_ID;
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
   const params = new URLSearchParams({
     response_type: 'code',
     client_id: clientId!,
-    redirect_uri: encodeURI(redirectUri),
+    redirect_uri: redirectUri,
     expires_in: '604800',
   });
 
