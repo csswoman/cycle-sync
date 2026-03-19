@@ -63,7 +63,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
   ];
 
   return (
-    <aside className="w-64 flex-shrink-0 border-r border-border bg-card hidden md:flex flex-col justify-between p-4 transition-colors duration-300">
+    <aside className={`w-64 flex-shrink-0 border-r border-border bg-card flex-col justify-between p-4 transition-colors duration-300 ${onClose ? 'flex' : 'hidden md:flex'}`}>
       <div className="flex flex-col gap-8">
         {/* Branding */}
         <div className="flex items-center gap-3 px-2">
