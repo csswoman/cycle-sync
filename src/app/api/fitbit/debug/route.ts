@@ -28,11 +28,14 @@ export async function GET() {
     is_expired: new Date(tokenData.expires_at) <= new Date(),
   };
 
+  const today = new Date().toISOString().split('T')[0];
+  results.date_used = today;
+
   const endpoints = [
-    { name: 'steps', url: '/1/user/-/activities/steps/date/today/1d.json' },
-    { name: 'heart', url: '/1/user/-/activities/heart/date/today/1d.json' },
-    { name: 'sleep', url: '/1.2/user/-/sleep/date/today.json' },
-    { name: 'activities', url: '/1/user/-/activities/date/today.json' },
+    { name: 'steps', url: `/1/user/-/activities/steps/date/${today}/1d.json` },
+    { name: 'heart', url: `/1/user/-/activities/heart/date/${today}/1d.json` },
+    { name: 'sleep', url: `/1.2/user/-/sleep/date/${today}.json` },
+    { name: 'activities', url: `/1/user/-/activities/date/${today}.json` },
   ];
 
   for (const ep of endpoints) {

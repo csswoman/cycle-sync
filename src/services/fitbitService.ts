@@ -101,29 +101,37 @@ export async function fetchFitbitData(endpoint: string, accessToken: string): Pr
   return response.json();
 }
 
+function getTodayDate(): string {
+  return new Date().toISOString().split('T')[0];
+}
+
 export async function getFitbitProfile(accessToken: string) {
   const data = await fetchFitbitData('/1/user/-/profile.json', accessToken);
   return data.user;
 }
 
 export async function getFitbitStepsToday(accessToken: string): Promise<number> {
-  const data = await fetchFitbitData('/1/user/-/activities/steps/date/today/1d.json', accessToken);
+  const date = getTodayDate();
+  const data = await fetchFitbitData(`/1/user/-/activities/steps/date/${date}/1d.json`, accessToken);
   const steps = data['activities-steps']?.[0]?.value;
   return parseInt(steps || '0', 10);
 }
 
 export async function getFitbitHeartRateToday(accessToken: string): Promise<FitbitHeartRate | null> {
-  const data = await fetchFitbitData('/1/user/-/activities/heart/date/today/1d.json', accessToken);
+  const date = getTodayDate();
+  const data = await fetchFitbitData(`/1/user/-/activities/heart/date/${date}/1d.json`, accessToken);
   return data['activities-heart']?.[0] || null;
 }
 
 export async function getFitbitSleepToday(accessToken: string): Promise<FitbitSleepLog | null> {
-  const data = await fetchFitbitData('/1.2/user/-/sleep/date/today.json', accessToken);
+  const date = getTodayDate();
+  const data = await fetchFitbitData(`/1.2/user/-/sleep/date/${date}.json`, accessToken);
   return data.sleep?.[0] || null;
 }
 
 export async function getFitbitActivityToday(accessToken: string) {
-  const data = await fetchFitbitData('/1/user/-/activities/date/today.json', accessToken);
+  const date = getTodayDate();
+  const data = await fetchFitbitData(`/1/user/-/activities/date/${date}.json`, accessToken);
   return data.summary;
 }
 
