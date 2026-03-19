@@ -3,6 +3,7 @@ import { useLanguage } from '@/i18n/LanguageContext';
 import { supabase } from '@/lib/supabase';
 import { SettingsSection, FormField } from './components/SettingsComponents';
 import FitbitConnection from './FitbitConnection';
+import HealthWebhookSettings from './HealthWebhookSettings';
 
 const Settings: React.FC = () => {
     const { t } = useLanguage();
@@ -166,7 +167,13 @@ const Settings: React.FC = () => {
                     </form>
                 </SettingsSection>
 
-                {/* Wearable Section */}
+                {/* Wearable: Health Connect (recommended for Samsung / Galaxy Watch) */}
+                <SettingsSection title={t.healthWebhookSection} icon="sync_alt">
+                    <p className="text-sm text-muted-foreground mb-4">{t.wearableHealthConnectHint}</p>
+                    <HealthWebhookSettings />
+                </SettingsSection>
+
+                {/* Fitbit (optional; Web API does not include Health Connect-only tiles) */}
                 <SettingsSection title={t.fitbitSection} icon="watch">
                     <FitbitConnection />
                 </SettingsSection>

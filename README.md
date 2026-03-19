@@ -55,6 +55,16 @@ The project follows a modern, scalable architecture based on **SOLID principles*
    npm run dev
    ```
 
+## ⌚ Health Connect webhook (Samsung / Galaxy Watch)
+
+CycleSync can receive steps, sleep, heart rate, distance, calories, and weight from **[HC Webhook](https://github.com/mcnaveen/health-connect-webhook)** on Android (data flows: Samsung Health → Health Connect → your app).
+
+1. Run the SQL migration `supabase/migrations/20260320000000_health_webhook_tokens.sql` (or `npx supabase db push`).
+2. Add **`SUPABASE_SERVICE_ROLE_KEY`** to `.env.local` and Vercel (Supabase → **Settings** → **API** → `service_role` — **server only**, never in client code).
+3. In the app: **Settings** → **Samsung & Health Connect** → **Generate webhook URL**, then paste that full URL into HC Webhook on your phone.
+
+The webhook endpoint is `POST /api/health/webhook?token=...` and does **not** use browser cookies, so the service role key is required to write to `health_data`.
+
 ## 📂 Project Structure
 
 ```text

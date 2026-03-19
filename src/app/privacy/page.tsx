@@ -33,6 +33,7 @@ export default function PrivacyPage() {
           <p>CycleSync integrates with:</p>
           <ul className="list-disc pl-5 space-y-1">
             <li><strong>Fitbit:</strong> to read health and activity data. Subject to <a href="https://www.fitbit.com/legal/privacy-policy" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">Fitbit&apos;s Privacy Policy</a>.</li>
+            <li><strong>Health Connect (optional):</strong> if you use the HC Webhook app on Android, you send the health metrics you choose to our servers via a private URL with a secret token. Data is stored in your CycleSync account only.</li>
             <li><strong>Supabase:</strong> for authentication and data storage.</li>
           </ul>
 

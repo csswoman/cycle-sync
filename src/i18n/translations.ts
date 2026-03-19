@@ -120,6 +120,26 @@ export interface Translations {
     fitbitSleepDetails: string;
     fitbitError: string;
     fitbitConnectionSuccess: string;
+
+    // Health Connect webhook (Samsung / Galaxy Watch)
+    healthWebhookSection: string;
+    healthWebhookDescription: string;
+    healthWebhookLoading: string;
+    healthWebhookGenerate: string;
+    healthWebhookRotate: string;
+    healthWebhookUrlLabel: string;
+    healthWebhookCopy: string;
+    healthWebhookSecretHint: string;
+    healthWebhookTokenCreated: string;
+    healthWebhookCopied: string;
+    healthWebhookStep1: string;
+    healthWebhookStep2: string;
+    healthWebhookStep3: string;
+    healthWebhookStep4: string;
+    wearableSectionTitle: string;
+    wearableHealthConnectHint: string;
+    distanceLabel: string;
+    weightLabel: string;
 }
 
 export const translations: Record<Language, Translations> = {
@@ -242,6 +262,27 @@ export const translations: Record<Language, Translations> = {
         fitbitSleepDetails: 'Sleep Breakdown',
         fitbitError: 'Could not connect to Fitbit. Please try again.',
         fitbitConnectionSuccess: 'Fitbit connected successfully!',
+
+        healthWebhookSection: 'Samsung & Health Connect',
+        healthWebhookDescription:
+            'Paste the webhook URL in the HC Webhook app on Android. Data from Samsung Health / Galaxy Watch (via Health Connect) syncs to CycleSync every 15+ minutes.',
+        healthWebhookLoading: 'Loading…',
+        healthWebhookGenerate: 'Generate webhook URL',
+        healthWebhookRotate: 'Regenerate URL (old link stops working)',
+        healthWebhookUrlLabel: 'Webhook URL (paste in HC Webhook)',
+        healthWebhookCopy: 'Copy',
+        healthWebhookSecretHint: 'Token prefix',
+        healthWebhookTokenCreated: 'New URL created and copied to clipboard.',
+        healthWebhookCopied: 'Copied to clipboard.',
+        healthWebhookStep1: 'Open HC Webhook → add this URL under Webhooks.',
+        healthWebhookStep2: 'Grant Health Connect permissions for steps, sleep, heart rate, etc.',
+        healthWebhookStep3: 'Choose data types and Save configuration.',
+        healthWebhookStep4: 'Tap Sync Now in HC Webhook or wait for the interval. On Vercel, add SUPABASE_SERVICE_ROLE_KEY (Supabase → Settings → API → service_role).',
+        wearableSectionTitle: 'Wearable',
+        wearableHealthConnectHint:
+            'Best for Galaxy Watch: use Health Connect below. Fitbit API only sees data on Fitbit servers (not Health Connect tiles).',
+        distanceLabel: 'Distance',
+        weightLabel: 'Weight',
     },
     es: {
         // Navigation
@@ -362,5 +403,26 @@ export const translations: Record<Language, Translations> = {
         fitbitSleepDetails: 'Desglose del Sueño',
         fitbitError: 'No se pudo conectar con Fitbit. Intenta de nuevo.',
         fitbitConnectionSuccess: '¡Fitbit conectado exitosamente!',
+
+        healthWebhookSection: 'Samsung y Health Connect',
+        healthWebhookDescription:
+            'Pega la URL del webhook en la app HC Webhook en Android. Los datos de Samsung Health / Galaxy Watch (vía Health Connect) se sincronizan con CycleSync cada 15+ minutos.',
+        healthWebhookLoading: 'Cargando…',
+        healthWebhookGenerate: 'Generar URL del webhook',
+        healthWebhookRotate: 'Regenerar URL (el enlace anterior deja de funcionar)',
+        healthWebhookUrlLabel: 'URL del webhook (pegar en HC Webhook)',
+        healthWebhookCopy: 'Copiar',
+        healthWebhookSecretHint: 'Prefijo del token',
+        healthWebhookTokenCreated: 'Nueva URL creada y copiada al portapapeles.',
+        healthWebhookCopied: 'Copiado al portapapeles.',
+        healthWebhookStep1: 'Abre HC Webhook → añade esta URL en Webhooks.',
+        healthWebhookStep2: 'Concede permisos de Health Connect (pasos, sueño, frecuencia cardíaca, etc.).',
+        healthWebhookStep3: 'Elige tipos de datos y guarda la configuración.',
+        healthWebhookStep4: 'Pulsa Sincronizar ahora en HC Webhook o espera el intervalo. En Vercel, añade SUPABASE_SERVICE_ROLE_KEY (Supabase → Ajustes → API → service_role).',
+        wearableSectionTitle: 'Wearable',
+        wearableHealthConnectHint:
+            'Ideal para Galaxy Watch: usa Health Connect abajo. La API de Fitbit solo ve datos en los servidores de Fitbit (no los datos de Health Connect en la app).',
+        distanceLabel: 'Distancia',
+        weightLabel: 'Peso',
     },
 };

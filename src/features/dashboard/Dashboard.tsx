@@ -9,7 +9,8 @@ import { SectionMovement } from './components/SectionMovement';
 import { SectionNourishment } from './components/SectionNourishment';
 import { HabitsProgress } from './components/HabitsProgress';
 import { useCycleInfo } from '@/hooks/useCycleInfo';
-import FitbitConnection from '@/features/setup/FitbitConnection';
+import { useLanguage } from '@/i18n/LanguageContext';
+import HealthConnectWidget from './components/HealthConnectWidget';
 
 interface DashboardProps {
     onNavigate: (view: View) => void;
@@ -58,6 +59,7 @@ const phaseMovement: Record<string, { title: string; desc: string; duration: str
 };
 
 const Dashboard: React.FC<DashboardProps> = ({ onNavigate, userName }) => {
+    const { t } = useLanguage();
     const { cycleInfo, loading } = useCycleInfo();
 
     const phase = cycleInfo?.phase ?? CyclePhase.FOLLICULAR;
@@ -122,9 +124,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate, userName }) => {
 
                 {/* Wearable Data */}
                 <Card>
-                    <CardHeader title="Wearable" icon="watch" />
+                    <CardHeader title={t.wearableSectionTitle} icon="watch" />
                     <CardContent>
-                        <FitbitConnection compact />
+                        <p className="text-xs text-muted-foreground mb-4">{t.wearableHealthConnectHint}</p>
+                        <HealthConnectWidget />
                     </CardContent>
                 </Card>
 
