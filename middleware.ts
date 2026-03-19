@@ -3,6 +3,15 @@ import { NextResponse, type NextRequest } from 'next/server';
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  const isApiRoute = pathname.startsWith('/api/');
+  if (isApiRoute) return NextResponse.next();
+
+  const isPublicRoute =
+    pathname.startsWith('/terms') ||
+    pathname.startsWith('/privacy');
+
+  if (isPublicRoute) return NextResponse.next();
+
   const isAuthRoute =
     pathname.startsWith('/login') ||
     pathname.startsWith('/register') ||

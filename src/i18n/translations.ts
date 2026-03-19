@@ -104,6 +104,22 @@ export interface Translations {
 
     // Export
     exportReport: string;
+
+    // Fitbit
+    fitbitSection: string;
+    fitbitDescription: string;
+    fitbitConnect: string;
+    fitbitConnected: string;
+    fitbitDisconnect: string;
+    fitbitSync: string;
+    fitbitLoading: string;
+    fitbitSteps: string;
+    fitbitHeartRate: string;
+    fitbitSleep: string;
+    fitbitCalories: string;
+    fitbitSleepDetails: string;
+    fitbitError: string;
+    fitbitConnectionSuccess: string;
 }
 
 export const translations: Record<Language, Translations> = {
@@ -210,6 +226,22 @@ export const translations: Record<Language, Translations> = {
 
         // Export
         exportReport: 'Export Report',
+
+        // Fitbit
+        fitbitSection: 'Wearable',
+        fitbitDescription: 'Connect your Fitbit or Samsung Galaxy Watch (via Health Connect + Fitbit) to sync steps, heart rate, sleep, and more.',
+        fitbitConnect: 'Connect Fitbit',
+        fitbitConnected: 'Connected to Fitbit',
+        fitbitDisconnect: 'Disconnect',
+        fitbitSync: 'Sync',
+        fitbitLoading: 'Checking connection...',
+        fitbitSteps: 'Steps',
+        fitbitHeartRate: 'Heart Rate',
+        fitbitSleep: 'Sleep',
+        fitbitCalories: 'Calories',
+        fitbitSleepDetails: 'Sleep Breakdown',
+        fitbitError: 'Could not connect to Fitbit. Please try again.',
+        fitbitConnectionSuccess: 'Fitbit connected successfully!',
     },
     es: {
         // Navigation
@@ -314,5 +346,21 @@ export const translations: Record<Language, Translations> = {
 
         // Export
         exportReport: 'Exportar Reporte',
+
+        // Fitbit
+        fitbitSection: 'Wearable',
+        fitbitDescription: 'Conecta tu Fitbit o Samsung Galaxy Watch (vía Health Connect + Fitbit) para sincronizar pasos, frecuencia cardíaca, sueño y más.',
+        fitbitConnect: 'Conectar Fitbit',
+        fitbitConnected: 'Conectado a Fitbit',
+        fitbitDisconnect: 'Desconectar',
+        fitbitSync: 'Sincronizar',
+        fitbitLoading: 'Verificando conexión...',
+        fitbitSteps: 'Pasos',
+        fitbitHeartRate: 'Frecuencia',
+        fitbitSleep: 'Sueño',
+        fitbitCalories: 'Calorías',
+        fitbitSleepDetails: 'Desglose del Sueño',
+        fitbitError: 'No se pudo conectar con Fitbit. Intenta de nuevo.',
+        fitbitConnectionSuccess: '¡Fitbit conectado exitosamente!',
     },
 };

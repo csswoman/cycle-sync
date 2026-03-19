@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { supabase } from '@/lib/supabase';
 import { SettingsSection, FormField } from './components/SettingsComponents';
+import FitbitConnection from './FitbitConnection';
 
 const Settings: React.FC = () => {
     const { t } = useLanguage();
@@ -163,6 +164,11 @@ const Settings: React.FC = () => {
                             {loading ? '...' : t.saveChanges}
                         </button>
                     </form>
+                </SettingsSection>
+
+                {/* Wearable Section */}
+                <SettingsSection title={t.fitbitSection} icon="watch">
+                    <FitbitConnection />
                 </SettingsSection>
 
                 {/* Security Section */}
