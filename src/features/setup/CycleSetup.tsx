@@ -17,9 +17,34 @@ const CycleSetup: React.FC<CycleSetupProps> = ({ onNavigate }) => {
     const [userName, setUserName] = useState("Elena R.");
     const [profilePic, setProfilePic] = useState("https://lh3.googleusercontent.com/aida-public/AB6AXuDsvySV6JHheB_2QTPrBxRW-WlPhII5ihPXtZ2SqR5vH__HjdCIoXlg4RBVuiMjUJha1iy3-K9NkNDQ1CxG4KKvsX_FZREjkfrapXJnVo0SBCzf4It_WPpVEv-VVa2yUaJW8wdnBPZZ7jOLxqycpnqA1FnmDOtVQL5m425jGmxqs5fXaeIJsf3h0JJRa5X2PZ05aJc5wKTudNG6YUveRY7twSunxCalqn3X2-wpQvlaVz2DeQ5SqfMo8x-MrPI_JLz7jro6j8aJaCQ");
 
-    const handleNext = () => {
-        if (step < 4) setStep(step + 1);
-        else onNavigate(View.DASHBOARD);
+    const [saving, setSaving] = useState(false);
+
+    const handleNext = async () => {
+        if (step < 4) { setStep(step + 1); return; }
+
+        setSaving(true);
+        try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return;
+
+            await supabase.from('cycle_config').upsert({
+                user_id: user.id,
+                cycle_length: cycleLength,
+                workout_prefs: selectedTraining,
+                dietary_prefs: selectedFood,
+                updated_at: new Date().toISOString(),
+            }, { onConflict: 'user_id' });
+
+            if (userName && userName !== 'Elena R.') {
+                await supabase.auth.updateUser({ data: { full_name: userName } });
+            }
+
+            onNavigate(View.DASHBOARD);
+        } catch (err) {
+            console.error('Error saving setup:', err);
+        } finally {
+            setSaving(false);
+        }
     };
 
     const handleBack = () => {
@@ -108,9 +133,9 @@ const CycleSetup: React.FC<CycleSetupProps> = ({ onNavigate }) => {
                             <button onClick={handleBack} className="px-6 py-3 rounded-lg text-sm font-bold text-muted-foreground hover:bg-secondary transition-colors">
                                 Back
                             </button>
-                            <button onClick={handleNext} className="px-8 py-3 rounded-lg bg-primary text-primary-foreground text-sm font-bold shadow-lg shadow-primary/30 hover:bg-primary/90 transition-colors flex items-center gap-2">
-                                <span>{step === 4 ? 'Complete Setup' : 'Next Step'}</span>
-                                {step < 4 ? <span className="material-symbols-outlined text-sm">arrow_forward</span> : <span className="material-symbols-outlined text-sm">check</span>}
+                            <button onClick={handleNext} disabled={saving} className="px-8 py-3 rounded-lg bg-primary text-primary-foreground text-sm font-bold shadow-lg shadow-primary/30 hover:bg-primary/90 transition-colors flex items-center gap-2 disabled:opacity-50">
+                                <span>{saving ? 'Saving...' : step === 4 ? 'Complete Setup' : 'Next Step'}</span>
+                                {!saving && (step < 4 ? <span className="material-symbols-outlined text-sm">arrow_forward</span> : <span className="material-symbols-outlined text-sm">check</span>)}
                             </button>
                         </div>
 
