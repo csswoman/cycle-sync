@@ -118,71 +118,118 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const today = new Date().toISOString().split('T')[0];
+  const getDate = (iso: string) => iso.split('T')[0];
 
-  const batchSteps = (payload.steps ?? []).reduce((sum, s) => sum + (Number(s.count) || 0), 0);
-  const batchDistance = (payload.distance ?? []).reduce((sum, d) => sum + (Number(d.meters) || 0), 0);
-  const batchActiveCal = (payload.active_calories ?? []).reduce((sum, c) => sum + (Number(c.calories) || 0), 0);
-  const batchTotalCal = (payload.total_calories ?? []).reduce((sum, c) => sum + (Number(c.calories) || 0), 0);
+  const stepsByDate: Record<string, number> = {};
+  for (const s of payload.steps ?? []) {
+    const date = getDate(s.start_time);
+    stepsByDate[date] = (stepsByDate[date] ?? 0) + (Number(s.count) || 0);
+  }
 
-  const restingFromBatch =
-    payload.resting_heart_rate?.length ?
-      [...payload.resting_heart_rate].sort(
-        (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
-      )[0].bpm
-    : null;
+  const distanceByDate: Record<string, number> = {};
+  for (const d of payload.distance ?? []) {
+    const date = getDate(d.start_time);
+    distanceByDate[date] = (distanceByDate[date] ?? 0) + (Number(d.meters) || 0);
+  }
 
-  const avgFromBatch =
-    payload.heart_rate?.length ?
-      Math.round(
-        payload.heart_rate.reduce((sum, h) => sum + h.bpm, 0) / payload.heart_rate.length
-      )
-    : null;
+  const activeCalByDate: Record<string, number> = {};
+  for (const c of payload.active_calories ?? []) {
+    const date = getDate(c.start_time);
+    activeCalByDate[date] = (activeCalByDate[date] ?? 0) + (Number(c.calories) || 0);
+  }
 
-  const latestSleep =
-    payload.sleep?.length ?
-      [...payload.sleep].sort(
-        (a, b) =>
-          new Date(b.session_end_time).getTime() - new Date(a.session_end_time).getTime()
-      )[0]
-    : null;
+  const totalCalByDate: Record<string, number> = {};
+  for (const c of payload.total_calories ?? []) {
+    const date = getDate(c.start_time);
+    totalCalByDate[date] = (totalCalByDate[date] ?? 0) + (Number(c.calories) || 0);
+  }
 
-  const latestWeight =
-    payload.weight?.length ?
-      [...payload.weight].sort(
-        (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
-      )[0].kilograms
-    : null;
+  const restingHRByDate: Record<string, number> = {};
+  for (const h of payload.resting_heart_rate ?? []) {
+    const date = getDate(h.time);
+    restingHRByDate[date] = h.bpm;
+  }
 
-  const { data: existing } = await admin
+  const avgHRByDate: Record<string, number[]> = {};
+  for (const h of payload.heart_rate ?? []) {
+    const date = getDate(h.time);
+    if (!avgHRByDate[date]) avgHRByDate[date] = [];
+    avgHRByDate[date].push(h.bpm);
+  }
+
+  const sleepByDate: Record<string, SleepRecord> = {};
+  for (const s of payload.sleep ?? []) {
+    const date = getDate(s.session_end_time);
+    const existing = sleepByDate[date];
+    if (!existing || s.duration_seconds > existing.duration_seconds) {
+      sleepByDate[date] = s;
+    }
+  }
+
+  const weightByDate: Record<string, number> = {};
+  for (const w of payload.weight ?? []) {
+    const date = getDate(w.time);
+    weightByDate[date] = w.kilograms;
+  }
+
+  const allDates = new Set<string>([
+    ...Object.keys(stepsByDate),
+    ...Object.keys(distanceByDate),
+    ...Object.keys(activeCalByDate),
+    ...Object.keys(totalCalByDate),
+    ...Object.keys(restingHRByDate),
+    ...Object.keys(avgHRByDate),
+    ...Object.keys(sleepByDate),
+    ...Object.keys(weightByDate),
+  ]);
+
+  if (allDates.size === 0) {
+    return NextResponse.json({ success: true, message: 'No data to process' });
+  }
+
+  const { data: existingRows } = await admin
     .from('health_data')
     .select('*')
     .eq('user_id', userId)
-    .eq('date', today)
-    .maybeSingle();
+    .in('date', Array.from(allDates));
 
-  const mergedSteps = (existing?.steps ?? 0) + batchSteps;
-  const mergedDistance = (existing?.distance_meters ?? 0) + batchDistance;
-  const mergedActiveCal = (existing?.active_calories ?? 0) + batchActiveCal;
-  const mergedTotalCal = (existing?.total_calories ?? 0) + batchTotalCal;
-
-  const restingHR = restingFromBatch ?? existing?.resting_heart_rate ?? null;
-  const avgHR = avgFromBatch ?? existing?.avg_heart_rate ?? null;
-
-  const sleepSeconds = Math.max(
-    existing?.sleep_duration_seconds ?? 0,
-    latestSleep?.duration_seconds ?? 0
+  const existingByDate = new Map(
+    (existingRows ?? []).map((r) => [r.date, r])
   );
-  const sleepStages = latestSleep?.stages?.length ? latestSleep.stages : existing?.sleep_stages ?? null;
 
-  const weightKg = latestWeight ?? existing?.weight_kg ?? null;
+  const rows: Array<Record<string, unknown>> = [];
 
-  const { error } = await admin.from('health_data').upsert(
-    {
+  for (const date of allDates) {
+    const ex = existingByDate.get(date);
+    const batchSteps = stepsByDate[date] ?? 0;
+    const batchDist = distanceByDate[date] ?? 0;
+    const batchActiveCal = activeCalByDate[date] ?? 0;
+    const batchTotalCal = totalCalByDate[date] ?? 0;
+
+    const mergedSteps = (ex?.steps ?? 0) + batchSteps;
+    const mergedDist = (ex?.distance_meters ?? 0) + batchDist;
+    const mergedActiveCal = (ex?.active_calories ?? 0) + batchActiveCal;
+    const mergedTotalCal = (ex?.total_calories ?? 0) + batchTotalCal;
+
+    const restingHR = restingHRByDate[date] ?? ex?.resting_heart_rate ?? null;
+    const hrList = avgHRByDate[date];
+    const avgHR = hrList?.length
+      ? Math.round(hrList.reduce((a, b) => a + b, 0) / hrList.length)
+      : ex?.avg_heart_rate ?? null;
+
+    const sleep = sleepByDate[date];
+    const sleepSeconds = sleep
+      ? Math.max(ex?.sleep_duration_seconds ?? 0, sleep.duration_seconds)
+      : ex?.sleep_duration_seconds ?? 0;
+    const sleepStages = sleep?.stages?.length ? sleep.stages : ex?.sleep_stages ?? null;
+
+    const weightKg = weightByDate[date] ?? ex?.weight_kg ?? null;
+
+    rows.push({
       user_id: userId,
-      date: today,
+      date,
       steps: mergedSteps,
-      distance_meters: mergedDistance,
+      distance_meters: mergedDist,
       active_calories: mergedActiveCal,
       total_calories: mergedTotalCal,
       resting_heart_rate: restingHR,
@@ -193,9 +240,12 @@ export async function POST(request: NextRequest) {
       source: 'health_connect',
       raw_payload: payload as unknown as Record<string, unknown>,
       synced_at: new Date().toISOString(),
-    },
-    { onConflict: 'user_id,date' }
-  );
+    });
+  }
+
+  const { error } = await admin
+    .from('health_data')
+    .upsert(rows, { onConflict: 'user_id,date' });
 
   if (error) {
     console.error('Failed to save health data:', error);
@@ -204,11 +254,9 @@ export async function POST(request: NextRequest) {
 
   return NextResponse.json({
     success: true,
-    date: today,
-    merged: {
-      steps: mergedSteps,
-      distance_meters: mergedDistance,
-      active_calories: mergedActiveCal,
-    },
+    dates: Array.from(allDates),
+    merged: Object.fromEntries(
+      rows.map((r) => [r.date, { steps: r.steps, distance_meters: r.distance_meters }])
+    ),
   });
 }
