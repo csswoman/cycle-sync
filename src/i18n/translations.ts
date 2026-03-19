@@ -101,6 +101,9 @@ export interface Translations {
     magicLinkSent: string;
     magicLinkSentDescription: string;
     checkSpamFolder: string;
+
+    // Export
+    exportReport: string;
 }
 
 export const translations: Record<Language, Translations> = {
@@ -204,6 +207,9 @@ export const translations: Record<Language, Translations> = {
         magicLinkSent: 'Magic link sent!',
         magicLinkSentDescription: 'We\'ve sent a login link to your email. Click it to sign in instantly.',
         checkSpamFolder: 'Didn\'t receive the email? Check your spam folder.',
+
+        // Export
+        exportReport: 'Export Report',
     },
     es: {
         // Navigation
@@ -305,5 +311,8 @@ export const translations: Record<Language, Translations> = {
         magicLinkSent: '¡Enlace mágico enviado!',
         magicLinkSentDescription: 'Hemos enviado un enlace de inicio de sesión a tu correo. Haz clic para iniciar sesión al instante.',
         checkSpamFolder: '¿No recibiste el correo? Revisa tu carpeta de spam.',
+
+        // Export
+        exportReport: 'Exportar Reporte',
     },
 };

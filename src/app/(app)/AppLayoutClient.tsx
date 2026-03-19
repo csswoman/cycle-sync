@@ -8,6 +8,7 @@ import SmartAssistant from '@/features/assistant/SmartAssistant';
 import { useAppStore } from '@/stores/appStore';
 import { supabase } from '@/lib/supabase';
 import { useLanguage } from '@/i18n/LanguageContext';
+import { useOfflineSync } from '@/hooks/useOfflineSync';
 
 export default function AppLayoutClient({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -23,6 +24,8 @@ export default function AppLayoutClient({ children }: { children: React.ReactNod
     user,
     setUser,
   } = useAppStore();
+
+  useOfflineSync();
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setUser(user));

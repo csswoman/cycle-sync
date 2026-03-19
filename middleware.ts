@@ -11,6 +11,13 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith('/reset-password') ||
     pathname.startsWith('/auth/callback');
 
+  const isPWARoute =
+    pathname.startsWith('/serwist') ||
+    pathname.startsWith('/~offline') ||
+    pathname === '/manifest.json';
+
+  if (isPWARoute) return NextResponse.next();
+
   const isAppRoute =
     !isAuthRoute &&
     !pathname.startsWith('/_next') &&
@@ -41,6 +48,6 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|icons/|sw\\.js|swe-worker|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 };

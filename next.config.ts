@@ -1,6 +1,6 @@
-import type { NextConfig } from 'next';
+import { withSerwist } from '@serwist/turbopack';
 
-const nextConfig: NextConfig = {
+export default withSerwist({
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: '*.supabase.co' },
@@ -8,6 +8,4 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'img.spoonacular.com' },
     ],
   },
-};
-
-export default nextConfig;
+});
