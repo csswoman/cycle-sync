@@ -6,7 +6,10 @@ export async function middleware(request: NextRequest) {
   const isAuthRoute =
     pathname.startsWith('/login') ||
     pathname.startsWith('/register') ||
-    pathname.startsWith('/check-email');
+    pathname.startsWith('/check-email') ||
+    pathname.startsWith('/forgot-password') ||
+    pathname.startsWith('/reset-password') ||
+    pathname.startsWith('/auth/callback');
 
   const isAppRoute =
     !isAuthRoute &&
@@ -23,7 +26,11 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (isAuthRoute && hasSession) {
+  const skipRedirectWhenAuthenticated =
+    pathname.startsWith('/reset-password') ||
+    pathname.startsWith('/auth/callback');
+
+  if (isAuthRoute && hasSession && !skipRedirectWhenAuthenticated) {
     const url = request.nextUrl.clone();
     url.pathname = '/dashboard';
     return NextResponse.redirect(url);

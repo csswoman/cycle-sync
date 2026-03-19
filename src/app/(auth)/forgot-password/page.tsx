@@ -2,19 +2,16 @@
 
 import { useRouter } from 'next/navigation';
 import { useTheme } from '@/lib/theme';
-import Login from '@/features/auth/Login';
+import ForgotPassword from '@/features/auth/ForgotPassword';
 
-export default function LoginPage() {
+export default function ForgotPasswordPage() {
   const router = useRouter();
   const { theme, setTheme } = useTheme();
   const isDarkMode = theme === 'dark';
 
   return (
-    <Login
-      onLogin={() => router.push('/dashboard')}
-      onSignUp={() => router.push('/register')}
-      onUnconfirmedEmail={() => router.push('/check-email')}
-      onForgotPassword={() => router.push('/forgot-password')}
+    <ForgotPassword
+      onBackToLogin={() => router.push('/login')}
       isDarkMode={isDarkMode}
       toggleDarkMode={() => setTheme(isDarkMode ? 'light' : 'dark')}
     />

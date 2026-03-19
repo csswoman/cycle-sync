@@ -80,6 +80,25 @@ export interface Translations {
     notEnoughData: string;
     cycleHistoryTitle: string;
     markDaysDescription: string;
+
+    // Forgot / Reset Password
+    forgotPasswordTitle: string;
+    forgotPasswordDescription: string;
+    sendResetLink: string;
+    resetLinkSent: string;
+    resetLinkSentDescription: string;
+    resetPasswordTitle: string;
+    resetPasswordDescription: string;
+    resetPasswordButton: string;
+    passwordResetSuccess: string;
+
+    // Magic Link
+    orContinueWith: string;
+    magicLink: string;
+    sendMagicLink: string;
+    magicLinkSent: string;
+    magicLinkSentDescription: string;
+    checkSpamFolder: string;
 }
 
 export const translations: Record<Language, Translations> = {
@@ -163,6 +182,25 @@ export const translations: Record<Language, Translations> = {
         notEnoughData: 'Not enough data',
         cycleHistoryTitle: 'Cycle History',
         markDaysDescription: 'Log your previous periods to track regularity.',
+
+        // Forgot / Reset Password
+        forgotPasswordTitle: 'Reset your password',
+        forgotPasswordDescription: 'Enter your email and we\'ll send you a link to reset your password.',
+        sendResetLink: 'Send Reset Link',
+        resetLinkSent: 'Check your email',
+        resetLinkSentDescription: 'We\'ve sent a password reset link to your email. Click the link to set a new password.',
+        resetPasswordTitle: 'Set new password',
+        resetPasswordDescription: 'Enter your new password below.',
+        resetPasswordButton: 'Update Password',
+        passwordResetSuccess: 'Password updated successfully!',
+
+        // Magic Link
+        orContinueWith: 'or continue with',
+        magicLink: 'Magic Link',
+        sendMagicLink: 'Send Magic Link',
+        magicLinkSent: 'Magic link sent!',
+        magicLinkSentDescription: 'We\'ve sent a login link to your email. Click it to sign in instantly.',
+        checkSpamFolder: 'Didn\'t receive the email? Check your spam folder.',
     },
     es: {
         // Navigation
@@ -244,5 +282,24 @@ export const translations: Record<Language, Translations> = {
         notEnoughData: 'Datos insuficientes',
         cycleHistoryTitle: 'Historial de Ciclos',
         markDaysDescription: 'Registra tus periodos anteriores para analizar tu regularidad.',
+
+        // Forgot / Reset Password
+        forgotPasswordTitle: 'Restablecer contraseña',
+        forgotPasswordDescription: 'Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña.',
+        sendResetLink: 'Enviar enlace',
+        resetLinkSent: 'Revisa tu correo',
+        resetLinkSentDescription: 'Hemos enviado un enlace para restablecer tu contraseña. Haz clic en el enlace para crear una nueva.',
+        resetPasswordTitle: 'Nueva contraseña',
+        resetPasswordDescription: 'Ingresa tu nueva contraseña a continuación.',
+        resetPasswordButton: 'Actualizar Contraseña',
+        passwordResetSuccess: '¡Contraseña actualizada exitosamente!',
+
+        // Magic Link
+        orContinueWith: 'o continuar con',
+        magicLink: 'Enlace Mágico',
+        sendMagicLink: 'Enviar Enlace Mágico',
+        magicLinkSent: '¡Enlace mágico enviado!',
+        magicLinkSentDescription: 'Hemos enviado un enlace de inicio de sesión a tu correo. Haz clic para iniciar sesión al instante.',
+        checkSpamFolder: '¿No recibiste el correo? Revisa tu carpeta de spam.',
     },
 };
