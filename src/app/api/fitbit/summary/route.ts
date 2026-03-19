@@ -2,14 +2,19 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { getFitbitDailySummary } from '@/services/fitbitService';
 
+export const dynamic = 'force-dynamic';
+
 async function getValidAccessToken(supabase: any, userId: string): Promise<string | null> {
-  const { data: tokenData } = await supabase
+  const { data: tokenData, error } = await supabase
     .from('fitbit_tokens')
     .select('*')
     .eq('user_id', userId)
     .single();
 
-  if (!tokenData) return null;
+  if (error || !tokenData) {
+    console.error('Fitbit token lookup failed:', error?.message);
+    return null;
+  }
 
   const isExpired = new Date(tokenData.expires_at) <= new Date();
 
@@ -17,6 +22,7 @@ async function getValidAccessToken(supabase: any, userId: string): Promise<strin
     return tokenData.access_token;
   }
 
+  console.log('Fitbit token expired, refreshing...');
   const clientId = process.env.FITBIT_CLIENT_ID!;
   const clientSecret = process.env.FITBIT_CLIENT_SECRET!;
 
@@ -33,6 +39,8 @@ async function getValidAccessToken(supabase: any, userId: string): Promise<strin
   });
 
   if (!response.ok) {
+    const errText = await response.text();
+    console.error('Fitbit token refresh failed:', errText);
     await supabase.from('fitbit_tokens').delete().eq('user_id', userId);
     return null;
   }
@@ -67,11 +75,14 @@ export async function GET() {
 
   try {
     const summary = await getFitbitDailySummary(accessToken);
-    return NextResponse.json(summary);
+    return NextResponse.json(summary, {
+      headers: { 'Cache-Control': 'no-store' },
+    });
   } catch (err: any) {
+    console.error('Fitbit summary error:', err.message);
     if (err.message === 'FITBIT_TOKEN_EXPIRED') {
       return NextResponse.json({ error: 'Token expired' }, { status: 401 });
     }
-    return NextResponse.json({ error: 'Failed to fetch Fitbit data' }, { status: 500 });
+    return NextResponse.json({ error: err.message || 'Failed to fetch Fitbit data' }, { status: 500 });
   }
 }

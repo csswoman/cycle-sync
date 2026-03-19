@@ -86,6 +86,7 @@ export async function fetchFitbitData(endpoint: string, accessToken: string): Pr
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
+    cache: 'no-store',
   });
 
   if (response.status === 401) {
@@ -93,7 +94,8 @@ export async function fetchFitbitData(endpoint: string, accessToken: string): Pr
   }
 
   if (!response.ok) {
-    throw new Error(`Fitbit API error: ${response.status}`);
+    const text = await response.text().catch(() => '');
+    throw new Error(`Fitbit API error ${response.status}: ${text}`);
   }
 
   return response.json();

@@ -9,6 +9,7 @@ import { SectionMovement } from './components/SectionMovement';
 import { SectionNourishment } from './components/SectionNourishment';
 import { HabitsProgress } from './components/HabitsProgress';
 import { useCycleInfo } from '@/hooks/useCycleInfo';
+import FitbitConnection from '@/features/setup/FitbitConnection';
 
 interface DashboardProps {
     onNavigate: (view: View) => void;
@@ -118,6 +119,14 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate, userName }) => {
                         </CardContent>
                     </Card>
                 </div>
+
+                {/* Wearable Data */}
+                <Card>
+                    <CardHeader title="Wearable" icon="watch" />
+                    <CardContent>
+                        <FitbitConnection compact />
+                    </CardContent>
+                </Card>
 
                 <DailyActionPanel
                     title="Daily Check-In"

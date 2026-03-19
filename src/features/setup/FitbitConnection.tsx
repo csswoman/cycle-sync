@@ -9,17 +9,41 @@ interface FitbitStatus {
   fitbitUserId: string | null;
 }
 
-const FitbitConnection: React.FC = () => {
+interface FitbitConnectionProps {
+  compact?: boolean;
+}
+
+const FitbitConnection: React.FC<FitbitConnectionProps> = ({ compact = false }) => {
   const { t } = useLanguage();
   const [status, setStatus] = useState<FitbitStatus>({ connected: false, fitbitUserId: null });
   const [summary, setSummary] = useState<FitbitDailySummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [syncing, setSyncing] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchSummary = useCallback(async () => {
+    setSyncing(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/fitbit/summary', { cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        setSummary(data);
+      } else {
+        const err = await res.json().catch(() => ({ error: 'Unknown error' }));
+        setError(err.error || `Error ${res.status}`);
+      }
+    } catch (e: any) {
+      setError(e.message || 'Network error');
+    } finally {
+      setSyncing(false);
+    }
+  }, []);
 
   const checkStatus = useCallback(async () => {
     try {
-      const res = await fetch('/api/fitbit/status');
+      const res = await fetch('/api/fitbit/status', { cache: 'no-store' });
       const data = await res.json();
       setStatus(data);
       if (data.connected) {
@@ -30,22 +54,7 @@ const FitbitConnection: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
-
-  const fetchSummary = async () => {
-    setSyncing(true);
-    try {
-      const res = await fetch('/api/fitbit/summary');
-      if (res.ok) {
-        const data = await res.json();
-        setSummary(data);
-      }
-    } catch {
-      // Silently fail
-    } finally {
-      setSyncing(false);
-    }
-  };
+  }, [fetchSummary]);
 
   useEffect(() => {
     checkStatus();
@@ -90,6 +99,7 @@ const FitbitConnection: React.FC = () => {
   }
 
   if (!status.connected) {
+    if (compact) return null;
     return (
       <div className="flex flex-col gap-4">
         <p className="text-sm text-muted-foreground">{t.fitbitDescription}</p>
@@ -122,16 +132,24 @@ const FitbitConnection: React.FC = () => {
             <span className={`material-symbols-outlined text-sm ${syncing ? 'animate-spin' : ''}`}>sync</span>
             {t.fitbitSync}
           </button>
-          <button
-            onClick={handleDisconnect}
-            disabled={disconnecting}
-            className="flex items-center gap-1.5 px-3 h-8 rounded-lg bg-destructive/10 text-destructive text-xs font-bold hover:bg-destructive/20 transition-all disabled:opacity-50"
-          >
-            <span className="material-symbols-outlined text-sm">link_off</span>
-            {t.fitbitDisconnect}
-          </button>
+          {!compact && (
+            <button
+              onClick={handleDisconnect}
+              disabled={disconnecting}
+              className="flex items-center gap-1.5 px-3 h-8 rounded-lg bg-destructive/10 text-destructive text-xs font-bold hover:bg-destructive/20 transition-all disabled:opacity-50"
+            >
+              <span className="material-symbols-outlined text-sm">link_off</span>
+              {t.fitbitDisconnect}
+            </button>
+          )}
         </div>
       </div>
+
+      {error && (
+        <div className="p-3 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-xs font-medium">
+          {error}
+        </div>
+      )}
 
       {summary && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
