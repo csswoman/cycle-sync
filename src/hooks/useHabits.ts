@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
+import { saveHabitLogOffline, getUnsyncedHabitLogs } from '@/lib/offlineHelpers';
+import { syncAll } from '@/hooks/useOfflineSync';
 import type { Habit, HabitLog } from '@/types';
 
 const DEFAULT_HABITS: Omit<Habit, 'id' | 'user_id'>[] = [
@@ -19,45 +21,53 @@ export function useHabits() {
   const today = new Date().toISOString().split('T')[0];
 
   const loadData = useCallback(async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) { setLoading(false); return; }
-
-    const [habitsRes, logsRes, weekRes] = await Promise.all([
-      supabase.from('habits').select('*').eq('user_id', user.id).eq('active', true).order('created_at'),
-      supabase.from('habit_logs').select('*').eq('user_id', user.id).eq('date', today),
-      supabase.from('habit_logs').select('*').eq('user_id', user.id)
-        .gte('date', new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0])
-        .order('date', { ascending: true }),
-    ]);
-
-    let userHabits = (habitsRes.data as Habit[]) ?? [];
-
-    if (userHabits.length === 0) {
-      const inserts = DEFAULT_HABITS.map((h) => ({ ...h, user_id: user.id }));
-      const { data: created } = await supabase.from('habits').insert(inserts).select();
-      userHabits = (created as Habit[]) ?? [];
+    const weekStart = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0];
+    try {
+      const [habitsRes, weekRes] = await Promise.all([
+        supabase.from('habits').select('*').eq('user_id', user.id).eq('active', true).order('created_at'),
+        supabase.from('habit_logs').select('*').eq('user_id', user.id)
+          .gte('date', weekStart)
+          .order('date', { ascending: true }),
+      ]);
+      if (!habitsRes.error) {
+        let userHabits = (habitsRes.data as Habit[]) ?? [];
+        if (userHabits.length === 0) {
+          const inserts = DEFAULT_HABITS.map((h) => ({ ...h, user_id: user.id }));
+          const { data: created } = await supabase.from('habits').insert(inserts).select();
+          userHabits = (created as Habit[]) ?? [];
+        }
+        setHabits(userHabits);
+      }
+      const remoteWeek = weekRes.error ? [] : ((weekRes.data as HabitLog[]) ?? []);
+      // Overlay logs saved locally that have not reached Supabase yet.
+      const pending = await getUnsyncedHabitLogs(user.id, weekStart);
+      const merged = remoteWeek.filter(
+        (r) => !pending.some((p) => p.habitId === r.habit_id && p.date === r.date),
+      );
+      for (const p of pending) {
+        merged.push({
+          id: `local-${p.id}`, user_id: p.userId, habit_id: p.habitId,
+          date: p.date, value: p.value, completed: p.completed,
+        });
+      }
+      setWeekLogs(merged);
+      setTodayLogs(merged.filter((l) => l.date === today));
+    } finally {
+      setLoading(false);
     }
-
-    setHabits(userHabits);
-    setTodayLogs((logsRes.data as HabitLog[]) ?? []);
-    setWeekLogs((weekRes.data as HabitLog[]) ?? []);
-    setLoading(false);
   }, [today]);
 
   useEffect(() => { loadData(); }, [loadData]);
 
   const logHabit = async (habitId: string, value: number, completed: boolean) => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) return;
-
-    await supabase.from('habit_logs').upsert({
-      user_id: user.id,
-      habit_id: habitId,
-      date: today,
-      value,
-      completed,
-    }, { onConflict: 'user_id,habit_id,date' });
-
+    await saveHabitLogOffline({ userId: user.id, habitId, date: today, value, completed });
+    if (navigator.onLine) await syncAll();
     await loadData();
   };
 

@@ -4,21 +4,27 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { CyclePhase, type CycleInfo, type CycleConfig, type Period } from '@/types';
 
-function computeCycleInfo(config: CycleConfig, periods: Period[]): CycleInfo {
+/** Parses 'YYYY-MM-DD' as a local date (new Date('YYYY-MM-DD') is UTC and shifts the day west of UTC). */
+function parseLocalDate(value: string): Date {
+  const [y, m, d] = value.slice(0, 10).split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
+
+export function computeCycleInfo(config: CycleConfig, periods: Period[], now: Date = new Date()): CycleInfo {
   const cycleLength = config.cycle_length || 28;
 
   let lastPeriodStart: Date | null = null;
   if (periods.length > 0) {
-    lastPeriodStart = new Date(periods[0].start_date);
+    lastPeriodStart = parseLocalDate(periods[0].start_date);
   } else if (config.last_period_start) {
-    lastPeriodStart = new Date(config.last_period_start);
+    lastPeriodStart = parseLocalDate(config.last_period_start);
   }
 
   if (!lastPeriodStart) {
     return { phase: CyclePhase.FOLLICULAR, cycleDay: 1, daysUntilNextPeriod: cycleLength, cycleLength };
   }
 
-  const today = new Date();
+  const today = new Date(now);
   today.setHours(0, 0, 0, 0);
   lastPeriodStart.setHours(0, 0, 0, 0);
 

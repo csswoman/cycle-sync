@@ -5,7 +5,7 @@ import { db } from '@/lib/offlineDb';
 import { supabase } from '@/lib/supabase';
 
 async function syncDailyLogs() {
-  const pending = await db.dailyLogs.where('synced').equals(0).toArray();
+  const pending = await db.dailyLogs.filter((r) => !r.synced).toArray();
   for (const log of pending) {
     const { error } = await supabase.from('daily_logs').upsert(
       {
@@ -27,7 +27,7 @@ async function syncDailyLogs() {
 }
 
 async function syncHabitLogs() {
-  const pending = await db.habitLogs.where('synced').equals(0).toArray();
+  const pending = await db.habitLogs.filter((r) => !r.synced).toArray();
   for (const log of pending) {
     const { error } = await supabase.from('habit_logs').upsert(
       {
@@ -46,7 +46,7 @@ async function syncHabitLogs() {
 }
 
 async function syncPCOSEntries() {
-  const pending = await db.pcosEntries.where('synced').equals(0).toArray();
+  const pending = await db.pcosEntries.filter((r) => !r.synced).toArray();
   for (const entry of pending) {
     const { error } = await supabase.from('pcos_symptoms').upsert(
       {
@@ -67,7 +67,7 @@ async function syncPCOSEntries() {
   }
 }
 
-async function syncAll() {
+export async function syncAll() {
   try {
     await Promise.all([syncDailyLogs(), syncHabitLogs(), syncPCOSEntries()]);
   } catch {

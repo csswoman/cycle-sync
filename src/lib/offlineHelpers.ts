@@ -89,9 +89,26 @@ export async function savePCOSEntryOffline(data: {
 
 export async function getPendingSyncCount(): Promise<number> {
   const [dailyCount, habitCount, pcosCount] = await Promise.all([
-    db.dailyLogs.where('synced').equals(0).count(),
-    db.habitLogs.where('synced').equals(0).count(),
-    db.pcosEntries.where('synced').equals(0).count(),
+    db.dailyLogs.filter((r) => !r.synced).count(),
+    db.habitLogs.filter((r) => !r.synced).count(),
+    db.pcosEntries.filter((r) => !r.synced).count(),
   ]);
   return dailyCount + habitCount + pcosCount;
+}
+
+/** Unsynced (or any local) records, used to overlay remote data while offline. */
+export async function getLocalDailyLog(userId: string, date: string) {
+  return db.dailyLogs.where('[userId+date]').equals([userId, date]).first();
+}
+
+export async function getUnsyncedHabitLogs(userId: string, fromDate: string) {
+  return db.habitLogs
+    .filter((l) => l.userId === userId && !l.synced && l.date >= fromDate)
+    .toArray();
+}
+
+export async function getUnsyncedPCOSEntries(userId: string, fromDate: string) {
+  return db.pcosEntries
+    .filter((e) => e.userId === userId && !e.synced && e.date >= fromDate)
+    .toArray();
 }

@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
+import { savePCOSEntryOffline, getUnsyncedPCOSEntries } from '@/lib/offlineHelpers';
+import { syncAll } from '@/hooks/useOfflineSync';
 import type { PCOSSymptomEntry } from '@/types';
 
 const SYMPTOM_KEYS = ['acne', 'fatigue', 'hirsutism', 'hair_loss', 'mood_swings', 'bloating'] as const;
@@ -17,26 +19,37 @@ export function usePCOSSymptoms() {
   const [saving, setSaving] = useState(false);
 
   const loadEntries = useCallback(async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user;
     if (!user) { setLoading(false); return; }
-
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-    const { data } = await supabase
-      .from('pcos_symptoms')
-      .select('*')
-      .eq('user_id', user.id)
-      .gte('date', thirtyDaysAgo.toISOString().split('T')[0])
-      .order('date', { ascending: true });
-
-    const all = (data as PCOSSymptomEntry[]) ?? [];
-    setEntries(all);
-
-    const today = new Date().toISOString().split('T')[0];
-    const existing = all.find((e) => e.date === today);
-    setTodayEntry(existing ?? { acne: 0, fatigue: 0, hirsutism: 0, hair_loss: 0, mood_swings: 0, bloating: 0 });
-    setLoading(false);
+    const fromDate = thirtyDaysAgo.toISOString().split('T')[0];
+    try {
+      const { data, error } = await supabase
+        .from('pcos_symptoms')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('date', fromDate)
+        .order('date', { ascending: true });
+      let all = error ? [] : ((data as PCOSSymptomEntry[]) ?? []);
+      // Overlay entries saved locally that have not reached Supabase yet.
+      const pending = await getUnsyncedPCOSEntries(user.id, fromDate);
+      all = all.filter((e) => !pending.some((p) => p.date === e.date));
+      for (const p of pending) {
+        all.push({
+          id: `local-${p.id}`, user_id: p.userId, date: p.date, acne: p.acne, fatigue: p.fatigue,
+          hirsutism: p.hirsutism, hair_loss: p.hairLoss, mood_swings: p.moodSwings, bloating: p.bloating,
+        });
+      }
+      all.sort((a, b) => a.date.localeCompare(b.date));
+      setEntries(all);
+      const today = new Date().toISOString().split('T')[0];
+      const existing = all.find((e) => e.date === today);
+      setTodayEntry(existing ?? { acne: 0, fatigue: 0, hirsutism: 0, hair_loss: 0, mood_swings: 0, bloating: 0 });
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => { loadEntries(); }, [loadEntries]);
@@ -44,16 +57,21 @@ export function usePCOSSymptoms() {
   const saveToday = async (values: Record<SymptomKey, number>) => {
     setSaving(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) return;
       const today = new Date().toISOString().split('T')[0];
-
-      await supabase.from('pcos_symptoms').upsert({
-        user_id: user.id,
+      await savePCOSEntryOffline({
+        userId: user.id,
         date: today,
-        ...values,
-      }, { onConflict: 'user_id,date' });
-
+        acne: values.acne,
+        fatigue: values.fatigue,
+        hirsutism: values.hirsutism,
+        hairLoss: values.hair_loss,
+        moodSwings: values.mood_swings,
+        bloating: values.bloating,
+      });
+      if (navigator.onLine) await syncAll();
       await loadEntries();
     } finally {
       setSaving(false);

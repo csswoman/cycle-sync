@@ -7,6 +7,8 @@ import { VitalsInputs } from './components/VitalsInputs';
 import { SymptomGrid } from './components/SymptomGrid';
 import { supabase } from '@/lib/supabase';
 import { useCycleInfo } from '@/hooks/useCycleInfo';
+import { saveDailyLogOffline, getLocalDailyLog } from '@/lib/offlineHelpers';
+import { syncAll } from '@/hooks/useOfflineSync';
 import { useLanguage } from '@/i18n/LanguageContext';
 
 const phaseInsights: Record<string, { tip: string; hormone: string }> = {
@@ -27,15 +29,26 @@ const DailyLog: React.FC = () => {
 
   useEffect(() => {
     async function loadTodayLog() {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) return;
       const today = new Date().toISOString().split('T')[0];
+      const local = await getLocalDailyLog(user.id, today);
+      if (local && !local.synced) {
+        // Pending local edits win over the remote copy.
+        setSelectedMood((local.mood as Mood) || Mood.OKAY);
+        setEnergyLevel(local.energyLevel ?? 5);
+        setSleepHours(local.sleepHours ?? 7);
+        setActiveSymptoms(local.symptoms ?? []);
+        setSaved(true);
+        return;
+      }
       const { data } = await supabase
         .from('daily_logs')
         .select('*')
         .eq('user_id', user.id)
         .eq('date', today)
-        .single();
+        .maybeSingle();
       if (data) {
         setSelectedMood((data.mood as Mood) || Mood.OKAY);
         setEnergyLevel(data.energy_level ?? 5);
@@ -50,19 +63,21 @@ const DailyLog: React.FC = () => {
   const handleSave = async () => {
     setSaving(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      const { data: { session } } = await supabase.auth.getSession();
+      const user = session?.user;
       if (!user) return;
       const today = new Date().toISOString().split('T')[0];
-
-      await supabase.from('daily_logs').upsert({
-        user_id: user.id,
+      await saveDailyLogOffline({
+        userId: user.id,
         date: today,
         mood: selectedMood,
-        energy_level: energyLevel,
-        sleep_hours: sleepHours,
+        energyLevel,
+        sleepHours,
+        sleepQuality: null,
         symptoms: activeSymptoms,
-      }, { onConflict: 'user_id,date' });
-
+        notes: null,
+      });
+      if (navigator.onLine) await syncAll();
       setSaved(true);
     } catch (err) {
       console.error('Error saving daily log:', err);
