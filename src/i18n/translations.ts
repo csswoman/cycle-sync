@@ -48,6 +48,7 @@ export interface Translations {
     passwordLabel: string;
     forgotPassword: string;
     loginButton: string;
+    connectionError: string;
     dontHaveAccount: string;
     signUp: string;
     dataSecurityInfo: string;
@@ -190,6 +191,7 @@ export const translations: Record<Language, Translations> = {
         passwordLabel: 'Password',
         forgotPassword: 'Forgot Password?',
         loginButton: 'Log In',
+        connectionError: 'Could not reach Supabase. Check NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local, restart the dev server, and confirm the project is active in the Supabase dashboard.',
         dontHaveAccount: "Don't have an account?",
         signUp: 'Sign Up',
         dataSecurityInfo: 'Your data is encrypted and stored locally.',
@@ -331,6 +333,7 @@ export const translations: Record<Language, Translations> = {
         passwordLabel: 'Contraseña',
         forgotPassword: '¿Olvidaste tu contraseña?',
         loginButton: 'Iniciar Sesión',
+        connectionError: 'No se pudo conectar con Supabase. Revisa NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_ANON_KEY en .env.local, reinicia el servidor y confirma que el proyecto esté activo en el panel de Supabase.',
         dontHaveAccount: '¿No tienes una cuenta?',
         signUp: 'Regístrate',
         dataSecurityInfo: 'Tus datos están encriptados y se almacenan localmente.',

@@ -38,7 +38,12 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSignUp, onUnconfirmedEmail, on
       }
       onLogin();
     } catch (err: any) {
-      setError(err.message);
+      const message = err?.message ?? String(err);
+      if (message === 'Failed to fetch' || message.includes('fetch failed')) {
+        setError(t.connectionError);
+      } else {
+        setError(message);
+      }
     }
   };
 
@@ -59,7 +64,12 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSignUp, onUnconfirmedEmail, on
       if (error) throw error;
       setMagicLinkSent(true);
     } catch (err: any) {
-      setError(err.message);
+      const message = err?.message ?? String(err);
+      if (message === 'Failed to fetch' || message.includes('fetch failed')) {
+        setError(t.connectionError);
+      } else {
+        setError(message);
+      }
     } finally {
       setMagicLinkLoading(false);
     }
