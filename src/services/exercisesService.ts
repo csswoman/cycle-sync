@@ -1,7 +1,6 @@
 import { Exercise, WorkoutVideo, BodyPart, Equipment } from '@/types/exercises';
 
-const EXERCISEDB_KEY = process.env.NEXT_PUBLIC_RAPIDAPI_KEY || '';
-const EXERCISEDB_BASE_URL = 'https://exercisedb.p.rapidapi.com';
+// Requests go through /api/exercises, which adds the RapidAPI key on the server.
 
 
 
@@ -10,12 +9,7 @@ const EXERCISEDB_BASE_URL = 'https://exercisedb.p.rapidapi.com';
  */
 export const fetchExercisesByBodyPart = async (bodyPart: BodyPart): Promise<Exercise[]> => {
     try {
-        const response = await fetch(`${EXERCISEDB_BASE_URL}/exercises/bodyPart/${bodyPart}?limit=15`, {
-            headers: {
-                'X-RapidAPI-Key': EXERCISEDB_KEY,
-                'X-RapidAPI-Host': 'exercisedb.p.rapidapi.com'
-            }
-        });
+        const response = await fetch(`/api/exercises?bodyPart=${encodeURIComponent(bodyPart)}&limit=15`);
 
         if (!response.ok) {
             throw new Error(`ExerciseDB error: ${response.status}`);
@@ -43,12 +37,7 @@ export const fetchExercisesByBodyPart = async (bodyPart: BodyPart): Promise<Exer
  */
 export const searchExercises = async (query: string): Promise<Exercise[]> => {
     try {
-        const response = await fetch(`${EXERCISEDB_BASE_URL}/exercises/name/${query}?limit=10`, {
-            headers: {
-                'X-RapidAPI-Key': EXERCISEDB_KEY,
-                'X-RapidAPI-Host': 'exercisedb.p.rapidapi.com'
-            }
-        });
+        const response = await fetch(`/api/exercises?name=${encodeURIComponent(query)}&limit=10`);
 
         if (!response.ok) {
             throw new Error(`ExerciseDB error: ${response.status}`);
@@ -102,12 +91,7 @@ export const fetchExercises = async (limit: number = 20): Promise<Exercise[]> =>
 
     // 2. If no cache, try API
     try {
-        const response = await fetch(`${EXERCISEDB_BASE_URL}/exercises?limit=${limit}`, {
-            headers: {
-                'X-RapidAPI-Key': EXERCISEDB_KEY,
-                'X-RapidAPI-Host': 'exercisedb.p.rapidapi.com'
-            }
-        });
+        const response = await fetch(`/api/exercises?limit=${limit}`);
 
         if (!response.ok) {
             if (response.status === 429) {

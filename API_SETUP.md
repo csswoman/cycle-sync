@@ -13,7 +13,7 @@ This guide will help you obtain the free API keys needed for CycleSync.
 3. Sign up with your email
 4. Verify your email
 5. Copy your API key from the dashboard
-6. Add to `.env.local`: `VITE_NEWSAPI_KEY=your_key_here`
+6. Add to `.env.local`: `NEWSAPI_KEY=your_key_here`
 
 ---
 
@@ -27,7 +27,7 @@ This guide will help you obtain the free API keys needed for CycleSync.
 4. Click "Subscribe to Test"
 5. Select the **Basic (Free)** plan
 6. Copy your `X-RapidAPI-Key` from the code snippets
-7. Add to `.env.local`: `VITE_RAPIDAPI_KEY=your_key_here`
+7. Add to `.env.local`: `RAPIDAPI_KEY=your_key_here`
 
 ---
 
@@ -40,7 +40,7 @@ This guide will help you obtain the free API keys needed for CycleSync.
 3. Sign up for a free account
 4. Go to your [Profile](https://spoonacular.com/food-api/console#Profile)
 5. Copy your API key
-6. Add to `.env.local`: `VITE_SPOONACULAR_KEY=your_key_here`
+6. Add to `.env.local`: `SPOONACULAR_API_KEY=your_key_here`
 
 **Important:** The app tracks your daily usage and automatically switches to fallback recipes when you reach the limit. You'll see a friendly message: "You've reached the daily limit for detailed recipes. Tomorrow you'll have more!"
 
@@ -50,9 +50,9 @@ This guide will help you obtain the free API keys needed for CycleSync.
 You should already have this from the initial setup.
 
 If not:
-1. Visit [https://makersuite.google.com/app/apikey](https://makersuite.google.com/app/apikey)
+1. Visit [https://aistudio.google.com/apikey](https://aistudio.google.com/apikey)
 2. Create an API key
-3. Add to `.env.local`: `VITE_GEMINI_API_KEY=your_key_here`
+3. Add to `.env.local`: `GEMINI_API_KEY=your_key_here`
 
 ---
 
@@ -65,10 +65,10 @@ If not:
 
 2. **Add all your API keys** to `.env.local`:
    ```env
-   VITE_GEMINI_API_KEY=your_gemini_key
-   VITE_NEWSAPI_KEY=your_newsapi_key
-   VITE_RAPIDAPI_KEY=your_rapidapi_key
-   VITE_SPOONACULAR_KEY=your_spoonacular_key
+   GEMINI_API_KEY=your_gemini_key
+   NEWSAPI_KEY=your_newsapi_key
+   RAPIDAPI_KEY=your_rapidapi_key
+   SPOONACULAR_API_KEY=your_spoonacular_key
    ```
 
 3. **Restart your dev server**:
@@ -107,7 +107,7 @@ You can check your quota status in the Nutrition page - a banner will appear whe
 
 ### "API key is missing" error
 - Make sure your `.env.local` file exists
-- Check that all keys start with `VITE_`
+- Check the variable names match `.env.example` (these keys must NOT use the `NEXT_PUBLIC_` prefix)
 - Restart your dev server after adding keys
 
 ### "Quota exceeded" message
@@ -139,8 +139,9 @@ If you need more requests:
 ## Privacy & Security
 
 - All API keys are stored in `.env.local` (gitignored)
-- Keys are only used client-side for this personal project
-- For production, consider using a backend proxy to hide API keys
+- Keys are only read on the server by the API routes in `src/app/api/`, which require a logged-in user
+- They are never bundled into the browser code
+- On Vercel, add the same variables under Project → Settings → Environment Variables
 - No user data is sent to third-party APIs
 
 ---

@@ -136,19 +136,21 @@ All integrations have **graceful fallbacks** to static data when quotas are exce
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
    SUPABASE_SERVICE_ROLE_KEY=your_service_role_key   # server-only, never expose to client
 
-   # AI
-   NEXT_PUBLIC_GEMINI_API_KEY=your_gemini_key
+   # AI (server-only)
+   GEMINI_API_KEY=your_gemini_key
 
    # Fitbit OAuth
    FITBIT_CLIENT_ID=your_fitbit_client_id
    FITBIT_CLIENT_SECRET=your_fitbit_client_secret
    NEXT_PUBLIC_FITBIT_CLIENT_ID=your_fitbit_client_id
 
-   # Optional (have free-tier fallbacks)
-   NEXT_PUBLIC_SPOONACULAR_KEY=your_spoonacular_key
-   NEXT_PUBLIC_RAPIDAPI_KEY=your_rapidapi_key
-   NEXT_PUBLIC_NEWSAPI_KEY=your_newsapi_key
+   # Optional, server-only (the app has fallbacks without them)
+   SPOONACULAR_API_KEY=your_spoonacular_key
+   RAPIDAPI_KEY=your_rapidapi_key
+   NEWSAPI_KEY=your_newsapi_key
    ```
+
+   Third-party keys are read only by the API routes in `src/app/api/` (`/api/ai/*`, `/api/recipes/*`, `/api/exercises`, `/api/articles`), which require a logged-in user. They are never bundled into the browser.
 
 3. Run the database migrations:
    ```bash

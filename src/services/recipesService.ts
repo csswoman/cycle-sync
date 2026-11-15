@@ -1,7 +1,6 @@
 import { Recipe, RecipeDetails, RecipeFilters, APIQuotaStatus, Ingredient } from '@/types/recipes';
 
-const SPOONACULAR_KEY = process.env.NEXT_PUBLIC_SPOONACULAR_KEY || '';
-const SPOONACULAR_BASE_URL = 'https://api.spoonacular.com';
+// Requests go through our API routes, which add the Spoonacular key on the server.
 const DAILY_QUOTA_LIMIT = 150; // Free tier limit
 
 // LocalStorage key for tracking daily usage
@@ -93,10 +92,7 @@ export const searchRecipes = async (filters: RecipeFilters = {}): Promise<Recipe
         } = filters;
 
         const params = new URLSearchParams({
-            apiKey: SPOONACULAR_KEY,
-            number: number.toString(),
-            addRecipeInformation: 'true',
-            fillIngredients: 'true'
+            number: number.toString()
         });
 
         if (query) params.append('query', query);
@@ -106,7 +102,7 @@ export const searchRecipes = async (filters: RecipeFilters = {}): Promise<Recipe
         if (type) params.append('type', type);
         if (maxReadyTime) params.append('maxReadyTime', maxReadyTime.toString());
 
-        const response = await fetch(`${SPOONACULAR_BASE_URL}/recipes/complexSearch?${params}`);
+        const response = await fetch(`/api/recipes/search?${params}`);
 
         if (!response.ok) {
             if (response.status === 402) {
@@ -152,12 +148,7 @@ export const getRecipeById = async (id: number): Promise<RecipeDetails | null> =
     }
 
     try {
-        const params = new URLSearchParams({
-            apiKey: SPOONACULAR_KEY,
-            includeNutrition: 'true'
-        });
-
-        const response = await fetch(`${SPOONACULAR_BASE_URL}/recipes/${id}/information?${params}`);
+        const response = await fetch(`/api/recipes/${id}`);
 
         if (!response.ok) {
             if (response.status === 402) {

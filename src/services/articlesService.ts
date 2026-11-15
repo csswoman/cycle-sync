@@ -1,7 +1,6 @@
 import { Article, ArticleFilters } from '@/types/articles';
 
-const NEWSAPI_KEY = process.env.NEXT_PUBLIC_NEWSAPI_KEY || '';
-const NEWSAPI_BASE_URL = 'https://newsapi.org/v2';
+// Requests go through /api/articles, which adds the NewsAPI key on the server.
 
 // Topic to search query mapping
 const TOPIC_QUERIES = {
@@ -25,11 +24,9 @@ export const fetchHealthArticles = async (
             q: query,
             language,
             sortBy: 'publishedAt',
-            pageSize: '10',
-            apiKey: NEWSAPI_KEY
         });
 
-        const response = await fetch(`${NEWSAPI_BASE_URL}/everything?${params}`);
+        const response = await fetch(`/api/articles?${params}`);
 
         if (!response.ok) {
             throw new Error(`NewsAPI error: ${response.status}`);
@@ -70,11 +67,9 @@ export const searchArticles = async (
             q: query,
             language,
             sortBy: 'relevancy',
-            pageSize: '10',
-            apiKey: NEWSAPI_KEY
         });
 
-        const response = await fetch(`${NEWSAPI_BASE_URL}/everything?${params}`);
+        const response = await fetch(`/api/articles?${params}`);
         const data = await response.json();
 
         if (data.status === 'error') {
