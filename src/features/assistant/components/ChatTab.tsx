@@ -48,6 +48,8 @@ export const ChatTab: React.FC<ChatTabProps> = ({
     t.suggestMeals,
     t.suggestCramps,
     t.suggestWorkout,
+    t.suggestLabs,
+    t.suggestCycles,
   ];
 
   const handleSelectSuggestion = (suggestion: string) => {
