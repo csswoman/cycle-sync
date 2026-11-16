@@ -19,6 +19,8 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         const saved = localStorage.getItem('language');
         if (saved === 'en' || saved === 'es') {
             setLanguageState(saved);
+        } else if (navigator.language?.toLowerCase().startsWith('es')) {
+            setLanguageState('es');
         }
         setMounted(true);
     }, []);

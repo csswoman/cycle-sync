@@ -2,20 +2,18 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { estimateCycle, parseLocalDate } from '@/lib/cycle/cycleEngine';
 import { CyclePhase, type CycleInfo, type CycleConfig, type Period } from '@/types';
 
-/** Parses 'YYYY-MM-DD' as a local date (new Date('YYYY-MM-DD') is UTC and shifts the day west of UTC). */
-function parseLocalDate(value: string): Date {
-  const [y, m, d] = value.slice(0, 10).split('-').map(Number);
-  return new Date(y, m - 1, d);
-}
-
 export function computeCycleInfo(config: CycleConfig, periods: Period[], now: Date = new Date()): CycleInfo {
-  const cycleLength = config.cycle_length || 28;
+  const estimate = estimateCycle(periods, config.cycle_length);
+  const cycleLength = estimate.cycleLength;
 
   let lastPeriodStart: Date | null = null;
   if (periods.length > 0) {
-    lastPeriodStart = parseLocalDate(periods[0].start_date);
+    // periods may arrive in any order; the latest start is the reference
+    const latest = periods.map((p) => p.start_date.slice(0, 10)).sort().pop() as string;
+    lastPeriodStart = parseLocalDate(latest);
   } else if (config.last_period_start) {
     lastPeriodStart = parseLocalDate(config.last_period_start);
   }
@@ -28,23 +26,32 @@ export function computeCycleInfo(config: CycleConfig, periods: Period[], now: Da
   today.setHours(0, 0, 0, 0);
   lastPeriodStart.setHours(0, 0, 0, 0);
 
-  const diffMs = today.getTime() - lastPeriodStart.getTime();
-  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-  const cycleDay = (diffDays % cycleLength) + 1;
+  const diffDays = Math.floor((today.getTime() - lastPeriodStart.getTime()) / (1000 * 60 * 60 * 24));
+  const cycleDay = (((diffDays % cycleLength) + cycleLength) % cycleLength) + 1;
   const daysUntilNextPeriod = cycleLength - cycleDay + 1;
 
   let phase: CyclePhase;
-  if (cycleDay <= 5) {
+  if (cycleDay <= estimate.periodLength) {
     phase = CyclePhase.MENSTRUAL;
-  } else if (cycleDay <= Math.floor(cycleLength * 0.5) - 1) {
+  } else if (cycleDay < estimate.ovulationDay) {
     phase = CyclePhase.FOLLICULAR;
-  } else if (cycleDay <= Math.floor(cycleLength * 0.5) + 1) {
+  } else if (cycleDay <= estimate.ovulationDay + 1) {
     phase = CyclePhase.OVULATION;
   } else {
     phase = CyclePhase.LUTEAL;
   }
 
-  return { phase, cycleDay, daysUntilNextPeriod, cycleLength };
+  return {
+    phase,
+    cycleDay,
+    daysUntilNextPeriod,
+    cycleLength,
+    ovulationDay: estimate.ovulationDay,
+    fertileStartDay: estimate.fertileStartDay,
+    fertileEndDay: estimate.fertileEndDay,
+    irregular: estimate.irregular,
+    confidence: estimate.confidence,
+  };
 }
 
 export function useCycleInfo() {
@@ -58,7 +65,7 @@ export function useCycleInfo() {
 
       const [configRes, periodsRes] = await Promise.all([
         supabase.from('cycle_config').select('*').eq('user_id', user.id).single(),
-        supabase.from('periods').select('*').eq('user_id', user.id).order('start_date', { ascending: false }).limit(1),
+        supabase.from('periods').select('*').eq('user_id', user.id).order('start_date', { ascending: false }).limit(12),
       ]);
 
       const config: CycleConfig = configRes.data ?? {

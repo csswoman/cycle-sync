@@ -96,6 +96,40 @@ export interface Translations {
     addPeriod: string;
     periodStartDate: string;
     periodEndDate: string;
+    cycleLengthsTitle: string;
+    shortestCycle: string;
+    longestCycle: string;
+    averageShort: string;
+    cycleOfDays: string;
+    untilNextPeriod: string;
+    currentCycleDay: string;
+    forecastHormonalNote: string;
+    forecastFertilityTip: string;
+    previousMonth: string;
+    nextMonth: string;
+    legendNewDays: string;
+    legendSavedDays: string;
+    legendFertile: string;
+    averageCycleLabel: string;
+    daysUnit: string;
+    forecastTitle: string;
+    confidenceLabel: string;
+    confidenceHigh: string;
+    confidenceMedium: string;
+    confidenceLow: string;
+    nextPeriodLabel: string;
+    ovulationLabel: string;
+    fertileWindowLabel: string;
+    forecastIrregularNote: string;
+    forecastDisclaimer: string;
+    calendarHint: string;
+    noDaysSelected: string;
+    periodSingular: string;
+    periodPlural: string;
+    saveMarkedDays: string;
+    clearSelection: string;
+    noPeriodsYet: string;
+    deletePeriod: string;
     regularityStatus: string;
     regular: string;
     irregular: string;
@@ -278,6 +312,40 @@ export const translations: Record<Language, Translations> = {
         addPeriod: 'Add Period',
         periodStartDate: 'Start Date',
         periodEndDate: 'End Date',
+        cycleLengthsTitle: 'Days between periods',
+        shortestCycle: 'Shortest',
+        longestCycle: 'Longest',
+        averageShort: 'Average',
+        cycleOfDays: 'Cycle of',
+        untilNextPeriod: 'until',
+        currentCycleDay: 'Current cycle: day',
+        forecastHormonalNote: 'You use hormonal contraception, which usually prevents natural ovulation. Treat the ovulation and fertile dates as informational only.',
+        forecastFertilityTip: 'Your chances are highest on the two days before ovulation and on ovulation day.',
+        previousMonth: 'Previous month',
+        nextMonth: 'Next month',
+        legendNewDays: 'New days',
+        legendSavedDays: 'Saved',
+        legendFertile: 'Fertile window',
+        averageCycleLabel: 'Average cycle',
+        daysUnit: 'days',
+        forecastTitle: 'Your estimates',
+        confidenceLabel: 'Confidence',
+        confidenceHigh: 'High',
+        confidenceMedium: 'Medium',
+        confidenceLow: 'Low',
+        nextPeriodLabel: 'Next period',
+        ovulationLabel: 'Ovulation',
+        fertileWindowLabel: 'Fertile window',
+        forecastIrregularNote: 'Your cycles vary a lot, so these dates are less reliable.',
+        forecastDisclaimer: 'These are approximate estimates based on your history. They are not a contraceptive method or medical advice.',
+        calendarHint: 'Tap the first day of a period, then tap its last day to fill the range. Go back month by month to add your history.',
+        noDaysSelected: 'No days selected yet.',
+        periodSingular: 'period',
+        periodPlural: 'periods',
+        saveMarkedDays: 'Save marked days',
+        clearSelection: 'Clear selection',
+        noPeriodsYet: 'No periods logged yet.',
+        deletePeriod: 'Delete period',
         regularityStatus: 'Cycle Regularity',
         regular: 'Regular',
         irregular: 'Irregular',
@@ -459,6 +527,40 @@ export const translations: Record<Language, Translations> = {
         addPeriod: 'Agregar Periodo',
         periodStartDate: 'Fecha de Inicio',
         periodEndDate: 'Fecha de Fin',
+        cycleLengthsTitle: 'Días entre un período y otro',
+        shortestCycle: 'Más corto',
+        longestCycle: 'Más largo',
+        averageShort: 'Promedio',
+        cycleOfDays: 'Ciclo de',
+        untilNextPeriod: 'hasta',
+        currentCycleDay: 'Ciclo actual: día',
+        forecastHormonalNote: 'Usas anticoncepción hormonal, que normalmente impide la ovulación natural. Toma las fechas de ovulación y ventana fértil solo como referencia.',
+        forecastFertilityTip: 'Tus probabilidades son mayores los dos días antes de la ovulación y el día de la ovulación.',
+        previousMonth: 'Mes anterior',
+        nextMonth: 'Mes siguiente',
+        legendNewDays: 'Días nuevos',
+        legendSavedDays: 'Guardados',
+        legendFertile: 'Ventana fértil',
+        averageCycleLabel: 'Ciclo promedio',
+        daysUnit: 'días',
+        forecastTitle: 'Tus estimaciones',
+        confidenceLabel: 'Confianza',
+        confidenceHigh: 'Alta',
+        confidenceMedium: 'Media',
+        confidenceLow: 'Baja',
+        nextPeriodLabel: 'Próxima menstruación',
+        ovulationLabel: 'Ovulación',
+        fertileWindowLabel: 'Ventana fértil',
+        forecastIrregularNote: 'Tus ciclos varían bastante, así que estas fechas son menos confiables.',
+        forecastDisclaimer: 'Son estimaciones aproximadas basadas en tu historial. No sirven como método anticonceptivo ni como consejo médico.',
+        calendarHint: 'Toca el primer día de una regla y luego el último para marcar el rango. Retrocede mes a mes para agregar tu historial.',
+        noDaysSelected: 'Aún no has marcado días.',
+        periodSingular: 'regla',
+        periodPlural: 'reglas',
+        saveMarkedDays: 'Guardar días marcados',
+        clearSelection: 'Limpiar selección',
+        noPeriodsYet: 'Aún no hay períodos registrados.',
+        deletePeriod: 'Eliminar período',
         regularityStatus: 'Regularidad del Ciclo',
         regular: 'Regular',
         irregular: 'Irregular',

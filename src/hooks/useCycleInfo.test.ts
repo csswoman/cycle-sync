@@ -55,10 +55,18 @@ describe('computeCycleInfo', () => {
   it('scales ovulation with custom cycle length', () => {
     const c = config({ cycle_length: 32 });
     const phaseOn = (n: number) => computeCycleInfo(c, [period('2025-01-01')], day(n)).phase;
-    expect(phaseOn(15)).toBe(CyclePhase.FOLLICULAR);
-    expect(phaseOn(16)).toBe(CyclePhase.OVULATION);
-    expect(phaseOn(17)).toBe(CyclePhase.OVULATION);
-    expect(phaseOn(18)).toBe(CyclePhase.LUTEAL);
+    expect(phaseOn(17)).toBe(CyclePhase.FOLLICULAR);
+    expect(phaseOn(18)).toBe(CyclePhase.OVULATION);
+    expect(phaseOn(19)).toBe(CyclePhase.OVULATION);
+    expect(phaseOn(20)).toBe(CyclePhase.LUTEAL);
+  });
+
+  it('learns the cycle length from logged history', () => {
+    const periods = [period('2025-03-05'), period('2025-02-05'), period('2025-01-01')]; // 35 and 28 -> ~32
+    const info = computeCycleInfo(config(), periods, new Date(2025, 2, 6, 12));
+    expect(info.cycleLength).toBe(32);
+    expect(info.cycleDay).toBe(2);
+    expect(info.ovulationDay).toBe(18);
   });
 
   it('falls back to 28 when cycle_length is 0', () => {

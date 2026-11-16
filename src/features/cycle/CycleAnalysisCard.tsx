@@ -1,0 +1,186 @@
+import React, { useMemo, useState } from 'react';
+import { useLanguage } from '@/i18n/LanguageContext';
+import type { PeriodInput } from '@/lib/cycle/cycleEngine';
+import {
+    analyzeCycles, MAX_REGULAR_DIFFERENCE, NORMAL_CYCLE_MAX, NORMAL_CYCLE_MIN, NORMAL_PERIOD_MAX, NORMAL_PERIOD_MIN,
+    type Rating,
+} from '@/lib/cycle/cycleAnalysis';
+
+const copy = {
+    es: {
+        title: 'Análisis del ciclo',
+        lastCycle: 'Último ciclo', lastPeriod: 'Último período', nextPeriod: 'Próxima menstruación',
+        days: 'días',
+        inDays: (n: number) => `en ${n} días`, today: 'hoy', late: (n: number) => `${n} ${n === 1 ? 'día' : 'días'} de retraso`,
+        cycleLength: 'Duración del ciclo', periodLength: 'Duración del período',
+        normal: 'Normal', abnormal: 'Anormal', avg: 'PROM.',
+        summary: (mean: number, n: number) => `Tus ciclos duraron una media de ${mean} días durante los últimos ${n} ciclos.`,
+        summaryAbnormal: ' Es un patrón inusual. Si continúa, considera consultar a un profesional sanitario.',
+        variation: 'Variación', variationHelp: 'Comparación de los últimos 2 ciclos',
+        periodSummary: (mean: number, n: number) => `Tus períodos duraron una media de ${mean} días durante los últimos ${n} períodos.`,
+        noPeriodEnd: 'Marca el último día de cada regla para ver cuánto dura.',
+        aboutCycle: 'Sobre la duración del ciclo',
+        aboutCycleBody: [
+            'Tu ciclo se cuenta desde el primer día de un período hasta el primer día del siguiente.',
+            `Una duración del ciclo de ${NORMAL_CYCLE_MIN} a ${NORMAL_CYCLE_MAX} días es normal. Una diferencia de hasta ${MAX_REGULAR_DIFFERENCE} días entre tu ciclo más corto y el más largo sigue siendo regular.`,
+            'Cuantos más ciclos registres, más precisa será tu media.',
+        ],
+        aboutPeriod: 'Sobre la duración del período',
+        aboutPeriodBody: [`Un período dura normalmente entre ${NORMAL_PERIOD_MIN} y ${NORMAL_PERIOD_MAX} días.`],
+        ok: 'Entendido', info: 'Información', notEnough: 'Registra al menos dos períodos para ver tus ciclos.',
+    },
+    en: {
+        title: 'Cycle analysis',
+        lastCycle: 'Last cycle', lastPeriod: 'Last period', nextPeriod: 'Next period',
+        days: 'days',
+        inDays: (n: number) => `in ${n} days`, today: 'today', late: (n: number) => `${n} ${n === 1 ? 'day' : 'days'} late`,
+        cycleLength: 'Cycle length', periodLength: 'Period length',
+        normal: 'Normal', abnormal: 'Abnormal', avg: 'AVG',
+        summary: (mean: number, n: number) => `Your cycles averaged ${mean} days over the last ${n} cycles.`,
+        summaryAbnormal: ' This is an unusual pattern. If it continues, consider talking to a healthcare professional.',
+        variation: 'Variation', variationHelp: 'Comparison of the last 2 cycles',
+        periodSummary: (mean: number, n: number) => `Your periods averaged ${mean} days over the last ${n} periods.`,
+        noPeriodEnd: 'Mark the last day of each period to see how long it lasts.',
+        aboutCycle: 'About cycle length',
+        aboutCycleBody: [
+            'Your cycle is counted from the first day of one period to the first day of the next.',
+            `A cycle length of ${NORMAL_CYCLE_MIN} to ${NORMAL_CYCLE_MAX} days is normal. A difference of up to ${MAX_REGULAR_DIFFERENCE} days between your shortest and longest cycle is still regular.`,
+            'The more cycles you log, the more accurate your average will be.',
+        ],
+        aboutPeriod: 'About period length',
+        aboutPeriodBody: [`A period usually lasts between ${NORMAL_PERIOD_MIN} and ${NORMAL_PERIOD_MAX} days.`],
+        ok: 'Got it', info: 'Information', notEnough: 'Log at least two periods to see your cycles.',
+    },
+};
+
+const RatingBadge: React.FC<{ rating: Rating; label: string }> = ({ rating, label }) => (
+    <span className={`inline-flex items-center gap-1.5 text-sm font-semibold ${rating === 'normal' ? 'text-green-500' : 'text-orange-500'}`}>
+        <span className="material-symbols-outlined text-[18px]">{rating === 'normal' ? 'check_circle' : 'error'}</span>
+        {label}
+    </span>
+);
+
+const Bars: React.FC<{ values: number[]; mean: number; avgLabel: string; color: string }> = ({ values, mean, avgLabel, color }) => {
+    const top = Math.max(...values, 1);
+    return (
+        <div className="relative pt-5">
+            <div className="flex items-end justify-between gap-2 h-28 relative">
+                <div
+                    className="absolute left-0 right-0 border-t-2 border-foreground/70 pointer-events-none"
+                    style={{ bottom: `${(mean / top) * 100}%` }}
+                >
+                    <span className="absolute right-0 -top-5 text-[11px] font-bold text-foreground/80">{avgLabel}</span>
+                </div>
+                {values.map((v, i) => (
+                    <div key={i} className="flex-1 flex flex-col items-center justify-end h-full">
+                        <div className={`w-full max-w-[44px] rounded-lg ${color}`} style={{ height: `${Math.max((v / top) * 100, 6)}%` }} />
+                    </div>
+                ))}
+            </div>
+            <div className="flex justify-between gap-2 mt-2">
+                {values.map((v, i) => (
+                    <span key={i} className="flex-1 text-center text-xs font-bold text-foreground">{v}</span>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+const Stat: React.FC<{ label: string; value: React.ReactNode; unit?: string }> = ({ label, value, unit }) => (
+    <div className="bg-secondary/40 rounded-xl p-4 min-w-[130px] flex-1">
+        <p className="text-xs font-semibold text-muted-foreground">{label}</p>
+        <p className="text-foreground font-black text-2xl mt-2">{value} {unit && <span className="text-sm font-medium">{unit}</span>}</p>
+    </div>
+);
+
+interface Props { periods: PeriodInput[] }
+
+export const CycleAnalysisCard: React.FC<Props> = ({ periods }) => {
+    const { language } = useLanguage();
+    const c = copy[language === 'es' ? 'es' : 'en'];
+    const a = useMemo(() => analyzeCycles(periods), [periods]);
+    const [modal, setModal] = useState<'cycle' | 'period' | null>(null);
+
+    const next = a.daysToNextPeriod;
+    const nextText = next === null ? '-' : next > 0 ? c.inDays(next) : next === 0 ? c.today : c.late(-next);
+
+    return (
+        <div className="flex flex-col gap-4">
+            <h3 className="text-foreground font-bold text-lg px-2">{c.title}</h3>
+            <div className="flex gap-3 overflow-x-auto pb-1">
+                <Stat label={c.lastCycle} value={a.lastCycle ?? '-'} unit={a.lastCycle ? c.days : undefined} />
+                <Stat label={c.lastPeriod} value={a.lastPeriodLength ?? '-'} unit={a.lastPeriodLength ? c.days : undefined} />
+                <Stat label={c.nextPeriod} value={<span className="text-xl">{nextText}</span>} />
+            </div>
+
+            <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                    <h4 className="font-bold text-foreground">{c.cycleLength}</h4>
+                    <button onClick={() => setModal('cycle')} aria-label={c.info} className="text-muted-foreground hover:text-foreground">
+                        <span className="material-symbols-outlined">info</span>
+                    </button>
+                </div>
+                {a.cycles.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">{c.notEnough}</p>
+                ) : (
+                    <>
+                        <div>
+                            <p className="text-foreground font-black text-4xl">
+                                {a.min === a.max ? a.min : `${a.min}-${a.max}`} <span className="text-lg font-semibold">{c.days}</span>
+                            </p>
+                            <RatingBadge rating={a.cycleRating} label={a.cycleRating === 'normal' ? c.normal : c.abnormal} />
+                        </div>
+                        <Bars values={a.cycles} mean={a.mean} avgLabel={c.avg} color="bg-indigo-300/60" />
+                        <p className="text-sm text-muted-foreground">
+                            {c.summary(a.mean, a.cycles.length)}{a.cycleRating === 'abnormal' && c.summaryAbnormal}
+                        </p>
+                        {a.variation !== null && (
+                            <div className="flex items-center justify-between border-t border-border pt-4">
+                                <div>
+                                    <p className="font-semibold text-foreground">{c.variation}</p>
+                                    <p className="text-xs text-muted-foreground">{c.variationHelp}</p>
+                                </div>
+                                <p className="font-bold text-foreground">{a.variation > 0 ? '+' : ''}{a.variation} {c.days}</p>
+                            </div>
+                        )}
+                    </>
+                )}
+            </div>
+
+            <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col gap-4">
+                <div className="flex items-center justify-between">
+                    <h4 className="font-bold text-foreground">{c.periodLength}</h4>
+                    <button onClick={() => setModal('period')} aria-label={c.info} className="text-muted-foreground hover:text-foreground">
+                        <span className="material-symbols-outlined">info</span>
+                    </button>
+                </div>
+                {a.periodLengths.length === 0 ? (
+                    <p className="text-sm text-muted-foreground">{c.noPeriodEnd}</p>
+                ) : (
+                    <>
+                        <div>
+                            <p className="text-foreground font-black text-4xl">{a.lastPeriodLength} <span className="text-lg font-semibold">{c.days}</span></p>
+                            <RatingBadge rating={a.periodRating} label={a.periodRating === 'normal' ? c.normal : c.abnormal} />
+                        </div>
+                        <Bars values={a.periodLengths} mean={a.periodMean} avgLabel={c.avg} color="bg-pink-300/60" />
+                        <p className="text-sm text-muted-foreground">{c.periodSummary(a.periodMean, a.periodLengths.length)}</p>
+                    </>
+                )}
+            </div>
+
+            {modal && (
+                <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-4" onClick={() => setModal(null)}>
+                    <div className="bg-card rounded-2xl p-6 w-full max-w-md flex flex-col gap-4" onClick={(e) => e.stopPropagation()}>
+                        <h4 className="text-xl font-black text-foreground">{modal === 'cycle' ? c.aboutCycle : c.aboutPeriod}</h4>
+                        {(modal === 'cycle' ? c.aboutCycleBody : c.aboutPeriodBody).map((p, i) => (
+                            <p key={i} className="text-sm text-muted-foreground leading-relaxed">{p}</p>
+                        ))}
+                        <button onClick={() => setModal(null)} className="w-full h-11 rounded-xl bg-primary text-primary-foreground font-bold">{c.ok}</button>
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default CycleAnalysisCard;

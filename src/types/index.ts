@@ -67,6 +67,11 @@ export interface CycleInfo {
   cycleDay: number;
   daysUntilNextPeriod: number;
   cycleLength: number;
+  ovulationDay?: number;
+  fertileStartDay?: number;
+  fertileEndDay?: number;
+  irregular?: boolean;
+  confidence?: 'low' | 'medium' | 'high';
 }
 
 // ── Daily Log ──────────────────────────────
