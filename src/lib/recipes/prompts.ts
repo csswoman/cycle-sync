@@ -29,12 +29,18 @@ export function buildGeneratePrompt(opts: {
   dietary: string[];
   language: RecipeLanguage;
   existingTitles: string[];
+  /** Foods the user enjoys: favor them. */
+  likes?: string[];
+  /** Foods the user dislikes: never use them. */
+  avoid?: string[];
 }): string {
-  const { ingredients, phase, dietary, language, existingTitles } = opts;
+  const { ingredients, phase, dietary, language, existingTitles, likes = [], avoid = [] } = opts;
   return `You are a nutrition expert specialized in cycle-synced eating and PMOS-friendly food.
 Create 3 different recipes using these ingredients (you may add common pantry items): ${ingredients.join(', ')}.
 Current cycle phase: ${phase}. ${dietary.length ? `Dietary restrictions: ${dietary.join(', ')}.` : ''}
 Prefer low glycemic index and anti-inflammatory ingredients.
+${avoid.length ? `The user is a picky eater and dislikes: ${avoid.join(', ')}. Do NOT use these ingredients or cooking styles in any recipe, not even as a garnish, and do not suggest them as a substitute.` : ''}
+${likes.length ? `The user enjoys: ${likes.join(', ')}. Use them where they fit. If one is a traditional dish (arepa, tacos, empanadas...), make a nutrition-upgraded version: thinner or smaller base, more protein and fiber, baked or griddled instead of fried, and mention the portion in the description.` : ''}
 Write everything in ${LANGUAGE_NAME[language]}, with natural dish names a native speaker would use.
 Tags: pick only from this list when they apply: ${TAGS[language]}.
 ${existingTitles.length ? `These recipes already exist, do NOT create them or close variations of them: ${existingTitles.slice(0, 300).join('; ')}.` : ''}

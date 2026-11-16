@@ -117,6 +117,10 @@ export async function generateRecipes(params: {
     phase: string;
     dietary: string[];
     language: RecipeLanguage;
+    /** Foods the user enjoys (names, in the recipe language). */
+    likes?: string[];
+    /** Foods the user dislikes (names, in the recipe language). */
+    avoid?: string[];
 }): Promise<GenerateResult> {
     const response = await fetch('/api/recipes/generate', {
         method: 'POST',

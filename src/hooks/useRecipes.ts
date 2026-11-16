@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { LibraryRecipe, NewRecipe } from '@/types/recipes';
+import { avoidedIn, likedIn, type FoodPreferences } from '@/lib/nutrition/foodPreferences';
 import {
     listLibrary,
     saveUserState,
@@ -15,13 +16,17 @@ export interface RecipeFilters {
     favoritesOnly: boolean;
     mineOnly: boolean;
     tags: string[];
+    /** Hide recipes that contain a food the user avoids. */
+    skipAvoided: boolean;
+    /** Only recipes that contain at least one food the user likes. */
+    withLiked: boolean;
 }
 
-export const EMPTY_RECIPE_FILTERS: RecipeFilters = { text: '', favoritesOnly: false, mineOnly: false, tags: [] };
+export const EMPTY_RECIPE_FILTERS: RecipeFilters = { text: '', favoritesOnly: false, mineOnly: false, tags: [], skipAvoided: false, withLiked: false };
 
 const allTagsOf = (r: LibraryRecipe) => [...r.tags, ...r.myTags];
 
-export function useRecipes() {
+export function useRecipes(foods: Pick<FoodPreferences, 'likes' | 'avoid'> = { likes: [], avoid: [] }) {
     const [recipes, setRecipes] = useState<LibraryRecipe[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -79,11 +84,14 @@ export function useRecipes() {
         [recipes]
     );
 
+    const { likes, avoid } = foods;
     const filtered = useMemo(() => {
         const text = filters.text.trim().toLowerCase();
         return recipes.filter((r) => {
             if (filters.favoritesOnly && !r.isFavorite) return false;
             if (filters.mineOnly && r.ownerId === null) return false;
+            if (filters.skipAvoided && avoidedIn(r, avoid).length > 0) return false;
+            if (filters.withLiked && likedIn(r, likes).length === 0) return false;
             if (filters.tags.length > 0) {
                 const tags = allTagsOf(r);
                 if (!filters.tags.every((t) => tags.includes(t))) return false;
@@ -94,7 +102,7 @@ export function useRecipes() {
             }
             return true;
         });
-    }, [recipes, filters]);
+    }, [recipes, filters, likes, avoid]);
 
     return {
         recipes,

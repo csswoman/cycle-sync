@@ -27,6 +27,10 @@ export async function POST(request: Request) {
     .map((i: unknown) => clean(i, 40))
     .filter(Boolean)
     .slice(0, 10);
+  const names = (v: unknown): string[] =>
+    (Array.isArray(v) ? v : []).map((i: unknown) => clean(i, 40)).filter(Boolean).slice(0, 40);
+  const likes = names(body?.likes);
+  const avoid = names(body?.avoid);
   const phase = clean(body?.phase, 30) || 'Follicular';
 
   if (ingredients.length === 0) {
@@ -36,7 +40,7 @@ export async function POST(request: Request) {
   try {
     const db = createAdminClient();
     const existingTitles = await listCatalogTitles(db, language);
-    const text = await generateJson(buildGeneratePrompt({ ingredients, phase, dietary, language, existingTitles }));
+    const text = await generateJson(buildGeneratePrompt({ ingredients, phase, dietary, language, existingTitles, likes, avoid }));
     const recipes = parseRecipesJson(text, language);
     if (recipes.length === 0) {
       return NextResponse.json({ error: 'The AI did not return valid recipes. Try again.' }, { status: 502 });

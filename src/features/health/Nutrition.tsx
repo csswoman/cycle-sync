@@ -3,6 +3,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useRecipes, EMPTY_RECIPE_FILTERS } from '@/hooks/useRecipes';
 import { useNutritionAI } from '@/hooks/useNutritionAI';
+import { useFoodPreferences } from '@/hooks/useFoodPreferences';
+import { entriesToNames } from '@/lib/nutrition/foodPreferences';
 import { useCycleInfo } from '@/hooks/useCycleInfo';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { generateRecipes, suggestedTags, type GenerateResult } from '@/services/recipesService';
@@ -11,12 +13,14 @@ import { RecipeDetailModal } from './components/RecipeDetailModal';
 import { RecipeForm } from './components/RecipeForm';
 import { PlateBuilder } from './components/PlateBuilder';
 import { MacroWaterCalculator } from './components/MacroWaterCalculator';
+import { FoodPreferencesPanel } from './components/FoodPreferencesPanel';
 import { Icon } from '@/components/ui/Icon';
 
-type ActiveTab = 'plate' | 'calculator' | 'recipes' | 'analyze' | 'generate';
+type ActiveTab = 'plate' | 'calculator' | 'tastes' | 'recipes' | 'analyze' | 'generate';
 
 const Nutrition: React.FC = () => {
-  const library = useRecipes();
+  const foodPrefs = useFoodPreferences();
+  const library = useRecipes(foodPrefs.prefs);
   const { analysis, analyzePlate } = useNutritionAI();
   const { cycleInfo } = useCycleInfo();
   const { language } = useLanguage();
@@ -63,6 +67,7 @@ const Nutrition: React.FC = () => {
   const [dietaryPrefs, setDietaryPrefs] = useState<string[]>([]);
 
   const phase = cycleInfo?.phase ?? 'Follicular';
+  const { likes, avoid } = foodPrefs.prefs;
 
   const openRecipe = library.recipes.find((r) => r.id === openRecipeId) ?? null;
   const suggestions = suggestedTags(language);
@@ -101,10 +106,17 @@ const Nutrition: React.FC = () => {
   };
 
   const handleGenerate = async () => {
-    if (ingredients.length === 0) return;
+    if (ingredients.length === 0 && likes.length === 0) return;
     setGeneration({ loading: true, error: null, result: null });
     try {
-      const result = await generateRecipes({ ingredients, phase, dietary: dietaryPrefs, language });
+      const result = await generateRecipes({
+        ingredients: ingredients.length > 0 ? ingredients : entriesToNames(likes, language).slice(0, 20),
+        phase,
+        dietary: dietaryPrefs,
+        language,
+        likes: entriesToNames(likes, language),
+        avoid: entriesToNames(avoid, language),
+      });
       setGeneration({ loading: false, error: null, result });
       await library.refresh();
     } catch (err: any) {
@@ -115,6 +127,7 @@ const Nutrition: React.FC = () => {
   const tabs: { id: ActiveTab; label: string; icon: string }[] = [
     { id: 'plate', label: isEs ? 'Armar Plato & Alimentos' : 'Plate Builder', icon: 'bowl_food' },
     { id: 'calculator', label: isEs ? 'Metas según Peso' : 'Weight Targets', icon: 'barbell' },
+    { id: 'tastes', label: isEs ? 'Mis gustos' : 'My Tastes', icon: 'favorite' },
     { id: 'recipes', label: isEs ? 'Recetas' : 'Recipes', icon: 'restaurant' },
     { id: 'analyze', label: isEs ? 'Analizar Plato' : 'Analyze Plate', icon: 'photo_camera' },
     { id: 'generate', label: isEs ? 'Recetas IA' : 'AI Recipes', icon: 'auto_awesome' },
@@ -247,6 +260,27 @@ const Nutrition: React.FC = () => {
           </section>
         )}
 
+        {/* === MY TASTES TAB === */}
+        {activeTab === 'tastes' && (
+          <FoodPreferencesPanel
+            prefs={foodPrefs.prefs}
+            language={language}
+            onSetFood={foodPrefs.setFood}
+            onSetSun={foodPrefs.setSun}
+            onSetActivity={foodPrefs.setActivity}
+            onClearFoods={foodPrefs.clearFoods}
+            onSeeRecipes={() => {
+              library.setFilters({
+                ...EMPTY_RECIPE_FILTERS,
+                skipAvoided: avoid.length > 0,
+                withLiked: likes.length > 0,
+              });
+              setActiveTab('recipes');
+            }}
+            onGenerate={() => setActiveTab('generate')}
+          />
+        )}
+
         {/* === RECIPES TAB === */}
         {activeTab === 'recipes' && (
           <section className="w-full flex flex-col gap-6">
@@ -288,6 +322,36 @@ const Nutrition: React.FC = () => {
                 >
                   <span className="material-symbols-outlined text-[16px]">person</span> My recipes
                 </button>
+                {avoid.length > 0 && (
+                  <button
+                    onClick={() => library.setFilters({ ...library.filters, skipAvoided: !library.filters.skipAvoided })}
+                    aria-pressed={library.filters.skipAvoided}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1 transition-all ${
+                      library.filters.skipAvoided ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:bg-accent'
+                    }`}
+                  >
+                    <Icon name="close" size={14} weight="bold" /> {isEs ? 'Sin lo que evito' : 'Without what I avoid'}
+                  </button>
+                )}
+                {likes.length > 0 && (
+                  <button
+                    onClick={() => library.setFilters({ ...library.filters, withLiked: !library.filters.withLiked })}
+                    aria-pressed={library.filters.withLiked}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1 transition-all ${
+                      library.filters.withLiked ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:bg-accent'
+                    }`}
+                  >
+                    <Icon name="favorite" size={14} /> {isEs ? 'Con mis alimentos' : 'With foods I like'}
+                  </button>
+                )}
+                {likes.length === 0 && avoid.length === 0 && (
+                  <button
+                    onClick={() => setActiveTab('tastes')}
+                    className="px-3 py-1.5 rounded-lg text-sm font-medium bg-secondary text-muted-foreground hover:bg-accent"
+                  >
+                    {isEs ? 'Elegir mis gustos' : 'Set my tastes'}
+                  </button>
+                )}
                 {library.allTags.map((tag) => {
                   const active = library.filters.tags.includes(tag);
                   return (
@@ -308,7 +372,7 @@ const Nutrition: React.FC = () => {
                     </button>
                   );
                 })}
-                {(library.filters.favoritesOnly || library.filters.mineOnly || library.filters.tags.length > 0 || library.filters.text) && (
+                {(library.filters.favoritesOnly || library.filters.mineOnly || library.filters.skipAvoided || library.filters.withLiked || library.filters.tags.length > 0 || library.filters.text) && (
                   <button
                     onClick={() => library.setFilters(EMPTY_RECIPE_FILTERS)}
                     className="text-sm text-muted-foreground hover:text-foreground underline"
@@ -482,6 +546,32 @@ const Nutrition: React.FC = () => {
                 )}
               </div>
 
+              {/* Tastes */}
+              {(likes.length > 0 || avoid.length > 0) ? (
+                <div className="bg-secondary/40 rounded-xl p-4 border border-border/50 text-sm flex flex-col gap-1.5">
+                  {likes.length > 0 && (
+                    <p className="text-foreground/90">
+                      <strong>{isEs ? 'Favoritos: ' : 'Favorites: '}</strong>
+                      {entriesToNames(likes, language).join(', ')}
+                      {ingredients.length === 0 && (isEs ? ' (se usan si no escribes ingredientes)' : ' (used when you type no ingredients)')}
+                    </p>
+                  )}
+                  {avoid.length > 0 && (
+                    <p className="text-foreground/90">
+                      <strong>{isEs ? 'Se evitan: ' : 'Avoided: '}</strong>
+                      {entriesToNames(avoid, language).join(', ')}
+                    </p>
+                  )}
+                  <button onClick={() => setActiveTab('tastes')} className="self-start text-xs text-muted-foreground hover:text-foreground underline">
+                    {isEs ? 'Editar mis gustos' : 'Edit my tastes'}
+                  </button>
+                </div>
+              ) : (
+                <button onClick={() => setActiveTab('tastes')} className="self-start text-sm text-muted-foreground hover:text-foreground underline">
+                  {isEs ? 'Elige tus alimentos favoritos y los que evitas para que las recetas se ajusten a ti' : 'Pick your favorite foods and the ones you avoid so recipes fit you'}
+                </button>
+              )}
+
               {/* Dietary Preferences */}
               <div>
                 <label className="block text-sm font-bold mb-2 text-foreground">Dietary Preferences</label>
@@ -504,7 +594,7 @@ const Nutrition: React.FC = () => {
 
               <button
                 onClick={handleGenerate}
-                disabled={ingredients.length === 0 || generation.loading}
+                disabled={(ingredients.length === 0 && likes.length === 0) || generation.loading}
                 className="w-full bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-700 text-primary-foreground font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg shadow-primary/20"
               >
                 <span className="material-symbols-outlined">{generation.loading ? 'hourglass_empty' : 'auto_awesome'}</span>
