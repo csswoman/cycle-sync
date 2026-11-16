@@ -70,6 +70,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
           <div
             className="bg-center bg-no-repeat bg-cover rounded-full size-10 shadow-lg"
             style={{
+    { href: '/planner', label: t.weeklyPlanner, icon: 'calendar_month' },
               backgroundImage:
                 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuAocgLUy_bp-dtx4_UsakO7oMmO9SwWvxFL5p5ctYuNGWccWPUdzIe_LFZz1iBmXjm1jgPvUXGoUU-tq6F4mz663g9rbkRt69-9JgsbYCx5BBX6pgqaOezDy6JXTv7c5Jqcev7JcAB6HfRpKsCdHp7Ly5LsBOZM-u61nwmQTBpW4lBOuVopOg7Pz_gyRrO8PVV4oLjzUxa3RnNk_ECfTF0icJkyT_yfas5keNw9n6YLbX2mDRCY8g367Xn7eTiT9qrSRe0FRiUR4nc")',
             }}

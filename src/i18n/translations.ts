@@ -11,6 +11,7 @@ export interface Translations {
     pcosToolkit: string;
     routines: string;
     mealIdeas: string;
+    weeklyPlanner: string;
 
     habits: string;
 
@@ -193,6 +194,7 @@ export const translations: Record<Language, Translations> = {
         loginButton: 'Log In',
         connectionError: 'Could not reach Supabase. Check NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local, restart the dev server, and confirm the project is active in the Supabase dashboard.',
         dontHaveAccount: "Don't have an account?",
+        weeklyPlanner: 'Weekly Plan',
         signUp: 'Sign Up',
         dataSecurityInfo: 'Your data is encrypted and stored locally.',
         help: 'Help',
@@ -373,6 +375,7 @@ export const translations: Record<Language, Translations> = {
         forgotPasswordTitle: 'Restablecer contraseña',
         forgotPasswordDescription: 'Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña.',
         sendResetLink: 'Enviar enlace',
+        weeklyPlanner: 'Plan Semanal',
         resetLinkSent: 'Revisa tu correo',
         resetLinkSentDescription: 'Hemos enviado un enlace para restablecer tu contraseña. Haz clic en el enlace para crear una nueva.',
         resetPasswordTitle: 'Nueva contraseña',
