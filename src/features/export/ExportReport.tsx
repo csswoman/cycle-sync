@@ -4,9 +4,14 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useCycleInfo } from '@/hooks/useCycleInfo';
 import type { DailyLog, PMOSSymptomEntry, Habit, HabitLog } from '@/types';
+import { toISODate } from '@/lib/cycle/cycleEngine';
+import { usePMOSOverview } from '@/hooks/usePMOSOverview';
+import { buildPMOSReport } from './buildPMOSReport';
 
 export default function ExportReport() {
   const { cycleInfo, loading: cycleLoading } = useCycleInfo();
+  const { data: overview, loading: overviewLoading } = usePMOSOverview();
+  const [includeWellbeing, setIncludeWellbeing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [stats, setStats] = useState({
@@ -32,11 +37,11 @@ export default function ExportReport() {
 
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      const dateStr = thirtyDaysAgo.toISOString().split('T')[0];
+      const dateStr = toISODate(thirtyDaysAgo);
 
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      const weekStr = sevenDaysAgo.toISOString().split('T')[0];
+      const weekStr = toISODate(sevenDaysAgo);
 
       const [configRes, logsRes, pmosRes, habitsRes, habitLogsRes] = await Promise.all([
         supabase.from('cycle_config').select('*').eq('user_id', user.id).single(),
@@ -80,9 +85,11 @@ export default function ExportReport() {
         import('@/services/medicalReportService'),
         import('jspdf'),
       ]);
+      const pmos = overview ? await buildPMOSReport(overview, includeWellbeing) : undefined;
       generateMedicalReport(
         {
           ...reportData,
+          pmos,
           cycleInfo: cycleInfo ?? null,
           generatedAt: new Date().toLocaleDateString('en-US', {
             year: 'numeric',
@@ -97,7 +104,7 @@ export default function ExportReport() {
     }
   };
 
-  const isLoading = loading || cycleLoading;
+  const isLoading = loading || cycleLoading || overviewLoading;
 
   return (
     <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide">
@@ -177,6 +184,11 @@ export default function ExportReport() {
                 { icon: 'medical_services', label: 'PMOS symptom severity with clinical alerts', color: 'text-red-500' },
                 { icon: 'bar_chart', label: 'Top symptom frequency analysis', color: 'text-orange-500' },
                 { icon: 'check_circle', label: 'Habit completion rates (7 days)', color: 'text-green-500' },
+                { icon: 'calendar_month', label: 'Cycle lengths, days since last period and ovulation per cycle', color: 'text-primary' },
+                { icon: 'medication', label: "Medications, doctor's instructions and adherence (30 days)", color: 'text-primary' },
+                { icon: 'biotech', label: 'Latest labs, HOMA-IR, free androgen index and blood pressure', color: 'text-primary' },
+                { icon: 'spa', label: 'Hirsutism score (mFG) trend', color: 'text-primary' },
+                { icon: 'chat', label: 'Your pending questions for the doctor', color: 'text-primary' },
               ].map((item) => (
                 <div key={item.label} className="flex items-center gap-3">
                   <span className={`material-symbols-outlined text-[18px] ${item.color}`}>{item.icon}</span>
@@ -184,6 +196,14 @@ export default function ExportReport() {
                 </div>
               ))}
             </div>
+
+            <label className="flex items-start gap-3 text-sm text-foreground cursor-pointer bg-secondary/40 rounded-xl p-3">
+              <input type="checkbox" className="size-4 mt-0.5 accent-primary" checked={includeWellbeing} onChange={(e) => setIncludeWellbeing(e.target.checked)} />
+              <span>
+                Include my latest mood, anxiety and sleep check-in (PHQ-2 / GAD-2)
+                <span className="block text-xs text-muted-foreground">Off by default because it is sensitive. Progress photos and sexual activity are never included.</span>
+              </span>
+            </label>
 
             <button
               onClick={handleGenerate}

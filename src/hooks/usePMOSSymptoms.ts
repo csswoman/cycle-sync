@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { savePMOSEntryOffline, getUnsyncedPMOSEntries } from '@/lib/offlineHelpers';
 import { syncAll } from '@/hooks/useOfflineSync';
 import type { PMOSSymptomEntry } from '@/types';
+import { toISODate } from '@/lib/cycle/cycleEngine';
 
 const SYMPTOM_KEYS = ['acne', 'fatigue', 'hirsutism', 'hair_loss', 'mood_swings', 'bloating'] as const;
 type SymptomKey = (typeof SYMPTOM_KEYS)[number];
@@ -24,7 +25,7 @@ export function usePMOSSymptoms() {
     if (!user) { setLoading(false); return; }
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const fromDate = thirtyDaysAgo.toISOString().split('T')[0];
+    const fromDate = toISODate(thirtyDaysAgo);
     try {
       const { data, error } = await supabase
         .from('pcos_symptoms')
@@ -44,7 +45,7 @@ export function usePMOSSymptoms() {
       }
       all.sort((a, b) => a.date.localeCompare(b.date));
       setEntries(all);
-      const today = new Date().toISOString().split('T')[0];
+      const today = toISODate(new Date());
       const existing = all.find((e) => e.date === today);
       setTodayEntry(existing ?? { acne: 0, fatigue: 0, hirsutism: 0, hair_loss: 0, mood_swings: 0, bloating: 0 });
     } finally {
@@ -60,7 +61,7 @@ export function usePMOSSymptoms() {
       const { data: { session } } = await supabase.auth.getSession();
       const user = session?.user;
       if (!user) return;
-      const today = new Date().toISOString().split('T')[0];
+      const today = toISODate(new Date());
       await savePMOSEntryOffline({
         userId: user.id,
         date: today,

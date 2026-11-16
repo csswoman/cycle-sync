@@ -8,21 +8,19 @@ import { usePMOSSymptoms } from '@/hooks/usePMOSSymptoms';
 import { useCycleInfo } from '@/hooks/useCycleInfo';
 import { useLanguage } from '@/i18n/LanguageContext';
 import PMOSMemberTools from '@/features/health/pmos/PMOSMemberTools';
-import SymptomCheckin, { type SymptomSummary } from '@/features/health/pmos/SymptomCheckin';
 import { useConfiguredSymptoms } from '@/features/health/pmos/useConfiguredSymptoms';
 import { PMOS_SYMPTOM_CONFIGS } from '@/features/health/pmos/symptomFaqData';
 
 
 export const PMOSCare: React.FC = () => {
   const router = useRouter();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const lang: 'es' | 'en' = language === 'es' ? 'es' : 'en';
 
-  const { entries, loading, alerts } = usePMOSSymptoms();
+  const { entries, todayEntry, loading, alerts } = usePMOSSymptoms();
   const { cycleInfo } = useCycleInfo();
 
-  const [configuredSymptoms, setConfiguredSymptoms] = useConfiguredSymptoms();
-  const [summary, setSummary] = useState<SymptomSummary>({ total: 0, max: 18 });
+  const [configuredSymptoms] = useConfiguredSymptoms();
   const [articles, setArticles] = useState<Article[]>([]);
   const [articlesLoading, setArticlesLoading] = useState(true);
 
@@ -34,8 +32,8 @@ export const PMOSCare: React.FC = () => {
       .finally(() => setArticlesLoading(false));
   }, [language]);
 
-  const todayTotal = summary.total;
-  const maxTotal = summary.max;
+  const todayTotal = configuredSymptoms.reduce((sum, k) => sum + ((todayEntry as Record<string, number> | null)?.[k] ?? 0), 0);
+  const maxTotal = Math.max(configuredSymptoms.length, 1) * 3;
   const severityPct = Math.round((todayTotal / maxTotal) * 100);
   const getStatusDetails = (pct: number) => {
     if (pct === 0) {
@@ -159,7 +157,24 @@ export const PMOSCare: React.FC = () => {
           </div>
         )}
 
-        <SymptomCheckin lang={lang} configured={configuredSymptoms} setConfigured={setConfiguredSymptoms} onSummary={setSummary} />
+        <section className="bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+              <span className="material-symbols-outlined text-2xl">monitor_heart</span>
+            </div>
+            <div>
+              <h3 className="text-foreground text-lg font-bold">{t.pmosLogMovedTitle}</h3>
+              <p className="text-sm text-muted-foreground">{t.pmosLogMovedBody}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => router.push('/log?tab=symptoms')}
+            className="shrink-0 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-all"
+          >
+            {t.pmosLogMovedCta}
+          </button>
+        </section>
         {/* Member Tools (Period Forecast, Glucose, Lab Results) */}
         <PMOSMemberTools />
 
