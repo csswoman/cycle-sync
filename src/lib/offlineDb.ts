@@ -27,7 +27,7 @@ export interface OfflineHabitLog {
   updatedAt: string;
 }
 
-export interface OfflinePCOSEntry {
+export interface OfflinePMOSEntry {
   id?: number;
   remoteId?: string;
   userId: string;
@@ -42,16 +42,37 @@ export interface OfflinePCOSEntry {
   updatedAt: string;
 }
 
+export interface OfflineWorkoutLog {
+  id?: number;
+  /** Client-generated UUID, also the primary key of the remote row. */
+  remoteId: string;
+  userId: string;
+  date: string;
+  exercise: string;
+  sets: number | null;
+  weightKg: number | null;
+  durationMinutes: number | null;
+  feeling: number;
+  notes: string | null;
+  phase: string | null;
+  synced: boolean;
+  updatedAt: string;
+}
 const db = new Dexie('CycleSyncOffline') as Dexie & {
   dailyLogs: EntityTable<OfflineDailyLog, 'id'>;
   habitLogs: EntityTable<OfflineHabitLog, 'id'>;
-  pcosEntries: EntityTable<OfflinePCOSEntry, 'id'>;
+  pcosEntries: EntityTable<OfflinePMOSEntry, 'id'>;
+  workoutLogs: EntityTable<OfflineWorkoutLog, 'id'>;
 };
 
+// The 'pcosEntries' store name is kept from before the PMOS rename; changing it would orphan unsynced local data.
 db.version(1).stores({
   dailyLogs: '++id, [userId+date], synced, updatedAt',
   habitLogs: '++id, [userId+habitId+date], synced, updatedAt',
   pcosEntries: '++id, [userId+date], synced, updatedAt',
 });
 
+db.version(2).stores({
+  workoutLogs: '++id, &remoteId, [userId+date], synced, updatedAt',
+});
 export { db };

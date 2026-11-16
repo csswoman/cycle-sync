@@ -45,7 +45,7 @@ async function syncHabitLogs() {
   }
 }
 
-async function syncPCOSEntries() {
+async function syncPMOSEntries() {
   const pending = await db.pcosEntries.filter((r) => !r.synced).toArray();
   for (const entry of pending) {
     const { error } = await supabase.from('pcos_symptoms').upsert(
@@ -67,9 +67,32 @@ async function syncPCOSEntries() {
   }
 }
 
+async function syncWorkoutLogs() {
+  const pending = await db.workoutLogs.filter((r) => !r.synced).toArray();
+  for (const log of pending) {
+    const { error } = await supabase.from('workout_logs').upsert(
+      {
+        id: log.remoteId,
+        user_id: log.userId,
+        date: log.date,
+        exercise: log.exercise,
+        sets: log.sets,
+        weight_kg: log.weightKg,
+        duration_minutes: log.durationMinutes,
+        feeling: log.feeling,
+        notes: log.notes,
+        phase: log.phase,
+      },
+      { onConflict: 'id' },
+    );
+    if (!error && log.id != null) {
+      await db.workoutLogs.update(log.id, { synced: true });
+    }
+  }
+}
 export async function syncAll() {
   try {
-    await Promise.all([syncDailyLogs(), syncHabitLogs(), syncPCOSEntries()]);
+    await Promise.all([syncDailyLogs(), syncHabitLogs(), syncPMOSEntries(), syncWorkoutLogs()]);
   } catch {
     // Will retry on next online event
   }

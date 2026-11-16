@@ -57,7 +57,7 @@ export async function saveHabitLogOffline(data: {
   }
 }
 
-export async function savePCOSEntryOffline(data: {
+export async function savePMOSEntryOffline(data: {
   userId: string;
   date: string;
   acne: number;
@@ -87,13 +87,34 @@ export async function savePCOSEntryOffline(data: {
   }
 }
 
+export async function saveWorkoutLogOffline(data: {
+  userId: string;
+  date: string;
+  exercise: string;
+  sets: number | null;
+  weightKg: number | null;
+  durationMinutes: number | null;
+  feeling: number;
+  notes: string | null;
+  phase: string | null;
+}) {
+  const remoteId = crypto.randomUUID();
+  await db.workoutLogs.add({
+    ...data,
+    remoteId,
+    synced: false,
+    updatedAt: new Date().toISOString(),
+  });
+  return remoteId;
+}
 export async function getPendingSyncCount(): Promise<number> {
-  const [dailyCount, habitCount, pcosCount] = await Promise.all([
+  const [dailyCount, habitCount, pmosCount, workoutCount] = await Promise.all([
     db.dailyLogs.filter((r) => !r.synced).count(),
     db.habitLogs.filter((r) => !r.synced).count(),
     db.pcosEntries.filter((r) => !r.synced).count(),
+    db.workoutLogs.filter((r) => !r.synced).count(),
   ]);
-  return dailyCount + habitCount + pcosCount;
+  return dailyCount + habitCount + pmosCount + workoutCount;
 }
 
 /** Unsynced (or any local) records, used to overlay remote data while offline. */
@@ -107,7 +128,10 @@ export async function getUnsyncedHabitLogs(userId: string, fromDate: string) {
     .toArray();
 }
 
-export async function getUnsyncedPCOSEntries(userId: string, fromDate: string) {
+export async function getUnsyncedWorkoutLogs(userId: string) {
+  return db.workoutLogs.filter((l) => l.userId === userId && !l.synced).toArray();
+}
+export async function getUnsyncedPMOSEntries(userId: string, fromDate: string) {
   return db.pcosEntries
     .filter((e) => e.userId === userId && !e.synced && e.date >= fromDate)
     .toArray();

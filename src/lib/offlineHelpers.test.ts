@@ -4,10 +4,10 @@ import { db } from './offlineDb';
 import {
   saveDailyLogOffline,
   saveHabitLogOffline,
-  savePCOSEntryOffline,
+  savePMOSEntryOffline,
   getPendingSyncCount,
   getUnsyncedHabitLogs,
-  getUnsyncedPCOSEntries,
+  getUnsyncedPMOSEntries,
   getLocalDailyLog,
 } from './offlineHelpers';
 
@@ -49,9 +49,9 @@ describe('offline storage', () => {
   });
 
   it('filters unsynced records by user and date', async () => {
-    await savePCOSEntryOffline({ userId: 'u', date: '2025-01-01', acne: 1, fatigue: 1, hirsutism: 1, hairLoss: 1, moodSwings: 1, bloating: 1 });
-    await savePCOSEntryOffline({ userId: 'other', date: '2025-01-05', acne: 1, fatigue: 1, hirsutism: 1, hairLoss: 1, moodSwings: 1, bloating: 1 });
-    expect(await getUnsyncedPCOSEntries('u', '2025-01-02')).toHaveLength(0);
-    expect(await getUnsyncedPCOSEntries('u', '2025-01-01')).toHaveLength(1);
+    await savePMOSEntryOffline({ userId: 'u', date: '2025-01-01', acne: 1, fatigue: 1, hirsutism: 1, hairLoss: 1, moodSwings: 1, bloating: 1 });
+    await savePMOSEntryOffline({ userId: 'other', date: '2025-01-05', acne: 1, fatigue: 1, hirsutism: 1, hairLoss: 1, moodSwings: 1, bloating: 1 });
+    expect(await getUnsyncedPMOSEntries('u', '2025-01-02')).toHaveLength(0);
+    expect(await getUnsyncedPMOSEntries('u', '2025-01-01')).toHaveLength(1);
   });
 });
