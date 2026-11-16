@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { randomBytes } from 'crypto';
 import { createClient } from '@/lib/supabase/server';
+import { isValidTimezone } from '@/lib/health/records';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,7 +22,7 @@ export async function GET(request: Request) {
 
   const { data, error } = await supabase
     .from('health_webhook_tokens')
-    .select('secret, created_at')
+    .select('secret, created_at, timezone')
     .eq('user_id', user.id)
     .maybeSingle();
 
@@ -45,6 +46,7 @@ export async function GET(request: Request) {
     webhookUrl: `${basePath}?token=${data.secret}`,
     secretPrefix: `${data.secret.slice(0, 6)}…`,
     created_at: data.created_at,
+    timezone: data.timezone ?? null,
   });
 }
 
@@ -59,13 +61,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
+  const body = await request.json().catch(() => ({}));
   const secret = generateSecret();
+  const row: { user_id: string; secret: string; timezone?: string } = { user_id: user.id, secret };
+  if (isValidTimezone(body?.timezone)) row.timezone = body.timezone;
 
   const { error } = await supabase.from('health_webhook_tokens').upsert(
-    {
-      user_id: user.id,
-      secret,
-    },
+    row,
     { onConflict: 'user_id' }
   );
 
@@ -81,4 +83,27 @@ export async function POST(request: Request) {
     webhookUrl,
     message: 'Copia esta URL en HC Webhook. Si la rotas, vuelve a pegar la nueva.',
   });
+}
+
+/** PATCH: set the timezone used to assign webhook data to local days. */
+export async function PATCH(request: Request) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  const body = await request.json().catch(() => ({}));
+  if (!isValidTimezone(body?.timezone)) {
+    return NextResponse.json({ error: 'Invalid timezone' }, { status: 400 });
+  }
+  const { error } = await supabase
+    .from('health_webhook_tokens')
+    .update({ timezone: body.timezone })
+    .eq('user_id', user.id);
+  if (error) {
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+  return NextResponse.json({ ok: true });
 }

@@ -21,6 +21,14 @@ export default function HealthWebhookSettings() {
       setConfigured(!!data.configured);
       setWebhookUrl(data.webhookUrl ?? null);
       setSecretPrefix(data.secretPrefix ?? null);
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (data.configured && tz && data.timezone !== tz) {
+        void fetch('/api/health/token', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ timezone: tz }),
+        }).catch(() => {});
+      }
     } catch (e: any) {
       setMessage({ type: 'error', text: e.message });
     } finally {
@@ -36,7 +44,11 @@ export default function HealthWebhookSettings() {
     setGenerating(true);
     setMessage(null);
     try {
-      const res = await fetch('/api/health/token', { method: 'POST' });
+      const res = await fetch('/api/health/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ timezone: Intl.DateTimeFormat().resolvedOptions().timeZone }),
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Error');
       setWebhookUrl(data.webhookUrl);
