@@ -16,7 +16,7 @@ CycleSync is a premium, AI-powered health assistant designed for women's holisti
 - **🏋️ Adaptive Routines** — Exercise recommendations based on a readiness score, with GIFs from ExerciseDB.
 - **📰 Health Articles** — Curated health content via NewsAPI with static fallback.
 - **📄 PDF Reports** — Export comprehensive health summaries for medical consultations.
-- **⌚ Wearable Integration** — Fitbit OAuth and Samsung Health Connect webhook support.
+- **⌚ Wearable Integration** — Samsung Health Connect webhook support and manual entry of steps, sleep and activity.
 - **🔒 Privacy First** — Offline-first with IndexedDB local persistence; data syncs to the cloud only when ready.
 
 ---
@@ -58,11 +58,10 @@ src/
 │   │   └── settings/
 │   ├── (auth)/             # Public auth routes (login, register, reset)
 │   └── api/
-│       ├── auth/fitbit/    # Fitbit OAuth flow
 │       └── health/         # Samsung Health Connect webhook
 ├── features/               # Domain modules (UI + logic per feature)
 ├── hooks/                  # Business logic hooks (useCycleInfo, useGeminiAssistant…)
-├── services/               # External API clients (Gemini, Fitbit…)
+├── services/               # External API clients (Gemini…)
 ├── stores/                 # Zustand global state
 ├── lib/supabase/           # Browser / server / admin Supabase clients
 ├── types/                  # Global TypeScript types
@@ -91,7 +90,6 @@ All tables use **Row Level Security (RLS)** — users can only read and write th
 | `pcos_symptoms` | PMOS symptom severity (0–3) per day |
 | `habits` | Habit definitions (water, sleep, mindfulness, custom) |
 | `habit_logs` | Daily habit completion values |
-| `fitbit_tokens` | OAuth access/refresh tokens for Fitbit |
 | `health_data` | Steps, sleep, heart rate, calories from wearables |
 | `health_webhook_tokens` | Secret tokens for the Health Connect Android webhook |
 
@@ -104,7 +102,6 @@ Migrations live in `supabase/migrations/`.
 | Integration | Purpose | Quota |
 | --- | --- | --- |
 | Google Gemini 2.5 Flash | AI assistant + multimodal analysis | — |
-| Fitbit Web API | Steps, heart rate, sleep (OAuth 2.0) | — |
 | Samsung Health Connect | Android wearable webhook | — |
 | RapidAPI / ExerciseDB | Exercise library with GIFs | 10k req/month (free) |
 | NewsAPI | Health articles | 100 req/day (free) |
@@ -138,10 +135,6 @@ All integrations have **graceful fallbacks** to static data when quotas are exce
    # AI (server-only)
    GEMINI_API_KEY=your_gemini_key
 
-   # Fitbit OAuth
-   FITBIT_CLIENT_ID=your_fitbit_client_id
-   FITBIT_CLIENT_SECRET=your_fitbit_client_secret
-   NEXT_PUBLIC_FITBIT_CLIENT_ID=your_fitbit_client_id
 
    # Optional, server-only (the app has fallbacks without them)
    NEWSAPI_KEY=your_newsapi_key
