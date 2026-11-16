@@ -11,7 +11,7 @@ export default function PrivacyPage() {
           <ul className="list-disc pl-5 space-y-1">
             <li><strong>Account data:</strong> email address, name, and profile picture.</li>
             <li><strong>Health data:</strong> menstrual cycle logs, daily symptoms, mood, and PMOS tracking entries.</li>
-            <li><strong>Wearable data:</strong> when you connect Fitbit, we access steps, heart rate, sleep, and activity data through the Fitbit Web API.</li>
+            <li><strong>Wearable data:</strong> steps, heart rate, sleep, and activity data that you send from Health Connect or enter manually.</li>
           </ul>
 
           <h2 className="text-lg font-bold text-foreground mt-4">2. How We Use Your Data</h2>
@@ -25,14 +25,13 @@ export default function PrivacyPage() {
           <h2 className="text-lg font-bold text-foreground mt-4">3. Data Storage & Security</h2>
           <p>
             Your data is stored securely using Supabase with row-level security policies.
-            Fitbit OAuth tokens are encrypted and stored server-side. We do not sell, share,
+            Your webhook token is stored server-side. We do not sell, share,
             or transfer your personal health data to third parties.
           </p>
 
           <h2 className="text-lg font-bold text-foreground mt-4">4. Third-Party Services</h2>
           <p>CycleSync integrates with:</p>
           <ul className="list-disc pl-5 space-y-1">
-            <li><strong>Fitbit:</strong> to read health and activity data. Subject to <a href="https://www.fitbit.com/legal/privacy-policy" className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">Fitbit&apos;s Privacy Policy</a>.</li>
             <li><strong>Health Connect (optional):</strong> if you use the HC Webhook app on Android, you send the health metrics you choose to our servers via a private URL with a secret token. Data is stored in your CycleSync account only.</li>
             <li><strong>Supabase:</strong> for authentication and data storage.</li>
           </ul>
@@ -48,7 +47,7 @@ export default function PrivacyPage() {
 
           <h2 className="text-lg font-bold text-foreground mt-4">6. Data Retention</h2>
           <p>
-            Fitbit tokens are deleted immediately when you disconnect the integration.
+            Wearable and manual health entries are deleted when you delete your account.
             Your account data is retained until you request deletion.
           </p>
 

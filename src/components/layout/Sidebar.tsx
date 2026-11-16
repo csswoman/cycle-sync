@@ -64,19 +64,38 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
   const { user, authReady, setSignupPromptOpen } = useAppStore();
   const isGuest = authReady && !user;
 
-  const navItems = [
-    { href: '/dashboard', label: t.overview, icon: 'dashboard' },
-    { href: '/log', label: t.dailyLog, icon: 'edit_calendar' },
-    { href: '/period-history', label: t.periodHistory, icon: 'history' },
-    { href: '/routines', label: t.routines, icon: 'fitness_center' },
-    { href: '/nutrition', label: t.mealIdeas, icon: 'restaurant' },
-    { href: '/planner', label: t.weeklyPlanner, icon: 'calendar_month' },
-    { href: '/trends', label: t.trends, icon: 'trending_up' },
-    { href: '/pmos', label: t.pmosToolkit, icon: 'spa' },
-    { href: '/articles', label: t.articles, icon: 'menu_book' },
-    { href: '/habits', label: t.habits, icon: 'check_circle' },
-    { href: '/medications', label: t.medications, icon: 'medication' },
-    { href: '/export', label: t.exportReport, icon: 'download' },
+  const navGroups = [
+    {
+      label: t.navToday,
+      items: [
+        { href: '/dashboard', label: t.overview, icon: 'dashboard' },
+        { href: '/log', label: t.dailyLog, icon: 'edit_calendar' },
+      ],
+    },
+    {
+      label: t.navCycle,
+      items: [
+        { href: '/period-history', label: t.periodHistory, icon: 'history' },
+        { href: '/trends', label: t.trends, icon: 'trending_up' },
+      ],
+    },
+    {
+      label: t.navPlan,
+      items: [
+        { href: '/routines', label: t.routines, icon: 'fitness_center' },
+        { href: '/nutrition', label: t.mealIdeas, icon: 'restaurant' },
+        { href: '/planner', label: t.weeklyPlanner, icon: 'calendar_month' },
+      ],
+    },
+    {
+      label: t.navHealth,
+      items: [
+        { href: '/pmos', label: t.pmosToolkit, icon: 'spa' },
+        { href: '/habits', label: t.habits, icon: 'check_circle' },
+        { href: '/articles', label: t.articles, icon: 'menu_book' },
+        { href: '/export', label: t.exportReport, icon: 'download' },
+      ],
+    },
   ];
 
   return (
@@ -110,8 +129,13 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
 
       {/* Nav Menu with independent scroll */}
       <nav className="flex-1 overflow-y-auto min-h-0 flex flex-col gap-1 py-3 scrollbar-hide my-1 pr-1">
-        {navItems.map((item) => (
-          <NavItem key={item.href} {...item} locked={isGuest && !isGuestRoute(item.href)} onClose={onClose} />
+        {navGroups.map((group) => (
+          <div key={group.label} className="flex flex-col gap-1 mb-2">
+            <p className="px-4 pt-2 pb-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70">{group.label}</p>
+            {group.items.map((item) => (
+              <NavItem key={item.href} {...item} locked={isGuest && !isGuestRoute(item.href)} onClose={onClose} />
+            ))}
+          </div>
         ))}
       </nav>
 

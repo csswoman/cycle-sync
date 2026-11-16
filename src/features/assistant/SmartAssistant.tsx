@@ -179,7 +179,7 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ onClose }) => {
       <div className="flex-1 overflow-hidden p-3 sm:p-4 relative flex flex-col">
         {activeTab === AssistantTab.CHAT && (
           <ChatTab
-            messages={messages}
+            messages={messages.map((m) => (m.id === '1' ? { ...m, text: initialGreeting } : m))}
             inputText={inputText}
             setInputText={setInputText}
             isChatLoading={isChatLoading}

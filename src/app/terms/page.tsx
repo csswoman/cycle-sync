@@ -23,14 +23,14 @@ export default function TermsPage() {
           <h2 className="text-lg font-bold text-foreground mt-4">3. Health Disclaimer</h2>
           <p>
             CycleSync is not a medical device and is intended for informational and wellness
-            purposes only. Data from wearable devices (including Fitbit and Samsung Health) is
+            purposes only. Data from wearable devices (including Samsung Health) is
             not intended for the diagnosis, treatment, or prevention of any medical condition.
             Always consult a healthcare professional for medical advice.
           </p>
 
           <h2 className="text-lg font-bold text-foreground mt-4">4. Third-Party Integrations</h2>
           <p>
-            CycleSync may integrate with third-party services such as Fitbit. Your use of these
+            CycleSync may integrate with third-party services such as Health Connect. Your use of these
             integrations is subject to the respective third-party terms of service and privacy
             policies. CycleSync is not responsible for the availability or accuracy of
             third-party data.

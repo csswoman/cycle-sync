@@ -35,7 +35,7 @@ serwist.addEventListeners();
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const url = (event.notification.data as { url?: string } | undefined)?.url ?? '/medications';
+  const url = (event.notification.data as { url?: string } | undefined)?.url ?? '/log?tab=meds';
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
       for (const c of list) {

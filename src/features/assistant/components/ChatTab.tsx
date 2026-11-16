@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from 'react';
+import ReactMarkdown from 'react-markdown';
 import { ChatMessage } from '@/types';
 import { Icon } from '@/components/ui/Icon';
 import { useLanguage } from '@/i18n/LanguageContext';
@@ -11,6 +12,19 @@ interface ChatTabProps {
   onSend: () => void;
   onFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
+
+const markdownStyles = [
+  '[&_p]:my-0 [&_p+p]:mt-2 [&_p+ul]:mt-2 [&_p+ol]:mt-2',
+  '[&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5 [&_ul]:my-2 [&_ol]:my-2',
+  '[&_li]:my-1 [&_li]:pl-0.5 [&_li::marker]:text-primary',
+  '[&_strong]:font-semibold [&_strong]:text-foreground [&_em]:italic',
+  '[&_h1]:text-base [&_h2]:text-sm [&_h3]:text-sm [&_h1]:font-bold [&_h2]:font-bold [&_h3]:font-semibold [&_h1]:mt-3 [&_h2]:mt-3 [&_h3]:mt-2 [&_h1]:mb-1 [&_h2]:mb-1 [&_h3]:mb-1',
+  '[&_a]:text-primary [&_a]:underline [&_a]:underline-offset-2',
+  '[&_code]:bg-background/70 [&_code]:rounded [&_code]:px-1 [&_code]:py-0.5 [&_code]:text-[0.85em]',
+  '[&_blockquote]:border-l-2 [&_blockquote]:border-primary/40 [&_blockquote]:pl-3 [&_blockquote]:my-2 [&_blockquote]:text-muted-foreground',
+  '[&_hr]:my-3 [&_hr]:border-border/60',
+  '[&>*:first-child]:mt-0 [&>*:last-child]:mb-0',
+].join(' ');
 
 export const ChatTab: React.FC<ChatTabProps> = ({
   messages,
@@ -63,13 +77,27 @@ export const ChatTab: React.FC<ChatTabProps> = ({
                 </div>
               )}
               <div
-                className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-xs sm:text-sm leading-relaxed whitespace-pre-wrap transition-colors ${
+                className={`max-w-[85%] rounded-2xl px-3.5 py-2.5 text-xs sm:text-sm leading-relaxed transition-colors ${
+                  isUser ? 'whitespace-pre-wrap' : ''
+                } ${
                   isUser
                     ? 'bg-primary text-primary-foreground rounded-tr-xs shadow-sm shadow-primary/20'
-                    : 'bg-secondary/80 border border-border/60 text-foreground rounded-tl-xs shadow-xs'
+                    : `bg-secondary/80 border border-border/60 text-foreground rounded-tl-xs shadow-xs ${markdownStyles}`
                 }`}
               >
-                {msg.text}
+                {isUser ? (
+                  msg.text
+                ) : (
+                  <ReactMarkdown
+                    components={{
+                      a: ({ node: _node, ...props }) => (
+                        <a {...props} target="_blank" rel="noopener noreferrer" />
+                      ),
+                    }}
+                  >
+                    {msg.text}
+                  </ReactMarkdown>
+                )}
               </div>
             </div>
           );

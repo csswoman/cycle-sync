@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { supabase } from '@/lib/supabase';
 import { SettingsSection, FormField } from './components/SettingsComponents';
-import FitbitConnection from './FitbitConnection';
 import HealthWebhookSettings from './HealthWebhookSettings';
 
 const Settings: React.FC = () => {
@@ -173,10 +172,6 @@ const Settings: React.FC = () => {
                     <HealthWebhookSettings />
                 </SettingsSection>
 
-                {/* Fitbit (optional; Web API does not include Health Connect-only tiles) */}
-                <SettingsSection title={t.fitbitSection} icon="watch">
-                    <FitbitConnection />
-                </SettingsSection>
 
                 {/* Security Section */}
                 <SettingsSection title={t.securitySection} icon="shield">

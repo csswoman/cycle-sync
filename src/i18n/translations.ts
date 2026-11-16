@@ -96,6 +96,13 @@ export interface Translations {
     addPeriod: string;
     periodStartDate: string;
     periodEndDate: string;
+    navToday: string;
+    navCycle: string;
+    navPlan: string;
+    navHealth: string;
+    pmosLogMovedTitle: string;
+    pmosLogMovedBody: string;
+    pmosLogMovedCta: string;
     cycleLengthsTitle: string;
     shortestCycle: string;
     longestCycle: string;
@@ -159,21 +166,12 @@ export interface Translations {
     // Export
     exportReport: string;
 
-    // Fitbit
-    fitbitSection: string;
-    fitbitDescription: string;
-    fitbitConnect: string;
-    fitbitConnected: string;
-    fitbitDisconnect: string;
     fitbitSync: string;
     fitbitLoading: string;
     fitbitSteps: string;
     fitbitHeartRate: string;
     fitbitSleep: string;
     fitbitCalories: string;
-    fitbitSleepDetails: string;
-    fitbitError: string;
-    fitbitConnectionSuccess: string;
 
     // Health Connect webhook (Samsung / Galaxy Watch)
     healthWebhookSection: string;
@@ -194,6 +192,27 @@ export interface Translations {
     wearableHealthConnectHint: string;
     distanceLabel: string;
     weightLabel: string;
+    bodyTodayTitle: string;
+    bodyConnectHint: string;
+    bodyAdd: string;
+    manualHealthToggle: string;
+    manualHealthTitle: string;
+    manualHealthSteps: string;
+    manualHealthSleep: string;
+    manualHealthActivity: string;
+    manualHealthDate: string;
+    manualHealthHours: string;
+    manualHealthMinutes: string;
+    manualHealthActivityType: string;
+    manualHealthStart: string;
+    manualHealthKcal: string;
+    manualHealthSave: string;
+    manualHealthSaved: string;
+    manualHealthRecent: string;
+    manualHealthDelete: string;
+    manualHealthEmpty: string;
+    manualHealthSleepNote: string;
+    activeMinutesLabel: string;
 
     // Health Library & Articles
     articles: string;
@@ -312,6 +331,13 @@ export const translations: Record<Language, Translations> = {
         addPeriod: 'Add Period',
         periodStartDate: 'Start Date',
         periodEndDate: 'End Date',
+        navToday: 'Today',
+        navCycle: 'My cycle',
+        navPlan: 'Plan',
+        navHealth: 'Health',
+        pmosLogMovedTitle: 'Daily symptom check-in',
+        pmosLogMovedBody: 'Your symptoms and medication now live in the Daily Log, together with your mood and energy.',
+        pmosLogMovedCta: 'Go to Daily Log',
         cycleLengthsTitle: 'Days between periods',
         shortestCycle: 'Shortest',
         longestCycle: 'Longest',
@@ -375,21 +401,12 @@ export const translations: Record<Language, Translations> = {
         // Export
         exportReport: 'Export Report',
 
-        // Fitbit
-        fitbitSection: 'Wearable',
-        fitbitDescription: 'Connect your Fitbit or Samsung Galaxy Watch (via Health Connect + Fitbit) to sync steps, heart rate, sleep, and more.',
-        fitbitConnect: 'Connect Fitbit',
-        fitbitConnected: 'Connected to Fitbit',
-        fitbitDisconnect: 'Disconnect',
-        fitbitSync: 'Sync',
+            fitbitSync: 'Sync',
         fitbitLoading: 'Checking connection...',
         fitbitSteps: 'Steps',
         fitbitHeartRate: 'Heart Rate',
         fitbitSleep: 'Sleep',
         fitbitCalories: 'Calories',
-        fitbitSleepDetails: 'Sleep Breakdown',
-        fitbitError: 'Could not connect to Fitbit. Please try again.',
-        fitbitConnectionSuccess: 'Fitbit connected successfully!',
 
         healthWebhookSection: 'Samsung & Health Connect',
         healthWebhookDescription:
@@ -408,9 +425,30 @@ export const translations: Record<Language, Translations> = {
         healthWebhookStep4: 'Tap Sync Now in HC Webhook or wait for the interval. On Vercel, add SUPABASE_SERVICE_ROLE_KEY (Supabase → Settings → API → service_role).',
         wearableSectionTitle: 'Wearable',
         wearableHealthConnectHint:
-            'Best for Galaxy Watch: use Health Connect below. Fitbit API only sees data on Fitbit servers (not Health Connect tiles).',
+            'Galaxy Watch data reaches CycleSync through Health Connect and the HC Webhook app.',
         distanceLabel: 'Distance',
         weightLabel: 'Weight',
+        bodyTodayTitle: 'Your body today',
+        bodyConnectHint: 'Connect your watch in Settings to sync automatically.',
+        bodyAdd: 'Add',
+        manualHealthToggle: 'Add data manually',
+        manualHealthTitle: 'Manual entry',
+        manualHealthSteps: 'Steps',
+        manualHealthSleep: 'Sleep',
+        manualHealthActivity: 'Activity',
+        manualHealthDate: 'Date',
+        manualHealthHours: 'Hours',
+        manualHealthMinutes: 'Minutes',
+        manualHealthActivityType: 'Activity (e.g. Yoga, Walk)',
+        manualHealthStart: 'Start time',
+        manualHealthKcal: 'Calories (optional)',
+        manualHealthSave: 'Save',
+        manualHealthSaved: 'Saved.',
+        manualHealthRecent: 'Recent manual entries',
+        manualHealthDelete: 'Delete',
+        manualHealthEmpty: 'No manual entries yet.',
+        manualHealthSleepNote: 'Date = the day you woke up.',
+        activeMinutesLabel: 'Active minutes',
 
         // Health Library & Articles
         articles: 'Articles',
@@ -527,6 +565,13 @@ export const translations: Record<Language, Translations> = {
         addPeriod: 'Agregar Periodo',
         periodStartDate: 'Fecha de Inicio',
         periodEndDate: 'Fecha de Fin',
+        navToday: 'Hoy',
+        navCycle: 'Mi ciclo',
+        navPlan: 'Plan',
+        navHealth: 'Salud',
+        pmosLogMovedTitle: 'Registro diario de síntomas',
+        pmosLogMovedBody: 'Tus síntomas y tu medicación ahora están en el Registro Diario, junto con tu ánimo y energía.',
+        pmosLogMovedCta: 'Ir al Registro Diario',
         cycleLengthsTitle: 'Días entre un período y otro',
         shortestCycle: 'Más corto',
         longestCycle: 'Más largo',
@@ -590,21 +635,12 @@ export const translations: Record<Language, Translations> = {
         // Export
         exportReport: 'Exportar Reporte',
 
-        // Fitbit
-        fitbitSection: 'Wearable',
-        fitbitDescription: 'Conecta tu Fitbit o Samsung Galaxy Watch (vía Health Connect + Fitbit) para sincronizar pasos, frecuencia cardíaca, sueño y más.',
-        fitbitConnect: 'Conectar Fitbit',
-        fitbitConnected: 'Conectado a Fitbit',
-        fitbitDisconnect: 'Desconectar',
-        fitbitSync: 'Sincronizar',
+            fitbitSync: 'Sincronizar',
         fitbitLoading: 'Verificando conexión...',
         fitbitSteps: 'Pasos',
         fitbitHeartRate: 'Frecuencia',
         fitbitSleep: 'Sueño',
         fitbitCalories: 'Calorías',
-        fitbitSleepDetails: 'Desglose del Sueño',
-        fitbitError: 'No se pudo conectar con Fitbit. Intenta de nuevo.',
-        fitbitConnectionSuccess: '¡Fitbit conectado exitosamente!',
 
         healthWebhookSection: 'Samsung y Health Connect',
         healthWebhookDescription:
@@ -623,9 +659,30 @@ export const translations: Record<Language, Translations> = {
         healthWebhookStep4: 'Pulsa Sincronizar ahora en HC Webhook o espera el intervalo. En Vercel, añade SUPABASE_SERVICE_ROLE_KEY (Supabase → Ajustes → API → service_role).',
         wearableSectionTitle: 'Wearable',
         wearableHealthConnectHint:
-            'Ideal para Galaxy Watch: usa Health Connect abajo. La API de Fitbit solo ve datos en los servidores de Fitbit (no los datos de Health Connect en la app).',
+            'Los datos del Galaxy Watch llegan a CycleSync mediante Health Connect y la app HC Webhook.',
         distanceLabel: 'Distancia',
         weightLabel: 'Peso',
+        bodyTodayTitle: 'Tu cuerpo hoy',
+        bodyConnectHint: 'Conecta tu reloj en Ajustes para sincronizar automáticamente.',
+        bodyAdd: 'Añadir',
+        manualHealthToggle: 'Añadir datos manualmente',
+        manualHealthTitle: 'Registro manual',
+        manualHealthSteps: 'Pasos',
+        manualHealthSleep: 'Sueño',
+        manualHealthActivity: 'Actividad',
+        manualHealthDate: 'Fecha',
+        manualHealthHours: 'Horas',
+        manualHealthMinutes: 'Minutos',
+        manualHealthActivityType: 'Actividad (ej. Yoga, Caminata)',
+        manualHealthStart: 'Hora de inicio',
+        manualHealthKcal: 'Calorías (opcional)',
+        manualHealthSave: 'Guardar',
+        manualHealthSaved: 'Guardado.',
+        manualHealthRecent: 'Registros manuales recientes',
+        manualHealthDelete: 'Eliminar',
+        manualHealthEmpty: 'Aún no hay registros manuales.',
+        manualHealthSleepNote: 'Fecha = el día en que despertaste.',
+        activeMinutesLabel: 'Minutos activos',
 
         // Health Library & Articles
         articles: 'Artículos',

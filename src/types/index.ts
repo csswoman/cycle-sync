@@ -72,6 +72,10 @@ export interface CycleInfo {
   fertileEndDay?: number;
   irregular?: boolean;
   confidence?: 'low' | 'medium' | 'high';
+  /** True once the cycle is longer than its typical length and no new period has been logged. */
+  overdue?: boolean;
+  /** Days past the latest expected start of the next period; 0 while still inside the expected range. */
+  daysLate?: number;
 }
 
 // ── Daily Log ──────────────────────────────
