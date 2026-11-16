@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useLanguage } from '@/i18n/LanguageContext';
-import type { PeriodInput } from '@/lib/cycle/cycleEngine';
+import { daysBetween, type PeriodInput } from '@/lib/cycle/cycleEngine';
 import {
     analyzeCycles, MAX_REGULAR_DIFFERENCE, NORMAL_CYCLE_MAX, NORMAL_CYCLE_MIN, NORMAL_PERIOD_MAX, NORMAL_PERIOD_MIN,
     type Rating,
@@ -63,109 +63,129 @@ const RatingBadge: React.FC<{ rating: Rating; label: string }> = ({ rating, labe
 const Bars: React.FC<{ values: number[]; mean: number; avgLabel: string; color: string }> = ({ values, mean, avgLabel, color }) => {
     const top = Math.max(...values, 1);
     return (
-        <div className="relative pt-5">
-            <div className="flex items-end justify-between gap-2 h-28 relative">
+        <div className="relative pt-4">
+            <div className="flex items-end justify-between gap-2 h-24 relative">
                 <div
-                    className="absolute left-0 right-0 border-t-2 border-foreground/70 pointer-events-none"
+                    className="absolute left-0 right-0 border-t border-dashed border-foreground/40 pointer-events-none"
                     style={{ bottom: `${(mean / top) * 100}%` }}
                 >
-                    <span className="absolute right-0 -top-5 text-[11px] font-bold text-foreground/80">{avgLabel}</span>
+                    <span className="absolute right-0 -top-4 text-[10px] font-bold text-foreground/70 uppercase tracking-wider">{avgLabel}</span>
                 </div>
                 {values.map((v, i) => (
                     <div key={i} className="flex-1 flex flex-col items-center justify-end h-full">
-                        <div className={`w-full max-w-[44px] rounded-lg ${color}`} style={{ height: `${Math.max((v / top) * 100, 6)}%` }} />
+                        <div className={`w-full max-w-[36px] rounded-md transition-all ${color}`} style={{ height: `${Math.max((v / top) * 100, 8)}%` }} />
                     </div>
                 ))}
             </div>
-            <div className="flex justify-between gap-2 mt-2">
+            <div className="flex justify-between gap-2 mt-1.5">
                 {values.map((v, i) => (
-                    <span key={i} className="flex-1 text-center text-xs font-bold text-foreground">{v}</span>
+                    <span key={i} className="flex-1 text-center text-[11px] font-semibold text-muted-foreground">{v}</span>
                 ))}
             </div>
         </div>
     );
 };
 
-const Stat: React.FC<{ label: string; value: React.ReactNode; unit?: string }> = ({ label, value, unit }) => (
-    <div className="bg-secondary/40 rounded-xl p-4 min-w-[130px] flex-1">
-        <p className="text-xs font-semibold text-muted-foreground">{label}</p>
-        <p className="text-foreground font-black text-2xl mt-2">{value} {unit && <span className="text-sm font-medium">{unit}</span>}</p>
-    </div>
-);
+interface Props {
+    periods: PeriodInput[];
+    /** Expected start of the next period (same date as the forecast card). */
+    expectedNext?: Date;
+}
 
-interface Props { periods: PeriodInput[] }
-
-export const CycleAnalysisCard: React.FC<Props> = ({ periods }) => {
+export const CycleAnalysisCard: React.FC<Props> = ({ periods, expectedNext }) => {
     const { language } = useLanguage();
     const c = copy[language === 'es' ? 'es' : 'en'];
-    const a = useMemo(() => analyzeCycles(periods), [periods]);
+    // Re-render every minute so the countdown drops by one when the day changes.
+    const [now, setNow] = useState(() => new Date());
+    useEffect(() => {
+        const id = setInterval(() => setNow(new Date()), 60_000);
+        return () => clearInterval(id);
+    }, []);
+    const a = useMemo(() => analyzeCycles(periods, now), [periods, now]);
     const [modal, setModal] = useState<'cycle' | 'period' | null>(null);
-
-    const next = a.daysToNextPeriod;
-    const nextText = next === null ? '-' : next > 0 ? c.inDays(next) : next === 0 ? c.today : c.late(-next);
 
     return (
         <div className="flex flex-col gap-4">
-            <h3 className="text-foreground font-bold text-lg px-2">{c.title}</h3>
-            <div className="flex gap-3 overflow-x-auto pb-1">
-                <Stat label={c.lastCycle} value={a.lastCycle ?? '-'} unit={a.lastCycle ? c.days : undefined} />
-                <Stat label={c.lastPeriod} value={a.lastPeriodLength ?? '-'} unit={a.lastPeriodLength ? c.days : undefined} />
-                <Stat label={c.nextPeriod} value={<span className="text-xl">{nextText}</span>} />
+            <div className="flex items-center justify-between px-1">
+                <h3 className="text-foreground font-bold text-xl">{c.title}</h3>
+                {a.lastCycle && (
+                    <span className="text-xs text-muted-foreground font-medium hidden sm:inline-block">
+                        {c.lastCycle}: <strong className="text-foreground">{a.lastCycle} {c.days}</strong>
+                        {a.lastPeriodLength && <> · {c.lastPeriod}: <strong className="text-foreground">{a.lastPeriodLength} {c.days}</strong></>}
+                    </span>
+                )}
             </div>
 
-            <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col gap-4">
-                <div className="flex items-center justify-between">
-                    <h4 className="font-bold text-foreground">{c.cycleLength}</h4>
-                    <button onClick={() => setModal('cycle')} aria-label={c.info} className="text-muted-foreground hover:text-foreground">
-                        <span className="material-symbols-outlined">info</span>
-                    </button>
-                </div>
-                {a.cycles.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">{c.notEnough}</p>
-                ) : (
-                    <>
-                        <div>
-                            <p className="text-foreground font-black text-4xl">
-                                {a.min === a.max ? a.min : `${a.min}-${a.max}`} <span className="text-lg font-semibold">{c.days}</span>
-                            </p>
-                            <RatingBadge rating={a.cycleRating} label={a.cycleRating === 'normal' ? c.normal : c.abnormal} />
-                        </div>
-                        <Bars values={a.cycles} mean={a.mean} avgLabel={c.avg} color="bg-indigo-300/60" />
-                        <p className="text-sm text-muted-foreground">
-                            {c.summary(a.mean, a.cycles.length)}{a.cycleRating === 'abnormal' && c.summaryAbnormal}
-                        </p>
-                        {a.variation !== null && (
-                            <div className="flex items-center justify-between border-t border-border pt-4">
-                                <div>
-                                    <p className="font-semibold text-foreground">{c.variation}</p>
-                                    <p className="text-xs text-muted-foreground">{c.variationHelp}</p>
-                                </div>
-                                <p className="font-bold text-foreground">{a.variation > 0 ? '+' : ''}{a.variation} {c.days}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Card 1: Cycle Length */}
+                <div className="bg-card border border-border/80 rounded-2xl p-5 shadow-sm flex flex-col justify-between gap-4">
+                    <div className="flex items-center justify-between">
+                        <h4 className="font-bold text-foreground text-base">{c.cycleLength}</h4>
+                        <button
+                            type="button"
+                            onClick={() => setModal('cycle')}
+                            aria-label={c.info}
+                            className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-secondary"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">info</span>
+                        </button>
+                    </div>
+
+                    {a.cycles.length === 0 ? (
+                        <p className="text-sm text-muted-foreground py-4">{c.notEnough}</p>
+                    ) : (
+                        <div className="flex flex-col gap-3">
+                            <div className="flex items-baseline justify-between gap-2">
+                                <p className="text-foreground font-black text-3xl tracking-tight">
+                                    {a.min === a.max ? a.min : `${a.min}–${a.max}`} <span className="text-base font-semibold text-muted-foreground">{c.days}</span>
+                                </p>
+                                <RatingBadge rating={a.cycleRating} label={a.cycleRating === 'normal' ? c.normal : c.abnormal} />
                             </div>
-                        )}
-                    </>
-                )}
-            </div>
-
-            <div className="bg-card border border-border rounded-2xl p-6 shadow-sm flex flex-col gap-4">
-                <div className="flex items-center justify-between">
-                    <h4 className="font-bold text-foreground">{c.periodLength}</h4>
-                    <button onClick={() => setModal('period')} aria-label={c.info} className="text-muted-foreground hover:text-foreground">
-                        <span className="material-symbols-outlined">info</span>
-                    </button>
-                </div>
-                {a.periodLengths.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">{c.noPeriodEnd}</p>
-                ) : (
-                    <>
-                        <div>
-                            <p className="text-foreground font-black text-4xl">{a.lastPeriodLength} <span className="text-lg font-semibold">{c.days}</span></p>
-                            <RatingBadge rating={a.periodRating} label={a.periodRating === 'normal' ? c.normal : c.abnormal} />
+                            <Bars values={a.cycles} mean={a.mean} avgLabel={c.avg} color="bg-indigo-400/50 dark:bg-indigo-400/40" />
+                            <p className="text-xs text-muted-foreground leading-relaxed mt-1">
+                                {c.summary(a.mean, a.cycles.length)}{a.cycleRating === 'abnormal' && c.summaryAbnormal}
+                            </p>
+                            {a.variation !== null && (
+                                <div className="flex items-center justify-between border-t border-border/70 pt-3 text-xs">
+                                    <span className="text-muted-foreground">{c.variation} ({c.variationHelp}):</span>
+                                    <span className="font-bold text-foreground">{a.variation > 0 ? '+' : ''}{a.variation} {c.days}</span>
+                                </div>
+                            )}
                         </div>
-                        <Bars values={a.periodLengths} mean={a.periodMean} avgLabel={c.avg} color="bg-pink-300/60" />
-                        <p className="text-sm text-muted-foreground">{c.periodSummary(a.periodMean, a.periodLengths.length)}</p>
-                    </>
-                )}
+                    )}
+                </div>
+
+                {/* Card 2: Period Length */}
+                <div className="bg-card border border-border/80 rounded-2xl p-5 shadow-sm flex flex-col justify-between gap-4">
+                    <div className="flex items-center justify-between">
+                        <h4 className="font-bold text-foreground text-base">{c.periodLength}</h4>
+                        <button
+                            type="button"
+                            onClick={() => setModal('period')}
+                            aria-label={c.info}
+                            className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md hover:bg-secondary"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">info</span>
+                        </button>
+                    </div>
+
+                    {a.periodLengths.length === 0 ? (
+                        <p className="text-sm text-muted-foreground py-4">{c.noPeriodEnd}</p>
+                    ) : (
+                        <div className="flex flex-col gap-3">
+                            <div className="flex items-baseline justify-between gap-2">
+                                <p className="text-foreground font-black text-3xl tracking-tight">
+                                    {a.lastPeriodLength} <span className="text-base font-semibold text-muted-foreground">{c.days}</span>
+                                </p>
+                                <RatingBadge rating={a.periodRating} label={a.periodRating === 'normal' ? c.normal : c.abnormal} />
+                            </div>
+                            <Bars values={a.periodLengths} mean={a.periodMean} avgLabel={c.avg} color="bg-pink-400/50 dark:bg-pink-400/40" />
+                            <p className="text-xs text-muted-foreground leading-relaxed mt-1">
+                                {c.periodSummary(a.periodMean, a.periodLengths.length)}
+                            </p>
+                        </div>
+                    )}
+                </div>
             </div>
 
             {modal && (

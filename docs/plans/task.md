@@ -11,3 +11,4 @@
 | Impeccable layout, typeset & adapt redesign | Complete | Scaled up font sizes to 14-16px, cards expand/collapse individually on click, customized symptom routine stored in localStorage with clean modal dialog |
 | Reorganize `/routines` layout with tabs and Impeccable hierarchy | Complete | Segmented navigation bar with 4 focused tabs: Para tu Fase, Videos Guiados, Mis Rutinas, Diario y Registro; sticky header with blur; instant switching preserving state |
 | Verify tests and TypeScript compilation | Complete | Vitest (33 passed), Next.js build (0 errors) |
+| Improve /planner layout, typography, and structure with Impeccable craft | Complete | Elevated WeeklyPlanner.tsx with cycle phase badge, weekly completion bar, unified temporal toolbar with shrink protection, responsive 7-day grid, meal slot icons and polished grocery/pantry panels with quick suggestions. Vitest (46 passed), tsc (0 errors), next build (0 errors). |
