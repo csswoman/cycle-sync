@@ -11,7 +11,7 @@ export default function RegisterPage() {
 
   return (
     <Register
-      onRegister={() => router.push('/check-email')}
+      onRegister={(user) => router.push(user?.hasSession ? '/dashboard' : '/check-email')}
       onBackToLogin={() => router.push('/login')}
       isDarkMode={isDarkMode}
       toggleDarkMode={() => setTheme(isDarkMode ? 'light' : 'dark')}

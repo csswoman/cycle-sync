@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLanguage } from '@/i18n/LanguageContext';
+import { Flower } from '@/components/ui/Flower';
 
 interface AuthLayoutProps {
   children: React.ReactNode;
@@ -32,9 +33,13 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
       <header className="w-full border-b border-border bg-background z-10 sticky top-0">
         <div className="px-4 md:px-10 py-3 flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center gap-3">
-            <div className="size-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
-              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>local_florist</span>
-            </div>
+            <Flower
+              petal="var(--blossom-soft)"
+              center="var(--sun)"
+              outline="var(--blossom)"
+              rotate={15}
+              className="size-9 drop-shadow-sm"
+            />
             <h2 className="text-lg font-bold leading-tight tracking-tight">CycleSync</h2>
           </div>
           <div className="flex gap-2">

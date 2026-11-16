@@ -1,58 +1,139 @@
+/* Astryx design system — order matters: reset → components → theme. */
+@import '@astryxdesign/core/reset.css';
+@import '@astryxdesign/core/astryx.css';
+@import '@astryxdesign/theme-neutral/theme.css';
+
+/* Preflight is disabled in tailwind.config.ts; Astryx's reset replaces it. */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * App tokens mapped onto Astryx tokens. <html> carries
+ * data-astryx-theme="neutral", so the --color-* tokens resolve here.
+ * Astryx colors use light-dark(), driven by html[data-theme], so no
+ * separate .dark block is needed (the .dark class still powers `dark:`).
+ */
 :root {
-  --background: #fdfcfd;
-  --foreground: #1a1122;
-  --card: #ffffff;
-  --card-foreground: #1a1122;
-  --popover: #ffffff;
-  --popover-foreground: #1a1122;
-  --primary: #7f19e6;
-  --primary-hover: #6814bd;
-  --primary-foreground: #ffffff;
-  --secondary: #f3f0f7;
-  --secondary-foreground: #1a1122;
-  --muted: #f3f0f7;
-  --muted-foreground: #5e4e75;
-  --accent: #f3f0f7;
-  --accent-foreground: #1a1122;
-  --destructive: #dc2626;
-  --destructive-foreground: #ffffff;
-  --border: #e9e4f0;
-  --input: #e9e4f0;
-  --ring: #7f19e6;
-  --surface: #f3f0f7;
-  --surface-hover: #e9e4f0;
+  --background: var(--color-background-body);
+  --foreground: var(--color-text-primary);
+  --card: var(--color-background-card);
+  --card-foreground: var(--color-text-primary);
+  --popover: var(--color-background-popover);
+  --popover-foreground: var(--color-text-primary);
+  --primary: var(--color-accent);
+  --primary-hover: color-mix(in srgb, var(--color-accent) 85%, transparent);
+  --primary-foreground: var(--color-on-accent);
+  --secondary: var(--color-background-muted);
+  --secondary-foreground: var(--color-text-primary);
+  --muted: var(--color-background-muted);
+  --muted-foreground: var(--color-text-secondary);
+  --accent: var(--color-background-muted);
+  --accent-foreground: var(--color-text-primary);
+  --destructive: var(--color-error);
+  --destructive-foreground: var(--color-on-error);
+  --border: var(--color-border);
+  --input: var(--color-border);
+  --ring: var(--color-accent);
+  --surface: var(--color-background-muted);
+  --surface-hover: var(--color-accent-muted);
+
+  /* Garden accents for illustrations and highlights. */
+  --blossom: light-dark(#c2306a, #ff8fb8);
+  --blossom-soft: light-dark(#f8c9da, #4a2233);
+  --leaf: light-dark(#356d22, #9bcc78);
+  --leaf-soft: light-dark(#e3ecc9, #2a3322);
+  --coral: light-dark(#d4482c, #ff8a6e);
+  --sun: light-dark(#f2a93b, #f2b65a);
+
+  --font-family-body: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-family-heading: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-.dark {
-  --background: #11091a;
-  --foreground: #fdfcfd;
-  --card: #1c1126;
-  --card-foreground: #fdfcfd;
-  --popover: #1c1126;
-  --popover-foreground: #fdfcfd;
-  --primary: #9b4dff;
-  --primary-hover: #862dff;
-  --primary-foreground: #ffffff;
-  --secondary: #241a30;
-  --secondary-foreground: #fdfcfd;
-  --muted: #241a30;
-  --muted-foreground: #b19cbd;
-  --accent: #241a30;
-  --accent-foreground: #fdfcfd;
-  --destructive: #991b1b;
-  --destructive-foreground: #ffffff;
-  --border: #362447;
-  --input: #362447;
-  --ring: #9b4dff;
-  --surface: #241a30;
-  --surface-hover: #362447;
+/*
+ * "Garden" palette on top of Astryx neutral: warm cream, blossom pink,
+ * leaf green. Values are light-dark(light, dark).
+ * Text pairs meet WCAG AA: body text 13.6:1, secondary 5.1:1+,
+ * pink accent 4.9:1+, leaf on leaf-soft 5.1:1; dark mode 6.6:1+.
+ */
+[data-astryx-theme='neutral'] {
+  --color-background-body: light-dark(#fbf3ea, #1b1714);
+  --color-background-card: light-dark(#fffbf4, #25201b);
+  --color-background-surface: light-dark(#fffbf4, #25201b);
+  --color-background-popover: light-dark(#fffbf4, #2e2822);
+  --color-background-muted: light-dark(#f1eedf, #2e2822);
+  --color-border: light-dark(#ebe2d3, #3a332b);
+  --color-border-emphasized: light-dark(#8f8169, #7a6f60);
+  --color-text-primary: light-dark(#2b2620, #f6eee3);
+  --color-text-secondary: light-dark(#6b6357, #b9ad9c);
+  --color-accent: light-dark(#c2306a, #ff8fb8);
+  --color-on-accent: light-dark(#ffffff, #2b0f1c);
+  --color-accent-muted: light-dark(#c2306a14, #ff8fb81f);
+  --color-text-accent: light-dark(#c2306a, #ff8fb8);
+  --color-icon-accent: light-dark(#c2306a, #ff8fb8);
+  --color-icon-primary: light-dark(#2b2620, #f6eee3);
+  --color-success: light-dark(#356d22, #9bcc78);
+  --color-text-success: light-dark(#356d22, #9bcc78);
+
+  --font-family-body: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-family-heading: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  /* Soft, generous corners. */
+  --radius-inner: 0.625rem;
+  --radius-element: 1rem;
+  --radius-container: 1.5rem;
+  --radius-page: 2rem;
+
+  /* Warm, diffuse shadows instead of grey ones. */
+  --shadow-low: 0 1px 2px light-dark(#5a3a2a0d, #0000004d), 0 6px 16px light-dark(#5a3a2a0f, #00000059);
+  --shadow-med: 0 2px 4px light-dark(#5a3a2a0f, #00000059), 0 12px 28px light-dark(#5a3a2a14, #00000066);
+  --shadow-high: 0 4px 8px light-dark(#5a3a2a14, #00000066), 0 24px 48px light-dark(#5a3a2a1f, #00000080);
+}
+
+/* Pill buttons, like the reference. Unlayered, so it beats the theme layer. */
+.astryx-button {
+  --_button-radius: 9999px;
+}
+
+.astryx-card {
+  border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+  box-shadow: var(--shadow-low);
+}
+
+/* Editorial serif for page and section titles. [class] lifts specificity
+   above Tailwind's font-weight utilities so the serif keeps a light weight. */
+/* Instrument Sans editorial hierarchy for page and section titles */
+:is(h1, h2),
+:is(h1, h2)[class] {
+  font-family: var(--font-family-heading);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+:is(h3, h4, h5, h6) {
+  font-family: var(--font-family-heading);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+/* App canvas: warm cream with soft pink and sage glows. */
+.garden-canvas {
+  background-color: var(--background);
+  background-image:
+    radial-gradient(60% 50% at 0% 0%, color-mix(in srgb, var(--leaf-soft) 90%, transparent), transparent 70%),
+    radial-gradient(55% 55% at 100% 100%, color-mix(in srgb, var(--blossom-soft) 85%, transparent), transparent 70%),
+    radial-gradient(40% 40% at 85% 10%, color-mix(in srgb, var(--blossom-soft) 45%, transparent), transparent 70%);
+  background-attachment: fixed;
 }
 
 body {
+  font-family: var(--font-family-body);
   background-color: var(--background);
   color: var(--foreground);
   transition: background-color 0.3s ease, color 0.3s ease;
@@ -138,6 +219,10 @@ input[type='range']:focus {
   animation-name: zoomIn95;
 }
 
+.slide-in-from-left {
+  animation-name: slideInFromLeft;
+}
+
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -146,6 +231,11 @@ input[type='range']:focus {
 @keyframes slideInFromBottom {
   from { transform: translateY(1rem); }
   to { transform: translateY(0); }
+}
+
+@keyframes slideInFromLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
 }
 
 @keyframes zoomIn95 {

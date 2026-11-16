@@ -111,9 +111,9 @@ const Settings: React.FC = () => {
     };
 
     return (
-        <div className="flex-1 overflow-y-auto h-full bg-background p-6 md:p-10">
-            <div className="max-w-[800px] mx-auto flex flex-col gap-8">
-                <h1 className="text-foreground text-4xl font-black tracking-tight">{t.settingsTitle}</h1>
+        <div className="flex-1 overflow-y-auto h-full scrollbar-hide">
+            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-8 pb-32">
+                <h1 className="text-foreground text-3xl md:text-4xl font-semibold tracking-tight">{t.settingsTitle}</h1>
 
                 {message && (
                     <div className={`p-4 rounded-xl border ${message.type === 'success' ? 'bg-green-500/10 border-green-500/20 text-green-500' : 'bg-destructive/10 border-destructive/20 text-destructive'}`}>

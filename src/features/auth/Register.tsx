@@ -37,13 +37,14 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onBackToLogin, isDarkMo
         email: formData.email,
         password: formData.password,
         options: {
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
           data: {
             full_name: formData.fullName,
           }
         }
       });
       if (error) throw error;
-      onRegister(data.user);
+      onRegister({ ...data.user, hasSession: !!data.session });
     } catch (err: any) {
       setError(err.message);
     }

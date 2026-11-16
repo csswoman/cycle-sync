@@ -3,6 +3,10 @@
 import { usePathname, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useLanguage } from '@/i18n/LanguageContext';
+import { useAppStore } from '@/stores/appStore';
+import { isGuestRoute } from '@/lib/guestAccess';
+import { Icon } from '@/components/ui/Icon';
+import { Flower } from '@/components/ui/Flower';
 
 interface SidebarProps {
   onClose?: () => void;
@@ -12,15 +16,22 @@ interface NavItemProps {
   href: string;
   label: string;
   icon: string;
+  locked?: boolean;
   onClose?: () => void;
 }
 
-const NavItem: React.FC<NavItemProps> = ({ href, label, icon, onClose }) => {
+const NavItem: React.FC<NavItemProps> = ({ href, label, icon, locked, onClose }) => {
   const pathname = usePathname();
   const router = useRouter();
+  const setSignupPromptOpen = useAppStore((s) => s.setSignupPromptOpen);
   const isActive = pathname === href || pathname.startsWith(href + '/');
 
   const handleClick = () => {
+    if (locked) {
+      setSignupPromptOpen(true);
+      onClose?.();
+      return;
+    }
     router.push(href);
     onClose?.();
   };
@@ -28,20 +39,21 @@ const NavItem: React.FC<NavItemProps> = ({ href, label, icon, onClose }) => {
   return (
     <div
       onClick={handleClick}
-      className={`flex items-center gap-3 px-3 py-3 rounded-xl transition-all cursor-pointer group ${
+      className={`flex items-center gap-3 px-4 py-2.5 rounded-full transition-all cursor-pointer group ${
         isActive
-          ? 'bg-primary/10 text-primary'
-          : 'hover:bg-secondary text-muted-foreground hover:text-foreground'
-      }`}
+          ? 'bg-blossom-soft text-foreground'
+          : 'hover:bg-card text-muted-foreground hover:text-foreground'
+      } ${locked ? 'opacity-60' : ''}`}
+      aria-disabled={locked || undefined}
     >
-      <span
-        className={`material-symbols-outlined ${
-          isActive ? 'text-primary fill-1' : 'text-muted-foreground group-hover:text-foreground'
-        }`}
-      >
-        {icon}
-      </span>
-      <p className={`text-sm ${isActive ? 'font-bold' : 'font-medium'}`}>{label}</p>
+      <Icon
+        name={icon}
+        size={20}
+        weight={isActive ? 'duotone' : 'regular'}
+        className={isActive ? 'text-blossom' : 'text-muted-foreground group-hover:text-foreground'}
+      />
+      <p className={`text-sm flex-1 ${isActive ? 'font-bold' : 'font-medium'}`}>{label}</p>
+      {locked && <Icon name="lock" size={16} className="text-muted-foreground" />}
     </div>
   );
 };
@@ -49,6 +61,8 @@ const NavItem: React.FC<NavItemProps> = ({ href, label, icon, onClose }) => {
 const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
   const { t } = useLanguage();
   const router = useRouter();
+  const { user, authReady, setSignupPromptOpen } = useAppStore();
+  const isGuest = authReady && !user;
 
   const navItems = [
     { href: '/dashboard', label: t.overview, icon: 'dashboard' },
@@ -56,61 +70,79 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
     { href: '/period-history', label: t.periodHistory, icon: 'history' },
     { href: '/routines', label: t.routines, icon: 'fitness_center' },
     { href: '/nutrition', label: t.mealIdeas, icon: 'restaurant' },
+    { href: '/planner', label: t.weeklyPlanner, icon: 'calendar_month' },
     { href: '/trends', label: t.trends, icon: 'trending_up' },
-    { href: '/pcos', label: t.pcosToolkit, icon: 'spa' },
+    { href: '/pmos', label: t.pmosToolkit, icon: 'spa' },
+    { href: '/articles', label: t.articles, icon: 'menu_book' },
     { href: '/habits', label: t.habits, icon: 'check_circle' },
+    { href: '/medications', label: t.medications, icon: 'medication' },
     { href: '/export', label: t.exportReport, icon: 'download' },
   ];
 
   return (
-    <aside className={`w-64 flex-shrink-0 border-r border-border bg-card flex-col justify-between p-4 transition-colors duration-300 ${onClose ? 'flex' : 'hidden md:flex'}`}>
-      <div className="flex flex-col gap-8">
-        {/* Branding */}
-        <div className="flex items-center gap-3 px-2">
-          <div
-            className="bg-center bg-no-repeat bg-cover rounded-full size-10 shadow-lg"
-            style={{
-    { href: '/planner', label: t.weeklyPlanner, icon: 'calendar_month' },
-              backgroundImage:
-                'url("https://lh3.googleusercontent.com/aida-public/AB6AXuAocgLUy_bp-dtx4_UsakO7oMmO9SwWvxFL5p5ctYuNGWccWPUdzIe_LFZz1iBmXjm1jgPvUXGoUU-tq6F4mz663g9rbkRt69-9JgsbYCx5BBX6pgqaOezDy6JXTv7c5Jqcev7JcAB6HfRpKsCdHp7Ly5LsBOZM-u61nwmQTBpW4lBOuVopOg7Pz_gyRrO8PVV4oLjzUxa3RnNk_ECfTF0icJkyT_yfas5keNw9n6YLbX2mDRCY8g367Xn7eTiT9qrSRe0FRiUR4nc")',
-            }}
+    <aside className={`relative z-10 w-64 h-full flex-shrink-0 border-r border-border/60 bg-card/70 backdrop-blur-xl flex flex-col justify-between p-4 transition-colors duration-300 ${onClose ? 'flex' : 'hidden md:flex'}`}>
+      {/* Top Section: Branding */}
+      <div className="flex items-center justify-between px-2 pb-4 border-b border-border/40 flex-shrink-0">
+        <div className="flex items-center gap-3">
+          <Flower
+            petal="var(--blossom-soft)"
+            center="var(--sun)"
+            outline="var(--blossom)"
+            rotate={15}
+            className="size-10 drop-shadow-sm"
           />
           <div className="flex flex-col">
-            <h1 className="text-foreground text-lg font-bold leading-normal">CycleSync</h1>
+            <h1 className="text-foreground text-xl font-bold tracking-tight">CycleSync</h1>
             <p className="text-muted-foreground text-xs font-normal">Holistic Health</p>
           </div>
         </div>
 
-        {/* Nav Menu */}
-        <nav className="flex flex-col gap-2">
-          {navItems.map((item) => (
-            <NavItem key={item.href} {...item} onClose={onClose} />
-          ))}
-        </nav>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="md:hidden text-muted-foreground hover:text-foreground p-1.5 rounded-full hover:bg-card transition-colors"
+            aria-label="Close menu"
+          >
+            <Icon name="close" size={20} />
+          </button>
+        )}
       </div>
 
-      <div className="flex flex-col gap-2">
-        {/* Personalize Button */}
+      {/* Nav Menu with independent scroll */}
+      <nav className="flex-1 overflow-y-auto min-h-0 flex flex-col gap-1 py-3 scrollbar-hide my-1 pr-1">
+        {navItems.map((item) => (
+          <NavItem key={item.href} {...item} locked={isGuest && !isGuestRoute(item.href)} onClose={onClose} />
+        ))}
+      </nav>
+
+      {/* Bottom Pinned Controls */}
+      <div className="flex flex-col gap-1.5 pt-3 border-t border-border/40 flex-shrink-0">
         <button
           onClick={() => {
-            router.push('/archetype');
+            if (isGuest) {
+              setSignupPromptOpen(true);
+            } else {
+              router.push('/archetype');
+            }
             onClose?.();
           }}
-          className="w-full bg-gradient-to-r from-primary to-purple-600 hover:from-primary-hover hover:to-purple-700 text-primary-foreground text-sm font-bold py-3 rounded-xl shadow-lg mb-2 transition-all transform hover:scale-[1.02]"
+          className="w-full bg-gradient-to-r from-blossom via-blossom to-coral text-primary-foreground text-sm font-bold py-2.5 rounded-full shadow-md shadow-blossom/20 mb-1 transition-all transform hover:scale-[1.02] hover:brightness-105 active:scale-95"
         >
           {t.personalizeExperience}
         </button>
 
-        <NavItem href="/settings" label={t.settings} icon="settings" onClose={onClose} />
+        <NavItem href="/settings" label={t.settings} icon="settings" locked={isGuest} onClose={onClose} />
 
         <button
-          onClick={() => supabase.auth.signOut()}
-          className="flex items-center gap-3 px-3 py-3 rounded-xl transition-all cursor-pointer group hover:bg-destructive/10 text-muted-foreground hover:text-destructive w-full mt-2"
+          onClick={() => (isGuest ? router.push('/login') : supabase.auth.signOut())}
+          className={`flex items-center gap-3 px-4 py-2 rounded-full transition-all cursor-pointer group w-full text-muted-foreground ${isGuest ? 'hover:bg-card hover:text-foreground' : 'hover:bg-destructive/10 hover:text-destructive'}`}
         >
-          <span className="material-symbols-outlined text-muted-foreground group-hover:text-destructive">
-            logout
-          </span>
-          <p className="text-sm font-medium">Logout</p>
+          <Icon
+            name={isGuest ? 'login' : 'logout'}
+            size={20}
+            className={isGuest ? 'group-hover:text-foreground' : 'group-hover:text-destructive'}
+          />
+          <p className="text-sm font-medium">{isGuest ? t.guestSignIn : 'Logout'}</p>
         </button>
       </div>
     </aside>

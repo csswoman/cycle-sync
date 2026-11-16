@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLanguage } from '@/i18n/LanguageContext';
 import Link from 'next/link';
+import { Icon } from '@/components/ui/Icon';
 
 interface HealthSummary {
   connected: boolean;
@@ -107,27 +108,22 @@ const HealthConnectWidget: React.FC = () => {
   }
 
   if (!summary?.connected) {
-    const urlToShow =
-      tokenInfo?.webhookUrl ||
-      tokenInfo?.webhookUrlTemplate ||
-      `${typeof window !== 'undefined' ? window.location.origin : ''}/api/health/webhook?token=`;
-
     return (
-      <div className="flex flex-col gap-3">
-        <p className="text-sm text-muted-foreground">
-          {t.healthWebhookDescription}{' '}
-          <Link href="/settings" className="text-primary font-semibold underline underline-offset-2">
-            {t.settings}
-          </Link>
-        </p>
-        <div className="flex items-start gap-2 p-3 bg-secondary/50 rounded-xl border border-border">
-          <span className="material-symbols-outlined text-primary text-xl shrink-0">info</span>
-          <div className="text-xs text-muted-foreground min-w-0">
-            <p className="font-bold text-foreground mb-1">{t.healthWebhookUrlLabel}</p>
-            <code className="text-primary font-mono text-[11px] break-all block">{urlToShow}</code>
-            {!tokenInfo?.configured && (
-              <p className="mt-2">{t.healthWebhookGenerate}</p>
-            )}
+      <div className="flex flex-col gap-3 py-1">
+        <div className="flex items-start gap-3 p-3.5 rounded-2xl bg-secondary/50 border border-border/60">
+          <div className="p-2 rounded-xl bg-card text-blossom shrink-0">
+            <Icon name="watch" size={20} weight="duotone" />
+          </div>
+          <div className="flex flex-col gap-1 text-xs text-muted-foreground min-w-0">
+            <p className="font-semibold text-foreground text-xs sm:text-sm">{t.wearableSectionTitle}</p>
+            <p className="leading-relaxed">{t.healthWebhookDescription}</p>
+            <Link
+              href="/settings"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-blossom hover:underline pt-1"
+            >
+              <span>{t.settings}</span>
+              <Icon name="arrow_forward" size={13} />
+            </Link>
           </div>
         </div>
       </div>
@@ -149,7 +145,7 @@ const HealthConnectWidget: React.FC = () => {
           disabled={syncing}
           className="flex items-center gap-1 px-2.5 h-7 rounded-lg bg-primary/10 text-primary text-xs font-bold hover:bg-primary/20 transition-all disabled:opacity-50"
         >
-          <span className={`material-symbols-outlined text-sm ${syncing ? 'animate-spin' : ''}`}>sync</span>
+          <Icon name="sync" size={14} className={syncing ? 'animate-spin' : ''} />
           {t.fitbitSync}
         </button>
       </div>
@@ -224,10 +220,10 @@ function MetricCard({
   return (
     <div className="bg-secondary/50 rounded-xl p-3 flex flex-col gap-1.5">
       <div className="flex items-center gap-1.5">
-        <span className={`material-symbols-outlined text-base ${color}`}>{icon}</span>
+        <Icon name={icon} size={16} weight="duotone" className={color} />
         <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">{label}</span>
       </div>
-      <span className="text-lg font-black text-foreground">{value}</span>
+      <span className="text-lg font-semibold tabular-nums text-foreground">{value}</span>
     </div>
   );
 }

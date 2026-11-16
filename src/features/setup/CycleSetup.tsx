@@ -95,10 +95,9 @@ const CycleSetup: React.FC<CycleSetupProps> = ({ onNavigate }) => {
     const progressPercentage = step === 2 ? 50 : step === 3 ? 75 : 100;
 
     return (
-        <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide bg-background">
-
-            <div className="flex justify-center py-10 px-4 md:px-10 lg:px-20">
-                <div className="w-full max-w-[1200px] flex flex-col lg:flex-row gap-10">
+        <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide">
+            <div className="flex justify-center py-8 px-4 sm:px-6 lg:px-8 pb-32">
+                <div className="w-full max-w-5xl flex flex-col lg:flex-row gap-8">
                     <div className="flex-1 flex flex-col gap-8">
                         <div className="flex flex-col gap-3">
                             <div className="flex gap-6 justify-between items-end">

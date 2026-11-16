@@ -87,28 +87,28 @@ const ArchetypeSelection: React.FC<ArchetypeSelectionProps> = ({ onComplete, isD
           </label>
 
 
-          {/* Card 2: PCOS Manager */}
-          <label className={`group relative flex flex-col gap-4 rounded-xl border-2 ${selectedArchetype === 'pcos' ? 'border-primary bg-card' : 'border-border bg-card/50'} p-6 md:p-8 cursor-pointer hover:border-primary hover:shadow-xl hover:shadow-primary/5 transition-all duration-300`}>
+          {/* Card 2: PMOS Manager */}
+          <label className={`group relative flex flex-col gap-4 rounded-xl border-2 ${selectedArchetype === 'pmos' ? 'border-primary bg-card' : 'border-border bg-card/50'} p-6 md:p-8 cursor-pointer hover:border-primary hover:shadow-xl hover:shadow-primary/5 transition-all duration-300`}>
             <input
               className="peer sr-only"
               name="archetype"
               type="radio"
-              value="pcos"
-              checked={selectedArchetype === 'pcos'}
-              onChange={() => setSelectedArchetype('pcos')}
+              value="pmos"
+              checked={selectedArchetype === 'pmos'}
+              onChange={() => setSelectedArchetype('pmos')}
             />
             {/* Checkmark indicator */}
-            <div className={`absolute top-4 right-4 text-primary transition-opacity ${selectedArchetype === 'pcos' ? 'opacity-100' : 'opacity-0'}`}>
+            <div className={`absolute top-4 right-4 text-primary transition-opacity ${selectedArchetype === 'pmos' ? 'opacity-100' : 'opacity-0'}`}>
               <span className="material-symbols-outlined filled">check_circle</span>
             </div>
             <div className="size-14 rounded-full bg-rose-500/10 flex items-center justify-center text-rose-500 group-hover:scale-110 transition-transform duration-300">
               <span className="material-symbols-outlined text-[32px]">spa</span>
             </div>
             <div className="flex flex-col gap-2">
-              <h3 className="text-xl font-bold text-foreground">PCOS Manager</h3>
+              <h3 className="text-xl font-bold text-foreground">PMOS Manager</h3>
               <p className="text-sm font-semibold text-rose-500 uppercase tracking-wider">For symptom management</p>
               <p className="text-muted-foreground text-sm leading-relaxed">
-                For women managing Polycystic Ovary Syndrome. Focus on hormonal balance, insulin sensitivity, and holistic symptom reduction through low-impact consistency.
+                For women managing Polyendocrine Metabolic Ovarian Syndrome (PMOS, formerly PCOS). Focus on hormonal balance, insulin sensitivity, and holistic symptom reduction through low-impact consistency.
               </p>
             </div>
           </label>

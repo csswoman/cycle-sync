@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useCycleInfo } from '@/hooks/useCycleInfo';
-import type { DailyLog, PCOSSymptomEntry, Habit, HabitLog } from '@/types';
+import type { DailyLog, PMOSSymptomEntry, Habit, HabitLog } from '@/types';
 
 export default function ExportReport() {
   const { cycleInfo, loading: cycleLoading } = useCycleInfo();
@@ -11,7 +11,7 @@ export default function ExportReport() {
   const [generating, setGenerating] = useState(false);
   const [stats, setStats] = useState({
     dailyLogCount: 0,
-    pcosEntryCount: 0,
+    pmosEntryCount: 0,
     habitCount: 0,
   });
 
@@ -20,7 +20,7 @@ export default function ExportReport() {
     cycleLength: number;
     lastPeriodStart: string | null;
     dailyLogs: DailyLog[];
-    pcosEntries: PCOSSymptomEntry[];
+    pmosEntries: PMOSSymptomEntry[];
     habits: Habit[];
     habitLogs: HabitLog[];
   } | null>(null);
@@ -38,7 +38,7 @@ export default function ExportReport() {
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
       const weekStr = sevenDaysAgo.toISOString().split('T')[0];
 
-      const [configRes, logsRes, pcosRes, habitsRes, habitLogsRes] = await Promise.all([
+      const [configRes, logsRes, pmosRes, habitsRes, habitLogsRes] = await Promise.all([
         supabase.from('cycle_config').select('*').eq('user_id', user.id).single(),
         supabase.from('daily_logs').select('*').eq('user_id', user.id).gte('date', dateStr).order('date'),
         supabase.from('pcos_symptoms').select('*').eq('user_id', user.id).gte('date', dateStr).order('date'),
@@ -47,13 +47,13 @@ export default function ExportReport() {
       ]);
 
       const dailyLogs = (logsRes.data as DailyLog[]) ?? [];
-      const pcosEntries = (pcosRes.data as PCOSSymptomEntry[]) ?? [];
+      const pmosEntries = (pmosRes.data as PMOSSymptomEntry[]) ?? [];
       const habits = (habitsRes.data as Habit[]) ?? [];
       const habitLogs = (habitLogsRes.data as HabitLog[]) ?? [];
 
       setStats({
         dailyLogCount: dailyLogs.length,
-        pcosEntryCount: pcosEntries.length,
+        pmosEntryCount: pmosEntries.length,
         habitCount: habits.length,
       });
 
@@ -62,7 +62,7 @@ export default function ExportReport() {
         cycleLength: configRes.data?.cycle_length ?? 28,
         lastPeriodStart: configRes.data?.last_period_start ?? null,
         dailyLogs,
-        pcosEntries,
+        pmosEntries,
         habits,
         habitLogs,
       });
@@ -101,10 +101,10 @@ export default function ExportReport() {
 
   return (
     <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide">
-      <div className="max-w-[800px] mx-auto p-6 md:p-10 flex flex-col gap-8 pb-20">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-8 pb-32">
         {/* Header */}
         <div className="flex flex-col gap-2">
-          <h1 className="text-foreground text-3xl md:text-4xl font-black leading-tight tracking-tight">
+          <h1 className="text-foreground text-3xl md:text-4xl font-semibold leading-tight tracking-tight">
             Medical Report
           </h1>
           <p className="text-muted-foreground text-base">
@@ -148,9 +148,9 @@ export default function ExportReport() {
                 </div>
                 <div>
                   <p className="text-foreground font-bold text-lg">
-                    {isLoading ? '...' : stats.pcosEntryCount}
+                    {isLoading ? '...' : stats.pmosEntryCount}
                   </p>
-                  <p className="text-muted-foreground text-xs">PCOS Entries</p>
+                  <p className="text-muted-foreground text-xs">PMOS Entries</p>
                 </div>
               </div>
 
@@ -174,7 +174,7 @@ export default function ExportReport() {
               {[
                 { icon: 'water_drop', label: 'Cycle phase, day, and length overview', color: 'text-primary' },
                 { icon: 'monitoring', label: 'Energy, sleep, and mood trends (30 days)', color: 'text-blue-500' },
-                { icon: 'medical_services', label: 'PCOS symptom severity with clinical alerts', color: 'text-red-500' },
+                { icon: 'medical_services', label: 'PMOS symptom severity with clinical alerts', color: 'text-red-500' },
                 { icon: 'bar_chart', label: 'Top symptom frequency analysis', color: 'text-orange-500' },
                 { icon: 'check_circle', label: 'Habit completion rates (7 days)', color: 'text-green-500' },
               ].map((item) => (

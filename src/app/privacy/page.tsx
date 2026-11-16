@@ -10,7 +10,7 @@ export default function PrivacyPage() {
           <p>CycleSync collects the following types of information:</p>
           <ul className="list-disc pl-5 space-y-1">
             <li><strong>Account data:</strong> email address, name, and profile picture.</li>
-            <li><strong>Health data:</strong> menstrual cycle logs, daily symptoms, mood, and PCOS tracking entries.</li>
+            <li><strong>Health data:</strong> menstrual cycle logs, daily symptoms, mood, and PMOS tracking entries.</li>
             <li><strong>Wearable data:</strong> when you connect Fitbit, we access steps, heart rate, sleep, and activity data through the Fitbit Web API.</li>
           </ul>
 

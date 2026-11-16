@@ -103,11 +103,11 @@ const DailyLog: React.FC = () => {
   const buttonMobileLabel = saving ? 'Saving...' : saved ? 'Updated ✓' : 'Log Today';
 
   return (
-    <div className="flex-1 overflow-y-auto bg-background p-6 md:p-10 pb-24 h-full scrollbar-hide">
-      <div className="max-w-5xl mx-auto flex flex-col gap-8">
+    <div className="flex-1 overflow-y-auto h-full scrollbar-hide">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-8 pb-32">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="flex flex-col gap-2">
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight">Daily Log</h1>
+            <h1 className="text-3xl md:text-4xl font-semibold text-foreground tracking-tight">Daily Log</h1>
             <div className="flex items-center gap-2 text-muted-foreground">
               <span className="material-symbols-outlined text-primary text-[20px]">calendar_today</span>
               <p className="text-sm font-medium">
@@ -133,7 +133,7 @@ const DailyLog: React.FC = () => {
             <button
               onClick={handleSave}
               disabled={saving || saved}
-              className="hidden md:flex w-full bg-primary hover:bg-primary-hover text-primary-foreground text-lg font-bold py-4 rounded-xl items-center justify-center gap-3 transition-all shadow-[0_0_20px_rgba(127,25,230,0.2)] hover:shadow-[0_0_30px_rgba(127,25,230,0.4)] disabled:opacity-60"
+              className="w-full bg-primary hover:bg-primary-hover text-primary-foreground text-base sm:text-lg font-bold py-3.5 sm:py-4 rounded-full flex items-center justify-center gap-3 transition-all shadow-md shadow-blossom/20 disabled:opacity-60"
             >
               <span className="material-symbols-outlined">{saved ? 'check_circle' : 'save'}</span>
               {buttonLabel}
@@ -142,7 +142,7 @@ const DailyLog: React.FC = () => {
 
           {/* Sidebar Context */}
           <div className="lg:col-span-4 flex flex-col gap-6">
-            <div className="bg-gradient-to-br from-secondary to-accent/20 border border-border rounded-2xl p-6 relative overflow-hidden">
+            <div className="bg-gradient-to-br from-card via-card to-blossom-soft/40 border border-border rounded-2xl p-6 relative overflow-hidden shadow-sm">
               <div className="absolute top-0 right-0 p-3 opacity-10">
                 <span className="material-symbols-outlined text-9xl text-foreground">water_drop</span>
               </div>
@@ -155,7 +155,7 @@ const DailyLog: React.FC = () => {
               </div>
               <div className="w-full h-3 bg-secondary rounded-full overflow-hidden relative z-10">
                 <div
-                  className="h-full bg-gradient-to-r from-purple-900 via-primary to-purple-900 rounded-full transition-all"
+                  className="h-full bg-gradient-to-r from-blossom to-coral rounded-full transition-all"
                   style={{ width: `${progressPct}%` }}
                 />
               </div>
@@ -164,30 +164,19 @@ const DailyLog: React.FC = () => {
               </p>
             </div>
 
-            <div className="bg-secondary/40 border border-border rounded-2xl p-6 flex flex-col gap-4">
+            <div className="bg-card/70 border border-border rounded-2xl p-6 flex flex-col gap-4 shadow-sm">
               <div className="flex items-center gap-3">
-                <div className="bg-primary/20 p-2 rounded-lg text-primary">
+                <div className="bg-blossom-soft p-2 rounded-xl text-blossom">
                   <span className="material-symbols-outlined">lightbulb</span>
                 </div>
                 <h4 className="text-foreground font-bold">Daily Insight</h4>
               </div>
               <p className="text-sm text-muted-foreground leading-relaxed">
-                PCOS Tip: During the {phase.toLowerCase()} phase, {insight.tip.toLowerCase()}
+                PMOS Tip: During the {phase.toLowerCase()} phase, {insight.tip.toLowerCase()}
               </p>
             </div>
           </div>
         </div>
-      </div>
-
-      <div className="md:hidden fixed bottom-0 left-0 w-full p-4 bg-background/95 backdrop-blur border-t border-border z-30">
-        <button
-          onClick={handleSave}
-          disabled={saving || saved}
-          className="w-full bg-primary hover:bg-primary-hover text-primary-foreground text-lg font-bold py-3 rounded-xl flex items-center justify-center gap-2 shadow-lg disabled:opacity-60"
-        >
-          <span className="material-symbols-outlined">{saved ? 'check_circle' : 'save'}</span>
-          {buttonMobileLabel}
-        </button>
       </div>
     </div>
   );

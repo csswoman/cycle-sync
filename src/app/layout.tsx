@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     default: 'CycleSync - Holistic Health',
     template: '%s | CycleSync',
   },
-  description: 'Track your cycle, sync your life. Holistic health for women with PCOS.',
+  description: 'Track your cycle, sync your life. Holistic health for women with PMOS.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#7f19e6',
+  themeColor: '#fbf3ea',
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
@@ -35,10 +35,14 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    // data-astryx-theme / data-theme are set here for SSR so tokens resolve on
+    // first paint; the Astryx <Theme> keeps them in sync on the client.
+    <html lang="en" data-astryx-theme="neutral" data-theme="dark" suppressHydrationWarning>
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&family=Noto+Sans:wght@300..900&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Instrument+Sans:ital,wght@0,400..700;1,400..700&display=swap"
           rel="stylesheet"
         />
         <link

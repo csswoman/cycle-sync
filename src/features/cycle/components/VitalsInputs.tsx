@@ -1,4 +1,5 @@
 import React from 'react';
+import { Icon } from '@/components/ui/Icon';
 
 interface VitalsInputsProps {
     energyLevel: number;
@@ -19,7 +20,7 @@ export const VitalsInputs: React.FC<VitalsInputsProps> = ({
             <div className="flex-1 flex flex-col justify-center gap-4">
                 <div className="flex justify-between items-center">
                     <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-                        <span className="material-symbols-outlined text-primary">bolt</span>
+                        <Icon name="bolt" size={20} weight="duotone" className="text-primary" />
                         Energy
                     </h3>
                     <span className="text-primary font-bold text-lg">{energyLevel}/10</span>
@@ -46,14 +47,14 @@ export const VitalsInputs: React.FC<VitalsInputsProps> = ({
             {/* Sleep Input */}
             <div className="flex-1 flex flex-col gap-4">
                 <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
-                    <span className="material-symbols-outlined text-primary">bedtime</span>
+                    <Icon name="bedtime" size={20} weight="duotone" className="text-primary" />
                     Sleep Quality
                 </h3>
                 <div className="flex items-center gap-3">
                     <button
                         onClick={() => onSleepHoursChange(Math.max(0, sleepHours - 0.5))}
                         className="size-10 rounded-lg bg-secondary hover:bg-surface-hover flex items-center justify-center text-foreground transition-colors">
-                        <span className="material-symbols-outlined">remove</span>
+                        <Icon name="remove" size={16} />
                     </button>
                     <div className="flex-1 text-center bg-secondary/50 rounded-lg py-2 border border-border">
                         <span className="text-2xl font-bold text-foreground">{sleepHours}</span>
@@ -62,7 +63,7 @@ export const VitalsInputs: React.FC<VitalsInputsProps> = ({
                     <button
                         onClick={() => onSleepHoursChange(sleepHours + 0.5)}
                         className="size-10 rounded-lg bg-secondary hover:bg-surface-hover flex items-center justify-center text-foreground transition-colors">
-                        <span className="material-symbols-outlined">add</span>
+                        <Icon name="add" size={16} />
                     </button>
                 </div>
                 <div className="flex gap-2">

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Icon } from '@/components/ui/Icon';
 
 interface SymptomGridProps {
     activeSymptoms: string[];
@@ -11,7 +12,7 @@ export const SymptomGrid: React.FC<SymptomGridProps> = ({ activeSymptoms, toggle
     return (
         <div className="bg-secondary/40 border border-border rounded-2xl p-6 hover:border-primary/50 transition-colors">
             <h3 className="text-lg font-bold text-foreground flex items-center gap-2 mb-4">
-                <span className="material-symbols-outlined text-primary">stethoscope</span>
+                <Icon name="stethoscope" size={20} weight="duotone" className="text-primary" />
                 Symptom Quick-Log
             </h3>
             <div className="flex flex-wrap gap-3">
@@ -26,13 +27,13 @@ export const SymptomGrid: React.FC<SymptomGridProps> = ({ activeSymptoms, toggle
                                     ? 'bg-primary text-primary-foreground border-primary shadow-[0_4px_10px_rgba(127,25,230,0.3)]'
                                     : 'bg-secondary text-muted-foreground border-transparent hover:bg-surface-hover hover:text-foreground'}`}
                         >
-                            {isActive && <span className="material-symbols-outlined text-[18px]">check</span>}
+                            {isActive && <Icon name="check" size={16} weight="bold" />}
                             {symptom}
                         </button>
                     );
                 })}
                 <button className="px-4 py-2 rounded-full border border-border border-dashed text-muted-foreground text-sm font-medium hover:text-foreground hover:border-primary hover:bg-primary/10 transition-all flex items-center gap-1 pl-3">
-                    <span className="material-symbols-outlined text-[18px]">add</span>
+                    <Icon name="add" size={16} />
                     Add Other
                 </button>
             </div>

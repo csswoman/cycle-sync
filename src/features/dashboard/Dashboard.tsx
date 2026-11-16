@@ -11,6 +11,7 @@ import { HabitsProgress } from './components/HabitsProgress';
 import { useCycleInfo } from '@/hooks/useCycleInfo';
 import { useLanguage } from '@/i18n/LanguageContext';
 import HealthConnectWidget from './components/HealthConnectWidget';
+import { Flower } from '@/components/ui/Flower';
 import { WeeklySummaryCard } from './components/WeeklySummaryCard';
 
 interface DashboardProps {
@@ -91,7 +92,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate, userName }) => {
 
     return (
         <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide">
-            <div className="max-w-[1100px] mx-auto p-6 md:p-10 flex flex-col gap-8 pb-20">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-8 pb-32">
                 <DashboardHeader
                     phase={loading ? '...' : phase}
                     day={cycleDay}
@@ -99,63 +100,76 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate, userName }) => {
                     userName={userName}
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <Card>
-                        <CardHeader title="Current Phase" icon="water_drop" />
+                {/* Top Phase Metric Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <Card className="rounded-3xl border border-border/80 bg-card/90 shadow-sm p-5">
+                        <Flower petal="var(--sun)" center="var(--blossom-soft)" rotate={8} className="absolute -top-7 -right-7 size-28 opacity-70 pointer-events-none" />
+                        <CardHeader title="Current Phase" />
                         <CardContent>
-                            <p className="text-foreground text-2xl font-bold">{loading ? '...' : phase}</p>
-                            <p className="text-xs text-muted-foreground mt-1">{hormone}</p>
+                            <p className="relative text-foreground text-2xl sm:text-3xl font-bold tracking-tight">{loading ? '...' : phase}</p>
+                            <p className="relative text-xs text-muted-foreground mt-1 font-medium">{hormone}</p>
                         </CardContent>
                     </Card>
-                    <Card>
-                        <CardHeader title="Cycle Day" icon="calendar_today" />
+                    <Card className="rounded-3xl border border-border/80 bg-card/90 shadow-sm p-5">
+                        <Flower petal="var(--leaf-soft)" center="var(--coral)" petals={5} rotate={-14} className="absolute -top-7 -right-7 size-28 opacity-70 pointer-events-none" />
+                        <CardHeader title="Cycle Day" />
                         <CardContent>
-                            <p className="text-foreground text-2xl font-bold">Day {cycleDay}</p>
-                            <p className="text-xs text-muted-foreground mt-1">~{daysUntil} Days to Menstruation</p>
+                            <p className="relative text-foreground text-2xl sm:text-3xl font-bold tracking-tight">Day {cycleDay}</p>
+                            <p className="relative text-xs text-muted-foreground mt-1 font-medium">~{daysUntil} Days to Menstruation</p>
                         </CardContent>
                     </Card>
-                    <Card>
-                        <CardHeader title="Archetype" icon="psychology" />
+                    <Card className="rounded-3xl border border-border/80 bg-card/90 shadow-sm p-5">
+                        <Flower petal="var(--blossom-soft)" center="var(--sun)" petals={7} rotate={20} className="absolute -top-7 -right-7 size-28 opacity-70 pointer-events-none" />
+                        <CardHeader title="Archetype" />
                         <CardContent>
-                            <p className="text-foreground text-2xl font-bold">Powerhouse</p>
-                            <p className="text-xs text-muted-foreground mt-1">Focus on Consistency</p>
+                            <p className="relative text-foreground text-2xl sm:text-3xl font-bold tracking-tight">Powerhouse</p>
+                            <p className="relative text-xs text-muted-foreground mt-1 font-medium">Focus on Consistency</p>
                         </CardContent>
                     </Card>
                 </div>
 
-                {/* Wearable Data */}
-                <Card>
-                    <CardHeader title={t.wearableSectionTitle} icon="watch" />
-                    <CardContent>
-                        <p className="text-xs text-muted-foreground mb-4">{t.wearableHealthConnectHint}</p>
-                        <HealthConnectWidget />
-                    </CardContent>
-                </Card>
+                {/* Balanced Two-Column Dashboard Grid */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                    {/* Primary Daily Actions & Recommendations */}
+                    <div className="lg:col-span-8 flex flex-col gap-8">
+                        <DailyActionPanel
+                            title="Daily Check-In"
+                            description="How are your symptoms today? Logging your mood and energy helps us refine your plan for tomorrow."
+                            buttonText="Log Symptoms"
+                            onAction={() => onNavigate(View.LOG)}
+                        />
+                        <WeeklySummaryCard />
 
-                <DailyActionPanel
-                    title="Daily Check-In"
-                    description="How are your symptoms today? Logging your mood and energy helps us refine your plan for tomorrow."
-                    buttonText="Log Symptoms"
-                    onAction={() => onNavigate(View.LOG)}
-                />
-                <WeeklySummaryCard />
+                        <SectionMovement
+                            title={movement.title}
+                            description={movement.desc}
+                            duration={movement.duration}
+                            intensity={movement.intensity}
+                            imageUrl="https://lh3.googleusercontent.com/aida-public/AB6AXuBhkMw5OiVrHssOpEse9L-QT9Bu5m6KhbS2Q0iFroBtbgs2Zepod0qFxAdS5MddjGO7t1G3zcamGliodgud5en1EXzSbzTGrx0VEsWcfgtDNcFuGfSulLPE12pg1gQ7GbQI_t2SryscKT0eHdQl9eOF5G1MGffb3Bve2y4lnRiWz9X5-XJWSdeAx2NxkbI31hZcYCTR1GH-k2IKABS89VufoS5sh36iV8rlyQMD7aIJGCVTUmJh9MTXDY5t6W-z5Ax095saet7A1A0"
+                            whyItWorks={movement.why}
+                        />
 
-                <SectionMovement
-                    title={movement.title}
-                    description={movement.desc}
-                    duration={movement.duration}
-                    intensity={movement.intensity}
-                    imageUrl="https://lh3.googleusercontent.com/aida-public/AB6AXuBhkMw5OiVrHssOpEse9L-QT9Bu5m6KhbS2Q0iFroBtbgs2Zepod0qFxAdS5MddjGO7t1G3zcamGliodgud5en1EXzSbzTGrx0VEsWcfgtDNcFuGfSulLPE12pg1gQ7GbQI_t2SryscKT0eHdQl9eOF5G1MGffb3Bve2y4lnRiWz9X5-XJWSdeAx2NxkbI31hZcYCTR1GH-k2IKABS89VufoS5sh36iV8rlyQMD7aIJGCVTUmJh9MTXDY5t6W-z5Ax095saet7A1A0"
-                    whyItWorks={movement.why}
-                />
+                        <SectionNourishment meals={nourishmentData} />
+                    </div>
 
-                <SectionNourishment meals={nourishmentData} />
+                    {/* Secondary Tracking & Wearables Column */}
+                    <div className="lg:col-span-4 flex flex-col gap-6">
+                        <HabitsProgress />
 
-                <HabitsProgress />
+                        <div className="bg-card rounded-3xl border border-border p-5 shadow-sm flex flex-col gap-3">
+                            <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
+                                <span className="material-symbols-outlined text-primary text-lg">watch</span>
+                                <h3>{t.wearableSectionTitle}</h3>
+                            </div>
+                            <p className="text-xs text-muted-foreground leading-relaxed">{t.wearableHealthConnectHint}</p>
+                            <HealthConnectWidget />
+                        </div>
+                    </div>
+                </div>
 
-                <footer className="mt-8 pt-8 border-t border-border flex flex-col items-center justify-center gap-4 text-center">
-                    <p className="text-xs text-muted-foreground max-w-md uppercase tracking-tighter">
-                        Disclaimer: This plan is generated based on your tracked data. Listen to your body first. Consult a healthcare professional for specific medical advice regarding PCOS.
+                <footer className="mt-4 pt-6 border-t border-border/60 flex flex-col items-center justify-center gap-2 text-center">
+                    <p className="text-[11px] text-muted-foreground/80 max-w-lg leading-relaxed">
+                        Disclaimer: This plan is generated based on your tracked data. Listen to your body first. Consult a healthcare professional for specific medical advice regarding PMOS.
                     </p>
                 </footer>
             </div>

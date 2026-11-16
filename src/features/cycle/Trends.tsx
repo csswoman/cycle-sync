@@ -70,11 +70,11 @@ const Trends: React.FC = () => {
 
   return (
     <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide">
-      <div className="max-w-[1400px] mx-auto p-6 md:p-10 flex flex-col gap-8 pb-20">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-8 pb-32">
 
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="flex flex-col gap-2">
-            <h1 className="text-foreground text-3xl md:text-4xl font-black leading-tight tracking-tight">My Patterns</h1>
+            <h1 className="text-foreground text-3xl md:text-4xl font-semibold leading-tight tracking-tight">My Patterns</h1>
             <p className="text-muted-foreground text-base font-normal">
               {loading ? 'Loading data...' : `Analyzing ${logs.length} logged days`}
             </p>

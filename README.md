@@ -1,6 +1,6 @@
 # 🌙 CycleSync: Holistic Health & Cycle Tracking
 
-CycleSync is a premium, AI-powered health assistant designed for women's holistic wellness. It synchronizes nutrition, fitness, and mental health with the natural phases of the menstrual cycle, with specialized support for PCOS management. Built as an offline-first PWA with privacy-first principles.
+CycleSync is a premium, AI-powered health assistant designed for women's holistic wellness. It synchronizes nutrition, fitness, and mental health with the natural phases of the menstrual cycle, with specialized support for PMOS management. Built as an offline-first PWA with privacy-first principles.
 
 ![CycleSync Banner](https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6)
 
@@ -11,8 +11,8 @@ CycleSync is a premium, AI-powered health assistant designed for women's holisti
 - **🧠 Smart AI Assistant** — Powered by Google Gemini with automatic model fallback (`2.5 Flash → 2.0 Flash → Flash Lite`). Supports multimodal analysis: meal photos for nutrition insights and exercise videos for form correction.
 - **📊 Advanced Analytics** — Track mood, energy, and symptoms across cycles to identify hormonal patterns.
 - **⚡ Personalized Dashboard** — Daily plans that adapt to your current cycle phase (Menstrual, Follicular, Ovulatory, Luteal).
-- **🩺 PCOS Care** — Tailored symptom tracking (acne, fatigue, hirsutism, hair loss, bloating) with phase-specific advice.
-- **🥗 Sync-Nourishment** — Phase-optimized meal ideas via Spoonacular with fallback recipes.
+- **🩺 PMOS Care** — Tailored symptom tracking (acne, fatigue, hirsutism, hair loss, bloating) with phase-specific advice.
+- **🥗 Sync-Nourishment** — Shared recipe catalog (Gemini-generated and imported from PDFs, no duplicates) with favorites and tags. Import PDFs with `npm run recipes:import -- <folder> [--lang es|en] [--dry-run]` (needs `SUPABASE_SERVICE_ROLE_KEY`).
 - **🏋️ Adaptive Routines** — Exercise recommendations based on a readiness score, with GIFs from ExerciseDB.
 - **📰 Health Articles** — Curated health content via NewsAPI with static fallback.
 - **📄 PDF Reports** — Export comprehensive health summaries for medical consultations.
@@ -33,7 +33,7 @@ CycleSync is a premium, AI-powered health assistant designed for women's holisti
 | AI | [Google Generative AI — Gemini](https://ai.google.dev/) |
 | PWA | [Serwist](https://serwist.pages.dev/) (Service Worker) |
 | PDF | [jsPDF](https://github.com/parallax/jsPDF) |
-| Icons | [Google Material Symbols](https://fonts.google.com/icons) |
+| Icons | [Phosphor Icons](https://phosphoricons.com/) (`@phosphor-icons/react`) |
 | Deploy | [Vercel](https://vercel.com/) |
 
 ---
@@ -52,7 +52,7 @@ src/
 │   │   ├── habits/
 │   │   ├── nutrition/
 │   │   ├── routines/
-│   │   ├── pcos/
+│   │   ├── pmos/
 │   │   ├── period-history/
 │   │   ├── export/
 │   │   └── settings/
@@ -62,7 +62,7 @@ src/
 │       └── health/         # Samsung Health Connect webhook
 ├── features/               # Domain modules (UI + logic per feature)
 ├── hooks/                  # Business logic hooks (useCycleInfo, useGeminiAssistant…)
-├── services/               # External API clients (Gemini, Fitbit, Spoonacular…)
+├── services/               # External API clients (Gemini, Fitbit…)
 ├── stores/                 # Zustand global state
 ├── lib/supabase/           # Browser / server / admin Supabase clients
 ├── types/                  # Global TypeScript types
@@ -88,7 +88,7 @@ All tables use **Row Level Security (RLS)** — users can only read and write th
 | --- | --- |
 | `cycle_config` | Cycle length, last period, workout & dietary prefs, archetype |
 | `daily_logs` | Mood, energy (1–10), sleep, symptoms — one row per user per day |
-| `pcos_symptoms` | PCOS symptom severity (0–3) per day |
+| `pcos_symptoms` | PMOS symptom severity (0–3) per day |
 | `habits` | Habit definitions (water, sleep, mindfulness, custom) |
 | `habit_logs` | Daily habit completion values |
 | `fitbit_tokens` | OAuth access/refresh tokens for Fitbit |
@@ -106,7 +106,6 @@ Migrations live in `supabase/migrations/`.
 | Google Gemini 2.5 Flash | AI assistant + multimodal analysis | — |
 | Fitbit Web API | Steps, heart rate, sleep (OAuth 2.0) | — |
 | Samsung Health Connect | Android wearable webhook | — |
-| Spoonacular | Recipe search & nutrition data | 150 req/day (free) |
 | RapidAPI / ExerciseDB | Exercise library with GIFs | 10k req/month (free) |
 | NewsAPI | Health articles | 100 req/day (free) |
 
@@ -145,7 +144,6 @@ All integrations have **graceful fallbacks** to static data when quotas are exce
    NEXT_PUBLIC_FITBIT_CLIENT_ID=your_fitbit_client_id
 
    # Optional, server-only (the app has fallbacks without them)
-   SPOONACULAR_API_KEY=your_spoonacular_key
    NEWSAPI_KEY=your_newsapi_key
    ```
 

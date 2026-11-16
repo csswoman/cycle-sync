@@ -1,4 +1,6 @@
 import React from 'react';
+import { Card as AstryxCard } from '@astryxdesign/core/Card';
+import { Icon } from '@/components/ui/Icon';
 
 interface CardProps {
     children: React.ReactNode;
@@ -8,28 +10,30 @@ interface CardProps {
 }
 
 export const Card: React.FC<CardProps> = ({ children, className = '', onClick, hoverable = true }) => {
-    const baseClasses = "rounded-xl p-5 border border-border bg-card text-foreground transition-all duration-300";
-    const hoverClasses = hoverable ? "hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5" : "";
+    const hoverClasses = hoverable ? "transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-blossom/10" : "";
     const cursorClasses = onClick ? "cursor-pointer" : "cursor-default";
 
     return (
-        <div
+        <AstryxCard
             onClick={onClick}
-            className={`${baseClasses} ${hoverClasses} ${cursorClasses} ${className} group`}
+            className={`relative overflow-hidden ${hoverClasses} ${cursorClasses} ${className} group`}
         >
             {children}
-        </div>
+        </AstryxCard>
     );
 };
 
 export const CardHeader: React.FC<{ children?: React.ReactNode, icon?: string, title: string }> = ({ icon, title, children }) => {
     return (
         <div className="flex items-center justify-between mb-2">
-            <p className="text-muted-foreground text-sm font-medium uppercase tracking-wider">{title}</p>
+            <p className="relative text-muted-foreground text-xs font-semibold uppercase tracking-wider">{title}</p>
             {icon && (
-                <span className="material-symbols-outlined text-primary opacity-50 group-hover:opacity-100 transition-opacity">
-                    {icon}
-                </span>
+                <Icon
+                    name={icon}
+                    size={18}
+                    weight="duotone"
+                    className="text-primary opacity-60 group-hover:opacity-100 transition-opacity"
+                />
             )}
             {children}
         </div>

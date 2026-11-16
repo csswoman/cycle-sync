@@ -6,7 +6,7 @@ export enum View {
   TRENDS = 'TRENDS',
   ARCHETYPE_SELECTION = 'ARCHETYPE_SELECTION',
   CYCLE_SETUP = 'CYCLE_SETUP',
-  PCOS = 'PCOS',
+  PMOS = 'PMOS',
   ROUTINES = 'ROUTINES',
   NUTRITION = 'NUTRITION',
   PERIOD_HISTORY = 'PERIOD_HISTORY',
@@ -86,9 +86,9 @@ export interface DailyLog {
   created_at: string;
 }
 
-// ── PCOS ───────────────────────────────────
+// ── PMOS ───────────────────────────────────
 
-export interface PCOSSymptomEntry {
+export interface PMOSSymptomEntry {
   id: string;
   user_id: string;
   date: string;

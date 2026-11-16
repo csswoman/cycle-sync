@@ -1,4 +1,5 @@
 import React from 'react';
+import { Icon } from '@/components/ui/Icon';
 
 interface Meal {
     title: string;
@@ -15,44 +16,44 @@ interface SectionNourishmentProps {
 
 export const SectionNourishment: React.FC<SectionNourishmentProps> = ({ meals }) => {
     return (
-        <section className="flex flex-col gap-4">
-            <div className="flex items-center gap-2 px-2 mt-4">
-                <span className="material-symbols-outlined text-primary">nutrition</span>
-                <h2 className="text-foreground text-xl font-bold">Nourishment</h2>
+        <section className="flex flex-col gap-3">
+            <div className="flex items-center gap-2 px-1">
+                <Icon name="restaurant" size={22} weight="duotone" className="text-primary" />
+                <h2 className="text-foreground text-xl font-semibold tracking-tight">Nourishment</h2>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {meals.map((meal, index) => (
-                    <div key={index} className="flex flex-col rounded-xl border border-border bg-card overflow-hidden hover:border-primary/30 transition-all group shadow-sm">
+                    <div key={index} className="flex flex-col rounded-3xl border border-border bg-card overflow-hidden hover:border-primary/40 transition-all group shadow-sm">
                         <div
-                            className="h-48 w-full bg-cover bg-center relative"
+                            className="h-44 w-full bg-cover bg-center relative"
                             style={{ backgroundImage: `url("${meal.imageUrl}")` }}
                         >
-                            <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-colors"></div>
-                            <div className="absolute bottom-4 left-4">
-                                <h3 className="text-primary-foreground text-xl font-bold shadow-black drop-shadow-md">{meal.title}</h3>
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+                            <div className="absolute bottom-3 left-4 right-4">
+                                <h3 className="text-white text-lg font-semibold leading-snug drop-shadow-sm">{meal.title}</h3>
                             </div>
                         </div>
-                        <div className="p-5 flex flex-col gap-4 h-full">
-                            <div className="flex items-start gap-3">
-                                <span className="material-symbols-outlined text-primary mt-0.5">verified</span>
-                                <div className="flex flex-col gap-1">
-                                    <span className="text-foreground font-bold text-sm">{meal.focus}</span>
-                                    <p className="text-muted-foreground text-sm leading-relaxed">{meal.description}</p>
+                        <div className="p-5 flex flex-col gap-3 flex-1">
+                            <div className="flex items-start gap-2.5">
+                                <Icon name="verified" size={18} weight="duotone" className="text-blossom mt-0.5 shrink-0" />
+                                <div className="flex flex-col gap-0.5">
+                                    <span className="text-foreground font-semibold text-xs sm:text-sm">{meal.focus}</span>
+                                    <p className="text-muted-foreground text-xs leading-relaxed">{meal.description}</p>
                                 </div>
                             </div>
-                            <div className="mt-auto bg-secondary p-4 rounded-xl border border-border/50">
-                                <p className="text-xs text-muted-foreground leading-relaxed">
-                                    <span className="text-primary font-bold">Why:</span> {meal.why}
+                            <div className="mt-auto bg-card/60 p-3 rounded-2xl border border-border/60 text-xs">
+                                <p className="text-muted-foreground leading-relaxed">
+                                    <strong className="text-foreground font-semibold">Why: </strong>{meal.why}
                                 </p>
                             </div>
-                            <button className="text-sm font-semibold text-foreground underline decoration-primary underline-offset-4 decoration-2 hover:text-primary transition-colors text-left mt-2">
-                                {meal.linkText}
+                            <button className="text-xs font-semibold text-blossom hover:text-blossom/80 transition-colors text-left flex items-center gap-1 pt-1">
+                                <span>{meal.linkText}</span>
+                                <Icon name="arrow_forward" size={14} />
                             </button>
                         </div>
                     </div>
                 ))}
             </div>
-
         </section>
     );
 };

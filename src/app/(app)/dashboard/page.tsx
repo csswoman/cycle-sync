@@ -15,7 +15,7 @@ export default function DashboardPage() {
           LOG: '/log',
           TRENDS: '/trends',
           CYCLE_SETUP: '/cycle-setup',
-          PCOS: '/pcos',
+          PMOS: '/pmos',
           ROUTINES: '/routines',
           NUTRITION: '/nutrition',
           PERIOD_HISTORY: '/period-history',

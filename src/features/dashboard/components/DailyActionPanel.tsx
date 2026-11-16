@@ -1,5 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/Button';
+import { Flower } from '@/components/ui/Flower';
+import { Icon } from '@/components/ui/Icon';
 
 interface DailyActionPanelProps {
     title: string;
@@ -15,22 +17,28 @@ export const DailyActionPanel: React.FC<DailyActionPanelProps> = ({
     onAction,
 }) => {
     return (
-        <div className="rounded-xl border border-primary/20 bg-gradient-to-r from-card to-secondary p-1">
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6 p-5 md:p-6 rounded-[10px] bg-card/30 backdrop-blur-sm">
-                <div className="flex items-start gap-4">
-                    <div className="p-3 rounded-full bg-primary/10 text-primary hidden sm:block">
-                        <span className="material-symbols-outlined">edit_note</span>
+        <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-gradient-to-br from-card via-card to-blossom-soft/40 shadow-sm p-6 sm:p-7">
+            <Flower
+                petal="var(--blossom-soft)"
+                center="var(--leaf-soft)"
+                petals={8}
+                rotate={10}
+                className="absolute -bottom-10 -right-6 size-36 opacity-70 pointer-events-none"
+            />
+            <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-5">
+                <div className="flex items-start gap-3.5">
+                    <div className="p-2.5 rounded-2xl bg-blossom-soft text-blossom flex-shrink-0 mt-0.5 sm:mt-0">
+                        <Icon name="edit_note" size={24} weight="duotone" />
                     </div>
                     <div className="flex flex-col gap-1">
-                        <p className="text-foreground text-lg font-bold">{title}</p>
-                        <p className="text-muted-foreground text-sm leading-normal max-w-lg">{description}</p>
+                        <h2 className="text-foreground text-xl sm:text-2xl font-semibold tracking-tight">{title}</h2>
+                        <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed max-w-lg">{description}</p>
                     </div>
                 </div>
-                <Button onClick={onAction} icon="add_circle" variant="primary">
+                <Button onClick={onAction} icon="add_circle" variant="primary" size="md" className="w-full sm:w-auto flex-shrink-0">
                     {buttonText}
                 </Button>
             </div>
         </div>
-
     );
 };

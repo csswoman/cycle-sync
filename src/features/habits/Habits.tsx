@@ -65,13 +65,13 @@ const Habits: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide bg-background">
-      <div className="w-full max-w-[1000px] mx-auto p-4 md:p-8 flex flex-col gap-8 pb-24">
+    <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide">
+      <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-8 pb-32">
 
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="flex flex-col gap-2">
-            <h1 className="text-foreground text-3xl md:text-4xl font-black leading-tight tracking-tight">
+            <h1 className="text-foreground text-3xl md:text-4xl font-semibold leading-tight tracking-tight">
               Daily Habits
             </h1>
             <p className="text-muted-foreground text-base">
@@ -80,7 +80,7 @@ const Habits: React.FC = () => {
           </div>
           <button
             onClick={() => setShowAddModal(true)}
-            className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-5 py-2.5 rounded-xl font-bold text-sm transition-all shadow-lg shadow-primary/20"
+            className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-5 py-2.5 rounded-full font-bold text-sm transition-all shadow-md shadow-blossom/20"
           >
             <span className="material-symbols-outlined text-[18px]">add</span>
             Add Habit
@@ -102,7 +102,7 @@ const Habits: React.FC = () => {
               />
             </svg>
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-foreground text-xl font-black">{dailyProgress}%</span>
+              <span className="text-foreground text-xl font-bold tabular-nums">{dailyProgress}%</span>
             </div>
           </div>
           <div className="flex flex-col gap-1">

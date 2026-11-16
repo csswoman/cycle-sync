@@ -34,6 +34,10 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSignUp, onUnconfirmedEmail, on
           onUnconfirmedEmail();
           return;
         }
+        if (error.message.includes('Invalid login credentials')) {
+          setError(t.invalidCredentials);
+          return;
+        }
         throw error;
       }
       onLogin();
@@ -59,9 +63,16 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSignUp, onUnconfirmedEmail, on
         email,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback`,
+          shouldCreateUser: false,
         },
       });
-      if (error) throw error;
+      if (error) {
+        if (error.message.toLowerCase().includes('signups not allowed')) {
+          setError(t.noAccountForEmail);
+          return;
+        }
+        throw error;
+      }
       setMagicLinkSent(true);
     } catch (err: any) {
       const message = err?.message ?? String(err);
@@ -236,6 +247,12 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSignUp, onUnconfirmedEmail, on
           </button>
 
           <div className="mt-6 text-center">
+            <a
+              href="/dashboard"
+              className="inline-block mb-3 text-sm font-semibold text-muted-foreground hover:text-foreground underline underline-offset-4"
+            >
+              {t.guestExplore}
+            </a>
             <p className="text-sm text-muted-foreground">
               {t.dontHaveAccount}
               <button 

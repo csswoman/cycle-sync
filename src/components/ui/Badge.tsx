@@ -1,4 +1,6 @@
 import React from 'react';
+import { Badge as AstryxBadge } from '@astryxdesign/core/Badge';
+import { Icon } from '@/components/ui/Icon';
 
 type BadgeVariant = 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'outline';
 
@@ -6,24 +8,26 @@ interface BadgeProps {
     children: React.ReactNode;
     variant?: BadgeVariant;
     className?: string;
+    /** Icon name. */
     icon?: string;
 }
 
+const VARIANT_MAP: Record<BadgeVariant, React.ComponentProps<typeof AstryxBadge>['variant']> = {
+    primary: 'pink',
+    secondary: 'neutral',
+    success: 'success',
+    warning: 'warning',
+    danger: 'error',
+    outline: 'neutral',
+};
+
 export const Badge: React.FC<BadgeProps> = ({ children, variant = 'primary', className = '', icon }) => {
-    const variants = {
-        primary: "bg-primary/10 text-primary border-primary/20",
-        secondary: "bg-secondary text-secondary-foreground border-border",
-        success: "bg-green-500/10 text-green-500 border-green-500/20",
-        warning: "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
-        danger: "bg-red-500/10 text-red-500 border-red-500/20",
-        outline: "bg-transparent text-muted-foreground border-border",
-    };
-
-
     return (
-        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold border transition-all ${variants[variant]} ${className}`}>
-            {icon && <span className="material-symbols-outlined text-[14px]">{icon}</span>}
-            {children}
-        </span>
+        <AstryxBadge
+            className={className}
+            variant={VARIANT_MAP[variant]}
+            label={children}
+            icon={icon ? <Icon name={icon} size={14} weight="bold" /> : undefined}
+        />
     );
 };

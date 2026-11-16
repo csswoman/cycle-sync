@@ -8,12 +8,13 @@ export interface Translations {
     settings: string;
     personalizeExperience: string;
     setupProfile: string;
-    pcosToolkit: string;
+    pmosToolkit: string;
     routines: string;
     mealIdeas: string;
     weeklyPlanner: string;
 
     habits: string;
+    medications: string;
 
     // Theme
     lightMode: string;
@@ -35,6 +36,14 @@ export interface Translations {
     video: string;
     typeMessage: string;
     send: string;
+    assistantTitle: string;
+    assistantSubtitle: string;
+    assistantOnline: string;
+    suggestMeals: string;
+    suggestCramps: string;
+    suggestWorkout: string;
+    uploadTooltip: string;
+    quickActions: string;
 
     // API Quota
     quotaExceeded: string;
@@ -50,8 +59,17 @@ export interface Translations {
     forgotPassword: string;
     loginButton: string;
     connectionError: string;
+    invalidCredentials: string;
+    noAccountForEmail: string;
     dontHaveAccount: string;
     signUp: string;
+    guestBrowsing: string;
+    guestSignIn: string;
+    guestExplore: string;
+    guestModalTitle: string;
+    guestModalBody: string;
+    guestLater: string;
+    guestUser: string;
     dataSecurityInfo: string;
     help: string;
     createAccount: string;
@@ -142,6 +160,26 @@ export interface Translations {
     wearableHealthConnectHint: string;
     distanceLabel: string;
     weightLabel: string;
+
+    // Health Library & Articles
+    articles: string;
+    healthLibrary: string;
+    searchArticles: string;
+    filterAll: string;
+    filterTraining: string;
+    filterNutrition: string;
+    filterPmos: string;
+    filterRecovery: string;
+    filterTracking: string;
+    forRegularCycle: string;
+    forPmos: string;
+    keyTakeaway: string;
+    actionInApp: string;
+    readArticle: string;
+    closeArticle: string;
+    readTime: string;
+    allAudiences: string;
+    medicalDisclaimer: string;
 }
 
 export const translations: Record<Language, Translations> = {
@@ -153,10 +191,12 @@ export const translations: Record<Language, Translations> = {
         settings: 'Settings',
         personalizeExperience: 'Personalize Experience',
         setupProfile: 'Setup Profile',
-        pcosToolkit: 'PCOS Toolkit',
+        pmosToolkit: 'PMOS Toolkit',
         routines: 'Workouts',
         mealIdeas: 'Meal Ideas',
+        weeklyPlanner: 'Weekly Plan',
         habits: 'Habits',
+        medications: 'Medications',
 
         // Theme
         lightMode: 'Light Mode',
@@ -178,6 +218,14 @@ export const translations: Record<Language, Translations> = {
         video: 'Video',
         typeMessage: 'Type your message...',
         send: 'Send',
+        assistantTitle: 'CycleSync AI',
+        assistantSubtitle: 'Cycle & wellness companion',
+        assistantOnline: 'Online',
+        suggestMeals: 'Phase-friendly foods?',
+        suggestCramps: 'How to ease cramps?',
+        suggestWorkout: 'Best workout for today?',
+        uploadTooltip: 'Upload image or video',
+        quickActions: 'Quick suggestions',
 
         // API Quota
         quotaExceeded: 'Daily Limit Reached',
@@ -192,10 +240,18 @@ export const translations: Record<Language, Translations> = {
         passwordLabel: 'Password',
         forgotPassword: 'Forgot Password?',
         loginButton: 'Log In',
+        invalidCredentials: 'Incorrect email or password. If you don\'t have an account yet, create one.',
+        noAccountForEmail: 'No account exists for this email. Create one to continue.',
         connectionError: 'Could not reach Supabase. Check NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in .env.local, restart the dev server, and confirm the project is active in the Supabase dashboard.',
         dontHaveAccount: "Don't have an account?",
-        weeklyPlanner: 'Weekly Plan',
         signUp: 'Sign Up',
+        guestBrowsing: 'Browsing as guest',
+        guestSignIn: 'Sign in',
+        guestExplore: 'Explore without an account',
+        guestModalTitle: 'Create a free account to use this',
+        guestModalBody: 'Logging, progress, medications and your personal data are saved to your account. Sign up to unlock them.',
+        guestLater: 'Maybe later',
+        guestUser: 'Guest',
         dataSecurityInfo: 'Your data is encrypted and stored locally.',
         help: 'Help',
         createAccount: 'Create Account',
@@ -287,6 +343,26 @@ export const translations: Record<Language, Translations> = {
             'Best for Galaxy Watch: use Health Connect below. Fitbit API only sees data on Fitbit servers (not Health Connect tiles).',
         distanceLabel: 'Distance',
         weightLabel: 'Weight',
+
+        // Health Library & Articles
+        articles: 'Articles',
+        healthLibrary: 'Health Library',
+        searchArticles: 'Search articles, topics or symptoms...',
+        filterAll: 'All',
+        filterTraining: 'Training & Phases',
+        filterNutrition: 'Nutrition & Insulin',
+        filterPmos: 'PMOS / PCOS',
+        filterRecovery: 'Recovery & Sleep',
+        filterTracking: 'Cycle Tracking',
+        forRegularCycle: 'Regular Cycle',
+        forPmos: 'With PMOS / PCOS',
+        keyTakeaway: 'Key Takeaway',
+        actionInApp: 'In CycleSync App',
+        readArticle: 'Read article',
+        closeArticle: 'Close',
+        readTime: 'min read',
+        allAudiences: 'All Audiences',
+        medicalDisclaimer: 'Educational information only. Does not replace professional medical advice, diagnosis, or personalized clinical treatment.',
     },
     es: {
         // Navigation
@@ -296,10 +372,12 @@ export const translations: Record<Language, Translations> = {
         settings: 'Configuración',
         personalizeExperience: 'Personalizar Experiencia',
         setupProfile: 'Configurar Perfil',
-        pcosToolkit: 'Kit de PCOS',
+        pmosToolkit: 'Kit de PMOS',
         routines: 'Entrenamientos',
         mealIdeas: 'Ideas de Comidas',
+        weeklyPlanner: 'Plan Semanal',
         habits: 'Hábitos',
+        medications: 'Medicamentos',
 
         // Theme
         lightMode: 'Modo Claro',
@@ -321,6 +399,14 @@ export const translations: Record<Language, Translations> = {
         video: 'Video',
         typeMessage: 'Escribe tu mensaje...',
         send: 'Enviar',
+        assistantTitle: 'CycleSync AI',
+        assistantSubtitle: 'Tu compañera de ciclo y bienestar',
+        assistantOnline: 'En línea',
+        suggestMeals: '¿Qué comer según mi fase?',
+        suggestCramps: '¿Cómo aliviar los cólicos?',
+        suggestWorkout: '¿Qué ejercicio me conviene hoy?',
+        uploadTooltip: 'Subir imagen o video',
+        quickActions: 'Sugerencias rápidas',
 
         // API Quota
         quotaExceeded: 'Límite Diario Alcanzado',
@@ -335,9 +421,18 @@ export const translations: Record<Language, Translations> = {
         passwordLabel: 'Contraseña',
         forgotPassword: '¿Olvidaste tu contraseña?',
         loginButton: 'Iniciar Sesión',
+        invalidCredentials: 'Correo o contraseña incorrectos. Si aún no tienes cuenta, créala.',
+        noAccountForEmail: 'No existe una cuenta con este correo. Créala para continuar.',
         connectionError: 'No se pudo conectar con Supabase. Revisa NEXT_PUBLIC_SUPABASE_URL y NEXT_PUBLIC_SUPABASE_ANON_KEY en .env.local, reinicia el servidor y confirma que el proyecto esté activo en el panel de Supabase.',
         dontHaveAccount: '¿No tienes una cuenta?',
         signUp: 'Regístrate',
+        guestBrowsing: 'Navegando como invitada',
+        guestSignIn: 'Iniciar sesión',
+        guestExplore: 'Explorar sin cuenta',
+        guestModalTitle: 'Crea una cuenta gratis para usar esto',
+        guestModalBody: 'El registro diario, el progreso, las medicinas y tus datos personales se guardan en tu cuenta. Regístrate para desbloquearlos.',
+        guestLater: 'Quizás después',
+        guestUser: 'Invitada',
         dataSecurityInfo: 'Tus datos están encriptados y se almacenan localmente.',
         help: 'Ayuda',
         createAccount: 'Crear Cuenta',
@@ -375,7 +470,6 @@ export const translations: Record<Language, Translations> = {
         forgotPasswordTitle: 'Restablecer contraseña',
         forgotPasswordDescription: 'Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña.',
         sendResetLink: 'Enviar enlace',
-        weeklyPlanner: 'Plan Semanal',
         resetLinkSent: 'Revisa tu correo',
         resetLinkSentDescription: 'Hemos enviado un enlace para restablecer tu contraseña. Haz clic en el enlace para crear una nueva.',
         resetPasswordTitle: 'Nueva contraseña',
@@ -430,5 +524,25 @@ export const translations: Record<Language, Translations> = {
             'Ideal para Galaxy Watch: usa Health Connect abajo. La API de Fitbit solo ve datos en los servidores de Fitbit (no los datos de Health Connect en la app).',
         distanceLabel: 'Distancia',
         weightLabel: 'Peso',
+
+        // Health Library & Articles
+        articles: 'Artículos',
+        healthLibrary: 'Biblioteca de Salud',
+        searchArticles: 'Buscar artículos, temas o síntomas...',
+        filterAll: 'Todos',
+        filterTraining: 'Entrenamiento y Fases',
+        filterNutrition: 'Nutrición e Insulina',
+        filterPmos: 'PMOS / SOP',
+        filterRecovery: 'Recuperación y Sueño',
+        filterTracking: 'Seguimiento del Ciclo',
+        forRegularCycle: 'En ciclo regular',
+        forPmos: 'Con PMOS / SOP',
+        keyTakeaway: 'Idea clave',
+        actionInApp: 'En la app CycleSync',
+        readArticle: 'Leer artículo',
+        closeArticle: 'Cerrar',
+        readTime: 'min de lectura',
+        allAudiences: 'Todas las audiencias',
+        medicalDisclaimer: 'Información educativa. No reemplaza el diagnóstico, valoración ni tratamiento médico personalizado.',
     },
 };

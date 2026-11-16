@@ -1,11 +1,11 @@
 {
   "name": "CycleSync - Holistic Health",
   "short_name": "CycleSync",
-  "description": "Track your cycle, sync your life. Holistic health for women with PCOS.",
+  "description": "Track your cycle, sync your life. Holistic health for women with PMOS.",
   "start_url": "/dashboard",
   "display": "standalone",
-  "background_color": "#11091a",
-  "theme_color": "#7f19e6",
+  "background_color": "#fbf3ea",
+  "theme_color": "#fbf3ea",
   "orientation": "portrait-primary",
   "categories": ["health", "lifestyle", "medical"],
   "icons": [

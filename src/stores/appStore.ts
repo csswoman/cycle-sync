@@ -12,6 +12,10 @@ interface AppState {
 
   user: User | null;
   setUser: (user: User | null) => void;
+  authReady: boolean;
+  setAuthReady: (ready: boolean) => void;
+  signupPromptOpen: boolean;
+  setSignupPromptOpen: (open: boolean) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -25,4 +29,8 @@ export const useAppStore = create<AppState>((set) => ({
 
   user: null,
   setUser: (user) => set({ user }),
+  authReady: false,
+  setAuthReady: (authReady) => set({ authReady }),
+  signupPromptOpen: false,
+  setSignupPromptOpen: (signupPromptOpen) => set({ signupPromptOpen }),
 }));

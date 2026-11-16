@@ -1,0 +1,299 @@
+'use client';
+
+import React from 'react';
+import {
+  IconProps as PhosphorBaseProps,
+  IconWeight,
+  SquaresFour,
+  CalendarPlus,
+  CalendarHeart,
+  Calendar,
+  CalendarDots,
+  CalendarCheck,
+  ClockCounterClockwise,
+  Barbell,
+  ForkKnife,
+  BowlFood,
+  TrendUp,
+  FlowerLotus,
+  Plant,
+  CheckCircle,
+  Pill,
+  DownloadSimple,
+  Gear,
+  Lock,
+  X,
+  SignIn,
+  SignOut,
+  List,
+  Globe,
+  Sun,
+  Moon,
+  User,
+  UserPlus,
+  DotsThree,
+  DotsThreeVertical,
+  Plus,
+  ChatCircleDots,
+  ChatDots,
+  PaperPlaneRight,
+  Robot,
+  Sparkle,
+  MagicWand,
+  MagnifyingGlass,
+  CaretLeft,
+  CaretRight,
+  ArrowRight,
+  ArrowLeft,
+  Check,
+  Trash,
+  FloppyDisk,
+  ArrowsClockwise,
+  Heart,
+  Lightning,
+  Drop,
+  Heartbeat,
+  Smiley,
+  SmileySad,
+  SmileyMeh,
+  SmileyWink,
+  Clock,
+  Dna,
+  Flask,
+  FirstAid,
+  Stethoscope,
+  WifiSlash,
+  Hourglass,
+  Warning,
+  Info,
+  SealCheck,
+  ShieldCheck,
+  BatteryCharging,
+  VideoCamera,
+  Camera,
+  CameraPlus,
+  Play,
+  PlayCircle,
+  Bookmark,
+  BookmarkSimple,
+  Eye,
+  EyeSlash,
+  Envelope,
+  EnvelopeOpen,
+  LinkBreak,
+  Flame,
+  Circle,
+  Minus,
+  PlusCircle,
+  CheckSquare,
+  ChartBar,
+  Flag,
+  Lightbulb,
+  Key,
+  GraduationCap,
+  ArrowsLeftRight,
+  HandTap,
+  UploadSimple,
+  Watch,
+  Spinner,
+  FileText,
+  BookOpen,
+  Funnel,
+  NotePencil,
+  Footprints,
+  PersonSimpleWalk,
+  Steps,
+} from '@phosphor-icons/react';
+
+export type { IconWeight };
+
+export type IconComponent = React.ComponentType<PhosphorBaseProps>;
+
+const ICON_MAP: Record<string, IconComponent> = {
+  // Navigation & Core
+  dashboard: SquaresFour,
+  overview: SquaresFour,
+  edit_calendar: CalendarPlus,
+  daily_log: CalendarHeart,
+  calendar: Calendar,
+  calendar_month: Calendar,
+  calendar_today: CalendarCheck,
+  event_upcoming: CalendarDots,
+  history: ClockCounterClockwise,
+  period_history: ClockCounterClockwise,
+  routines: Barbell,
+  fitness_center: Barbell,
+  restaurant: ForkKnife,
+  nutrition: ForkKnife,
+  meal_ideas: BowlFood,
+  trends: TrendUp,
+  trending_up: TrendUp,
+  insights: TrendUp,
+  analytics: ChartBar,
+  pmos: FlowerLotus,
+  pmos_toolkit: FlowerLotus,
+  spa: FlowerLotus,
+  habits: CheckCircle,
+  check_circle: CheckCircle,
+  medication: Pill,
+  medications: Pill,
+  export: DownloadSimple,
+  export_report: DownloadSimple,
+  download: DownloadSimple,
+  settings: Gear,
+  lock: Lock,
+  close: X,
+  x: X,
+  login: SignIn,
+  logout: SignOut,
+  menu: List,
+  language: Globe,
+  light_mode: Sun,
+  dark_mode: Moon,
+  person: User,
+  person_add: UserPlus,
+  more_horiz: DotsThree,
+  more_vert: DotsThreeVertical,
+  add: Plus,
+  plus: Plus,
+  chat: ChatCircleDots,
+  chat_dots: ChatDots,
+  chat_circle_dots: ChatCircleDots,
+  smart_toy: ChatCircleDots,
+  assistant: ChatCircleDots,
+  robot: Robot,
+  auto_awesome: Sparkle,
+  auto_fix_high: MagicWand,
+  sparkle: Sparkle,
+  sparkles: Sparkle,
+  plant: Plant,
+
+  // Actions & Controls
+  search: MagnifyingGlass,
+  search_off: MagnifyingGlass,
+  chevron_left: CaretLeft,
+  chevron_right: CaretRight,
+  arrow_forward: ArrowRight,
+  arrow_left: ArrowLeft,
+  check: Check,
+  delete: Trash,
+  save: FloppyDisk,
+  sync: ArrowsClockwise,
+  filter_list: Funnel,
+  edit_note: NotePencil,
+  play_arrow: Play,
+  play_circle: PlayCircle,
+  bookmark: Bookmark,
+  bookmark_add: BookmarkSimple,
+  visibility: Eye,
+  visibility_off: EyeSlash,
+  remove: Minus,
+  add_circle: PlusCircle,
+  task_alt: CheckSquare,
+  upload_file: UploadSimple,
+  hand_tap: HandTap,
+  touch_app: HandTap,
+  directions_walk: Footprints,
+  walk: PersonSimpleWalk,
+  steps: Steps,
+
+  // Health, PMOS & Vitals
+  favorite: Heart,
+  heart: Heart,
+  bolt: Lightning,
+  water_drop: Drop,
+  glucose: Drop,
+  drop: Drop,
+  monitor_heart: Heartbeat,
+  mood: Smiley,
+  sentiment_very_dissatisfied: SmileySad,
+  sentiment_dissatisfied: SmileyMeh,
+  sentiment_neutral: SmileyMeh,
+  sentiment_satisfied: Smiley,
+  sentiment_very_satisfied: SmileyWink,
+  bedtime: Moon,
+  schedule: Clock,
+  biotech: Dna,
+  science: Flask,
+  medical_services: FirstAid,
+  stethoscope: Stethoscope,
+  battery_charging_full: BatteryCharging,
+  flame: Flame,
+  local_fire_department: Flame,
+  local_florist: FlowerLotus,
+  self_improvement: FlowerLotus,
+
+  // Communication & Status
+  mail: Envelope,
+  mark_email_unread: EnvelopeOpen,
+  send: PaperPlaneRight,
+  paper_plane: PaperPlaneRight,
+  link_off: LinkBreak,
+  radio_button_unchecked: Circle,
+  circle: Circle,
+  hourglass_empty: Hourglass,
+  warning: Warning,
+  info: Info,
+  verified: SealCheck,
+  shield_lock: ShieldCheck,
+  videocam: VideoCamera,
+  movie: VideoCamera,
+  photo_camera: Camera,
+  add_a_photo: CameraPlus,
+  flag: Flag,
+  lightbulb: Lightbulb,
+  key: Key,
+  lock_reset: Key,
+  school: GraduationCap,
+  swap_horiz: ArrowsLeftRight,
+  watch: Watch,
+  wifi_off: WifiSlash,
+  progress_activity: Spinner,
+  description: FileText,
+  menu_book: BookOpen,
+};
+
+export interface IconProps extends Omit<PhosphorBaseProps, 'weight'> {
+  /** Icon name (either material-symbol name like 'edit_calendar' or phosphor name like 'CalendarHeart'). */
+  name: string;
+  /** Phosphor weight. Defaults to 'duotone' unless specified or className has 'fill-1' -> 'fill'. */
+  weight?: IconWeight;
+  className?: string;
+  size?: number | string;
+}
+
+export const Icon: React.FC<IconProps> = ({
+  name,
+  weight,
+  className = '',
+  size = 20,
+  ...props
+}) => {
+  // Normalize name: lowercase, trim, replace hyphen with underscore
+  const normalized = name.toLowerCase().trim().replace(/-/g, '_');
+
+  // Look up mapped component
+  const Component = ICON_MAP[normalized] || ICON_MAP[name] || Sparkle;
+
+  // Resolve weight: if fill-1 is present in className and no weight passed, use 'fill'
+  const resolvedWeight: IconWeight =
+    weight ?? (className.includes('fill-1') ? 'fill' : 'duotone');
+
+  // Strip material-symbols-outlined / fill-1 classes that are no longer needed
+  const cleanClassName = className
+    .replace(/\bmaterial-symbols-outlined\b/g, '')
+    .replace(/\bfill-1\b/g, '')
+    .trim();
+
+  return (
+    <Component
+      size={size}
+      weight={resolvedWeight}
+      className={`inline-block shrink-0 align-middle ${cleanClassName}`}
+      aria-hidden="true"
+      {...props}
+    />
+  );
+};
+
+export default Icon;

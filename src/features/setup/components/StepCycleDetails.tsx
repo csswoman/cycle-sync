@@ -73,7 +73,7 @@ export const StepCycleDetails: React.FC<StepCycleDetailsProps> = ({ cycleLength,
                 <div className="bg-card rounded-xl p-6 border border-border shadow-sm flex flex-col justify-between">
                     <div>
                         <h3 className="text-lg font-bold leading-tight tracking-[-0.015em] text-foreground">Cycle Regularity</h3>
-                        <p className="text-muted-foreground text-sm mt-1">Do you have irregular cycles or PCOS?</p>
+                        <p className="text-muted-foreground text-sm mt-1">Do you have irregular cycles or PMOS?</p>
                     </div>
                     <div className="mt-6 flex flex-col gap-3">
                         <label className="flex items-center gap-3 cursor-pointer group">
