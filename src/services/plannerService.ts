@@ -1,6 +1,8 @@
 import { supabase } from '@/lib/supabase';
 import { addDays, weekDays, type MealSlot } from '@/lib/planner/week';
 import type { GeneratedPlan } from '@/lib/planner/plan';
+import { buildPlanFromRecipes } from '@/lib/planner/fromRecipes';
+import { listLibrary } from '@/services/recipesService';
 
 export interface MealEntry {
     id: string;
@@ -67,6 +69,21 @@ export async function loadWeek(weekStart: string) {
         meals: (meals.data ?? []).map(toMeal),
         workouts: (workouts.data ?? []).map(toWorkout),
         checked: (checks.data ?? []).map((c) => c.item_key as string),
+    };
+}
+
+/** Meals and workout planned for one day, without the week's grocery data. */
+export async function loadDay(date: string) {
+    const userId = await currentUserId();
+    const [meals, workouts] = await Promise.all([
+        supabase.from('meal_plan_entries').select('*').eq('user_id', userId).eq('plan_date', date),
+        supabase.from('workout_plan_entries').select('*').eq('user_id', userId).eq('plan_date', date),
+    ]);
+    if (meals.error) throw meals.error;
+    if (workouts.error) throw workouts.error;
+    return {
+        meals: (meals.data ?? []).map(toMeal),
+        workout: (workouts.data ?? []).map(toWorkout)[0] ?? null,
     };
 }
 
@@ -209,7 +226,9 @@ export async function requestPlan(body: {
     dietary?: string[];
     includeMeals: boolean;
     includeWorkouts: boolean;
-}): Promise<GeneratedPlan> {
+    avoid?: string[];
+    onlySlots?: { day: number; slot: MealSlot }[];
+}): Promise<GeneratedPlan & { savedRecipes?: number }> {
     const res = await fetch('/api/planner/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -217,5 +236,22 @@ export async function requestPlan(body: {
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(data.error || `Plan generation failed (${res.status})`);
-    return data as GeneratedPlan;
+    return data as GeneratedPlan & { savedRecipes?: number };
+}
+
+/**
+ * Fills the empty meal slots of the week from the recipes already in the library (no AI).
+ * Returns the slots it could not fill so the caller can offer the AI for those.
+ */
+export async function planMealsFromLibrary(
+    weekStart: string,
+    opts: { language: 'es' | 'en'; pantry: string[]; avoid: string[]; likes: string[]; taken: Set<string> },
+) {
+    const library = await listLibrary();
+    const recipes = library.filter((r) => r.language === opts.language);
+    const result = buildPlanFromRecipes(recipes, opts);
+    if (result.meals.length > 0) {
+        await applyGeneratedPlan(weekStart, { meals: result.meals, workouts: [] }, { video: new Map() });
+    }
+    return { filled: result.meals.length, missing: result.missing };
 }

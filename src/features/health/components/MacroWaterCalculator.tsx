@@ -45,7 +45,7 @@ export const MacroWaterCalculator: React.FC<MacroWaterCalculatorProps> = ({
               </span>
             </h3>
             <p className="text-muted-foreground text-xs sm:text-sm">
-              Cálculo para quemar grasa preservando 100% tu masa muscular
+              Proteína y agua para cuidar tu masa muscular, tu energía y tu glucosa
             </p>
           </div>
         </div>

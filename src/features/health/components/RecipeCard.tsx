@@ -53,6 +53,25 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe: r, onToggleFavor
       <div className="p-5 flex flex-col flex-1 gap-3">
         <h3 className="text-lg font-bold leading-tight text-foreground group-hover:text-primary transition-colors">{r.title}</h3>
         {r.description && <p className="text-sm text-muted-foreground line-clamp-2">{r.description}</p>}
+        {r.nutrition && (
+          <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground py-0.5">
+            {r.nutrition.calories != null && (
+              <span className="font-bold text-foreground bg-secondary px-2 py-0.5 rounded">
+                {Math.round(r.nutrition.calories)} kcal
+              </span>
+            )}
+            {r.nutrition.protein != null && (
+              <span className="font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
+                {Math.round(r.nutrition.protein)}g prot
+              </span>
+            )}
+            {r.nutrition.carbohydrates != null && (
+              <span className="text-[11px] text-muted-foreground">
+                {Math.round(r.nutrition.carbohydrates)}g C
+              </span>
+            )}
+          </div>
+        )}
         {tags.length > 0 && (
           <div className="mt-auto pt-2 flex flex-wrap gap-2">
             {tags.map((tag) => (

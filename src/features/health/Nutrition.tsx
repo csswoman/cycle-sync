@@ -148,7 +148,7 @@ const Nutrition: React.FC = () => {
               Nourish Your Body
             </h1>
             <p className="text-muted-foreground text-sm md:text-base font-normal leading-relaxed max-w-xl">
-              Nutrición inteligente y sincronizada con tu ciclo: calcula requerimientos de proteína y agua según tu peso para ganar músculo y quemar grasa, diseña tus platos en gramos y explora recetas antiinflamatorias.
+              Nutrición inteligente y sincronizada con tu ciclo: calcula tus requerimientos de proteína y agua para cuidar tu músculo, tu energía y tu glucosa, diseña tus platos en gramos y explora recetas antiinflamatorias.
             </p>
           </div>
         </section>
@@ -207,7 +207,7 @@ const Nutrition: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="text-foreground text-lg font-bold">
-                    Lógica Nutricional: Ganar Músculo y Bajar de Peso sin Perder Masa Muscular
+                    Lógica nutricional: proteína para tu músculo y tu sensibilidad a la insulina
                   </h3>
                   <p className="text-muted-foreground text-xs sm:text-sm">
                     Fundamentos basados en las guías de la Sociedad Internacional de Nutrición Deportiva (ISSN) y McMaster University
@@ -222,7 +222,7 @@ const Nutrition: React.FC = () => {
                     ¿Por qué 1.6 a 2.2 g de proteína por kg?
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Al buscar perder peso (déficit calórico), el cuerpo tiende a utilizar reservas de aminoácidos musculares si no recibe suficiente proteína. Consumir entre <strong>1.8 y 2.2 g/kg</strong> asegura balance de nitrógeno positivo, repara miofibrillas y provee mayor termogénesis (el 20-30% de las calorías de la proteína se queman simplemente digiriéndola).
+                    El músculo es el principal lugar donde tu cuerpo usa la glucosa, así que cuidarlo ayuda con la resistencia a la insulina del PMOS. Si comes menos de lo que gastas, el cuerpo tiende a usar aminoácidos del músculo cuando no recibe suficiente proteína. Consumir entre <strong>1.8 y 2.2 g/kg</strong> asegura balance de nitrógeno positivo, repara miofibrillas y provee mayor termogénesis (el 20-30% de las calorías de la proteína se queman simplemente digiriéndola).
                   </p>
                 </div>
 

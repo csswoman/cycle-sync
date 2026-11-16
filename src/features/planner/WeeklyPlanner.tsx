@@ -6,6 +6,8 @@ import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { useCycleInfo } from '@/hooks/useCycleInfo';
+import { useFoodPreferences } from '@/hooks/useFoodPreferences';
+import { entriesToNames } from '@/lib/nutrition/foodPreferences';
 import { fetchWorkoutVideos } from '@/services/exercisesService';
 import type { WorkoutVideo } from '@/types/exercises';
 import { MEAL_SLOTS, addDays, parseISODate, toISODate, weekDays, weekStartOf, type MealSlot } from '@/lib/planner/week';
@@ -23,6 +25,7 @@ import {
     saveWorkout,
     setDone,
     setGroceryChecked,
+    planMealsFromLibrary,
     type MealEntry,
     type PantryItem,
     type WorkoutEntry,
@@ -33,9 +36,16 @@ const TEXT = {
         title: 'Plan semanal',
         subtitle: 'Menús y entrenamientos sincronizados con la fisiología de tu ciclo menstrual.',
         phaseContext: 'Fase actual',
-        generate: 'Generar con IA',
-        generateMeals: 'Solo comidas',
-        generateWorkouts: 'Solo entrenos',
+        fromRecipes: 'Planear con mis recetas',
+        fromRecipesBusy: 'Armando plan…',
+        fromRecipesNone: 'Ya hay comidas en todos los espacios de esta semana.',
+        gapNotice: (n: number) => `${n} ${n === 1 ? 'espacio quedó' : 'espacios quedaron'} sin receta que encaje. La IA puede completarlos.`,
+        completeWithAi: 'Completar con IA',
+        aiLabel: 'Con IA:',
+        savedRecipes: (n: number) => `${n} ${n === 1 ? 'receta nueva guardada' : 'recetas nuevas guardadas'} en tu biblioteca.`,
+        generate: 'Todo con IA',
+        generateMeals: 'Comidas con IA',
+        generateWorkouts: 'Entrenos con IA',
         generating: 'Generando plan…',
         clear: 'Vaciar semana',
         today: 'Hoy',
@@ -67,9 +77,16 @@ const TEXT = {
         title: 'Weekly plan',
         subtitle: 'Meals and workouts synchronized with your menstrual cycle physiology.',
         phaseContext: 'Current phase',
-        generate: 'Generate with AI',
-        generateMeals: 'Meals only',
-        generateWorkouts: 'Workouts only',
+        fromRecipes: 'Plan with my recipes',
+        fromRecipesBusy: 'Building plan…',
+        fromRecipesNone: 'Every meal slot this week already has a meal.',
+        gapNotice: (n: number) => `${n} ${n === 1 ? 'slot has' : 'slots have'} no matching recipe. The AI can fill them.`,
+        completeWithAi: 'Complete with AI',
+        aiLabel: 'With AI:',
+        savedRecipes: (n: number) => `${n} new ${n === 1 ? 'recipe' : 'recipes'} saved to your library.`,
+        generate: 'Everything with AI',
+        generateMeals: 'Meals with AI',
+        generateWorkouts: 'Workouts with AI',
         generating: 'Generating plan…',
         clear: 'Clear week',
         today: 'Today',
@@ -131,6 +148,9 @@ const WeeklyPlanner: React.FC = () => {
     const [editing, setEditing] = useState<{ date: string; slot: MealSlot } | null>(null);
     const [draft, setDraft] = useState({ title: '', ingredients: '' });
     const [pantryInput, setPantryInput] = useState('');
+    const [notice, setNotice] = useState<string | null>(null);
+    const [gaps, setGaps] = useState<{ day: number; slot: MealSlot }[]>([]);
+    const foodPrefs = useFoodPreferences();
 
     const days = useMemo(() => weekDays(weekStart), [weekStart]);
     const todayISO = toISODate(new Date());
@@ -197,18 +217,37 @@ const WeeklyPlanner: React.FC = () => {
         }
     };
 
-    const generate = (includeMeals: boolean, includeWorkouts: boolean) =>
+    const lang = isEs ? 'es' : 'en';
+    const generate = (includeMeals: boolean, includeWorkouts: boolean, onlySlots?: { day: number; slot: MealSlot }[]) =>
         run(async () => {
+            setNotice(null);
+            setGaps([]);
             const plan = await requestPlan({
-                language: isEs ? 'es' : 'en',
+                language: lang,
                 phase,
                 pantry: pantry.map((p) => p.name),
+                avoid: entriesToNames(foodPrefs.prefs.avoid, lang),
                 includeMeals,
                 includeWorkouts,
+                onlySlots,
             });
             await applyGeneratedPlan(weekStart, plan, { video: new Map(videos.map((v) => [v.id, v.title])) });
+            if (plan.savedRecipes) setNotice(tx.savedRecipes(plan.savedRecipes));
         });
-
+    const planFromRecipes = () =>
+        run(async () => {
+            setNotice(null);
+            const taken = new Set(meals.map((m) => `${days.indexOf(m.date)}-${m.slot}`));
+            const result = await planMealsFromLibrary(weekStart, {
+                language: lang,
+                pantry: pantry.map((p) => p.name),
+                avoid: foodPrefs.prefs.avoid,
+                likes: foodPrefs.prefs.likes,
+                taken,
+            });
+            setGaps(result.missing);
+            if (result.filled === 0 && result.missing.length === 0) setNotice(tx.fromRecipesNone);
+        });
     const startEdit = (date: string, slot: MealSlot) => {
         const current = mealAt(date, slot);
         setDraft({ title: current?.title ?? '', ingredients: current?.ingredients.join(', ') ?? '' });
@@ -373,12 +412,23 @@ const WeeklyPlanner: React.FC = () => {
                     <div className="flex items-center gap-2 flex-wrap justify-end">
                         <Button
                             size="sm"
+                            icon="menu_book"
+                            disabled={busy}
+                            onClick={planFromRecipes}
+                            className="shadow-sm"
+                        >
+                            {busy ? tx.fromRecipesBusy : tx.fromRecipes}
+                        </Button>
+                        <span className="text-xs text-muted-foreground">{tx.aiLabel}</span>
+                        <Button
+                            size="sm"
+                            variant="secondary"
                             icon="auto_awesome"
                             disabled={busy}
                             onClick={() => generate(true, true)}
-                            className="shadow-sm"
+                            className="text-xs"
                         >
-                            {busy ? tx.generating : tx.generate}
+                            {tx.generate}
                         </Button>
                         <Button
                             size="sm"
@@ -410,6 +460,18 @@ const WeeklyPlanner: React.FC = () => {
                         </Button>
                     </div>
                 </div>
+
+                {gaps.length > 0 && (
+                    <div className="p-3 rounded-xl bg-primary/10 border border-primary/30 text-sm flex items-center justify-between gap-3 flex-wrap">
+                        <span>{tx.gapNotice(gaps.length)}</span>
+                        <Button size="sm" icon="auto_awesome" disabled={busy} onClick={() => generate(true, false, gaps)} className="text-xs">
+                            {tx.completeWithAi}
+                        </Button>
+                    </div>
+                )}
+                {notice && (
+                    <div className="p-3 rounded-xl bg-muted/50 border border-border text-sm text-muted-foreground">{notice}</div>
+                )}
 
                 {error && (
                     <div role="alert" className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-sm flex items-center gap-2">

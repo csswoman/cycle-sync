@@ -1,0 +1,2683 @@
+[
+  {
+    "title": "Pasta con Calabacin y Huevos",
+    "description": "Pasta ligera con calabacin en tiras finas y tortilla de huevo cortada en rodajas, con opcion de salsa fria o picante.",
+    "category": "almuerzo",
+    "calories": 280,
+    "protein": 14,
+    "carbs": 32,
+    "fat": 10,
+    "ingredients": [
+      "2 huevos",
+      "1 pizca de sal",
+      "2 calabacines (cantidad variable segun tamano)",
+      "1 tomate"
+    ],
+    "instructions": [
+      "Batir 2 huevos, anadir una pizca de sal y preparar dos o tres tortillas finas. Dejar enfriar, enrollar y cortar en rodajas muy finas.",
+      "Cortar el calabacin en tiras muy finas o usar una mandolina. Cortar en dados un tomate sin semillas.",
+      "Mezclar los ingredientes justo antes de servir y agregar la salsa preferida."
+    ],
+    "prepTime": null,
+    "servings": 2,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Noquis de Calabaza",
+    "description": "Noquis caseros hechos con pure de calabaza, huevo y harina, servidos con tu salsa favorita.",
+    "category": "almuerzo",
+    "calories": 180,
+    "protein": 3,
+    "carbs": 42,
+    "fat": 1,
+    "ingredients": [
+      "1 taza y 1/2 de pure de calabaza",
+      "1 huevo",
+      "1 pizca de sal",
+      "3 o 4 cucharadas de harina de arroz o harina de trigo",
+      "1 pizca de nuez moscada"
+    ],
+    "instructions": [
+      "Cocinar la calabaza al vapor de 30 a 40 minutos, retirar la pulpa y triturarla bien.",
+      "Anadir el huevo, la sal, la nuez moscada y la harina hasta obtener una consistencia ideal para hacer panecillos.",
+      "Espolvorear harina sobre una superficie, formar pequenos rollos con la masa y cortarlos en trozos de 2 cm con un cuchillo.",
+      "Poner los noquis en agua hirviendo y retirarlos con una espumadera cuando floten.",
+      "Colocarlos en una fuente para horno. Servirlos con tu salsa favorita."
+    ],
+    "prepTime": null,
+    "servings": 2,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Pastel de Frijoles (Bunuelos)",
+    "description": "Buñuelos de frijoles blancos con zanahoria rallada. Se pueden hacer en sarten, horneados o fritos.",
+    "category": "almuerzo",
+    "calories": 220,
+    "protein": 8,
+    "carbs": 38,
+    "fat": 4,
+    "ingredients": [
+      "14g (1 cucharada) de frijoles blancos cocidos con especias trituradas (sustituibles por frijoles de ojo negro o frijoles pintos)",
+      "3.5g (1/2 cucharada) de zanahoria cruda rallada",
+      "1/2 cucharadita de aceite de oliva",
+      "1/2 cucharadita de maicena o harina de trigo",
+      "Perejil, oregano, semillas de cilantro molidas, pimienta negra y sal"
+    ],
+    "instructions": [
+      "Mezclar bien todos los ingredientes.",
+      "Dar forma a la mezcla con una cuchara.",
+      "Colocar en una sarten antiadherente a fuego lento, tapada."
+    ],
+    "prepTime": null,
+    "servings": 2,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Pastel de Remolacha",
+    "description": "Bizcocho dulce de remolacha con cobertura de chocolate.",
+    "category": "postre",
+    "calories": 250,
+    "protein": 10,
+    "carbs": 30,
+    "fat": 10,
+    "ingredients": [
+      "2 cucharadas de jugo de naranja",
+      "1/2 taza de remolacha picada (cocida o cruda)",
+      "1 huevo",
+      "1/4 taza de azucar",
+      "1 1/2 cucharadas de aceite",
+      "3/8 taza de harina para todo uso (puede ser integral)",
+      "1/2 cucharadita de polvo para hornear"
+    ],
+    "instructions": [
+      "Combinar el jugo de naranja con la remolacha y licuar. Reservar.",
+      "Aparte, batir las yemas de huevo y el aceite. Anadir poco a poco el jugo licuado.",
+      "Anadir la harina de trigo.",
+      "Incorporar las claras batidas y la levadura quimica.",
+      "Hornear a temperatura moderada.",
+      "Para la cobertura: derretir la mantequilla, anadir el chocolate en polvo, el azucar y la leche. Dejar hervir hasta que espese. Verter sobre el pastel aun caliente."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Zumo de Cascara de Fruta",
+    "description": "Jugo nutritivo elaborado con cascaras de frutas variadas. Rico en Vitaminas C y B1, Potasio, Fosforo, Calcio y Magnesio.",
+    "category": "bebida",
+    "calories": 150,
+    "protein": 8,
+    "carbs": 12,
+    "fat": 8,
+    "ingredients": [
+      "3/4 taza de cascaras de frutas variadas",
+      "1/2 litro de agua",
+      "Azucar al gusto"
+    ],
+    "instructions": [
+      "Lavar bien las cascaras.",
+      "Licuar con agua.",
+      "Colar bien y endulzar al gusto."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Jugo de Naranja, Hinojo y Menta",
+    "description": "Jugo refrescante con naranja, hinojo y menta.",
+    "category": "bebida",
+    "calories": 280,
+    "protein": 12,
+    "carbs": 20,
+    "fat": 16,
+    "ingredients": [
+      "1 naranja sin semillas (1 con piel y 2 sin piel)",
+      "1 punado de hinojo",
+      "1 ramita de menta",
+      "250ml de agua",
+      "Azucar o edulcorante al gusto"
+    ],
+    "instructions": [
+      "Licuar todo junto.",
+      "Colar y anadir hielo."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Pastel de Frijoles (Dulce)",
+    "description": "Bizcocho dulce hecho con frijoles cocidos licuados.",
+    "category": "postre",
+    "calories": 320,
+    "protein": 10,
+    "carbs": 45,
+    "fat": 12,
+    "ingredients": [
+      "1 huevo",
+      "1/4 taza de azucar",
+      "3 cucharadas de harina comun o integral",
+      "2 cucharadas de frijoles cocidos sin sal, licuados",
+      "2 cucharadas de aceite",
+      "1/2 cucharadita de levadura en polvo"
+    ],
+    "instructions": [
+      "Batir las claras a punto de nieve, preferiblemente con batidora electrica.",
+      "Sin parar de batir, anadir las yemas.",
+      "Anadir poco a poco el azucar, luego el aceite y los frijoles.",
+      "Una vez homogenea, apagar la batidora y anadir la levadura. Remover con cuchara.",
+      "Colocar la masa en un molde engrasado y enharinado.",
+      "Hornear en horno precalentado a 200 grados durante 40-45 minutos."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "mantener"
+    ]
+  },
+  {
+    "title": "Pastel de Avena",
+    "description": "Bizcocho sencillo de avena con opcion de cobertura de chocolate.",
+    "category": "postre",
+    "calories": 250,
+    "protein": 22,
+    "carbs": 10,
+    "fat": 14,
+    "ingredients": [
+      "1 huevo batido",
+      "1/2 cucharada de leche en polvo (sin diluir)",
+      "3 cucharadas de azucar",
+      "1 cucharadita de mantequilla",
+      "1/2 cucharadita de mantequilla (para engrasar el molde)",
+      "1/2 cucharadita rasa de polvo para hornear",
+      "1 paquete de avena en hojuelas (25g)",
+      "1/8 cucharadita de canela molida"
+    ],
+    "instructions": [
+      "Mezclar todo.",
+      "Engrasar un molde para hornear con margarina.",
+      "Extender la mezcla presionando con la mano.",
+      "Hornear.",
+      "Opcionalmente, anadir una cobertura de chocolate."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Albondigas en Salsa de Papaya",
+    "description": "Albondigas de carne picada con una salsa cremosa de papaya.",
+    "category": "almuerzo",
+    "calories": 300,
+    "protein": 8,
+    "carbs": 52,
+    "fat": 6,
+    "ingredients": [
+      "1 panecillo pequeno (13g)",
+      "50g de carne picada",
+      "Sal al gusto",
+      "2 cucharadas de aceite para freir",
+      "1/2 taza de pulpa de papaya",
+      "1 cucharadita de cebolla",
+      "1 diente de ajo",
+      "1 cucharadita de aceite",
+      "1 1/4 cucharadas de pulpa de tomate",
+      "1 cucharadita de perejil picado"
+    ],
+    "instructions": [
+      "Remojar el pan en agua. Apretarlo bien.",
+      "Anadir el pan ablandado a la carne y sazonar con sal. Mezclar bien y formar albondigas.",
+      "Freirlas en aceite caliente y reservar.",
+      "Licuar la pulpa de papaya y reservar.",
+      "Saltear la cebolla y el ajo en aceite, agregar el pure de papaya y la pasta de tomate. Sazonar con sal.",
+      "Cuando hierva, agregar las albondigas, espolvorear con perejil y servir caliente."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Arroz Verde",
+    "description": "Arroz salteado con verduras de hoja verde: tallos de berro, perejil y hojas de zanahoria.",
+    "category": "almuerzo",
+    "calories": 120,
+    "protein": 4,
+    "carbs": 18,
+    "fat": 3,
+    "ingredients": [
+      "3/4 taza de arroz",
+      "1 cucharadita de cebolla picada",
+      "1 diente de ajo",
+      "1 cucharada de aceite",
+      "Sal al gusto",
+      "1 cucharadita de aceite (para el salteado)",
+      "3 cucharadas de cebolla picada",
+      "1/4 taza de tallos de berro picados",
+      "1/4 taza de perejil picado",
+      "1/4 taza de hojas de zanahoria picadas"
+    ],
+    "instructions": [
+      "Saltear la cebolla y el ajo en aceite, anadir rapidamente el arroz, luego el agua y la sal. Cocinar hasta que se absorba el agua. Reservar.",
+      "Aparte, sofreir la cebolla en aceite, anadir los tallos y las hojas. Saltearlos y mezclarlos con el arroz cocido."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Crema de Naranja y Zanahoria",
+    "description": "Crema dulce de naranja y zanahoria, ideal como relleno para tartas.",
+    "category": "postre",
+    "calories": 380,
+    "protein": 28,
+    "carbs": 40,
+    "fat": 12,
+    "ingredients": [
+      "2 cucharadas de zanahorias picadas",
+      "2 cucharadas de agua",
+      "1/4 taza de jugo de naranja",
+      "1/2 cucharada de maicena",
+      "1/2 cucharada de azucar"
+    ],
+    "instructions": [
+      "Licuar la zanahoria con el agua y anadir el jugo de naranja.",
+      "Agregar la maicena y el azucar, revolver bien.",
+      "Cocinar a fuego lento hasta que espese.",
+      "Cocinar hasta que se despegue del fondo de la olla y servir frio."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "ganar-musculo",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Pastel de Naranja con Cascara",
+    "description": "Bizcocho de naranja preparado con naranjas enteras (con cascara).",
+    "category": "postre",
+    "calories": 300,
+    "protein": 16,
+    "carbs": 24,
+    "fat": 16,
+    "ingredients": [
+      "65g de harina especial o integral",
+      "38g de azucar",
+      "1 huevo",
+      "2.5 gramos de polvo para hornear",
+      "2 cucharadas de aceite",
+      "31ml de leche",
+      "1 naranja"
+    ],
+    "instructions": [
+      "Licuar las naranjas (2 con cascara y 2 sin cascara), las yemas de huevo, el azucar, el aceite y la leche.",
+      "Tamizar la harina con la levadura.",
+      "Combinar ambas mezclas e incorporar con movimientos envolventes las claras batidas.",
+      "Engrasar un molde, verter la masa y hornear en horno precalentado."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Galletas de Hojas, Tallos o Cascaras de Vegetales",
+    "description": "Galletas saladas hechas con hojas, tallos o cascaras de vegetales.",
+    "category": "snack",
+    "calories": 350,
+    "protein": 15,
+    "carbs": 58,
+    "fat": 6,
+    "ingredients": [
+      "1/3 taza de hojas, tallos o corteza (una o mezcla de varias)",
+      "1 huevo",
+      "1/2 cucharadita de mantequilla",
+      "1/8 cucharadita de polvo para hornear",
+      "1/3 taza de harina comun o integral",
+      "1 1/2 cucharadas de leche",
+      "Sal al gusto",
+      "Queso rallado al gusto"
+    ],
+    "instructions": [
+      "Lavar bien las hojas, los tallos y las cascaras, luego picarlos finamente o triturarlos.",
+      "Agregar el resto de los ingredientes y amasar bien hasta que la masa este bien extendida con un rodillo.",
+      "Agregar mas harina si es necesario.",
+      "Extender la masa finamente, cortarla en cuadrados pequenos.",
+      "Hornear en una bandeja de horno engrasada."
+    ],
+    "prepTime": null,
+    "servings": 2,
+    "tags": [
+      "perder-peso",
+      "ganar-musculo",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Receta con Pan Duro (Version Dulce)",
+    "description": "Aprovechamiento de pan duro en un pudin dulce con manzana y pasas.",
+    "category": "postre",
+    "calories": 320,
+    "protein": 35,
+    "carbs": 15,
+    "fat": 12,
+    "ingredients": [
+      "1 panecillo duro",
+      "1 manzana",
+      "1 cucharadita de pasas",
+      "1 huevo",
+      "1/2 taza de leche",
+      "1/2 cucharada de azucar",
+      "Extracto de vainilla",
+      "Canela molida",
+      "Mantequilla para engrasar"
+    ],
+    "instructions": [
+      "Engrasar una fuente con mantequilla.",
+      "Cortar el pan en rebanadas gruesas sin separarlas completamente.",
+      "Colocar las rebanadas en la fuente engrasada.",
+      "Cortar la manzana en rodajas y colocarlas con las pasas en los espacios entre las rebanadas.",
+      "Batir los huevos con la leche, el azucar, el extracto de vainilla y la canela.",
+      "Verter el liquido sobre el pan.",
+      "Cubrir y refrigerar durante al menos 1 hora.",
+      "Hornear a 180 grados durante aproximadamente 25 minutos hasta que este dorado."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "ganar-musculo",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Receta con Pan Duro (Version Salada)",
+    "description": "Aprovechamiento de pan duro en un plato salado con tomate, cebolla y queso.",
+    "category": "almuerzo",
+    "calories": 220,
+    "protein": 12,
+    "carbs": 8,
+    "fat": 16,
+    "ingredients": [
+      "1 panecillo duro",
+      "1 tomate",
+      "1 cebolla",
+      "1 huevo",
+      "1/2 taza de leche",
+      "1/4 cucharadita de sal",
+      "Pimienta negra al gusto",
+      "1/4 taza de queso fresco rallado grueso",
+      "Oregano al gusto",
+      "Mantequilla para engrasar"
+    ],
+    "instructions": [
+      "Engrasar una fuente con mantequilla.",
+      "Cortar el pan en rebanadas gruesas, sin separarlas del todo.",
+      "Colocar en la fuente y poner rodajas de tomate y cebolla entre las rebanadas.",
+      "Batir los huevos con la leche, la sal y la pimienta.",
+      "Verter el liquido sobre las rebanadas de pan.",
+      "Distribuir el queso rallado y espolvorear con oregano.",
+      "Tapar y refrigerar durante al menos 1 hora.",
+      "Hornear a 180 grados durante 25 minutos hasta que este dorado."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Panqueque de Arroz (Salado)",
+    "description": "Panqueques salados hechos con arroz blanco sobrante.",
+    "category": "almuerzo",
+    "calories": 200,
+    "protein": 6,
+    "carbs": 28,
+    "fat": 8,
+    "ingredients": [
+      "1/2 taza de arroz blanco cocido",
+      "1 cebolla finamente picada",
+      "1 zanahoria pequena rallada",
+      "Perejil y cebollino al gusto",
+      "3/4 cucharada de queso rallado",
+      "1 huevo",
+      "3/4 cucharada de maicena",
+      "3/4 cucharadita de sal",
+      "1/4 cucharadita de azafran (curcuma)",
+      "Pimienta negra al gusto"
+    ],
+    "instructions": [
+      "Calentar un chorrito de aceite y sofreir la cebolla hasta que este dorada.",
+      "En un bol, batir los huevos. Anadir la cebolla sofrita y el resto de los ingredientes. Mezclar bien.",
+      "En la sarten, calentar un poco de aceite. Colocar una cucharada grande de masa y presionar con el dorso de la cuchara dandole forma de mini panqueque.",
+      "Dar la vuelta para dorar el otro lado."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Arroz Dulce con Especias",
+    "description": "Arroz cremoso dulce con canela, clavo, jengibre, nuez moscada y curcuma.",
+    "category": "postre",
+    "calories": 450,
+    "protein": 28,
+    "carbs": 35,
+    "fat": 22,
+    "ingredients": [
+      "1/4 taza de arroz crudo",
+      "3/4 taza de agua",
+      "250ml de leche de vaca",
+      "1 cucharada (rasadas) de azucar",
+      "1 rama de canela",
+      "1 clavo de olor",
+      "1/8 cucharadita de jengibre en polvo",
+      "1/8 cucharadita de nuez moscada",
+      "Ralladura de 1 limon",
+      "1/4 cucharadita de curcuma"
+    ],
+    "instructions": [
+      "Cocinar el arroz en agua.",
+      "Una vez cocido, anadir la leche, el azucar y las especias (excepto la ralladura de limon).",
+      "Cocinar a fuego lento, con la olla tapada, revolviendo ocasionalmente, hasta que el liquido se reduzca y el arroz quede cremoso.",
+      "Anadir la ralladura de limon al final.",
+      "Se puede servir caliente o frio."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "ganar-musculo",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Pastel Rico en Vitaminas (con Cascaras)",
+    "description": "Bizcocho nutritivo hecho con naranjas, remolacha, zanahorias con cascara, chia y linaza.",
+    "category": "postre",
+    "calories": 350,
+    "protein": 30,
+    "carbs": 12,
+    "fat": 18,
+    "ingredients": [
+      "1 naranja pelada y picada (sin cascara ni semillas, con la pulpa)",
+      "2 cucharadas de remolacha cruda picada (con cascara)",
+      "1 huevo",
+      "2 cucharadas de zanahorias picadas (con cascara)",
+      "3 cucharadas de azucar morena",
+      "1 cucharada de aceite de oliva",
+      "3/8 taza de harina de trigo o harina de arroz",
+      "1 cucharadita de semillas de chia",
+      "1 cucharadita de linaza",
+      "1/2 cucharadita de polvo para hornear"
+    ],
+    "instructions": [
+      "En una licuadora, mezclar bien el aceite, huevos, remolacha, zanahoria y naranjas, agregando gradualmente el azucar moreno.",
+      "Anadir la harina y la levadura en polvo.",
+      "Mezclar todo y anadir las semillas de chia y de lino.",
+      "Colocar en un molde engrasado y hornear en horno precalentado."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "ganar-musculo",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Ensalada de Cascaras Sobrantes",
+    "description": "Ensalada ligera hecha con cascaras de calabaza, berenjena y chayote.",
+    "category": "almuerzo",
+    "calories": 320,
+    "protein": 22,
+    "carbs": 15,
+    "fat": 20,
+    "ingredients": [
+      "1/4 taza de cascara de calabaza rallada",
+      "1/4 taza de cascara de berenjena rallada",
+      "2 cucharadas de tomate picado o tomates cherry",
+      "1/4 taza de cascara de chayote rallada",
+      "2 cucharadas de cebolla picada",
+      "Sal al gusto",
+      "Hierbas frescas (cebollino, perejil o cilantro)",
+      "Aceite de oliva"
+    ],
+    "instructions": [
+      "Lavar bien la calabaza, la berenjena y el chayote. Pelarlos y rallarlos.",
+      "Cocinar al vapor las cascaras hasta que esten tiernas al dente.",
+      "Servir en una fuente y sazonar con hierbas, cebolla, tomate picado, sal y aceite de oliva.",
+      "Se puede servir caliente o frio."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "ganar-musculo",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Solterito Arequipeno",
+    "description": "Ensalada fria arequipena con habas, choclo, queso fresco, aceitunas y rocoto.",
+    "category": "almuerzo",
+    "calories": 220,
+    "protein": 12,
+    "carbs": 28,
+    "fat": 8,
+    "ingredients": [
+      "1/4 taza de habas frescas peladas cocidas",
+      "1/4 taza de choclo desgranado cocido",
+      "38g de queso fresco en cubitos",
+      "1 cebolla roja picada finamente",
+      "1 tomate en cubitos",
+      "1 cucharada de aceitunas negras picadas",
+      "1/8 rocoto picado sin venas (opcional)",
+      "Jugo de 1 limon",
+      "1/2 cucharada de aceite de oliva",
+      "Sal y pimienta al gusto",
+      "Hojas de huacatay o perejil"
+    ],
+    "instructions": [
+      "Cocinar las habas y el choclo en agua con sal hasta que esten tiernos. Escurrir y enfriar.",
+      "Cortar la cebolla en juliana fina y remojar en agua con sal por 5 minutos. Escurrir.",
+      "En un bol, combinar habas, choclo, queso, cebolla, tomate, aceitunas y rocoto.",
+      "Alinar con jugo de limon, aceite de oliva, sal y pimienta.",
+      "Mezclar suavemente y servir frio decorado con huacatay o perejil."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Pastel de Aguacate",
+    "description": "Bizcocho humedo de aguacate con leche de coco y semillas de chia.",
+    "category": "postre",
+    "calories": 280,
+    "protein": 16,
+    "carbs": 40,
+    "fat": 6,
+    "ingredients": [
+      "1 huevo",
+      "2 cucharadas de leche de coco",
+      "2 cucharadas de azucar o xilitol",
+      "1/2 cucharadita de mantequilla",
+      "1 aguacate mediano",
+      "1/4 taza de harina de arroz o harina de trigo",
+      "1 cucharadita de semillas de chia",
+      "1/2 cucharadita de polvo para hornear"
+    ],
+    "instructions": [
+      "Precalentar el horno.",
+      "Colocar huevos, leche de coco, azucar, mantequilla y aguacate en licuadora y batir bien.",
+      "En un bol, mezclar harina de arroz, semillas de chia y polvo para hornear.",
+      "Agregar la crema batida y mezclar bien.",
+      "Hornear de 40 a 50 minutos."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Panqueque Super Facil",
+    "description": "Panqueques rapidos con zanahoria, harina de maiz y leche de coco.",
+    "category": "desayuno",
+    "calories": 380,
+    "protein": 26,
+    "carbs": 32,
+    "fat": 16,
+    "ingredients": [
+      "1 huevo",
+      "1/8 zanahoria pequena con cascara",
+      "1/4 taza de harina de maiz o copos de maiz",
+      "1 cucharadita de avena arrollada o salvado de avena (opcional)",
+      "1/4 taza de leche de coco",
+      "Sal al gusto"
+    ],
+    "instructions": [
+      "Licuar todo excepto la avena.",
+      "Calentar una sarten antiadherente a fuego lento.",
+      "Despues de batir, anadir la avena y mezclar.",
+      "Colocar 1 o 2 cucharadas de crema en la sarten caliente.",
+      "Cuando se despegue el fondo, dar la vuelta y dorar el otro lado.",
+      "Rellenar con pollo desmenuzado o platano con canela."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "ganar-musculo",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Pastel de Calabacin y Remolacha",
+    "description": "Bizcocho saludable de calabacin y remolacha con cacao.",
+    "category": "postre",
+    "calories": 400,
+    "protein": 28,
+    "carbs": 30,
+    "fat": 18,
+    "ingredients": [
+      "1 calabacin rallado",
+      "1 remolacha pequenas",
+      "1 huevo",
+      "1 cucharada de aceite de oliva/aceite vegetal",
+      "1 cucharada de azucar",
+      "1 cucharada de agua",
+      "1/4 taza de harina de avena",
+      "1/8 cucharadita de extracto de vainilla",
+      "1 cucharadita de cacao en polvo 100% (opcional)",
+      "1/8 cucharadita de canela molida",
+      "1/8 cucharadita de polvo para hornear"
+    ],
+    "instructions": [
+      "Licuar los calabacines, remolachas, huevos, aceite, azucar y agua.",
+      "Mezclar la crema batida con la harina de avena, vainilla, cacao, canela y polvo para hornear en un tazon grande.",
+      "Hornear durante 45 minutos a 210 grados (180 grados si el horno es potente)."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "ganar-musculo",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Yuquitas Fritas",
+    "description": "Bastones de yuca frita crujientes por fuera y suaves por dentro, clasico acompanamiento peruano.",
+    "category": "snack",
+    "calories": 280,
+    "protein": 3,
+    "carbs": 42,
+    "fat": 12,
+    "ingredients": [
+      "125g de yuca fresca pelada",
+      "Aceite vegetal para freir",
+      "Sal al gusto",
+      "Salsa huancaina o salsa criolla para acompanar"
+    ],
+    "instructions": [
+      "Pelar la yuca y cortarla en bastones medianos. Retirar la fibra central.",
+      "Hervir los bastones en agua con sal hasta que esten tiernos (15-20 minutos). No sobrecocinar.",
+      "Escurrir bien y dejar enfriar ligeramente.",
+      "Calentar abundante aceite. Freir los bastones hasta dorar y que esten crujientes.",
+      "Escurrir sobre papel absorbente y sazonar con sal.",
+      "Servir calientes con salsa huancaina o salsa criolla."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "ganar-musculo",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Pastel de Verduras",
+    "description": "Bizcocho salado con mezcla de verduras cocidas y picadas finamente.",
+    "category": "almuerzo",
+    "calories": 150,
+    "protein": 4,
+    "carbs": 22,
+    "fat": 6,
+    "ingredients": [
+      "1 cucharadita colmadas de mantequilla o margarina",
+      "1/4 taza de harina de trigo",
+      "1 huevo",
+      "2 cucharadas de leche o agua para cocinar las verduras",
+      "Mezcla de verduras cocidas y picadas: calabaza, col rizada, judias verdes"
+    ],
+    "instructions": [
+      "Batir la mantequilla con los huevos, la harina y la leche (o agua de coccion).",
+      "Incorporar las verduras y remover con una cuchara.",
+      "Colocar en un molde engrasado y enharinado y hornear en horno caliente."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Tortilla de Verduras",
+    "description": "Tortilla jugosa de huevo con papa, arvejas y pimiento. Ideal para almuerzo rapido o cena ligera.",
+    "category": "almuerzo",
+    "calories": 180,
+    "protein": 12,
+    "carbs": 12,
+    "fat": 10,
+    "ingredients": [
+      "1 1/2 huevos",
+      "1 papa mediana cocida en cubitos",
+      "2 cucharadas de arvejas cocidas",
+      "1/8 pimiento rojo picado",
+      "1/4 cebolla picada",
+      "Sal y pimienta al gusto",
+      "1 cucharadita de aceite de oliva"
+    ],
+    "instructions": [
+      "Batir los huevos con sal y pimienta.",
+      "Agregar la papa en cubitos, arvejas, pimiento y cebolla.",
+      "Calentar aceite en una sarten a fuego medio.",
+      "Verter la mezcla y cocinar a fuego bajo tapado por 5-7 minutos.",
+      "Dar vuelta con ayuda de un plato y cocinar 3 minutos mas.",
+      "Servir tibia o fria cortada en porciones."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Tallarines Verdes con Pollo",
+    "description": "Pasta peruana en salsa verde de albahaca y espinaca con pollo a la plancha. Clasico de la cocina criolla.",
+    "category": "almuerzo",
+    "calories": 420,
+    "protein": 28,
+    "carbs": 45,
+    "fat": 14,
+    "ingredients": [
+      "100g de fideos spaghetti",
+      "1 atado de albahaca fresca",
+      "1/4 taza de hojas de espinaca",
+      "2 cucharadas de leche evaporada",
+      "13g de queso parmesano rallado",
+      "1 cucharada de pecanas o nueces",
+      "1 diente de ajo",
+      "1/2 cucharada de aceite de oliva",
+      "1 filete de pechuga de pollo",
+      "Sal y pimienta al gusto"
+    ],
+    "instructions": [
+      "Cocinar los fideos en abundante agua con sal. Escurrir y reservar.",
+      "Licuar la albahaca, espinaca, leche evaporada, queso parmesano, pecanas, ajo y aceite.",
+      "Sazonar el pollo con sal y pimienta. Cocinar a la plancha hasta dorar.",
+      "Calentar la salsa verde en una olla a fuego bajo. No dejar hervir.",
+      "Mezclar los fideos con la salsa verde.",
+      "Servir con el pollo encima. Espolvorear con queso parmesano."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "ganar-musculo",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Compota de Entrecascara de Naranja",
+    "description": "Compota dulce hecha con la parte blanca de la cascara de naranja.",
+    "category": "postre",
+    "calories": 200,
+    "protein": 5,
+    "carbs": 30,
+    "fat": 8,
+    "ingredients": [
+      "2 1/2 cucharadas de cascara de naranja (aproximadamente 3 naranjas)",
+      "1/6 cucharadita de bicarbonato de sodio",
+      "1/6 taza de azucar",
+      "1 rama de canela",
+      "1 1/2 clavos de olor",
+      "Agua suficiente para cocinar"
+    ],
+    "instructions": [
+      "Retirar la parte naranja de la cascara y reservar la parte blanca.",
+      "En una cacerola, agregar la parte blanca, el bicarbonato y agua suficiente para cubrir. Dejar hervir.",
+      "Sacar la cascara del agua y enjuagarla bien bajo chorro de agua. Dejar escurrir.",
+      "Colocar la cascara en una olla con el azucar, la canela, los clavos y un poco de agua.",
+      "Dejar hervir a fuego lento para que la cascara absorba el sabor del almibar.",
+      "Retirar del fuego y transferir a recipientes de vidrio esterilizados."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Tamal de Pollo",
+    "description": "Tamal peruano de masa de maiz relleno de pollo, aceitunas y huevo, envuelto en hoja de platano.",
+    "category": "almuerzo",
+    "calories": 380,
+    "protein": 18,
+    "carbs": 35,
+    "fat": 20,
+    "ingredients": [
+      "65g de maiz pelado molido (o harina de maiz)",
+      "25g de manteca de cerdo",
+      "38g de pollo cocido desmenuzado",
+      "1 cebolla roja picada",
+      "1 cucharadita de pasta de aji panca",
+      "1/8 cucharadita de comino",
+      "1 huevo duro en rodajas",
+      "Aceitunas negras",
+      "Hojas de platano para envolver",
+      "Sal y pimienta al gusto"
+    ],
+    "instructions": [
+      "Preparar la masa mezclando el maiz molido con manteca derretida, sal y caldo de pollo hasta obtener masa suave.",
+      "Hacer aderezo con cebolla, ajo, aji panca y comino. Agregar el pollo desmenuzado.",
+      "Cortar hojas de platano en cuadros y pasarlas por el fuego para suavizar.",
+      "Colocar una porcion de masa sobre la hoja de platano. Aplanar.",
+      "Poner relleno de pollo, una rodaja de huevo duro y una aceituna.",
+      "Cerrar formando un paquete rectangular. Amarrar con pabilo.",
+      "Cocinar al vapor por 1 hora.",
+      "Servir caliente con salsa criolla."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "ganar-musculo",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Trufa de Platano y Chocolate",
+    "description": "Trufas saludables de platano con cacao al 70% y canela.",
+    "category": "postre",
+    "calories": 350,
+    "protein": 28,
+    "carbs": 30,
+    "fat": 14,
+    "ingredients": [
+      "1 platano maduro machacado",
+      "1 cucharada de azucar",
+      "2 cucharadas de cacao en polvo al 70%",
+      "1/2 cucharadita rasa de mantequilla",
+      "1/8 cucharadita rasa de canela molida"
+    ],
+    "instructions": [
+      "Combinar todos los ingredientes en una cacerola de fondo grueso.",
+      "Mezclar bien y llevar a ebullicion a fuego medio.",
+      "Reducir el fuego y seguir removiendo hasta que la mezcla se despegue del fondo.",
+      "Dejar enfriar.",
+      "Untar mantequilla en las manos, formar bolitas y rebozarlas en chocolate 70% cacao.",
+      "Colocar en capacillos de papel."
+    ],
+    "prepTime": null,
+    "servings": 2,
+    "tags": [
+      "perder-peso",
+      "ganar-musculo",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Aguadito de Pollo",
+    "description": "Sopa espesa peruana de pollo con arroz, cilantro y verduras. Reconfortante y nutritiva.",
+    "category": "almuerzo",
+    "calories": 320,
+    "protein": 22,
+    "carbs": 35,
+    "fat": 10,
+    "ingredients": [
+      "1 presa de pollo",
+      "1 atado de cilantro licuado con 1/2 taza de agua",
+      "2 cucharadas de arroz",
+      "1 cebolla roja picada",
+      "1 diente de ajo picado",
+      "1 aji amarillo picado",
+      "1 zanahoria en rodaja",
+      "2 cucharadas de arvejas",
+      "1/8 pimiento rojo en cubo",
+      "1 papa pelada en cubo",
+      "1/4 cucharadita de comino",
+      "Aceite vegetal, sal y pimienta"
+    ],
+    "instructions": [
+      "Dorar las presas de pollo en aceite. Reservar.",
+      "En la misma olla, hacer aderezo con cebolla, ajo, aji amarillo y comino.",
+      "Agregar 6 tazas de agua caliente y el pollo. Hervir 20 minutos.",
+      "Agregar el arroz, zanahoria y papa. Cocinar 15 minutos.",
+      "Agregar el cilantro licuado, arvejas y pimiento.",
+      "Cocinar 5 minutos mas. Ajustar sal y pimienta.",
+      "Servir caliente con limon al lado."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "mantener"
+    ]
+  },
+  {
+    "title": "Croqueta de Camote y Pollo",
+    "description": "Croquetas horneadas de camote y pollo.",
+    "category": "snack",
+    "calories": 220,
+    "protein": 4,
+    "carbs": 44,
+    "fat": 4,
+    "ingredients": [
+      "1 cucharadita de avena en hojuelas",
+      "25g de camote cocido",
+      "50g de pechuga de pollo cocida y desmenuzada"
+    ],
+    "instructions": [
+      "Mezclar todos los ingredientes en un procesador de alimentos.",
+      "Cuando tenga una consistencia suave, dar forma con las manos humedas o engrasadas.",
+      "Hornear hasta que este dorado, aproximadamente 20 minutos."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Albondigas de Pollo y Queso con Verduras",
+    "description": "Albondigas horneadas con pollo, queso y verduras ralladas.",
+    "category": "almuerzo",
+    "calories": 250,
+    "protein": 18,
+    "carbs": 12,
+    "fat": 14,
+    "ingredients": [
+      "1 calabacin crudo rallado",
+      "1 zanahoria cruda rallada",
+      "2 cucharadas de pechuga de pollo salteada y machacada",
+      "9g de queso fresco sin lactosa"
+    ],
+    "instructions": [
+      "Mezclar todos los ingredientes y formar bolitas pequenas.",
+      "Hornear en un horno precalentado a 180 grados centigrados durante 20 minutos."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Salsa Criolla",
+    "description": "Clasica guarnicion peruana de cebolla roja, tomate y aji marinada en limon. Ideal para carnes y ceviches.",
+    "category": "almuerzo",
+    "calories": 45,
+    "protein": 1,
+    "carbs": 6,
+    "fat": 2,
+    "ingredients": [
+      "1 cebolla roja grande en juliana fina",
+      "1 tomate en rodajas finas",
+      "1 aji limo picado (opcional)",
+      "Jugo de 1 limon",
+      "1 cucharadita de aceite de oliva",
+      "Sal y pimienta al gusto",
+      "Cilantro o perejil fresco picado"
+    ],
+    "instructions": [
+      "Cortar la cebolla en juliana fina.",
+      "Lavar la cebolla en agua fria con una pizca de sal. Escurrir bien para quitarle el sabor fuerte.",
+      "Mezclar la cebolla con tomate en rodajas y aji limo.",
+      "Alinar con jugo de limon, aceite de oliva, sal y pimienta.",
+      "Dejar marinar 10 minutos antes de servir.",
+      "Agregar cilantro fresco picado al final."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Saltado de Verduras",
+    "description": "Salteado peruano de verduras al wok con sillao, ideal como acompanamiento o plato ligero.",
+    "category": "almuerzo",
+    "calories": 160,
+    "protein": 5,
+    "carbs": 18,
+    "fat": 8,
+    "ingredients": [
+      "1 cebolla roja en juliana",
+      "1 pimiento rojo en tiras",
+      "1 pimiento verde en tiras",
+      "1 tomate en gajos",
+      "1 zanahoria en bastones finos",
+      "1/2 taza de vainitas cortadas",
+      "2 dientes de ajo picados",
+      "2 cucharadas de sillao (salsa de soya)",
+      "1 cucharada de vinagre",
+      "Aceite vegetal, sal y pimienta"
+    ],
+    "instructions": [
+      "Calentar un wok o sarten grande a fuego alto con aceite.",
+      "Saltear el ajo por 30 segundos.",
+      "Agregar zanahoria y vainitas. Saltear 2 minutos.",
+      "Agregar pimientos y cebolla. Saltear 2 minutos mas.",
+      "Agregar tomate, sillao y vinagre. Mezclar rapidamente.",
+      "Servir inmediatamente sobre arroz blanco."
+    ],
+    "prepTime": null,
+    "servings": 2,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Helado de Platano",
+    "description": "Helado saludable de solo 3 ingredientes.",
+    "category": "postre",
+    "calories": 300,
+    "protein": 32,
+    "carbs": 8,
+    "fat": 14,
+    "ingredients": [
+      "2 platanos pelados",
+      "1 cucharadita de canela molida",
+      "50 ml de agua"
+    ],
+    "instructions": [
+      "Lavar el platano con agua corriente antes de pelarlo.",
+      "Licuar el platano, la canela y el agua hasta obtener una mezcla suave y homogenea.",
+      "Congelarlo durante aproximadamente 4 horas."
+    ],
+    "prepTime": null,
+    "servings": 2,
+    "tags": [
+      "perder-peso",
+      "ganar-musculo",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Chifles",
+    "description": "Chips crujientes de platano verde fritos, snack clasico peruano.",
+    "category": "snack",
+    "calories": 220,
+    "protein": 2,
+    "carbs": 32,
+    "fat": 10,
+    "ingredients": [
+      "1 platano verde grande",
+      "Aceite vegetal para freir",
+      "Sal al gusto"
+    ],
+    "instructions": [
+      "Pelar los platanos verdes (mojar las manos para evitar la mancha).",
+      "Cortar en rodajas muy finas con mandolina o cuchillo.",
+      "Calentar abundante aceite a fuego medio-alto.",
+      "Freir las rodajas en tandas sin amontonar, hasta que esten doradas y crujientes.",
+      "Escurrir sobre papel absorbente.",
+      "Sazonar con sal inmediatamente al sacarlos."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "mantener"
+    ]
+  },
+  {
+    "title": "Pollo Fragante",
+    "description": "Muslos de pollo deshuesados marinados en condimento aromatico con verduras al horno.",
+    "category": "cena",
+    "calories": 250,
+    "protein": 10,
+    "carbs": 35,
+    "fat": 8,
+    "ingredients": [
+      "250g de muslos de pollo",
+      "1 limon",
+      "1/4 de pimiento morron verde, rojo y amarillo (cada uno)",
+      "1 cebolla blanca mediana",
+      "1 cebolla roja mediana",
+      "1 tomate italiano",
+      "Tomillo fresco",
+      "Romero fresco (6 ramitas)",
+      "Aceite o aceite de oliva para dorar",
+      "1 1/2 dientes de ajo",
+      "Perejil fresco",
+      "Cilantro fresco",
+      "Sal",
+      "Pimienta blanca"
+    ],
+    "instructions": [
+      "Retirar los huesos de los muslos de pollo y sazonar los filetes.",
+      "Colocarlos en jugo de limon durante 10 minutos.",
+      "Preparar condimento aromatico: sal, pimienta, 1 diente de ajo muy fino, perejil, cilantro, hojas de romero, ramitas de tomillo.",
+      "Marinar los muslos en el condimento aromatico al menos 1 hora.",
+      "Preparar caldo aromatico con los huesos, cebolla, ajo, romero, tomillo y los tallos/cascaras de verduras. Cocinar 1 hora a fuego lento.",
+      "Cortar cebolla blanca, roja, pimientos y tomate en cubos de 2 cm.",
+      "Dorar los cubos por separado y los dientes de ajo pelados. Dorar los filetes de muslo.",
+      "Disponer los filetes en fuente para horno, distribuir los cubos entre ellos.",
+      "Anadir tomillo y romero, rociar con aceite de oliva.",
+      "Hornear a 180 grados durante 30 minutos.",
+      "Decorar con perejil picado y servir con arroz preparado con el caldo."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Tomates Asados para Salsa Rustica",
+    "description": "Tomates asados lentamente al horno para hacer una salsa rustica.",
+    "category": "almuerzo",
+    "calories": 320,
+    "protein": 24,
+    "carbs": 28,
+    "fat": 12,
+    "ingredients": [
+      "500g de tomates muy maduros",
+      "1 diente de ajo pelado",
+      "1 cebolla blanca grande, cortada en trozos grande",
+      "Aceite de oliva",
+      "Sal",
+      "Hierbas frescas (albahaca, tomillo o laurel)"
+    ],
+    "instructions": [
+      "Lavar bien los tomates, cortarlos en cuartos y extenderlos en una bandeja forrada con papel vegetal. Espolvorear con sal.",
+      "Distribuir los dientes de ajo, la cebolla y las hierbas. Rociar con aceite de oliva y mezclar bien.",
+      "Hornear en horno precalentado durante al menos 1 hora y 30 minutos.",
+      "Despues de enfriar, transferir todo a una licuadora o procesador (retirar el laurel). Usar funcion de pulso para salsa rustica.",
+      "Rectificar la sazon si es necesario."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "ganar-musculo",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Pan con Chicharron",
+    "description": "Sandwich peruano de cerdo frito crujiente con camote y salsa criolla en pan frances.",
+    "category": "almuerzo",
+    "calories": 450,
+    "protein": 28,
+    "carbs": 35,
+    "fat": 22,
+    "ingredients": [
+      "125g de panceta de cerdo cortada en trozos",
+      "1 pan frances crujiente",
+      "1 camote mediano en rodaja",
+      "1 cebolla roja en juliana",
+      "1 aji limo picado",
+      "Jugo de 1 limon",
+      "1/4 cucharadita de comino",
+      "1 diente de ajo machacado",
+      "Sal y pimienta al gusto",
+      "Aceite vegetal"
+    ],
+    "instructions": [
+      "Sazonar la panceta con ajo, comino, sal y pimienta.",
+      "Cocinar la panceta en una olla con un poco de agua a fuego medio hasta que se evapore.",
+      "Dejar que la carne se fria en su propia grasa hasta que este dorada y crujiente.",
+      "Freir las rodajas de camote en aceite hasta que esten tiernas y doradas.",
+      "Preparar salsa criolla: mezclar cebolla lavada con aji limo, jugo de limon, sal y pimienta.",
+      "Abrir los panes, rellenar con chicharron, camote frito y salsa criolla.",
+      "Servir inmediatamente."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "ganar-musculo"
+    ]
+  },
+  {
+    "title": "Lomo Saltado",
+    "description": "Clasico plato peruano de lomo fino salteado con cebolla, tomate y aji amarillo, acompanado de papas fritas y arroz.",
+    "category": "almuerzo",
+    "calories": 480,
+    "protein": 35,
+    "carbs": 40,
+    "fat": 14,
+    "ingredients": [
+      "125g de lomo fino cortado en tiras",
+      "1 cebolla roja en juliana",
+      "1 tomate en gajos",
+      "1 aji amarillo en tiras",
+      "1 diente de ajo picado",
+      "75g de papa para freir cortada en bastones",
+      "3/4 cucharada de sillao (salsa de soya)",
+      "1/2 cucharada de vinagre tinto",
+      "1/4 cucharadita de comino",
+      "Aceite vegetal",
+      "Sal y pimienta al gusto",
+      "Cilantro fresco picado",
+      "Arroz blanco cocido para acompanar"
+    ],
+    "instructions": [
+      "Sazonar la carne con sal, pimienta y comino.",
+      "En un wok o sarten a fuego muy alto, sellar la carne en tandas. Reservar.",
+      "En la misma sarten con aceite, saltear la cebolla por 1 minuto.",
+      "Agregar el tomate y el aji amarillo, saltear 1 minuto mas.",
+      "Devolver la carne y agregar el sillao y vinagre. Mezclar bien.",
+      "Freir las papas en aceite caliente hasta dorar. Escurrir.",
+      "Servir la carne salteada sobre arroz, acompanar con las papas fritas y cilantro."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "ganar-musculo",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Aji de Gallina",
+    "description": "Cremosa preparacion peruana de pollo desmenuzado en salsa de aji amarillo con pecanas y queso, servido con papa amarilla y arroz.",
+    "category": "almuerzo",
+    "calories": 420,
+    "protein": 32,
+    "carbs": 22,
+    "fat": 16,
+    "ingredients": [
+      "1 pechuga de pollo grande (aprox 150g)",
+      "1 aji amarillo (o 3 cucharadas de pasta de aji)",
+      "1 rebanada de pan de molde sin corteza",
+      "1/4 taza de leche evaporada",
+      "1 cebolla picada finamente",
+      "1 diente de ajo picado",
+      "1 cucharada de pecanas",
+      "13g de queso parmesano rallado",
+      "1 papa amarilla cocida",
+      "Huevos duros y aceitunas para decorar",
+      "Aceite vegetal, sal y pimienta"
+    ],
+    "instructions": [
+      "Hervir la pechuga en agua con sal hasta cocinar. Desmenuzar y reservar el caldo.",
+      "Remojar el pan en la leche evaporada.",
+      "Licuar el aji amarillo con las pecanas y el pan remojado.",
+      "En una olla, hacer un aderezo con cebolla y ajo hasta dorar.",
+      "Agregar la crema de aji licuada. Cocinar 5 minutos revolviendo.",
+      "Anadir el pollo desmenuzado y un poco de caldo para lograr consistencia cremosa.",
+      "Incorporar el queso parmesano, ajustar sal y pimienta.",
+      "Servir sobre papa amarilla con arroz, decorar con huevo duro y aceitunas."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "ganar-musculo",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Arroz con Pollo",
+    "description": "Arroz verde peruano cocinado con pollo, cilantro, aji amarillo y verduras. Plato emblematico de la cocina criolla.",
+    "category": "almuerzo",
+    "calories": 650,
+    "protein": 34,
+    "carbs": 60,
+    "fat": 28,
+    "ingredients": [
+      "1 pierna de pollo",
+      "1/2 taza de arroz",
+      "1 atado de cilantro",
+      "1 aji amarillo",
+      "1 cucharadita de pasta de aji panca",
+      "1/4 taza de arvejas",
+      "1 zanahoria en cubo",
+      "1 pimiento rojo en tiras",
+      "1 cebolla picada",
+      "1 diente de ajo picado",
+      "1/4 cucharadita de comino",
+      "2 cucharadas de cerveza rubia (opcional)",
+      "3/4 taza de caldo de pollo",
+      "Aceite vegetal, sal y pimienta"
+    ],
+    "instructions": [
+      "Sazonar las piernas de pollo con sal, pimienta y comino.",
+      "Dorar el pollo en aceite caliente. Reservar.",
+      "Licuar el cilantro con 1/2 taza de caldo.",
+      "En la misma olla, hacer aderezo con cebolla, ajo, aji amarillo y aji panca.",
+      "Agregar la cerveza y dejar reducir.",
+      "Anadir el arroz y sofreir 2 minutos.",
+      "Verter el caldo, el cilantro licuado, arvejas y zanahoria.",
+      "Colocar las presas de pollo encima. Tapar.",
+      "Cocinar a fuego bajo 20-25 minutos hasta que el arroz este listo. Decorar con pimiento."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "ganar-musculo"
+    ]
+  },
+  {
+    "title": "Papa a la Huancaina",
+    "description": "Entrada clasica peruana de papas amarillas banadas en cremosa salsa de aji amarillo con queso fresco y leche.",
+    "category": "almuerzo",
+    "calories": 341,
+    "protein": 16,
+    "carbs": 33,
+    "fat": 17,
+    "ingredients": [
+      "115g de papa amarilla",
+      "30g de queso fresco",
+      "2 cucharadas de leche evaporada",
+      "1 aji amarillo sin venas ni semillas",
+      "1 galleta de soda",
+      "1/2 cucharada de aceite vegetal",
+      "1 huevo duro",
+      "Aceitunas negras",
+      "Hojas de lechuga"
+    ],
+    "instructions": [
+      "Cocinar las papas con cascara en agua con sal hasta que esten tiernas. Pelar y cortar en rodajas.",
+      "Licuar el queso fresco, aji amarillo, leche evaporada, galletas y aceite hasta obtener una crema.",
+      "Ajustar sal al gusto. Si queda muy espesa, agregar un poco mas de leche.",
+      "Colocar hojas de lechuga en un plato.",
+      "Acomodar las rodajas de papa sobre la lechuga.",
+      "Banar con la salsa huancaina. Decorar con rodajas de huevo duro y aceitunas."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Causa Limena",
+    "description": "Plato frio peruano de papa amarilla prensada con limon y aji, rellena de pollo o atun con mayonesa y palta.",
+    "category": "almuerzo",
+    "calories": 386,
+    "protein": 14,
+    "carbs": 41,
+    "fat": 22,
+    "ingredients": [
+      "115g de papa amarilla",
+      "1/2 cucharada de pasta de aji amarillo",
+      "1/2 cucharada de aceite de oliva",
+      "Jugo de 1 limon",
+      "50g de pollo desmenuzado (o 2 latas de atun)",
+      "1/2 cucharada de mayonesa",
+      "1/2 cebolla roja picada finamente",
+      "1 1/2 cucharadas de arvejas cocidas",
+      "1 palta madura en lamina",
+      "Huevo duro y aceitunas para decorar",
+      "Sal y pimienta al gusto"
+    ],
+    "instructions": [
+      "Cocinar las papas y prensar calientes. Mezclar con aji amarillo, aceite de oliva, limon, sal y pimienta.",
+      "Mezclar el pollo (o atun) con mayonesa, cebolla y arvejas. Sazonar.",
+      "En un molde, colocar una capa de masa de papa.",
+      "Agregar una capa de relleno de pollo.",
+      "Colocar laminas de palta.",
+      "Cubrir con otra capa de masa de papa. Refrigerar 30 minutos.",
+      "Desmoldar, decorar con huevo duro y aceitunas. Servir frio."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "mantener"
+    ]
+  },
+  {
+    "title": "Seco de Pollo",
+    "description": "Guiso peruano de pollo en salsa verde de cilantro y espinaca, con papas y zanahoria. Plato reconfortante y nutritivo.",
+    "category": "almuerzo",
+    "calories": 450,
+    "protein": 35,
+    "carbs": 26,
+    "fat": 22,
+    "ingredients": [
+      "1 presa de pollo (piernas o encuentros)",
+      "1 atado grande de cilantro",
+      "1/4 taza de hojas de espinaca",
+      "1 cebolla roja picada",
+      "1 diente de ajo picado",
+      "1 aji amarillo",
+      "1 papa pelada en trozos",
+      "1 zanahoria en rodaja",
+      "2 cucharadas de arvejas",
+      "2 cucharadas de cerveza negra (opcional)",
+      "1/4 cucharadita de comino",
+      "Aceite vegetal, sal y pimienta"
+    ],
+    "instructions": [
+      "Sazonar el pollo con sal, pimienta y comino.",
+      "Dorar las presas en aceite caliente. Reservar.",
+      "Licuar el cilantro y la espinaca con 1/2 taza de agua.",
+      "En la misma olla, hacer aderezo con cebolla, ajo y aji amarillo.",
+      "Agregar la cerveza negra y dejar reducir.",
+      "Verter la salsa verde licuada. Cocinar 5 minutos.",
+      "Devolver el pollo a la olla. Agregar papas y zanahoria.",
+      "Tapar y cocinar a fuego bajo por 35-40 minutos.",
+      "Agregar las arvejas los ultimos 5 minutos.",
+      "Servir caliente acompanado de arroz blanco o frejoles."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "ganar-musculo",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Mazamorra Morada",
+    "description": "Postre tradicional peruano a base de maiz morado con frutas, canela y clavo. Dulce, reconfortante y bajo en grasa.",
+    "category": "postre",
+    "calories": 220,
+    "protein": 2,
+    "carbs": 54,
+    "fat": 1,
+    "ingredients": [
+      "65g de maiz morado",
+      "1 rama de canela",
+      "1 clavo de olor",
+      "1 anis estrella",
+      "Cascara de 1 naranja",
+      "2 cucharadas de pina picada en cubos",
+      "1 manzana pelada en cubo",
+      "1 cucharada de ciruelas pasas",
+      "2 cucharadas de azucar",
+      "1/2 cucharada de harina de camote (o maicena)",
+      "Jugo de 1 limon",
+      "250ml de agua"
+    ],
+    "instructions": [
+      "Hervir el maiz morado con canela, clavo, anis y cascara de naranja en 2 litros de agua por 45 minutos.",
+      "Colar el liquido morado. Descartar el maiz y las especias.",
+      "Volver a poner el liquido al fuego. Agregar azucar y revolver.",
+      "Anadir la pina, manzana y ciruelas pasas.",
+      "Cocinar 10 minutos a fuego medio.",
+      "Disolver la harina de camote en 1/2 taza de agua fria.",
+      "Agregar a la olla revolviendo constantemente para espesar.",
+      "Cocinar 5 minutos mas revolviendo.",
+      "Retirar del fuego y agregar jugo de limon.",
+      "Servir tibio o frio. Se puede espolvorear con canela."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Avena con Platano y Canela",
+    "description": "Desayuno clasico fitness: avena cocida con platano, canela y miel. Alto en fibra y energia para entrenar.",
+    "category": "desayuno",
+    "calories": 320,
+    "protein": 12,
+    "carbs": 55,
+    "fat": 6,
+    "ingredients": [
+      "1/2 taza de avena en hojuelas",
+      "1 taza de leche o agua",
+      "1 platano maduro en rodajas",
+      "1 cucharadita de canela molida",
+      "1 cucharada de miel o stevia",
+      "1 cucharada de semillas de chia (opcional)"
+    ],
+    "instructions": [
+      "Hervir la leche o agua en una olla pequena.",
+      "Agregar la avena y cocinar a fuego bajo por 3-5 minutos revolviendo.",
+      "Servir en un bol y colocar las rodajas de platano encima.",
+      "Espolvorear con canela, agregar miel y semillas de chia."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "ganar-musculo",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Huevos Revueltos con Tomate y Cebolla",
+    "description": "Desayuno alto en proteina con huevos revueltos, tomate y cebolla. Rapido y nutritivo.",
+    "category": "desayuno",
+    "calories": 250,
+    "protein": 18,
+    "carbs": 4,
+    "fat": 18,
+    "ingredients": [
+      "3 huevos",
+      "1/2 tomate picado",
+      "1/4 cebolla picada",
+      "1 cucharada de aceite de oliva",
+      "Sal y pimienta al gusto",
+      "Perejil fresco picado"
+    ],
+    "instructions": [
+      "Batir los huevos con sal y pimienta.",
+      "Calentar aceite en una sarten a fuego medio.",
+      "Sofreir la cebolla y el tomate por 1 minuto.",
+      "Agregar los huevos batidos y revolver suavemente hasta que cuajen.",
+      "Servir con perejil picado. Acompanar con pan integral o tostada."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "ganar-musculo",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Pan con Palta y Huevo",
+    "description": "Tostada con palta y huevo frito, desayuno peruano moderno rico en grasas saludables y proteina.",
+    "category": "desayuno",
+    "calories": 380,
+    "protein": 16,
+    "carbs": 30,
+    "fat": 22,
+    "ingredients": [
+      "2 rebanadas de pan integral",
+      "1/2 palta madura",
+      "1 huevo",
+      "1 cucharadita de aceite de oliva",
+      "Sal y pimienta al gusto",
+      "Aji molido o rocoto al gusto (opcional)"
+    ],
+    "instructions": [
+      "Tostar el pan hasta que este crujiente.",
+      "Machacar la palta con un tenedor. Sazonar con sal, pimienta y aji.",
+      "Freir el huevo en aceite de oliva a fuego medio.",
+      "Untar la palta sobre las tostadas y colocar el huevo encima.",
+      "Servir inmediatamente."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "ganar-musculo",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Batido Proteico de Platano y Avena",
+    "description": "Smoothie energetico con platano, avena, leche y mantequilla de mani. Perfecto antes de entrenar.",
+    "category": "desayuno",
+    "calories": 350,
+    "protein": 20,
+    "carbs": 48,
+    "fat": 10,
+    "ingredients": [
+      "1 platano maduro",
+      "3 cucharadas de avena",
+      "1 taza de leche",
+      "1 cucharada de mantequilla de mani",
+      "1 cucharadita de miel",
+      "Hielo al gusto"
+    ],
+    "instructions": [
+      "Colocar todos los ingredientes en la licuadora.",
+      "Licuar por 1-2 minutos hasta obtener mezcla homogenea.",
+      "Servir inmediatamente. Se puede agregar canela al gusto."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "ganar-musculo",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Tortilla de Espinaca y Queso",
+    "description": "Tortilla francesa rellena de espinaca y queso fresco. Alta en proteina y baja en carbohidratos.",
+    "category": "desayuno",
+    "calories": 220,
+    "protein": 18,
+    "carbs": 3,
+    "fat": 15,
+    "ingredients": [
+      "3 huevos",
+      "1 taza de hojas de espinaca",
+      "30g de queso fresco desmenuzado",
+      "1 cucharadita de aceite de oliva",
+      "Sal y pimienta al gusto"
+    ],
+    "instructions": [
+      "Lavar la espinaca y picarla gruesa.",
+      "Batir los huevos con sal y pimienta.",
+      "Calentar aceite en sarten antiadherente a fuego medio.",
+      "Agregar la espinaca y saltear 1 minuto hasta que se reduzca.",
+      "Verter los huevos batidos sobre la espinaca. Cocinar tapado 3 minutos.",
+      "Agregar el queso, doblar la tortilla y cocinar 1 minuto mas."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Quinua con Leche y Frutas",
+    "description": "Desayuno andino peruano de quinua cocida en leche con frutas frescas. Nutritivo y energizante.",
+    "category": "desayuno",
+    "calories": 300,
+    "protein": 12,
+    "carbs": 50,
+    "fat": 6,
+    "ingredients": [
+      "1/2 taza de quinua lavada",
+      "1 taza de leche",
+      "1 taza de agua",
+      "2 cucharadas de azucar o miel",
+      "1/2 cucharadita de canela",
+      "1 manzana picada en cubos",
+      "1/2 taza de fresas picadas",
+      "1 cucharada de pasas"
+    ],
+    "instructions": [
+      "Lavar bien la quinua frotando con las manos. Enjuagar varias veces.",
+      "Cocinar la quinua en agua hasta que se abra (10-15 minutos).",
+      "Agregar la leche, azucar y canela. Cocinar 5 minutos mas a fuego bajo.",
+      "Servir tibia en bols y decorar con manzana, fresas y pasas."
+    ],
+    "prepTime": null,
+    "servings": 2,
+    "tags": [
+      "ganar-musculo",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Pollo a la Plancha con Ensalada Fresca",
+    "description": "Cena ligera alta en proteina: pechuga de pollo a la plancha con ensalada de lechuga, tomate y palta.",
+    "category": "cena",
+    "calories": 280,
+    "protein": 35,
+    "carbs": 8,
+    "fat": 12,
+    "ingredients": [
+      "150g de pechuga de pollo",
+      "1 taza de lechuga picada",
+      "1/2 tomate en rodajas",
+      "1/4 palta en laminas",
+      "1/4 cebolla roja en juliana",
+      "Jugo de 1 limon",
+      "1 cucharada de aceite de oliva",
+      "Sal, pimienta y comino al gusto"
+    ],
+    "instructions": [
+      "Sazonar el pollo con sal, pimienta y comino.",
+      "Cocinar en sarten o plancha a fuego medio-alto, 5 minutos por lado.",
+      "Preparar la ensalada mezclando lechuga, tomate, palta y cebolla.",
+      "Alinar con limon, aceite de oliva y sal.",
+      "Servir el pollo cortado sobre la ensalada."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "ganar-musculo",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Pescado al Horno con Brocoli",
+    "description": "Filete de pescado horneado con brocoli al vapor. Cena ligera rica en omega-3 y proteina.",
+    "category": "cena",
+    "calories": 250,
+    "protein": 30,
+    "carbs": 10,
+    "fat": 10,
+    "ingredients": [
+      "150g de filete de pescado (bonito, jurel o tilapia)",
+      "1 taza de brocoli en florecillas",
+      "1 diente de ajo picado",
+      "Jugo de 1 limon",
+      "1 cucharada de aceite de oliva",
+      "Sal, pimienta y oregano al gusto"
+    ],
+    "instructions": [
+      "Precalentar el horno a 200 grados.",
+      "Colocar el filete en papel aluminio. Sazonar con ajo, limon, sal, pimienta y oregano.",
+      "Rociar con aceite de oliva y cerrar el paquete de aluminio.",
+      "Hornear 15-20 minutos hasta que el pescado este cocido.",
+      "Cocinar el brocoli al vapor por 5 minutos.",
+      "Servir el pescado acompanado del brocoli."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Ensalada de Atun con Palta",
+    "description": "Ensalada fria rapida de atun con palta, tomate y cebolla. Cena practica alta en proteina.",
+    "category": "cena",
+    "calories": 300,
+    "protein": 28,
+    "carbs": 8,
+    "fat": 18,
+    "ingredients": [
+      "1 lata de atun en agua escurrido",
+      "1/2 palta en cubos",
+      "1/2 tomate en cubos",
+      "1/4 cebolla roja picada finamente",
+      "Jugo de 1 limon",
+      "1 cucharada de aceite de oliva",
+      "Hojas de lechuga",
+      "Sal y pimienta al gusto",
+      "Cilantro fresco picado"
+    ],
+    "instructions": [
+      "Escurrir bien el atun y desmenuzar con un tenedor.",
+      "Mezclar con palta, tomate y cebolla.",
+      "Alinar con limon, aceite de oliva, sal y pimienta.",
+      "Servir sobre hojas de lechuga y decorar con cilantro."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "ganar-musculo",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Tortilla de Claras con Verduras",
+    "description": "Cena ultra ligera de claras de huevo con pimiento, cebolla y champiñones. Minima grasa, maxima proteina.",
+    "category": "cena",
+    "calories": 180,
+    "protein": 24,
+    "carbs": 6,
+    "fat": 6,
+    "ingredients": [
+      "4 claras de huevo",
+      "1 yema de huevo",
+      "1/4 pimiento rojo picado",
+      "1/4 cebolla picada",
+      "3 champinones en laminas",
+      "1 cucharadita de aceite de oliva",
+      "Sal, pimienta y oregano al gusto"
+    ],
+    "instructions": [
+      "Batir las claras con la yema, sal y pimienta.",
+      "Calentar aceite en sarten antiadherente a fuego medio.",
+      "Saltear pimiento, cebolla y champinones por 2 minutos.",
+      "Verter los huevos batidos sobre las verduras.",
+      "Cocinar tapado a fuego bajo por 3-4 minutos.",
+      "Doblar la tortilla y servir con ensalada verde."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Crema de Zapallo con Pollo Deshilachado",
+    "description": "Sopa cremosa de zapallo con pollo deshilachado. Cena reconfortante peruana baja en grasa.",
+    "category": "cena",
+    "calories": 260,
+    "protein": 22,
+    "carbs": 22,
+    "fat": 10,
+    "ingredients": [
+      "300g de zapallo pelado en cubos",
+      "150g de pechuga de pollo cocida y deshilachada",
+      "1/2 cebolla picada",
+      "1 diente de ajo",
+      "1 taza de caldo de pollo",
+      "1/2 taza de leche evaporada",
+      "1 cucharada de aceite de oliva",
+      "Sal, pimienta y comino al gusto"
+    ],
+    "instructions": [
+      "Hervir el zapallo en agua hasta que este tierno (15 minutos). Escurrir.",
+      "Sofreir cebolla y ajo en aceite de oliva.",
+      "Licuar el zapallo con el sofrito y el caldo de pollo.",
+      "Calentar en olla a fuego bajo, agregar la leche evaporada.",
+      "Sazonar con sal, pimienta y comino.",
+      "Servir en platos hondos y colocar el pollo deshilachado encima."
+    ],
+    "prepTime": null,
+    "servings": 2,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Trucha a la Plancha con Ensalada",
+    "description": "Filete de trucha a la plancha con ensalada fresca. Cena rica en omega-3 y proteina con pescado peruano.",
+    "category": "cena",
+    "calories": 300,
+    "protein": 32,
+    "carbs": 6,
+    "fat": 16,
+    "ingredients": [
+      "150g de filete de trucha",
+      "1 taza de lechuga mixta",
+      "1/2 tomate en rodajas",
+      "1/4 cebolla roja en juliana",
+      "1 diente de ajo picado",
+      "Jugo de 1 limon",
+      "1 cucharada de aceite de oliva",
+      "Sal, pimienta y oregano al gusto"
+    ],
+    "instructions": [
+      "Sazonar la trucha con ajo, sal, pimienta, limon y oregano.",
+      "Calentar una sarten a fuego medio-alto con un poco de aceite.",
+      "Cocinar la trucha 3-4 minutos por lado hasta que este dorada.",
+      "Preparar la ensalada con lechuga, tomate y cebolla. Alinar con limon y aceite.",
+      "Servir la trucha sobre la ensalada."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "ganar-musculo",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Pan con Queso Fresco y Aceituna",
+    "description": "Desayuno clasico peruano: pan frances con queso fresco, aceitunas y un cafe con leche.",
+    "category": "desayuno",
+    "calories": 310,
+    "protein": 14,
+    "carbs": 35,
+    "fat": 12,
+    "ingredients": [
+      "2 panes frances",
+      "60g de queso fresco en rodajas",
+      "4 aceitunas negras",
+      "1 cucharadita de mantequilla (opcional)"
+    ],
+    "instructions": [
+      "Cortar los panes por la mitad.",
+      "Colocar rodajas de queso fresco dentro.",
+      "Acompanar con aceitunas al costado.",
+      "Servir con cafe con leche o infusion de hierbas."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "mantener"
+    ]
+  },
+  {
+    "title": "Panqueques de Avena con Platano",
+    "description": "Panqueques fitness de avena y platano sin harina refinada. Altos en fibra y energia.",
+    "category": "desayuno",
+    "calories": 280,
+    "protein": 14,
+    "carbs": 38,
+    "fat": 8,
+    "ingredients": [
+      "1 taza de avena en hojuelas",
+      "1 platano maduro",
+      "2 huevos",
+      "1/4 taza de leche",
+      "1 cucharadita de canela",
+      "1 cucharadita de aceite para la sarten",
+      "Miel o fruta para servir"
+    ],
+    "instructions": [
+      "Licuar la avena, platano, huevos, leche y canela hasta obtener masa homogenea.",
+      "Calentar sarten antiadherente con un poco de aceite a fuego medio-bajo.",
+      "Verter porciones de masa y cocinar 2 minutos por lado.",
+      "Servir con miel, fruta picada o yogurt."
+    ],
+    "prepTime": null,
+    "servings": 2,
+    "tags": [
+      "ganar-musculo",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Yogurt con Granola y Frutas",
+    "description": "Bowl de yogurt natural con granola casera y frutas frescas de temporada.",
+    "category": "desayuno",
+    "calories": 290,
+    "protein": 15,
+    "carbs": 40,
+    "fat": 8,
+    "ingredients": [
+      "1 taza de yogurt natural sin azucar",
+      "1/3 taza de granola",
+      "1/2 platano en rodajas",
+      "5 fresas picadas",
+      "1 cucharada de miel",
+      "1 cucharada de semillas de chia"
+    ],
+    "instructions": [
+      "Colocar el yogurt en un bowl.",
+      "Agregar la granola por un lado.",
+      "Colocar las frutas picadas encima.",
+      "Rociar con miel y semillas de chia."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Sandwich de Pollo con Palta",
+    "description": "Sandwich proteico con pollo deshilachado, palta y tomate en pan integral.",
+    "category": "desayuno",
+    "calories": 380,
+    "protein": 28,
+    "carbs": 32,
+    "fat": 14,
+    "ingredients": [
+      "2 rebanadas de pan integral",
+      "100g de pollo cocido deshilachado",
+      "1/4 palta machacada",
+      "2 rodajas de tomate",
+      "Hojas de lechuga",
+      "Sal, pimienta y limon al gusto"
+    ],
+    "instructions": [
+      "Tostar el pan ligeramente.",
+      "Untar la palta machacada en una rebanada.",
+      "Colocar el pollo sazonado con sal, pimienta y limon.",
+      "Agregar tomate y lechuga. Cerrar el sandwich."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "ganar-musculo",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Avena con Manzana y Pecanas",
+    "description": "Avena cocida con trozos de manzana, pecanas y canela. Desayuno reconfortante y nutritivo.",
+    "category": "desayuno",
+    "calories": 340,
+    "protein": 10,
+    "carbs": 50,
+    "fat": 12,
+    "ingredients": [
+      "1/2 taza de avena en hojuelas",
+      "1 taza de leche",
+      "1/2 manzana picada en cubos",
+      "2 cucharadas de pecanas picadas",
+      "1 cucharadita de canela",
+      "1 cucharada de miel"
+    ],
+    "instructions": [
+      "Cocinar la avena con la leche a fuego bajo por 5 minutos.",
+      "Agregar la manzana picada y cocinar 2 minutos mas.",
+      "Servir y decorar con pecanas, canela y miel."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "ganar-musculo",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Huevos Duros con Pan Integral y Palta",
+    "description": "Desayuno rapido y completo: huevos duros con pan integral tostado y palta.",
+    "category": "desayuno",
+    "calories": 350,
+    "protein": 20,
+    "carbs": 28,
+    "fat": 18,
+    "ingredients": [
+      "2 huevos duros",
+      "2 rebanadas de pan integral",
+      "1/4 palta",
+      "Sal y pimienta al gusto",
+      "Aji molido (opcional)"
+    ],
+    "instructions": [
+      "Hervir los huevos por 10 minutos. Pelar y cortar por la mitad.",
+      "Tostar el pan integral.",
+      "Machacar la palta con sal y pimienta.",
+      "Untar la palta en el pan y acompanar con los huevos duros."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "ganar-musculo",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Jugo Verde con Tostada de Huevo",
+    "description": "Combinacion energizante: jugo verde de espinaca con fruta y tostada de huevo revuelto.",
+    "category": "desayuno",
+    "calories": 300,
+    "protein": 16,
+    "carbs": 35,
+    "fat": 10,
+    "ingredients": [
+      "1 taza de espinaca",
+      "1 platano",
+      "1/2 taza de pina picada",
+      "1 taza de agua",
+      "2 huevos",
+      "1 rebanada de pan integral",
+      "Sal al gusto"
+    ],
+    "instructions": [
+      "Licuar espinaca, platano, pina y agua. Colar si se desea.",
+      "Batir los huevos con sal y cocinar revueltos en sarten antiadherente.",
+      "Tostar el pan y colocar los huevos revueltos encima.",
+      "Servir la tostada con el jugo verde al lado."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Tamal Verde de Pollo",
+    "description": "Tamal peruano de masa de maiz con cilantro relleno de pollo. Desayuno contundente para dias de entreno fuerte.",
+    "category": "desayuno",
+    "calories": 350,
+    "protein": 18,
+    "carbs": 38,
+    "fat": 14,
+    "ingredients": [
+      "85g de maiz pelado molido",
+      "1 atado de cilantro licuado",
+      "33g de manteca de cerdo",
+      "50g de pollo cocido desmenuzado",
+      "1 cebolla roja picada",
+      "1 cucharadita de aji verde licuado",
+      "Hojas de platano para envolver",
+      "Sal y comino al gusto"
+    ],
+    "instructions": [
+      "Mezclar el maiz molido con manteca derretida, cilantro licuado y sal hasta obtener masa suave.",
+      "Preparar relleno salteando cebolla con aji verde y pollo desmenuzado.",
+      "Pasar hojas de platano por el fuego para suavizar.",
+      "Colocar masa sobre la hoja, rellenar con pollo y cerrar formando paquete.",
+      "Amarrar con pabilo y cocinar al vapor por 1 hora.",
+      "Servir caliente con salsa criolla."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "ganar-musculo"
+    ]
+  },
+  {
+    "title": "Ceviche de Bonito",
+    "description": "Ceviche fresco de bonito marinado en limon con cebolla roja y aji limo. Cena ligera clasica peruana.",
+    "category": "cena",
+    "calories": 200,
+    "protein": 28,
+    "carbs": 12,
+    "fat": 4,
+    "ingredients": [
+      "300g de bonito fresco en cubos",
+      "1 cebolla roja en juliana fina",
+      "Jugo de 8-10 limones",
+      "1 aji limo picado",
+      "1 diente de ajo picado fino",
+      "Cilantro fresco picado",
+      "Sal y pimienta al gusto",
+      "1 camote cocido en rodajas",
+      "1 choclo cocido desgranado"
+    ],
+    "instructions": [
+      "Cortar el bonito en cubos de 2cm. Sazonar con sal y pimienta.",
+      "Lavar la cebolla en agua fria con sal. Escurrir.",
+      "En un bol, mezclar el pescado con jugo de limon, ajo y aji limo.",
+      "Dejar marinar 3-5 minutos.",
+      "Agregar la cebolla y cilantro. Mezclar suavemente.",
+      "Servir con camote y choclo al costado."
+    ],
+    "prepTime": null,
+    "servings": 2,
+    "tags": [
+      "perder-peso",
+      "ganar-musculo",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Sopa de Pollo con Fideos",
+    "description": "Sopa casera de pollo con fideos y verduras. Cena reconfortante y facil de digerir.",
+    "category": "cena",
+    "calories": 280,
+    "protein": 24,
+    "carbs": 28,
+    "fat": 8,
+    "ingredients": [
+      "2 presas de pollo",
+      "1/2 taza de fideos cabello de angel",
+      "1 zanahoria en rodajas",
+      "1 papa en cubos",
+      "1/4 cebolla",
+      "1 diente de ajo",
+      "1 rama de apio",
+      "Sal y pimienta al gusto",
+      "Perejil fresco picado"
+    ],
+    "instructions": [
+      "Hervir las presas de pollo en 4 tazas de agua con cebolla, ajo y apio por 20 minutos.",
+      "Retirar el pollo. Colar el caldo.",
+      "Volver a calentar el caldo, agregar zanahoria y papa. Cocinar 10 minutos.",
+      "Agregar los fideos. Cocinar 5 minutos mas.",
+      "Desmenuzar el pollo y devolverlo al caldo.",
+      "Servir con perejil fresco picado."
+    ],
+    "prepTime": null,
+    "servings": 2,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Pechuga al Horno con Camote",
+    "description": "Pechuga de pollo horneada con camote asado y ensalada. Cena completa alta en proteina.",
+    "category": "cena",
+    "calories": 350,
+    "protein": 35,
+    "carbs": 30,
+    "fat": 8,
+    "ingredients": [
+      "150g de pechuga de pollo",
+      "1 camote mediano en rodajas",
+      "1 taza de lechuga mixta",
+      "1/2 tomate en rodajas",
+      "1 cucharada de aceite de oliva",
+      "1 cucharadita de comino",
+      "Sal, pimienta y paprika al gusto"
+    ],
+    "instructions": [
+      "Precalentar horno a 200 grados.",
+      "Sazonar la pechuga con comino, paprika, sal y pimienta.",
+      "Colocar pechuga y rodajas de camote en bandeja con aceite de oliva.",
+      "Hornear 25 minutos hasta que el pollo este cocido y el camote tierno.",
+      "Preparar ensalada con lechuga y tomate.",
+      "Servir el pollo cortado con camote y ensalada."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "ganar-musculo",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Tiradito de Pescado",
+    "description": "Laminas finas de pescado fresco en salsa de aji amarillo y limon. Entrada-cena peruana ligera.",
+    "category": "cena",
+    "calories": 180,
+    "protein": 26,
+    "carbs": 8,
+    "fat": 4,
+    "ingredients": [
+      "300g de filete de pescado fresco (lenguado, bonito o corvina)",
+      "Jugo de 6-8 limones",
+      "2 cucharadas de pasta de aji amarillo",
+      "1 cucharadita de ajo picado",
+      "Sal y pimienta al gusto",
+      "Cilantro fresco",
+      "1 choclo cocido desgranado"
+    ],
+    "instructions": [
+      "Cortar el pescado en laminas finas y colocar en plato extendido.",
+      "Mezclar jugo de limon con aji amarillo, ajo, sal y pimienta.",
+      "Verter la salsa sobre las laminas de pescado.",
+      "Dejar reposar 2-3 minutos.",
+      "Decorar con cilantro y servir con choclo desgranado."
+    ],
+    "prepTime": null,
+    "servings": 2,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Ensalada de Quinua con Pollo",
+    "description": "Ensalada tibia de quinua con pollo a la plancha, palta y verduras frescas. Cena completa y nutritiva.",
+    "category": "cena",
+    "calories": 380,
+    "protein": 30,
+    "carbs": 32,
+    "fat": 14,
+    "ingredients": [
+      "1/2 taza de quinua cocida",
+      "100g de pechuga de pollo a la plancha",
+      "1/4 palta en cubos",
+      "1/2 tomate en cubos",
+      "1/4 pepino en rodajas",
+      "Jugo de 1 limon",
+      "1 cucharada de aceite de oliva",
+      "Sal y pimienta al gusto",
+      "Cilantro fresco"
+    ],
+    "instructions": [
+      "Cocinar la quinua lavada en agua por 15 minutos. Escurrir y enfriar.",
+      "Cocinar la pechuga a la plancha. Cortar en tiras.",
+      "Mezclar la quinua con tomate, pepino y palta.",
+      "Colocar el pollo encima.",
+      "Alinar con limon, aceite, sal y pimienta. Decorar con cilantro."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "ganar-musculo",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Arroz de Coliflor con Pollo Salteado",
+    "description": "Pollo salteado sobre arroz de coliflor rallada. Cena baja en carbohidratos ideal para definicion.",
+    "category": "cena",
+    "calories": 240,
+    "protein": 30,
+    "carbs": 10,
+    "fat": 10,
+    "ingredients": [
+      "150g de pechuga de pollo en tiras",
+      "2 tazas de coliflor rallada (como arroz)",
+      "1/2 pimiento rojo en tiras",
+      "1/4 cebolla en juliana",
+      "1 diente de ajo picado",
+      "1 cucharada de sillao",
+      "1 cucharada de aceite de oliva",
+      "Sal y pimienta al gusto"
+    ],
+    "instructions": [
+      "Rallar la coliflor con rallador grueso para simular arroz.",
+      "Saltear el pollo en aceite caliente con ajo. Reservar.",
+      "En la misma sarten, saltear cebolla y pimiento por 2 minutos.",
+      "Agregar la coliflor rallada y sillao. Cocinar 3 minutos.",
+      "Devolver el pollo y mezclar todo.",
+      "Servir caliente."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Wrap de Pollo con Verduras",
+    "description": "Wrap ligero de tortilla integral con pollo, lechuga, tomate y salsa de yogurt.",
+    "category": "cena",
+    "calories": 300,
+    "protein": 26,
+    "carbs": 28,
+    "fat": 10,
+    "ingredients": [
+      "1 tortilla integral grande",
+      "100g de pollo cocido deshilachado",
+      "Hojas de lechuga",
+      "1/2 tomate en rodajas finas",
+      "1/4 palta en laminas",
+      "2 cucharadas de yogurt natural",
+      "Jugo de 1/2 limon",
+      "Sal y pimienta al gusto"
+    ],
+    "instructions": [
+      "Mezclar el yogurt con limon, sal y pimienta para la salsa.",
+      "Calentar la tortilla en sarten seca por 30 segundos.",
+      "Untar la salsa de yogurt sobre la tortilla.",
+      "Colocar lechuga, pollo, tomate y palta.",
+      "Enrollar bien apretado y cortar por la mitad."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Causa Rellena Light de Atun",
+    "description": "Version ligera de la causa peruana con atun en agua y palta. Sin mayonesa, baja en grasa.",
+    "category": "cena",
+    "calories": 320,
+    "protein": 22,
+    "carbs": 38,
+    "fat": 10,
+    "ingredients": [
+      "3 papas amarillas medianas",
+      "1 lata de atun en agua escurrido",
+      "1/2 palta en laminas",
+      "2 cucharadas de pasta de aji amarillo",
+      "Jugo de 2 limones",
+      "1 cucharada de aceite de oliva",
+      "1/4 cebolla roja picada fina",
+      "Sal y pimienta al gusto",
+      "Hojas de lechuga para decorar"
+    ],
+    "instructions": [
+      "Cocinar papas con cascara hasta que esten tiernas. Pelar y prensar calientes.",
+      "Mezclar la masa de papa con aji amarillo, limon, aceite, sal y pimienta.",
+      "Mezclar atun con cebolla y limon.",
+      "En un molde, colocar capa de papa, luego atun, luego palta, y otra capa de papa.",
+      "Refrigerar 20 minutos.",
+      "Desmoldar sobre lechuga y servir frio."
+    ],
+    "prepTime": null,
+    "servings": 2,
+    "tags": [
+      "perder-peso",
+      "mantener"
+    ]
+  },
+  {
+    "title": "Zumo Detox de Pepino y Limon",
+    "description": "Hidratacion, desintoxicacion, vitamina C, digestion",
+    "category": "jugo-detox",
+    "calories": null,
+    "protein": null,
+    "carbs": null,
+    "fat": null,
+    "ingredients": [
+      "1 pepino",
+      "1 limon",
+      "Un punado de hojas de menta",
+      "1 manzana verde",
+      "Agua"
+    ],
+    "instructions": [
+      "Cortar el pepino y la manzana en trozos.",
+      "Exprimir el limon y mezclar todo en la batidora.",
+      "Anadir agua al gusto y servir con hielo."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "detox",
+      "hidratacion",
+      "desintoxicacion",
+      "vitamina c",
+      "digestion"
+    ]
+  },
+  {
+    "title": "Zumo Detox de Remolacha y Zanahoria",
+    "description": "Antioxidante, vitamina A, hierro, desintoxicacion hepatica",
+    "category": "jugo-detox",
+    "calories": null,
+    "protein": null,
+    "carbs": null,
+    "fat": null,
+    "ingredients": [
+      "1 remolacha",
+      "2 zanahorias",
+      "Un trozo pequeno de jengibre",
+      "1 manzana"
+    ],
+    "instructions": [
+      "Pelar y trocear todos los ingredientes.",
+      "Colocarlos en la batidora con un poco de agua.",
+      "Servir."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "detox",
+      "antioxidante",
+      "vitamina a",
+      "hierro",
+      "desintoxicacion hepatica"
+    ]
+  },
+  {
+    "title": "Zumo Tropical Detox",
+    "description": "Vitamina C, digestion, hidratacion tropical, enzimas digestivas",
+    "category": "jugo-detox",
+    "calories": null,
+    "protein": null,
+    "carbs": null,
+    "fat": null,
+    "ingredients": [
+      "1 rodaja de pina",
+      "1 mango",
+      "200 ml de agua"
+    ],
+    "instructions": [
+      "Triturar todos los ingredientes en la licuadora.",
+      "Servir bien frio."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "detox",
+      "vitamina c",
+      "digestion",
+      "hidratacion tropical",
+      "enzimas digestivas"
+    ]
+  },
+  {
+    "title": "Batido Verde Detox",
+    "description": "Clorofila, hierro, fibra, desintoxicacion, vitaminas K y A",
+    "category": "jugo-detox",
+    "calories": null,
+    "protein": null,
+    "carbs": null,
+    "fat": null,
+    "ingredients": [
+      "Un manojo de espinacas",
+      "Un manojo de acelga",
+      "Una manzana verde",
+      "Un tallo de apio"
+    ],
+    "instructions": [
+      "Triturar todos los ingredientes en la batidora con agua.",
+      "Servir."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "detox",
+      "clorofila",
+      "hierro",
+      "fibra",
+      "desintoxicacion",
+      "vitaminas k y a"
+    ]
+  },
+  {
+    "title": "Batido Detox de Aguaymanto y Fresa",
+    "description": "Antioxidantes, vitamina C, antiinflamatorio, salud cardiovascular",
+    "category": "jugo-detox",
+    "calories": null,
+    "protein": null,
+    "carbs": null,
+    "fat": null,
+    "ingredients": [
+      "1/2 taza de fresas",
+      "1/2 taza de aguaymanto",
+      "1/2 taza de fresa",
+      "1 cucharada de miel"
+    ],
+    "instructions": [
+      "Mezclar todos los ingredientes con agua en la batidora.",
+      "Servir bien frio."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "detox",
+      "antioxidantes",
+      "vitamina c",
+      "antiinflamatorio",
+      "salud cardiovascular"
+    ]
+  },
+  {
+    "title": "Zumo Detox de Sandia",
+    "description": "Hidratacion, licopeno, vitaminas A y C, diuretico natural",
+    "category": "jugo-detox",
+    "calories": null,
+    "protein": null,
+    "carbs": null,
+    "fat": null,
+    "ingredients": [
+      "2 rodajas de sandia",
+      "1 limon",
+      "Un punado de menta"
+    ],
+    "instructions": [
+      "Licuar todos los ingredientes.",
+      "Servir bien frio con hielo."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "detox",
+      "hidratacion",
+      "licopeno",
+      "vitaminas a y c",
+      "diuretico natural"
+    ]
+  },
+  {
+    "title": "Zumo Detox Citrico",
+    "description": "Vitamina C, refuerzo inmunologico, antioxidante, energia natural",
+    "category": "jugo-detox",
+    "calories": null,
+    "protein": null,
+    "carbs": null,
+    "fat": null,
+    "ingredients": [
+      "2 naranjas",
+      "1 toronja",
+      "1 limon"
+    ],
+    "instructions": [
+      "Exprimir la fruta y mezclar los zumos.",
+      "Servir bien frio con hielo."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "detox",
+      "vitamina c",
+      "refuerzo inmunologico",
+      "antioxidante",
+      "energia natural"
+    ]
+  },
+  {
+    "title": "Zumo Detox de Zanahoria y Jengibre",
+    "description": "Vitamina A, antiinflamatorio, digestion, sistema inmunologico",
+    "category": "jugo-detox",
+    "calories": null,
+    "protein": null,
+    "carbs": null,
+    "fat": null,
+    "ingredients": [
+      "3 zanahorias",
+      "Un trozo pequeno de jengibre",
+      "1 manzana"
+    ],
+    "instructions": [
+      "Triturar todos los ingredientes con agua en la batidora.",
+      "Servir."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "detox",
+      "vitamina a",
+      "antiinflamatorio",
+      "digestion",
+      "sistema inmunologico"
+    ]
+  },
+  {
+    "title": "Zumo Detox de Maracuya y Remolacha",
+    "description": "Antioxidante potente, hierro, vitamina C, salud cardiovascular",
+    "category": "jugo-detox",
+    "calories": null,
+    "protein": null,
+    "carbs": null,
+    "fat": null,
+    "ingredients": [
+      "1 maracuya (solo la pulpa)",
+      "1 remolacha",
+      "1 manzana"
+    ],
+    "instructions": [
+      "Triturar todos los ingredientes en la batidora.",
+      "Servir bien frio."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "detox",
+      "antioxidante potente",
+      "hierro",
+      "vitamina c",
+      "salud cardiovascular"
+    ]
+  },
+  {
+    "title": "Zumo Detox de Pepino y Menta",
+    "description": "Hidratacion, frescura, digestion, diuretico, vitamina C",
+    "category": "jugo-detox",
+    "calories": null,
+    "protein": null,
+    "carbs": null,
+    "fat": null,
+    "ingredients": [
+      "1 pepino",
+      "10 hojas de menta",
+      "Zumo de 1 limon",
+      "Agua"
+    ],
+    "instructions": [
+      "Triturar todos los ingredientes en la batidora.",
+      "Servir bien frio con hielo."
+    ],
+    "prepTime": null,
+    "servings": 1,
+    "tags": [
+      "detox",
+      "hidratacion",
+      "frescura",
+      "digestion",
+      "diuretico",
+      "vitamina c"
+    ]
+  }
+]

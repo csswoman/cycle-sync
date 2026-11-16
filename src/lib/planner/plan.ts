@@ -1,10 +1,15 @@
 import { MEAL_SLOTS, type MealSlot } from './week';
+import { ingredientName } from './fromRecipes';
+import { sanitizeRecipe } from '../recipes/sanitize';
+import type { NewRecipe } from '../../types/recipes';
 
 export interface PlannedMeal {
   day: number; // 0 = Monday … 6 = Sunday
   slot: MealSlot;
   title: string;
   ingredients: string[];
+  /** Full recipe written by the AI (server side: saved to the catalog, not sent to the client). */
+  recipe?: NewRecipe;
 }
 
 export interface PlannedWorkout {
@@ -36,6 +41,10 @@ export interface PlanRequest {
   includeMeals: boolean;
   includeWorkouts: boolean;
   videos: CandidateVideo[];
+  /** Foods she avoids. */
+  avoid?: string[];
+  /** When set, only these meal slots are planned (the rest were already filled from her recipes). */
+  onlySlots?: { day: number; slot: MealSlot }[];
 }
 
 export function buildPlanPrompt(req: PlanRequest): string {
@@ -45,11 +54,17 @@ export function buildPlanPrompt(req: PlanRequest): string {
     `Write all text in ${lang}.`,
   ];
   if (req.includeMeals) {
+    const only = req.onlySlots;
     parts.push(
-      `Meals: for every day 0-6 give breakfast, lunch, snack and dinner. Favor foods that suit the ${req.phase} phase. Reuse ingredients across the week to keep shopping simple.`,
+      only && only.length
+        ? `Meals: plan ONLY these slots (day:slot): ${only.map((o) => `${o.day}:${o.slot}`).join(', ')}. Do not return any other slot.`
+        : 'Meals: for every day 0-6 give breakfast, lunch, snack and dinner.',
+      `Favor foods that suit the ${req.phase} phase. Reuse ingredients across the week to keep shopping simple.`,
       req.pantry.length ? `Prefer using these ingredients she already has: ${req.pantry.join(', ')}.` : '',
       req.dietary.length ? `Dietary preferences/restrictions: ${req.dietary.join(', ')}.` : '',
-      'Each meal needs a short title and 2 to 8 ingredients as plain names without quantities.',
+      req.avoid?.length ? `She dislikes or avoids: ${req.avoid.join(', ')}. Never use them.` : '',
+      'Each meal is a short, complete recipe: title, a 1 sentence description, readyInMinutes, servings, 2 to 8 ingredients each with an amount (e.g. "200 g de lentejas"), 3 to 6 short steps, and tags.',
+      `Tags: exactly one meal type matching the slot (${req.language === 'es' ? 'Desayuno, Almuerzo, Cena, Snack' : 'Breakfast, Lunch, Dinner, Snack'}).`,
     );
   }
   if (req.includeWorkouts) {
@@ -58,13 +73,13 @@ export function buildPlanPrompt(req: PlanRequest): string {
       'Use kind "video" with the exact id of one video from the list below, kind "gym" for a strength session without video (give a descriptive title and durationMinutes), or kind "rest".',
       req.videos.length
         ? `Videos (id | title | category | minutes | intensity):\n${req.videos
-            .map((v) => `${v.id} | ${v.title} | ${v.category} | ${v.durationMinutes} | ${v.intensity}`)
-            .join('\n')}`
+          .map((v) => `${v.id} | ${v.title} | ${v.category} | ${v.durationMinutes} | ${v.intensity}`)
+          .join('\n')}`
         : 'There are no videos available, so use only "gym" and "rest".',
     );
   }
   parts.push(
-    'Return only JSON with this shape: {"meals":[{"day":0,"slot":"breakfast|lunch|snack|dinner","title":"","ingredients":[""]}],"workouts":[{"day":0,"kind":"video|gym|rest","videoId":null,"title":"","durationMinutes":30}]}.',
+    'Return only JSON with this shape: {"meals":[{"day":0,"slot":"breakfast|lunch|snack|dinner","title":"","description":"","readyInMinutes":20,"servings":1,"ingredients":[""],"steps":[""],"tags":[""]}],"workouts":[{"day":0,"kind":"video|gym|rest","videoId":null,"title":"","durationMinutes":30}]}.',
     `Use an empty array for the section you were not asked for (${req.includeMeals ? 'workouts' : 'meals'} when applicable).`,
   );
   return parts.filter(Boolean).join('\n');
@@ -74,7 +89,12 @@ const str = (v: unknown, max: number) => (typeof v === 'string' ? v.trim().slice
 const isDay = (v: unknown): v is number => Number.isInteger(v) && (v as number) >= 0 && (v as number) <= 6;
 
 /** Validates the model output: drops malformed rows, unknown slots and video ids that are not in the candidate list. */
-export function parsePlanJson(text: string, validVideoIds: Set<string>): GeneratedPlan {
+export function parsePlanJson(
+  text: string,
+  validVideoIds: Set<string>,
+  language: 'es' | 'en' = 'es',
+  onlySlots?: { day: number; slot: MealSlot }[],
+): GeneratedPlan {
   let raw: any;
   try {
     raw = JSON.parse(text);
@@ -89,12 +109,14 @@ export function parsePlanJson(text: string, validVideoIds: Set<string>): Generat
     if (!isDay(m?.day) || !MEAL_SLOTS.includes(m?.slot) || !title) continue;
     const key = `${m.day}-${m.slot}`;
     if (seenMeals.has(key)) continue;
+    if (onlySlots && !onlySlots.some((o) => o.day === m.day && o.slot === m.slot)) continue;
     seenMeals.add(key);
     const ingredients = (Array.isArray(m.ingredients) ? m.ingredients : [])
-      .map((i: unknown) => str(i, 60))
+      .map((i: unknown) => ingredientName(str(i, 120)))
       .filter(Boolean)
       .slice(0, 12);
-    meals.push({ day: m.day, slot: m.slot, title, ingredients });
+    const recipe = sanitizeRecipe(m, language) ?? undefined;
+    meals.push({ day: m.day, slot: m.slot, title, ingredients, recipe });
   }
 
   const workouts: PlannedWorkout[] = [];

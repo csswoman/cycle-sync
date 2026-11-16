@@ -51,3 +51,39 @@ describe('parsePlanJson', () => {
     expect(parsePlanJson('nope', ids)).toEqual({ meals: [], workouts: [] });
   });
 });
+
+import { buildPlanFromRecipes, ingredientName } from './fromRecipes';
+
+describe('ingredientName', () => {
+  it('drops quantities, units and "de"', () => {
+    expect(ingredientName('200 g de lentejas')).toBe('lentejas');
+    expect(ingredientName('2 huevos')).toBe('huevos');
+    expect(ingredientName('1 cup oats (rolled)')).toBe('oats');
+    expect(ingredientName('Huevos')).toBe('Huevos');
+  });
+});
+
+describe('buildPlanFromRecipes', () => {
+  const mk = (id: string, tag: string, ing: string[] = ['2 huevos']) => ({ id, title: id, ingredients: ing, tags: [tag] });
+  const base = { pantry: [], avoid: [], likes: [], random: () => 0.5 };
+
+  it('fills every slot, avoids repeats while candidates remain and reports gaps', () => {
+    const recipes = [mk('a', 'Desayuno'), mk('b', 'Desayuno'), mk('c', 'Almuerzo'), mk('d', 'Cena')];
+    const r = buildPlanFromRecipes(recipes, base);
+    expect(r.meals.filter((m) => m.slot === 'breakfast')).toHaveLength(7);
+    expect(r.meals.slice(0, 0)).toEqual([]);
+    const firstTwo = r.meals.filter((m) => m.slot === 'breakfast').slice(0, 2).map((m) => m.title);
+    expect(new Set(firstTwo).size).toBe(2);
+    expect(r.missing.filter((m) => m.slot === 'snack')).toHaveLength(7);
+  });
+
+  it('skips avoided foods and slots already taken', () => {
+    const r = buildPlanFromRecipes([mk('a', 'Almuerzo', ['pollo asado']), mk('b', 'Almuerzo', ['lentejas'])], {
+      ...base,
+      avoid: ['pollo'],
+      taken: new Set(['0-lunch']),
+    });
+    expect(r.meals.some((m) => m.title === 'a')).toBe(false);
+    expect(r.meals.some((m) => m.day === 0 && m.slot === 'lunch')).toBe(false);
+  });
+});
