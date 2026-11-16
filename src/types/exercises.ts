@@ -34,5 +34,8 @@ export interface Routine {
     description: string;
     exercises: Exercise[];
     phase: string;
+    /** 0 = Monday ... 6 = Sunday. */
+    weekday?: number | null;
+    muscle_groups?: string[];
     created_at: string;
 }

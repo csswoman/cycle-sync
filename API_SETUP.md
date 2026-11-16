@@ -17,19 +17,6 @@ This guide will help you obtain the free API keys needed for CycleSync.
 
 ---
 
-### 2. RapidAPI (ExerciseDB)
-**Free Tier:** 10,000 requests/month
-
-**Steps to get your key:**
-1. Visit [https://rapidapi.com/](https://rapidapi.com/)
-2. Sign up for a free account
-3. Go to [ExerciseDB API](https://rapidapi.com/justin-WFnsXH_t6/api/exercisedb)
-4. Click "Subscribe to Test"
-5. Select the **Basic (Free)** plan
-6. Copy your `X-RapidAPI-Key` from the code snippets
-7. Add to `.env.local`: `RAPIDAPI_KEY=your_key_here`
-
----
 
 ### 3. Spoonacular (Recipes)
 **Free Tier:** 150 requests/day
@@ -67,7 +54,6 @@ If not:
    ```env
    GEMINI_API_KEY=your_gemini_key
    NEWSAPI_KEY=your_newsapi_key
-   RAPIDAPI_KEY=your_rapidapi_key
    SPOONACULAR_API_KEY=your_spoonacular_key
    ```
 

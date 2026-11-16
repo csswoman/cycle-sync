@@ -146,7 +146,6 @@ All integrations have **graceful fallbacks** to static data when quotas are exce
 
    # Optional, server-only (the app has fallbacks without them)
    SPOONACULAR_API_KEY=your_spoonacular_key
-   RAPIDAPI_KEY=your_rapidapi_key
    NEWSAPI_KEY=your_newsapi_key
    ```
 

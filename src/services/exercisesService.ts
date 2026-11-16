@@ -2,199 +2,76 @@ import { Exercise, WorkoutVideo, BodyPart, Equipment } from '@/types/exercises';
 import { supabase } from '@/lib/supabase';
 import { parseYouTubeId } from '@/lib/youtube';
 import workoutVideosData from '@/data/workoutVideos.json';
+import dataset from '@/data/exercisesDataset.json';
 
-// Requests go through /api/exercises, which adds the RapidAPI key on the server.
+// Exercise data comes from https://github.com/hasaneyldrm/exercises-dataset (bundled JSON).
+// GIFs are loaded from our fork. Media © Gym visual — https://gymvisual.com/
+export const EXERCISE_MEDIA_BASE =
+    'https://raw.githubusercontent.com/FatCat-Game-Studio/exercises-dataset/main/';
+export const EXERCISE_ATTRIBUTION = '© Gym visual — https://gymvisual.com/';
 
-
-
-/**
- * Fetch exercises by body part
- */
-export const fetchExercisesByBodyPart = async (bodyPart: BodyPart): Promise<Exercise[]> => {
-    try {
-        const response = await fetch(`/api/exercises?bodyPart=${encodeURIComponent(bodyPart)}&limit=15`);
-
-        if (!response.ok) {
-            throw new Error(`ExerciseDB error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        return data.map((ex: any) => ({
-            id: ex.id,
-            name: ex.name,
-            bodyPart: ex.bodyPart,
-            equipment: ex.equipment,
-            gifUrl: ex.gifUrl,
-            target: ex.target,
-            instructions: ex.instructions || [],
-            secondaryMuscles: ex.secondaryMuscles || []
-        }));
-    } catch (error) {
-        console.error('Error fetching exercises by body part:', error);
-        return getFallbackExercises().filter(ex => ex.bodyPart === bodyPart);
-    }
-};
-
-/**
- * Search exercises by name
- */
-export const searchExercises = async (query: string): Promise<Exercise[]> => {
-    try {
-        const response = await fetch(`/api/exercises?name=${encodeURIComponent(query)}&limit=10`);
-
-        if (!response.ok) {
-            throw new Error(`ExerciseDB error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        return data.map((ex: any) => ({
-            id: ex.id,
-            name: ex.name,
-            bodyPart: ex.bodyPart,
-            equipment: ex.equipment,
-            gifUrl: ex.gifUrl,
-            target: ex.target,
-            instructions: ex.instructions || [],
-            secondaryMuscles: ex.secondaryMuscles || []
-        }));
-    } catch (error) {
-        console.error('Error searching exercises:', error);
-        return [];
-    }
-};
-
-import localExercisesData from '@/data/localExercises.json';
-
-const CACHE_KEY = 'exercise_cache';
-const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
-
-interface CacheEntry {
-    timestamp: number;
-    data: Exercise[];
+interface DatasetExercise {
+    id: string;
+    name: string;
+    bodyPart: string;
+    equipment: string;
+    target: string;
+    secondaryMuscles: string[];
+    gif: string;
+    steps: { en: string[]; es: string[] };
 }
 
-/**
- * Fetch exercises from ExerciseDB API with Caching and Local Fallback
- */
-export const fetchExercises = async (limit: number = 20): Promise<Exercise[]> => {
-    // 1. Try to get from Local Storage Cache first
-    try {
-        if (typeof window === 'undefined') throw new Error('SSR - skip cache');
-        const cached = localStorage.getItem(CACHE_KEY);
-        if (cached) {
-            const { timestamp, data } = JSON.parse(cached) as CacheEntry;
-            if (Date.now() - timestamp < CACHE_DURATION) {
-                // Return cached data if valid
-                return data.slice(0, limit);
-            }
-        }
-    } catch (e) {
-        console.warn('Cache parsing failed', e);
-    }
+type Lang = 'en' | 'es';
 
-    // 2. If no cache, try API
-    try {
-        const response = await fetch(`/api/exercises?limit=${limit}`);
-
-        if (!response.ok) {
-            if (response.status === 429) {
-                console.warn('⚠️ API Limit Exceeded (429). Using local static dataset.');
-                return getFallbackExercises(); // Or strictly return localExercisesData mapped
-            }
-            throw new Error(`ExerciseDB error: ${response.status}`);
-        }
-
-        const data = await response.json();
-        const formattedData = data.map((ex: any) => ({
-            id: ex.id,
-            name: ex.name,
-            bodyPart: ex.bodyPart,
-            equipment: ex.equipment,
-            gifUrl: ex.gifUrl.replace('http://', 'https://'), // Force HTTPS
-            target: ex.target,
-            instructions: ex.instructions || [],
-            secondaryMuscles: ex.secondaryMuscles || []
-        }));
-
-        // 3. Save to Cache
-        try {
-            if (typeof window !== 'undefined') localStorage.setItem(CACHE_KEY, JSON.stringify({
-                timestamp: Date.now(),
-                data: formattedData
-            }));
-        } catch (e) {
-            console.warn('Failed to save to cache (quota exceeded?)', e);
-        }
-
-        return formattedData;
-
-    } catch (error) {
-        console.error('Error fetching exercises:', error);
-        return getFallbackExercises();
-    }
+const getLang = (): Lang => {
+    if (typeof window === 'undefined') return 'en';
+    return localStorage.getItem('language') === 'es' ? 'es' : 'en';
 };
 
-// ... existing code ...
+const toExercise = (ex: DatasetExercise, lang: Lang): Exercise => ({
+    id: ex.id,
+    name: ex.name,
+    bodyPart: ex.bodyPart,
+    equipment: ex.equipment,
+    gifUrl: EXERCISE_MEDIA_BASE + ex.gif,
+    target: ex.target,
+    instructions: ex.steps[lang],
+    secondaryMuscles: ex.secondaryMuscles,
+});
 
-/**
- * Fallback exercises when API fails
- */
-const getFallbackExercises = (): Exercise[] => {
-    // Use the imported local JSON + some hardcoded defaults if needed
-    // Mapping local JSON to Exercise type
-    const localData: Exercise[] = localExercisesData.map(ex => ({
-        ...ex,
-        gifUrl: ex.gifUrl.replace('http://', 'https://'),
-        secondaryMuscles: [] // data might be missing this
-    }));
-    
-    // Combine with original hardcoded fallbacks if localData is small, or just return localData
-    if (localData.length > 0) return localData;
+const all = dataset as DatasetExercise[];
 
-    return [
-        {
-            id: '1',
-            name: 'Push-ups',
-            bodyPart: 'chest',
-            equipment: 'body weight',
-            gifUrl: '/strength.png',
-            target: 'pectorals',
-            instructions: [
-                'Start in a plank position with hands shoulder-width apart',
-                'Lower your body until chest nearly touches the floor',
-                'Push back up to starting position',
-                'Repeat for desired reps'
-            ]
-        },
-        {
-            id: '2',
-            name: 'Squats',
-            bodyPart: 'upper legs',
-            equipment: 'body weight',
-            gifUrl: '/exercise-fallback.png',
-            target: 'glutes',
-            instructions: [
-                'Stand with feet shoulder-width apart',
-                'Lower your body as if sitting back into a chair',
-                'Keep chest up and knees behind toes',
-                'Push through heels to return to start'
-            ]
-        },
-        {
-            id: '3',
-            name: 'Plank',
-            bodyPart: 'waist',
-            equipment: 'body weight',
-            gifUrl: '/yoga.png',
-            target: 'abs',
-            instructions: [
-                'Start in forearm plank position',
-                'Keep body in straight line from head to heels',
-                'Engage core and hold position',
-                'Breathe steadily throughout'
-            ]
-        }
-    ];
+/** First `limit` exercises of the dataset. */
+export const fetchExercises = async (limit: number = 20): Promise<Exercise[]> => {
+    const lang = getLang();
+    return all.slice(0, limit).map((ex) => toExercise(ex, lang));
+};
+
+export const fetchExercisesByBodyPart = async (bodyPart: BodyPart, limit: number = 15): Promise<Exercise[]> => {
+    const lang = getLang();
+    return all
+        .filter((ex) => ex.bodyPart === bodyPart)
+        .slice(0, limit)
+        .map((ex) => toExercise(ex, lang));
+};
+
+export const fetchExercisesByEquipment = async (equipment: Equipment, limit: number = 15): Promise<Exercise[]> => {
+    const lang = getLang();
+    return all
+        .filter((ex) => ex.equipment === equipment)
+        .slice(0, limit)
+        .map((ex) => toExercise(ex, lang));
+};
+
+/** Case-insensitive search by exercise name (names are in English). */
+export const searchExercises = async (query: string, limit: number = 10): Promise<Exercise[]> => {
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+    const lang = getLang();
+    return all
+        .filter((ex) => ex.name.toLowerCase().includes(q))
+        .slice(0, limit)
+        .map((ex) => toExercise(ex, lang));
 };
 
 /**
@@ -244,3 +121,76 @@ const getFallbackVideos = (): WorkoutVideo[] =>
             }]
             : [];
     });
+
+/** Exercises for the given dataset ids, in the same order. Unknown ids are skipped. */
+export const getExercisesByIds = (ids: string[]): Exercise[] => {
+    const lang = getLang();
+    const byId = new Map(all.map((ex) => [ex.id, ex]));
+    return ids.flatMap((id) => {
+        const ex = byId.get(id);
+        return ex ? [toExercise(ex, lang)] : [];
+    });
+};
+
+export const BODY_PART_LABELS_ES: Record<string, string> = {
+    back: 'Espalda',
+    cardio: 'Cardio',
+    chest: 'Pecho',
+    'lower arms': 'Antebrazos',
+    'lower legs': 'Pantorrillas',
+    neck: 'Cuello',
+    shoulders: 'Hombros',
+    'upper arms': 'Brazos',
+    'upper legs': 'Piernas y glúteos',
+    waist: 'Abdomen y core',
+};
+
+export const EQUIPMENT_LABELS_ES: Record<string, string> = {
+    'body weight': 'Sin equipo',
+    dumbbell: 'Mancuernas',
+    band: 'Banda elástica',
+    kettlebell: 'Pesa rusa',
+    'stability ball': 'Pelota de estabilidad',
+    barbell: 'Barra',
+    cable: 'Polea',
+    'leverage machine': 'Máquina',
+    'smith machine': 'Máquina Smith',
+    'ez barbell': 'Barra EZ',
+    weighted: 'Con peso',
+};
+
+export const listBodyParts = (): string[] =>
+    Array.from(new Set(all.map((ex) => ex.bodyPart))).sort();
+
+export const listEquipment = (): string[] =>
+    Array.from(new Set(all.map((ex) => ex.equipment))).sort();
+
+export interface ExerciseQuery {
+    bodyPart?: string;
+    equipment?: string;
+    text?: string;
+    offset?: number;
+    limit?: number;
+}
+
+/** Filtered, paginated browse of the whole dataset. `total` ignores offset/limit. */
+export const queryExercises = ({
+    bodyPart,
+    equipment,
+    text,
+    offset = 0,
+    limit = 24,
+}: ExerciseQuery): { items: Exercise[]; total: number } => {
+    const lang = getLang();
+    const q = text?.trim().toLowerCase();
+    const matches = all.filter(
+        (ex) =>
+            (!bodyPart || ex.bodyPart === bodyPart) &&
+            (!equipment || ex.equipment === equipment) &&
+            (!q || ex.name.toLowerCase().includes(q) || ex.target.toLowerCase().includes(q)),
+    );
+    return {
+        items: matches.slice(offset, offset + limit).map((ex) => toExercise(ex, lang)),
+        total: matches.length,
+    };
+};
