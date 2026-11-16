@@ -2,9 +2,9 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
-import { savePCOSEntryOffline, getUnsyncedPCOSEntries } from '@/lib/offlineHelpers';
+import { savePMOSEntryOffline, getUnsyncedPMOSEntries } from '@/lib/offlineHelpers';
 import { syncAll } from '@/hooks/useOfflineSync';
-import type { PCOSSymptomEntry } from '@/types';
+import type { PMOSSymptomEntry } from '@/types';
 
 const SYMPTOM_KEYS = ['acne', 'fatigue', 'hirsutism', 'hair_loss', 'mood_swings', 'bloating'] as const;
 type SymptomKey = (typeof SYMPTOM_KEYS)[number];
@@ -12,9 +12,9 @@ type SymptomKey = (typeof SYMPTOM_KEYS)[number];
 const ALERT_THRESHOLD = 2;
 const ALERT_WINDOW_DAYS = 7;
 
-export function usePCOSSymptoms() {
-  const [entries, setEntries] = useState<PCOSSymptomEntry[]>([]);
-  const [todayEntry, setTodayEntry] = useState<Partial<PCOSSymptomEntry> | null>(null);
+export function usePMOSSymptoms() {
+  const [entries, setEntries] = useState<PMOSSymptomEntry[]>([]);
+  const [todayEntry, setTodayEntry] = useState<Partial<PMOSSymptomEntry> | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -32,9 +32,9 @@ export function usePCOSSymptoms() {
         .eq('user_id', user.id)
         .gte('date', fromDate)
         .order('date', { ascending: true });
-      let all = error ? [] : ((data as PCOSSymptomEntry[]) ?? []);
+      let all = error ? [] : ((data as PMOSSymptomEntry[]) ?? []);
       // Overlay entries saved locally that have not reached Supabase yet.
-      const pending = await getUnsyncedPCOSEntries(user.id, fromDate);
+      const pending = await getUnsyncedPMOSEntries(user.id, fromDate);
       all = all.filter((e) => !pending.some((p) => p.date === e.date));
       for (const p of pending) {
         all.push({
@@ -61,7 +61,7 @@ export function usePCOSSymptoms() {
       const user = session?.user;
       if (!user) return;
       const today = new Date().toISOString().split('T')[0];
-      await savePCOSEntryOffline({
+      await savePMOSEntryOffline({
         userId: user.id,
         date: today,
         acne: values.acne,
