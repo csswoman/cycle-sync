@@ -1,4 +1,6 @@
 import React from 'react';
+import { useLanguage } from '@/i18n/LanguageContext';
+import { onboardingText } from '@/i18n/onboardingText';
 
 interface StepProfileFinalizeProps {
     userName: string;
@@ -13,11 +15,13 @@ export const StepProfileFinalize: React.FC<StepProfileFinalizeProps> = ({
     profilePic,
     onImageUpload,
 }) => {
+    const { language } = useLanguage();
+    const text = onboardingText[language].setup.profile;
     return (
         <div className="flex flex-col gap-8 animate-in fade-in slide-in-from-right-4 duration-500">
             <div className="flex flex-col gap-2">
-                <h1 className="text-3xl md:text-4xl font-black leading-tight tracking-[-0.033em] text-foreground">Finalize your profile</h1>
-                <p className="text-muted-foreground text-base font-normal leading-normal">Let's make this space yours.</p>
+                <h1 className="text-3xl md:text-4xl font-black leading-tight tracking-[-0.033em] text-foreground">{text.title}</h1>
+                <p className="text-muted-foreground text-base font-normal leading-normal">{text.subtitle}</p>
             </div>
 
 
@@ -33,26 +37,26 @@ export const StepProfileFinalize: React.FC<StepProfileFinalizeProps> = ({
                             <input type="file" className="hidden" accept="image/*" onChange={onImageUpload} />
                         </label>
                     </div>
-                    <p className="text-sm text-muted-foreground">Tap to change photo</p>
+                    <p className="text-sm text-muted-foreground">{text.changePhoto}</p>
                 </div>
 
 
                 <div className="flex-1 w-full flex flex-col gap-6">
                     <div className="flex flex-col gap-2">
-                        <label className="text-foreground font-bold text-sm uppercase tracking-wider">Display Name</label>
+                        <label className="text-foreground font-bold text-sm uppercase tracking-wider">{text.displayName}</label>
                         <input
                             type="text"
                             value={userName}
                             onChange={(e) => setUserName(e.target.value)}
                             className="w-full bg-secondary border border-border rounded-xl px-4 py-3 text-foreground text-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all"
-                            placeholder="Enter your name"
+                            placeholder={text.namePlaceholder}
                         />
                     </div>
                     <div className="flex flex-col gap-2">
-                        <label className="text-foreground font-bold text-sm uppercase tracking-wider">Goal Statement (Optional)</label>
+                        <label className="text-foreground font-bold text-sm uppercase tracking-wider">{text.goal}</label>
                         <textarea
                             className="w-full bg-secondary border border-border rounded-xl px-4 py-3 text-foreground text-base focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all h-24 resize-none"
-                            placeholder="e.g. I want to feel more energetic during my luteal phase..."
+                            placeholder={text.goalPlaceholder}
                         ></textarea>
                     </div>
                 </div>

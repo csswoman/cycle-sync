@@ -1,15 +1,45 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/i18n/LanguageContext';
+import { onboardingText } from '@/i18n/onboardingText';
+import {
+  ONBOARDING_QUESTIONS, isQuestionAnswered, usesHormonalContraception,
+  type OnboardingAnswers,
+} from './onboarding';
 
 interface ArchetypeSelectionProps {
-  onComplete: () => void;
+  onComplete: (answers: OnboardingAnswers) => void | Promise<void>;
+  initialAnswers?: OnboardingAnswers;
+  saving?: boolean;
   isDarkMode: boolean;
   toggleDarkMode: () => void;
 }
 
-const ArchetypeSelection: React.FC<ArchetypeSelectionProps> = ({ onComplete, isDarkMode, toggleDarkMode }) => {
-  const [selectedArchetype, setSelectedArchetype] = useState<string | null>(null);
-  const { language, setLanguage, t } = useLanguage();
+const ArchetypeSelection: React.FC<ArchetypeSelectionProps> = ({ onComplete, initialAnswers, saving = false, isDarkMode, toggleDarkMode }) => {
+  const { language, setLanguage } = useLanguage();
+  const text = onboardingText[language].archetype;
+  const [answers, setAnswers] = useState<OnboardingAnswers>(initialAnswers ?? {});
+  const [index, setIndex] = useState(0);
+  const question = ONBOARDING_QUESTIONS[index];
+  const isLast = index === ONBOARDING_QUESTIONS.length - 1;
+  const copy = text.questions[question.id];
+  const current = answers[question.id];
+  const isSelected = (id: string) => (Array.isArray(current) ? current.includes(id) : current === id);
+  const choose = (id: string) => {
+    if (question.multi) {
+      const list = (Array.isArray(current) ? current : []) as string[];
+      setAnswers({ ...answers, [question.id]: list.includes(id) ? list.filter((v) => v !== id) : [...list, id] });
+    } else {
+      setAnswers({ ...answers, [question.id]: id });
+    }
+  };
+  const note =
+    question.id === 'contraception' && usesHormonalContraception(answers) ? text.notes.hormonalContraception
+    : question.id === 'regularity' && answers.regularity === 'irregular' ? text.notes.irregular
+    : null;
+  const handleNext = () => {
+    if (isLast) void onComplete(answers);
+    else setIndex(index + 1);
+  };
 
   const toggleLanguage = () => {
     setLanguage(language === 'en' ? 'es' : 'en');
@@ -46,98 +76,83 @@ const ArchetypeSelection: React.FC<ArchetypeSelectionProps> = ({ onComplete, isD
         </div>
       </header>
 
-      <div className="flex-1 w-full max-w-[960px] mx-auto flex flex-col gap-8 md:gap-12 py-10 px-6">
-        {/* PageHeading */}
-        <div className="flex flex-col gap-4 text-center items-center animate-in fade-in slide-in-from-bottom-4 duration-700">
-          <h1 className="text-3xl md:text-5xl font-black leading-tight tracking-tight max-w-2xl text-foreground">
-            Welcome. Let's personalize your experience.
-          </h1>
-          <p className="text-muted-foreground text-base md:text-lg font-normal leading-relaxed max-w-2xl">
-            Select the profile that best matches your current health goals. All data is stored locally on your device for maximum privacy.
-          </p>
-        </div>
-
-
-        {/* FeatureSection / Selection Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full animate-in fade-in slide-in-from-bottom-8 duration-700 delay-150">
-          {/* Card 1: Performance Optimizer */}
-          <label className={`group relative flex flex-col gap-4 rounded-xl border-2 ${selectedArchetype === 'performance' ? 'border-primary bg-card' : 'border-border bg-card/50'} p-6 md:p-8 cursor-pointer hover:border-primary hover:shadow-xl hover:shadow-primary/5 transition-all duration-300`}>
-            <input
-              className="peer sr-only"
-              name="archetype"
-              type="radio"
-              value="performance"
-              checked={selectedArchetype === 'performance'}
-              onChange={() => setSelectedArchetype('performance')}
-            />
-            {/* Checkmark indicator (visible when selected) */}
-            <div className={`absolute top-4 right-4 text-primary transition-opacity ${selectedArchetype === 'performance' ? 'opacity-100' : 'opacity-0'}`}>
-              <span className="material-symbols-outlined filled">check_circle</span>
-            </div>
-            <div className="size-14 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform duration-300">
-              <span className="material-symbols-outlined text-[32px]">trending_up</span>
-            </div>
-            <div className="flex flex-col gap-2">
-              <h3 className="text-xl font-bold text-foreground">Performance Optimizer</h3>
-              <p className="text-sm font-semibold text-primary uppercase tracking-wider">For regular cycles</p>
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                Optimize athletic performance by training in sync with your follicular and luteal phases. Push harder when estrogen is high, and recover when progesterone peaks.
-              </p>
-            </div>
-          </label>
-
-
-          {/* Card 2: PMOS Manager */}
-          <label className={`group relative flex flex-col gap-4 rounded-xl border-2 ${selectedArchetype === 'pmos' ? 'border-primary bg-card' : 'border-border bg-card/50'} p-6 md:p-8 cursor-pointer hover:border-primary hover:shadow-xl hover:shadow-primary/5 transition-all duration-300`}>
-            <input
-              className="peer sr-only"
-              name="archetype"
-              type="radio"
-              value="pmos"
-              checked={selectedArchetype === 'pmos'}
-              onChange={() => setSelectedArchetype('pmos')}
-            />
-            {/* Checkmark indicator */}
-            <div className={`absolute top-4 right-4 text-primary transition-opacity ${selectedArchetype === 'pmos' ? 'opacity-100' : 'opacity-0'}`}>
-              <span className="material-symbols-outlined filled">check_circle</span>
-            </div>
-            <div className="size-14 rounded-full bg-rose-500/10 flex items-center justify-center text-rose-500 group-hover:scale-110 transition-transform duration-300">
-              <span className="material-symbols-outlined text-[32px]">spa</span>
-            </div>
-            <div className="flex flex-col gap-2">
-              <h3 className="text-xl font-bold text-foreground">PMOS Manager</h3>
-              <p className="text-sm font-semibold text-rose-500 uppercase tracking-wider">For symptom management</p>
-              <p className="text-muted-foreground text-sm leading-relaxed">
-                For women managing Polyendocrine Metabolic Ovarian Syndrome (PMOS, formerly PCOS). Focus on hormonal balance, insulin sensitivity, and holistic symptom reduction through low-impact consistency.
-              </p>
-            </div>
-          </label>
-
-        </div>
-
-        {/* SingleButton & Privacy Note */}
-        <div className="flex flex-col items-center gap-6 animate-in fade-in slide-in-from-bottom-8 duration-700 delay-300">
-          <button
-            onClick={onComplete}
-            disabled={!selectedArchetype}
-            className="w-full max-w-[480px] h-14 flex items-center justify-center rounded-xl bg-primary disabled:opacity-50 disabled:cursor-not-allowed text-primary-foreground text-lg font-bold shadow-lg hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] transition-all"
-          >
-            Start My Journey
-          </button>
-          <div className="flex flex-col items-center gap-2">
-            <div className="flex items-center gap-2 text-muted-foreground text-xs font-medium bg-secondary px-3 py-1.5 rounded-full">
-              <span className="material-symbols-outlined text-[16px]">lock</span>
-              <span>Your data is encrypted and stored locally.</span>
-            </div>
-            <a className="text-muted-foreground text-sm font-normal underline hover:text-primary transition-colors" href="#">
-              Not sure which one to pick? Learn more here.
-            </a>
+      <div className="flex-1 w-full max-w-[760px] mx-auto flex flex-col gap-8 py-10 px-6">
+        {index === 0 && (
+          <div className="flex flex-col gap-3 text-center items-center animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <h1 className="text-3xl md:text-4xl font-black leading-tight tracking-tight max-w-2xl text-foreground">{text.title}</h1>
+            <p className="text-muted-foreground text-base leading-relaxed max-w-xl">{text.subtitle}</p>
+          </div>
+        )}
+        <div className="flex flex-col gap-2">
+          <div className="flex justify-between text-sm font-medium text-muted-foreground">
+            <span>{text.questionOf(index + 1, ONBOARDING_QUESTIONS.length)}</span>
+            <span>{question.multi ? text.chooseAny : text.chooseOne}</span>
+          </div>
+          <div className="h-2 w-full rounded-full bg-secondary overflow-hidden">
+            <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${((index + 1) / ONBOARDING_QUESTIONS.length) * 100}%` }} />
           </div>
         </div>
-
+        <div key={question.id} className="flex flex-col gap-6 animate-in fade-in slide-in-from-right-4 duration-500">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-2xl md:text-3xl font-black text-foreground">{copy.title}</h2>
+            <p className="text-muted-foreground">{copy.hint}</p>
+          </div>
+          <div className={`grid gap-3 ${question.multi ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-1'}`}>
+            {question.options.map((opt) => {
+              const o = text.options[`${question.prefix}_${opt.id}`];
+              const selected = isSelected(opt.id);
+              return (
+                <button
+                  key={opt.id}
+                  type="button"
+                  onClick={() => choose(opt.id)}
+                  aria-pressed={selected}
+                  className={`flex items-center gap-4 text-left rounded-xl border-2 p-4 transition-all ${selected ? 'border-primary bg-card shadow-lg shadow-primary/5' : 'border-border bg-card/50 hover:border-primary/60'}`}
+                >
+                  <span className={`size-11 shrink-0 rounded-full flex items-center justify-center ${selected ? 'bg-primary text-primary-foreground' : 'bg-primary/10 text-primary'}`}>
+                    <span className="material-symbols-outlined text-[24px]">{opt.icon}</span>
+                  </span>
+                  <span className="flex flex-col gap-0.5">
+                    <span className="font-bold text-foreground">{o.label}</span>
+                    {o.description && <span className="text-sm text-muted-foreground leading-snug">{o.description}</span>}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          {note && (
+            <div className="flex gap-3 rounded-xl bg-amber-500/10 text-foreground p-4 text-sm">
+              <span className="material-symbols-outlined text-amber-500">info</span>
+              <p>{note}</p>
+            </div>
+          )}
+        </div>
+        <div className="flex items-center justify-between gap-4">
+          <button
+            type="button"
+            onClick={() => setIndex(Math.max(0, index - 1))}
+            disabled={index === 0 || saving}
+            className="px-6 py-3 rounded-lg text-sm font-bold text-muted-foreground hover:bg-secondary transition-colors disabled:opacity-0"
+          >
+            {text.back}
+          </button>
+          <button
+            type="button"
+            onClick={handleNext}
+            disabled={!isQuestionAnswered(question, answers) || saving}
+            className="px-8 h-12 rounded-xl bg-primary text-primary-foreground font-bold shadow-lg hover:bg-primary/90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {saving ? text.saving : isLast ? text.finish : text.next}
+          </button>
+        </div>
+        <div className="flex justify-center">
+          <div className="flex items-center gap-2 text-muted-foreground text-xs font-medium bg-secondary px-3 py-1.5 rounded-full">
+            <span className="material-symbols-outlined text-[16px]">lock</span>
+            <span>{text.privacy}</span>
+          </div>
+        </div>
       </div>
     </div>
   );
 };
-
 export default ArchetypeSelection;
