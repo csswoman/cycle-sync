@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 
+import { isGuestRoute } from '@/lib/guestAccess';
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -36,7 +37,7 @@ export async function middleware(request: NextRequest) {
   // Supabase stores the session in a cookie named sb-*-auth-token
   const hasSession = request.cookies.getAll().some((c) => c.name.includes('-auth-token'));
 
-  if (isAppRoute && !hasSession) {
+  if (isAppRoute && !hasSession && !isGuestRoute(pathname)) {
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);
