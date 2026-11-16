@@ -1,15 +1,19 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { fetchWorkoutVideos } from '@/services/exercisesService';
+import { fetchWorkoutVideos, getExercisesByIds, EXERCISE_ATTRIBUTION } from '@/services/exercisesService';
 import { Exercise, WorkoutVideo, Routine, VideoCategory, VideoIntensity } from '@/types/exercises';
 import phaseData from '@/data/phaseExercises.json';
 import { supabase } from '@/lib/supabase';
 import { useCycleInfo } from '@/hooks/useCycleInfo';
 import { useRoutineStore } from '@/stores/routineStore';
-import { ExerciseCard, RoutineSection, SavedRoutineCard, VideoCard } from './components/RoutinesComponents';
+import WorkoutLogSection from './components/WorkoutLogSection';
+import PhasePlaylists from './components/PhasePlaylists';
+import RoutineBuilder from './components/RoutineBuilder';
+import { ExerciseCard, RoutineSection, SavedRoutineCard, VideoCard, VideoModal } from './components/RoutinesComponents';
 
 const VIDEOS_PAGE = 9;
+
 const PHASE_KEY_MAP: Record<string, string> = {
   Menstrual: 'menstrual',
   Follicular: 'follicular',
@@ -17,57 +21,97 @@ const PHASE_KEY_MAP: Record<string, string> = {
   Luteal: 'luteal',
 };
 
-const PHASE_GUIDANCE: Record<string, { title: string; desc: string; intensity: string }> = {
+const PHASE_NAMES_ES: Record<string, string> = {
+  menstrual: 'Fase Menstrual',
+  follicular: 'Fase Folicular',
+  ovulation: 'Fase Ovulatoria',
+  luteal: 'Fase Lútea',
+};
+
+const PHASE_GUIDANCE: Record<string, { title: string; desc: string; intensity: string; focus: string; icon: string }> = {
   menstrual: {
-    title: 'Rest & Recovery',
-    desc: 'Gentle yoga, stretching, and walks. Honor your body\'s need for rest.',
-    intensity: 'Low',
+    title: 'Descanso y Movilidad Suave',
+    desc: 'Los niveles de estrógeno y progesterona están en su punto mínimo. Prioriza caminatas tranquilas, estiramientos y yoga restaurativo para aliviar la tensión y favorecer la circulación.',
+    intensity: 'Baja / Restaurativa',
+    focus: 'Recuperación y relajación',
+    icon: 'water_drop',
   },
   follicular: {
-    title: 'Build Strength',
-    desc: 'Rising estrogen supports muscle growth. Time for progressive overload!',
-    intensity: 'Moderate-High',
+    title: 'Desarrollo de Fuerza y Resistencia',
+    desc: 'El ascenso de estrógenos mejora la energía, la síntesis proteica y la tolerancia al esfuerzo. Es el momento perfecto para sobrecarga progresiva y entrenamientos de fuerza.',
+    intensity: 'Moderada - Alta',
+    focus: 'Construcción muscular y energía',
+    icon: 'fitness_center',
   },
   ovulation: {
-    title: 'Peak Performance',
-    desc: 'Energy peaks — go for HIIT, sprints, and challenging lifts.',
-    intensity: 'High',
+    title: 'Pico de Rendimiento y Potencia',
+    desc: 'Estrógenos en su punto máximo y un aumento de testosterona. Tu fuerza y resistencia alcanzan su pico. Ideal para sesiones intensas, retos de fuerza o circuitos dinámicos.',
+    intensity: 'Alta',
+    focus: 'Fuerza máxima y potencia',
+    icon: 'bolt',
   },
   luteal: {
-    title: 'Stabilize & Maintain',
-    desc: 'Low impact strength and mobility. Avoid spiking cortisol.',
-    intensity: 'Low-Moderate',
+    title: 'Fuerza Controlada y Bajo Impacto',
+    desc: 'El predominio de progesterona eleva el gasto basal pero también la sensibilidad al estrés. Prioriza pilates, fuerza controlada y movilidad para tonificar sin elevar el cortisol.',
+    intensity: 'Baja - Moderada',
+    focus: 'Fuerza de bajo impacto y equilibrio',
+    icon: 'self_improvement',
   },
 };
 
+const CATEGORIES: { id: VideoCategory | 'all'; label: string; icon: string }[] = [
+  { id: 'all', label: 'Todos', icon: 'grid_view' },
+  { id: 'yoga', label: 'Yoga', icon: 'self_improvement' },
+  { id: 'pilates', label: 'Pilates', icon: 'accessibility_new' },
+  { id: 'gym', label: 'Fuerza', icon: 'fitness_center' },
+  { id: 'dance', label: 'Danza', icon: 'music_note' },
+];
+
+const INTENSITIES: { id: VideoIntensity | 'all'; label: string }[] = [
+  { id: 'all', label: 'Cualquier intensidad' },
+  { id: 'low', label: 'Suave' },
+  { id: 'medium', label: 'Moderada' },
+  { id: 'high', label: 'Intensa' },
+];
+
+type RoutineTab = 'phase' | 'videos' | 'builder' | 'log';
+
+const TABS: { id: RoutineTab; label: string; icon: string; description: string }[] = [
+  { id: 'phase', label: 'Para tu Fase', icon: 'auto_awesome', description: 'Recomendaciones y playlists adaptadas a tu momento hormonal' },
+  { id: 'videos', label: 'Videos Guiados', icon: 'videocam', description: 'Catálogo de sesiones en video con filtros por disciplina' },
+  { id: 'builder', label: 'Mis Rutinas', icon: 'calendar_month', description: 'Rutinas guardadas y creador semanal de ejercicios' },
+  { id: 'log', label: 'Diario y Registro', icon: 'edit_note', description: 'Anota tus sesiones y analiza cómo responde tu cuerpo' },
+];
+
 const Routines: React.FC = () => {
   const { cycleInfo, loading: cycleLoading } = useCycleInfo();
-  const { streak, badges, newBadges, completeWorkout, clearNewBadges } = useRoutineStore();
+  const { streak, completeWorkout } = useRoutineStore();
 
+  const [activeTab, setActiveTab] = useState<RoutineTab>('phase');
   const [recommendedExercises, setRecommendedExercises] = useState<Exercise[]>([]);
-  const [pcosExercises, setPcosExercises] = useState<Exercise[]>([]);
   const [workoutVideos, setWorkoutVideos] = useState<WorkoutVideo[]>([]);
   const [videoCategory, setVideoCategory] = useState<VideoCategory | 'all'>('all');
   const [videoIntensity, setVideoIntensity] = useState<VideoIntensity | 'all'>('all');
+  const [onlyPhaseVideos, setOnlyPhaseVideos] = useState(false);
   const [videosShown, setVideosShown] = useState(VIDEOS_PAGE);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userRoutines, setUserRoutines] = useState<Routine[]>([]);
   const [saving, setSaving] = useState(false);
-  const [showBadgeModal, setShowBadgeModal] = useState(false);
+  const [activeVideo, setActiveVideo] = useState<WorkoutVideo | null>(null);
 
   const phaseKey = cycleInfo ? PHASE_KEY_MAP[cycleInfo.phase] || 'follicular' : 'follicular';
-  const guidance = PHASE_GUIDANCE[phaseKey];
+  const phaseNameEs = PHASE_NAMES_ES[phaseKey] || 'Fase Folicular';
+  const guidance = PHASE_GUIDANCE[phaseKey] || PHASE_GUIDANCE.follicular;
+
+  const today = new Date().toISOString().split('T')[0];
+  const isCompletedToday = streak.lastCompletedDate === today;
 
   const visibleVideos = workoutVideos
     .filter((v) => videoCategory === 'all' || v.category === videoCategory)
     .filter((v) => videoIntensity === 'all' || v.intensity === videoIntensity)
+    .filter((v) => !onlyPhaseVideos || v.phases.includes(phaseKey as any))
     .sort((a, b) => Number(b.phases.includes(phaseKey as any)) - Number(a.phases.includes(phaseKey as any)));
-  useEffect(() => {
-    if (newBadges.length > 0) {
-      setShowBadgeModal(true);
-    }
-  }, [newBadges]);
 
   useEffect(() => {
     const loadData = async () => {
@@ -75,22 +119,15 @@ const Routines: React.FC = () => {
         setLoading(true);
         const currentPhaseData = (phaseData as any)[phaseKey];
         if (currentPhaseData) {
-          setRecommendedExercises(currentPhaseData.exercises.map((ex: any) => ({
-            ...ex,
-            secondaryMuscles: []
-          })));
+          setRecommendedExercises(getExercisesByIds(currentPhaseData.exerciseIds));
         }
-
-        const pcosKey = phaseKey === 'menstrual' ? 'follicular' : 'menstrual';
-        const pcosData = (phaseData as any)[pcosKey]?.exercises?.slice(0, 3) ?? [];
-        setPcosExercises(pcosData.map((ex: any) => ({ ...ex, secondaryMuscles: [] })));
 
         const videos = await fetchWorkoutVideos();
         setWorkoutVideos(videos);
         setError(null);
       } catch (err) {
         console.error('Error loading routines data:', err);
-        setError('Could not load routines. Please try again later.');
+        setError('No se pudieron cargar las rutinas. Por favor intenta de nuevo.');
       } finally {
         setLoading(false);
       }
@@ -123,8 +160,8 @@ const Routines: React.FC = () => {
 
       const { error } = await supabase.from('routines').insert([{
         user_id: user.id,
-        name: `${ex.name} Routine`,
-        description: `Targeting ${ex.target} for the ${cycleInfo?.phase ?? 'current'} phase.`,
+        name: `Rutina de ${ex.name}`,
+        description: `Enfocada en ${ex.target} para ${phaseNameEs}.`,
         exercises: [ex],
         phase: phaseKey,
       }]);
@@ -132,7 +169,7 @@ const Routines: React.FC = () => {
       if (error) throw error;
       fetchUserRoutines();
     } catch (err: any) {
-      alert('Error saving: ' + err.message);
+      alert('Error al guardar: ' + err.message);
     } finally {
       setSaving(false);
     }
@@ -142,281 +179,379 @@ const Routines: React.FC = () => {
     completeWorkout();
   };
 
-  const earnedBadges = badges.filter((b) => b.earnedAt);
-  const unearnedBadges = badges.filter((b) => !b.earnedAt);
-
   return (
-    <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide bg-background">
-      <div className="w-full max-w-[1200px] mx-auto p-4 md:p-8 flex flex-col gap-10 pb-24">
-
-        {/* Badge Unlock Modal */}
-        {showBadgeModal && newBadges.length > 0 && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => { setShowBadgeModal(false); clearNewBadges(); }}>
-            <div className="bg-card border border-border rounded-2xl p-8 max-w-sm w-full mx-4 text-center animate-in zoom-in-95 duration-300" onClick={(e) => e.stopPropagation()}>
-              <div className="text-6xl mb-4">
-                <span className="material-symbols-outlined text-yellow-400 text-[64px]">emoji_events</span>
-              </div>
-              <h3 className="text-foreground text-2xl font-black mb-2">Badge Unlocked!</h3>
-              {newBadges.map((id) => {
-                const badge = badges.find((b) => b.id === id);
-                return badge ? (
-                  <div key={id} className="mt-4 p-4 bg-yellow-400/10 rounded-xl border border-yellow-400/30">
-                    <span className="material-symbols-outlined text-yellow-400 text-3xl">{badge.icon}</span>
-                    <p className="text-foreground font-bold mt-2">{badge.name}</p>
-                    <p className="text-muted-foreground text-sm">{badge.description}</p>
-                  </div>
-                ) : null;
-              })}
-              <button
-                onClick={() => { setShowBadgeModal(false); clearNewBadges(); }}
-                className="mt-6 bg-primary text-primary-foreground font-bold px-6 py-2.5 rounded-xl"
-              >
-                Awesome!
-              </button>
-            </div>
-          </div>
-        )}
+    <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide">
+      <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-10 pb-32">
 
         {/* Hero Section */}
-        <section className="flex flex-col gap-6 md:flex-row md:items-end justify-between">
-          <div className="flex flex-col gap-3 max-w-2xl">
-            <h1 className="text-foreground text-4xl md:text-5xl font-black leading-tight tracking-tight">
-              Workout Routines
+        <section className="flex flex-col gap-6">
+          <div className="flex flex-col gap-2 max-w-2xl">
+            <h1 className="text-foreground text-3xl md:text-4xl font-bold tracking-tight">
+              Rutinas y Entrenamiento
             </h1>
-            <p className="text-muted-foreground text-lg font-normal leading-relaxed">
-              Workouts designed to sync with your body. {guidance.desc}
+            <p className="text-muted-foreground text-base md:text-lg leading-relaxed">
+              Sincroniza tu actividad física con tu ciclo menstrual para trabajar a favor de tu fisiología hormonal, prevenir fatiga y maximizar tus resultados.
             </p>
           </div>
-          <div className="bg-card p-4 rounded-xl border border-border flex items-center gap-4 min-w-[300px] shadow-lg">
-            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-              <span className="material-symbols-outlined">water_drop</span>
-            </div>
-            <div>
-              <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wider">Current Status</p>
-              <p className="text-foreground text-lg font-bold">
-                {cycleLoading ? 'Loading...' : `${cycleInfo?.phase ?? 'Unknown'} Phase • Day ${cycleInfo?.cycleDay ?? '?'}`}
-              </p>
-            </div>
-          </div>
-        </section>
 
-        {/* Streak & Badges Row */}
-        <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Current Streak */}
-          <div className="bg-card rounded-xl border border-border p-5 flex items-center gap-4 relative overflow-hidden">
-            <div className="absolute right-0 top-0 p-3 opacity-5">
-              <span className="material-symbols-outlined text-7xl">local_fire_department</span>
-            </div>
-            <div className="p-3 bg-orange-500/10 rounded-xl">
-              <span className="material-symbols-outlined text-orange-500 text-3xl">local_fire_department</span>
-            </div>
-            <div>
-              <p className="text-muted-foreground text-xs font-medium uppercase tracking-wider">Current Streak</p>
-              <p className="text-foreground text-3xl font-black">{streak.currentStreak} <span className="text-sm font-medium text-muted-foreground">days</span></p>
-            </div>
-          </div>
-
-          {/* Total Workouts */}
-          <div className="bg-card rounded-xl border border-border p-5 flex items-center gap-4 relative overflow-hidden">
-            <div className="absolute right-0 top-0 p-3 opacity-5">
-              <span className="material-symbols-outlined text-7xl">fitness_center</span>
-            </div>
-            <div className="p-3 bg-primary/10 rounded-xl">
-              <span className="material-symbols-outlined text-primary text-3xl">fitness_center</span>
-            </div>
-            <div>
-              <p className="text-muted-foreground text-xs font-medium uppercase tracking-wider">Total Workouts</p>
-              <p className="text-foreground text-3xl font-black">{streak.totalCompleted}</p>
-            </div>
-          </div>
-
-          {/* Complete Workout CTA */}
-          <button
-            onClick={handleCompleteWorkout}
-            disabled={streak.lastCompletedDate === new Date().toISOString().split('T')[0]}
-            className="bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-700 text-primary-foreground rounded-xl border-0 p-5 flex items-center gap-4 transition-all disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-primary/20"
-          >
-            <div className="p-3 bg-white/20 rounded-xl">
-              <span className="material-symbols-outlined text-3xl">
-                {streak.lastCompletedDate === new Date().toISOString().split('T')[0] ? 'check_circle' : 'play_arrow'}
-              </span>
-            </div>
-            <div className="text-left">
-              <p className="text-xs font-medium uppercase tracking-wider opacity-80">
-                {streak.lastCompletedDate === new Date().toISOString().split('T')[0] ? 'Completed Today' : 'Mark as Done'}
-              </p>
-              <p className="text-lg font-black">
-                {streak.lastCompletedDate === new Date().toISOString().split('T')[0] ? 'Great Job!' : 'Log Workout'}
-              </p>
-            </div>
-          </button>
-        </section>
-
-        {/* Badges */}
-        <section className="bg-card rounded-xl border border-border p-6">
-          <h3 className="text-foreground text-lg font-bold mb-4 flex items-center gap-2">
-            <span className="material-symbols-outlined text-yellow-400">emoji_events</span>
-            Badges ({earnedBadges.length}/{badges.length})
-          </h3>
-          <div className="flex flex-wrap gap-3">
-            {badges.map((badge) => (
-              <div
-                key={badge.id}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl border transition-all ${
-                  badge.earnedAt
-                    ? 'bg-yellow-400/10 border-yellow-400/30 text-foreground'
-                    : 'bg-secondary/50 border-border text-muted-foreground opacity-50'
-                }`}
-              >
-                <span className={`material-symbols-outlined ${badge.earnedAt ? 'text-yellow-400' : ''}`}>
-                  {badge.icon}
+          {/* Status & Daily Activity Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Phase Status Card */}
+            <div className="md:col-span-2 bg-card rounded-2xl border border-border p-5 sm:p-6 shadow-sm flex flex-col justify-between gap-4">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="size-11 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                    <span className="material-symbols-outlined text-2xl">{guidance.icon}</span>
+                  </div>
+                  <div>
+                    <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Tu Fase Actual</span>
+                    <h2 className="text-xl font-bold text-foreground">
+                      {cycleLoading ? 'Cargando...' : `${phaseNameEs} • Día ${cycleInfo?.cycleDay ?? '?'}`}
+                    </h2>
+                  </div>
+                </div>
+                <span className="text-xs font-bold px-3 py-1 rounded-full bg-primary/10 text-primary shrink-0">
+                  {guidance.intensity}
                 </span>
-                <div>
-                  <p className="text-sm font-bold">{badge.name}</p>
-                  <p className="text-[10px]">{badge.description}</p>
-                </div>
               </div>
-            ))}
-          </div>
-        </section>
 
-        {/* Phase Guidance */}
-        <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {[
-            { title: 'Strength Training', p: 'Improve insulin sensitivity', icon: 'fitness_center' },
-            { title: 'Yoga & Pilates', p: 'Reduce cortisol & balance hormones', icon: 'self_improvement' },
-            { title: 'Mindful Cardio', p: 'Low impact for metabolic health', icon: 'directions_run' },
-          ].map((cat, i) => (
-            <div key={i} className="group relative rounded-2xl overflow-hidden cursor-pointer bg-card border border-border p-6 hover:border-primary/50 transition-all">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <span className="material-symbols-outlined text-primary">{cat.icon}</span>
+              <div className="bg-secondary/40 rounded-xl p-3.5 border border-border/50 text-sm">
+                <div className="flex items-center justify-between gap-2 mb-0.5">
+                  <p className="font-semibold text-foreground">{guidance.title}</p>
+                  {activeTab !== 'phase' && (
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('phase')}
+                      className="text-[11px] font-bold text-primary hover:underline flex items-center gap-0.5 cursor-pointer shrink-0"
+                    >
+                      <span>Ver ejercicios</span>
+                      <span className="material-symbols-outlined text-xs">arrow_forward</span>
+                    </button>
+                  )}
                 </div>
-                <h3 className="text-foreground font-bold">{cat.title}</h3>
+                <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">{guidance.desc}</p>
               </div>
-              <p className="text-muted-foreground text-sm">{cat.p}</p>
             </div>
-          ))}
+
+            {/* Daily Movement Check-in */}
+            <div className="bg-card rounded-2xl border border-border p-5 sm:p-6 shadow-sm flex flex-col justify-between gap-4">
+              <div>
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Registro de Hoy</span>
+                <div className="flex items-baseline gap-2 mt-1">
+                  <span className="text-3xl font-black text-foreground">{streak.currentStreak}</span>
+                  <span className="text-xs text-muted-foreground font-medium">días activos seguidos</span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  {streak.totalCompleted} {streak.totalCompleted === 1 ? 'entrenamiento registrado' : 'entrenamientos registrados'}
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={handleCompleteWorkout}
+                  disabled={isCompletedToday}
+                  className={`w-full py-3 px-4 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${
+                    isCompletedToday
+                      ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 cursor-default'
+                      : 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-md hover:shadow-lg cursor-pointer'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-lg">
+                    {isCompletedToday ? 'check_circle' : 'task_alt'}
+                  </span>
+                  <span>{isCompletedToday ? 'Entrenamiento de hoy listo' : 'Registrar sesión de hoy'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('log')}
+                  className="text-xs text-muted-foreground hover:text-foreground text-center font-medium transition-colors cursor-pointer flex items-center justify-center gap-1 py-1"
+                >
+                  <span className="material-symbols-outlined text-sm">edit_note</span>
+                  <span>Abrir diario de entrenamiento</span>
+                </button>
+              </div>
+            </div>
+          </div>
         </section>
 
         {error && (
-          <div className="p-4 bg-destructive/10 text-destructive rounded-xl border border-destructive/20 text-center font-bold">
+          <div className="p-4 bg-destructive/10 text-destructive rounded-xl border border-destructive/20 text-center font-bold text-sm">
             {error}
           </div>
         )}
 
-        {/* Videos */}
-        <RoutineSection
-          title="Home Workout Videos"
-          description={`Sorted with the ones that suit your ${cycleInfo?.phase ?? 'current'} phase first.`}
-          icon="videocam"
-          rightElement={
-            <span className="text-xs font-bold px-3 py-1 rounded-full bg-primary/10 text-primary">
-              {visibleVideos.length} videos
-            </span>
-          }
-        >
-          <div className="flex flex-col gap-3">
-            <div className="flex flex-wrap gap-2">
-              {(['all', 'gym', 'dance', 'yoga', 'pilates'] as const).map((c) => (
+        {/* Sticky Tab Navigation */}
+        <div className="sticky top-0 z-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-2.5 bg-background/85 backdrop-blur-md border-y border-border/50">
+          <div className="grid grid-cols-2 lg:grid-cols-4 p-1.5 rounded-2xl bg-secondary/50 border border-border gap-1.5 shadow-xs">
+            {TABS.map((tab) => {
+              const isActive = activeTab === tab.id;
+              return (
                 <button
-                  key={c}
+                  key={tab.id}
                   type="button"
-                  onClick={() => { setVideoCategory(c); setVideosShown(VIDEOS_PAGE); }}
-                  className={`px-3 py-1 rounded-full text-xs font-bold border ${videoCategory === c ? 'bg-primary text-white border-primary' : 'bg-card text-foreground border-border'}`}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center justify-center sm:justify-start gap-2.5 px-3 sm:px-4 py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                    isActive
+                      ? 'bg-card text-foreground shadow-sm border border-border/80 font-bold'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-card/40 border border-transparent'
+                  }`}
                 >
-                  {c === 'all' ? 'All' : c.charAt(0).toUpperCase() + c.slice(1)}
+                  <span className={`material-symbols-outlined text-lg sm:text-xl shrink-0 ${isActive ? 'text-primary' : 'text-muted-foreground'}`}>
+                    {tab.icon}
+                  </span>
+                  <span className="truncate">{tab.label}</span>
+                  {tab.id === 'phase' && (
+                    <span className={`hidden sm:inline-block text-[10px] font-bold px-2 py-0.5 rounded-full ml-auto shrink-0 ${
+                      isActive ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'
+                    }`}>
+                      {phaseNameEs.replace('Fase ', '')}
+                    </span>
+                  )}
+                  {tab.id === 'videos' && (
+                    <span className={`hidden sm:inline-block text-[10px] font-bold px-2 py-0.5 rounded-full ml-auto shrink-0 ${
+                      isActive ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'
+                    }`}>
+                      {visibleVideos.length}
+                    </span>
+                  )}
+                  {tab.id === 'builder' && userRoutines.length > 0 && (
+                    <span className={`hidden sm:inline-block text-[10px] font-bold px-2 py-0.5 rounded-full ml-auto shrink-0 ${
+                      isActive ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'
+                    }`}>
+                      {userRoutines.length}
+                    </span>
+                  )}
                 </button>
-              ))}
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {(['all', 'low', 'medium', 'high'] as const).map((l) => (
-                <button
-                  key={l}
-                  type="button"
-                  onClick={() => { setVideoIntensity(l); setVideosShown(VIDEOS_PAGE); }}
-                  className={`px-3 py-1 rounded-full text-xs font-bold border ${videoIntensity === l ? 'bg-foreground text-background border-foreground' : 'bg-card text-foreground border-border'}`}
-                >
-                  {l === 'all' ? 'Any intensity' : `${l.charAt(0).toUpperCase() + l.slice(1)} intensity`}
-                </button>
-              ))}
-            </div>
+              );
+            })}
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {loading ? (
-              [...Array(3)].map((_, i) => (
-                <div key={i} className="aspect-video rounded-2xl bg-card animate-pulse border border-border" />
-              ))
-            ) : visibleVideos.length === 0 ? (
-              <p className="text-muted-foreground text-sm col-span-full">No videos match these filters.</p>
-            ) : (
-              visibleVideos.slice(0, videosShown).map((video) => (
-                <VideoCard key={video.id} video={video} />
-              ))
-            )}
-          </div>
-          {!loading && visibleVideos.length > videosShown && (
-            <button
-              type="button"
-              onClick={() => setVideosShown((n) => n + VIDEOS_PAGE)}
-              className="self-center px-5 py-2 rounded-full text-sm font-bold border border-border bg-card text-foreground hover:border-primary/50 transition-colors"
-            >
-              Show more ({visibleVideos.length - videosShown} left)
-            </button>
-          )}
-        </RoutineSection>
-        {/* Phase Exercises */}
-        <RoutineSection
-          title={`Recommended for ${cycleInfo?.phase ?? 'Your'} Phase`}
-          description={guidance.desc}
-          rightElement={
-            <span className="text-xs font-bold px-3 py-1 rounded-full bg-primary/10 text-primary uppercase">
-              {guidance.intensity} Intensity
-            </span>
-          }
-        >
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {loading ? (
-              [...Array(2)].map((_, i) => (
-                <div key={i} className="h-48 rounded-2xl bg-card animate-pulse border border-border" />
-              ))
-            ) : (
-              recommendedExercises.slice(0, 4).map((ex) => (
-                <ExerciseCard
-                  key={ex.id}
-                  exercise={ex}
-                  variant="horizontal"
-                  onSave={() => onSaveExercise(ex)}
-                  saving={saving}
-                />
-              ))
-            )}
-          </div>
-        </RoutineSection>
+        </div>
 
-        {/* PCOS Exercises */}
-        <RoutineSection
-          title="PCOS Symptom Management"
-          description="Focused on insulin sensitivity and androgen reduction."
-          icon="health_and_safety"
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {loading ? (
-              [...Array(3)].map((_, i) => (
-                <div key={i} className="h-64 rounded-2xl bg-card animate-pulse border border-border" />
-              ))
-            ) : (
-              pcosExercises.map((ex) => (
-                <ExerciseCard
-                  key={ex.id}
-                  exercise={ex}
-                  onSave={() => onSaveExercise(ex)}
-                  saving={saving}
-                />
-              ))
+        {/* Tab 1: Para tu Fase */}
+        <div className={activeTab === 'phase' ? 'flex flex-col gap-10' : 'hidden'}>
+          {/* Recommended Movements for Current Phase */}
+          <RoutineSection
+            title={`Ejercicios Recomendados para ${phaseNameEs}`}
+            description={guidance.focus}
+            icon="fitness_center"
+            rightElement={
+              <span className="text-xs font-bold px-3 py-1 rounded-full bg-primary/10 text-primary">
+                Intensidad: {guidance.intensity}
+              </span>
+            }
+          >
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {loading ? (
+                [...Array(2)].map((_, i) => (
+                  <div key={i} className="h-44 rounded-2xl bg-card animate-pulse border border-border" />
+                ))
+              ) : recommendedExercises.length === 0 ? (
+                <p className="text-muted-foreground text-sm col-span-full">No hay ejercicios específicos cargados para esta fase.</p>
+              ) : (
+                recommendedExercises.map((ex) => (
+                  <ExerciseCard
+                    key={ex.id}
+                    exercise={ex}
+                    variant="horizontal"
+                    onSave={() => onSaveExercise(ex)}
+                    saving={saving}
+                  />
+                ))
+              )}
+            </div>
+          </RoutineSection>
+
+          {/* Automatic phase playlists */}
+          <RoutineSection
+            title="Playlists por Fase"
+            description="Sesiones de video curadas y organizadas según el momento de tu ciclo hormonal."
+            icon="queue_music"
+          >
+            <PhasePlaylists videos={workoutVideos} currentPhaseKey={phaseKey} onPlay={(v) => setActiveVideo(v)} />
+          </RoutineSection>
+        </div>
+
+        {/* Tab 2: Videos Guiados */}
+        <div className={activeTab === 'videos' ? 'flex flex-col gap-10' : 'hidden'}>
+          <RoutineSection
+            title="Catálogo de Videos de Entrenamiento"
+            description="Sesiones completas en video adaptadas para realizar en casa o en el gimnasio."
+            icon="videocam"
+            rightElement={
+              <span className="text-xs font-bold px-3 py-1 rounded-full bg-secondary text-foreground">
+                {visibleVideos.length} {visibleVideos.length === 1 ? 'video disponible' : 'videos disponibles'}
+              </span>
+            }
+          >
+            {/* Controls & Filter Bar */}
+            <div className="flex flex-col gap-3.5 bg-card/60 p-4 rounded-2xl border border-border">
+              {/* Categories */}
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
+                  {CATEGORIES.map((cat) => (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => { setVideoCategory(cat.id); setVideosShown(VIDEOS_PAGE); }}
+                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                        videoCategory === cat.id
+                          ? 'bg-primary text-primary-foreground shadow-sm'
+                          : 'bg-secondary/70 hover:bg-secondary text-foreground border border-transparent'
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-[15px]">{cat.icon}</span>
+                      <span>{cat.label}</span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Phase alignment quick toggle */}
+                <button
+                  type="button"
+                  onClick={() => { setOnlyPhaseVideos(!onlyPhaseVideos); setVideosShown(VIDEOS_PAGE); }}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                    onlyPhaseVideos
+                      ? 'bg-primary/15 text-primary border border-primary/30'
+                      : 'bg-secondary/70 hover:bg-secondary text-muted-foreground'
+                  }`}
+                >
+                  <span className="material-symbols-outlined text-[15px]">
+                    {onlyPhaseVideos ? 'auto_awesome' : 'filter_list'}
+                  </span>
+                  <span>Solo ideales para mi fase</span>
+                </button>
+              </div>
+
+              {/* Intensities */}
+              <div className="flex items-center gap-2 pt-2 border-t border-border/60">
+                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider mr-1">
+                  Intensidad:
+                </span>
+                <div className="flex flex-wrap gap-1.5">
+                  {INTENSITIES.map((lvl) => (
+                    <button
+                      key={lvl.id}
+                      type="button"
+                      onClick={() => { setVideoIntensity(lvl.id); setVideosShown(VIDEOS_PAGE); }}
+                      className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                        videoIntensity === lvl.id
+                          ? 'bg-foreground text-background font-bold shadow-xs'
+                          : 'bg-secondary/50 hover:bg-secondary text-muted-foreground'
+                      }`}
+                    >
+                      {lvl.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Videos Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {loading ? (
+                [...Array(6)].map((_, i) => (
+                  <div key={i} className="h-64 rounded-2xl bg-card animate-pulse border border-border" />
+                ))
+              ) : visibleVideos.length === 0 ? (
+                <div className="col-span-full py-12 text-center flex flex-col items-center justify-center gap-3 bg-card/40 rounded-2xl border border-dashed border-border p-6">
+                  <span className="material-symbols-outlined text-muted-foreground text-4xl">search_off</span>
+                  <p className="text-foreground font-semibold text-base">No hay videos con los filtros seleccionados</p>
+                  <p className="text-muted-foreground text-xs max-w-sm">
+                    Prueba a quitar el filtro de fase o cambiar la categoría seleccionada.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setVideoCategory('all');
+                      setVideoIntensity('all');
+                      setOnlyPhaseVideos(false);
+                    }}
+                    className="mt-2 text-xs font-bold text-primary hover:underline cursor-pointer"
+                  >
+                    Restablecer filtros
+                  </button>
+                </div>
+              ) : (
+                visibleVideos.slice(0, videosShown).map((video) => (
+                  <VideoCard
+                    key={video.id}
+                    video={video}
+                    isPhaseRecommended={video.phases.includes(phaseKey as any)}
+                    onPlay={(v) => setActiveVideo(v)}
+                  />
+                ))
+              )}
+            </div>
+
+            {/* Load More Button */}
+            {!loading && visibleVideos.length > videosShown && (
+              <div className="flex justify-center mt-2">
+                <button
+                  type="button"
+                  onClick={() => setVideosShown((n) => n + VIDEOS_PAGE)}
+                  className="px-6 py-2.5 rounded-xl text-xs font-bold border border-border bg-card text-foreground hover:border-primary/50 hover:bg-secondary/50 transition-all cursor-pointer shadow-sm"
+                >
+                  Cargar más videos ({visibleVideos.length - videosShown} restantes)
+                </button>
+              </div>
             )}
-          </div>
-        </RoutineSection>
+          </RoutineSection>
+        </div>
+
+        {/* Tab 3: Mis Rutinas */}
+        <div className={activeTab === 'builder' ? 'flex flex-col gap-10' : 'hidden'}>
+          {/* Saved Routines (if any exist) */}
+          {userRoutines.length > 0 && (
+            <RoutineSection
+              title="Mis Rutinas Guardadas"
+              description="Ejercicios y entrenamientos que has guardado para consultar rápidamente."
+              icon="bookmark"
+              rightElement={
+                <span className="text-xs font-bold px-3 py-1 rounded-full bg-secondary text-foreground">
+                  {userRoutines.length} {userRoutines.length === 1 ? 'rutina' : 'rutinas'}
+                </span>
+              }
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[...userRoutines]
+                  .sort((a, b) => (a.weekday ?? 7) - (b.weekday ?? 7))
+                  .map((routine) => (
+                  <SavedRoutineCard key={routine.id} routine={routine} />
+                ))}
+              </div>
+            </RoutineSection>
+          )}
+
+          {/* Custom routine builder */}
+          <RoutineSection
+            title="Crea tu Rutina Semanal"
+            description="Explora más de 1.300 ejercicios por grupo muscular y equipamiento, y arma tu rutina para cada día de la semana."
+            icon="edit_calendar"
+          >
+            <RoutineBuilder phaseKey={phaseKey} onSaved={fetchUserRoutines} />
+          </RoutineSection>
+        </div>
+
+        {/* Tab 4: Diario y Registro */}
+        <div className={activeTab === 'log' ? 'flex flex-col gap-10' : 'hidden'}>
+          <RoutineSection
+            title="Registro de Entrenamientos"
+            description="Anota qué hiciste y cómo te sentiste para ver cómo responde tu cuerpo en cada fase."
+            icon="edit_note"
+          >
+            <WorkoutLogSection phaseKey={phaseKey} />
+          </RoutineSection>
+        </div>
+
+        {/* Video Player Modal */}
+        <VideoModal
+          video={activeVideo}
+          onClose={() => setActiveVideo(null)}
+          onCompleteWorkout={handleCompleteWorkout}
+          isCompletedToday={isCompletedToday}
+        />
+
       </div>
     </div>
   );
