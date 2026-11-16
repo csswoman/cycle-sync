@@ -1,11 +1,19 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useMedications } from '@/hooks/useMedications';
 import { requestMedicationNotifications } from '@/hooks/useMedicationReminders';
 
 const PRESETS = ['Metformin', 'Inositol', 'Birth control', 'Vitamin D'];
 
-const Medications: React.FC = () => {
+export interface MedicationSummary { taken: number; total: number }
+
+interface MedicationsProps {
+  /** Render without the page wrapper and title (used inside the daily log). */
+  embedded?: boolean;
+  onSummary?: (summary: MedicationSummary) => void;
+}
+
+const Medications: React.FC<MedicationsProps> = ({ embedded = false, onSummary }) => {
   const { medications, loading, addMedication, removeMedication, isTaken, setTaken } = useMedications();
   const [name, setName] = useState('');
   const [dose, setDose] = useState('');
@@ -22,13 +30,22 @@ const Medications: React.FC = () => {
     setName(''); setDose(''); setTimes(['08:00']);
   };
 
-  return (
-    <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide">
-      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-8 pb-32">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-foreground text-3xl md:text-4xl font-semibold leading-tight tracking-tight">Medications</h1>
-          <p className="text-muted-foreground text-base">Track your daily doses and get reminders.</p>
-        </div>
+  useEffect(() => {
+    if (!onSummary) return;
+    const total = medications.reduce((n, m) => n + m.times.length, 0);
+    const taken = medications.reduce((n, m) => n + m.times.filter((t) => isTaken(m.id, t)).length, 0);
+    onSummary({ taken, total });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [medications, isTaken]);
+
+  const content = (
+    <>
+        {!embedded && (
+          <div className="flex flex-col gap-2">
+            <h1 className="text-foreground text-3xl md:text-4xl font-semibold leading-tight tracking-tight">Medications</h1>
+            <p className="text-muted-foreground text-base">Track your daily doses and get reminders.</p>
+          </div>
+        )}
 
         {perm === 'denied' && (
           <p className="text-sm text-amber-500">Notifications are blocked in your browser settings, so reminders will not appear.</p>
@@ -127,6 +144,13 @@ const Medications: React.FC = () => {
             Save
           </button>
         </div>
+    </>
+  );
+  if (embedded) return <div className="flex flex-col gap-8">{content}</div>;
+  return (
+    <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide">
+      <div className="w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-8 pb-32">
+        {content}
       </div>
     </div>
   );

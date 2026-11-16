@@ -10,6 +10,11 @@ import { useCycleInfo } from '@/hooks/useCycleInfo';
 import { saveDailyLogOffline, getLocalDailyLog } from '@/lib/offlineHelpers';
 import { syncAll } from '@/hooks/useOfflineSync';
 import { useLanguage } from '@/i18n/LanguageContext';
+import SymptomCheckin, { type SymptomSummary } from '@/features/health/pmos/SymptomCheckin';
+import { useConfiguredSymptoms } from '@/features/health/pmos/useConfiguredSymptoms';
+import Medications, { type MedicationSummary } from '@/features/medications/Medications';
+
+type Tab = 'today' | 'symptoms' | 'meds';
 
 const phaseInsights: Record<string, { tip: string; hormone: string }> = {
   Menstrual: { tip: 'Focus on iron-rich foods and gentle movement. Your body is shedding — rest is productive.', hormone: 'Low Estrogen & Progesterone' },
@@ -26,6 +31,17 @@ const DailyLog: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const { cycleInfo, loading: cycleLoading } = useCycleInfo();
+  const { language } = useLanguage();
+  const lang: 'es' | 'en' = language === 'es' ? 'es' : 'en';
+  const [tab, setTab] = useState<Tab>('today');
+  const [configuredSymptoms, setConfiguredSymptoms] = useConfiguredSymptoms();
+  const [symptomSummary, setSymptomSummary] = useState<SymptomSummary>({ total: 0, max: 18 });
+  const [medSummary, setMedSummary] = useState<MedicationSummary>({ taken: 0, total: 0 });
+  const tabs: { id: Tab; icon: string; label: string; badge?: string }[] = [
+    { id: 'today', icon: 'mood', label: lang === 'es' ? 'Hoy' : 'Today', badge: saved ? '✓' : undefined },
+    { id: 'symptoms', icon: 'monitor_heart', label: lang === 'es' ? 'Síntomas PMOS' : 'PMOS symptoms', badge: `${symptomSummary.total}/${symptomSummary.max}` },
+    { id: 'meds', icon: 'medication', label: lang === 'es' ? 'Medicación' : 'Medication', badge: medSummary.total ? `${medSummary.taken}/${medSummary.total}` : undefined },
+  ];
 
   useEffect(() => {
     async function loadTodayLog() {
@@ -99,7 +115,7 @@ const DailyLog: React.FC = () => {
   const insight = phaseInsights[phase] ?? phaseInsights.Follicular;
   const progressPct = Math.round((cycleDay / cycleLength) * 100);
 
-  const buttonLabel = saving ? 'Saving...' : saved ? 'Updated ✓' : 'Complete Check-in';
+  const buttonLabel = saving ? (lang === 'es' ? 'Guardando...' : 'Saving...') : saved ? (lang === 'es' ? 'Actualizado ✓' : 'Updated ✓') : (lang === 'es' ? 'Completar registro' : 'Complete Check-in');
   const buttonMobileLabel = saving ? 'Saving...' : saved ? 'Updated ✓' : 'Log Today';
 
   return (
@@ -107,17 +123,40 @@ const DailyLog: React.FC = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-8 pb-32">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="flex flex-col gap-2">
-            <h1 className="text-3xl md:text-4xl font-semibold text-foreground tracking-tight">Daily Log</h1>
+            <h1 className="text-3xl md:text-4xl font-semibold text-foreground tracking-tight">{lang === 'es' ? 'Registro diario' : 'Daily Log'}</h1>
             <div className="flex items-center gap-2 text-muted-foreground">
               <span className="material-symbols-outlined text-primary text-[20px]">calendar_today</span>
               <p className="text-sm font-medium">
-                {cycleLoading ? 'Loading...' : `Log your symptoms and mood for Day ${cycleDay}`}
+                {cycleLoading ? (lang === 'es' ? 'Cargando...' : 'Loading...') : lang === 'es' ? `Registra tu día · Día ${cycleDay} del ciclo` : `Log your symptoms and mood for Day ${cycleDay}`}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div role="tablist" className="flex gap-2 overflow-x-auto -mt-2 pb-1">
+          {tabs.map((t) => (
+            <button
+              key={t.id}
+              role="tab"
+              aria-selected={tab === t.id}
+              onClick={() => setTab(t.id)}
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold whitespace-nowrap border transition-all ${tab === t.id ? 'bg-primary text-primary-foreground border-primary shadow-md' : 'bg-card text-foreground border-border hover:border-primary/50'}`}
+            >
+              <span className="material-symbols-outlined text-[18px]">{t.icon}</span>
+              {t.label}
+              {t.badge && (
+                <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${tab === t.id ? 'bg-primary-foreground/20' : 'bg-secondary text-muted-foreground'}`}>{t.badge}</span>
+              )}
+            </button>
+          ))}
+        </div>
+        {tab === 'symptoms' && (
+          <SymptomCheckin lang={lang} configured={configuredSymptoms} setConfigured={setConfiguredSymptoms} onSummary={setSymptomSummary} />
+        )}
+        <div className={tab === 'meds' ? '' : 'hidden'}>
+          <Medications embedded onSummary={setMedSummary} />
+        </div>
+        <div className={`grid grid-cols-1 lg:grid-cols-12 gap-6 ${tab === 'today' ? '' : 'hidden'}`}>
           <div className="lg:col-span-8 flex flex-col gap-6">
             <MoodSelector selectedMood={selectedMood} onMoodSelect={(m) => { setSelectedMood(m); setSaved(false); }} />
 
