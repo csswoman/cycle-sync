@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useWorkoutLogs } from '@/hooks/useWorkoutLogs';
+import type { useWorkoutLogs } from '@/hooks/useWorkoutLogs';
 
 const FEELINGS = [
   { value: 1, emoji: '😣', label: 'Muy mal' },
@@ -31,13 +31,15 @@ const formatDate = (iso: string) => {
 
 interface Props {
   phaseKey: string;
+  /** Owned by the page so the weekly goal card updates as soon as a workout is saved. */
+  state: ReturnType<typeof useWorkoutLogs>;
 }
 
 const inputClass =
   'w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40';
 
-const WorkoutLogSection: React.FC<Props> = ({ phaseKey }) => {
-  const { logs, loading, saving, addLog } = useWorkoutLogs();
+const WorkoutLogSection: React.FC<Props> = ({ phaseKey, state }) => {
+  const { logs, loading, saving, addLog } = state;
   const [exercise, setExercise] = useState('');
   const [sets, setSets] = useState('');
   const [weight, setWeight] = useState('');

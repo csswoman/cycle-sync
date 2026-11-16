@@ -1,15 +1,19 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { fetchWorkoutVideos, getExercisesByIds, EXERCISE_ATTRIBUTION } from '@/services/exercisesService';
 import { Exercise, WorkoutVideo, Routine, VideoCategory, VideoIntensity } from '@/types/exercises';
 import phaseData from '@/data/phaseExercises.json';
 import { supabase } from '@/lib/supabase';
 import { useCycleInfo } from '@/hooks/useCycleInfo';
-import { useRoutineStore } from '@/stores/routineStore';
+import { localDay, useRoutineStore } from '@/stores/routineStore';
+import { useWorkoutLogs } from '@/hooks/useWorkoutLogs';
+import { suggestEffort, summarizeWeek, type Effort, type EffortReason } from '@/lib/exercise/weeklyActivity';
 import WorkoutLogSection from './components/WorkoutLogSection';
+import WeeklyGoalCard from './components/WeeklyGoalCard';
 import PhasePlaylists from './components/PhasePlaylists';
 import RoutineBuilder from './components/RoutineBuilder';
+import { ProgramsExplorer } from './components/ProgramsExplorer';
 import { ExerciseCard, RoutineSection, SavedRoutineCard, VideoCard, VideoModal } from './components/RoutinesComponents';
 
 const VIDEOS_PAGE = 9;
@@ -28,36 +32,55 @@ const PHASE_NAMES_ES: Record<string, string> = {
   luteal: 'Fase Lútea',
 };
 
+// The phase is a starting point, not a rule: studies find its effect on performance small and very
+// individual, so the copy suggests and never forbids. suggestEffort() adjusts it to today's energy.
 const PHASE_GUIDANCE: Record<string, { title: string; desc: string; intensity: string; focus: string; icon: string }> = {
   menstrual: {
-    title: 'Descanso y Movilidad Suave',
-    desc: 'Los niveles de estrógeno y progesterona están en su punto mínimo. Prioriza caminatas tranquilas, estiramientos y yoga restaurativo para aliviar la tensión y favorecer la circulación.',
-    intensity: 'Baja / Restaurativa',
-    focus: 'Recuperación y relajación',
+    title: 'Muévete según tus síntomas',
+    desc: 'Con cólicos o poca energía, caminar, la movilidad y el yoga suave ayudan a aliviar el dolor. Si te sientes bien puedes entrenar con normalidad: la regla no obliga a parar.',
+    intensity: 'Suave a moderada',
+    focus: 'Alivio y movilidad',
     icon: 'water_drop',
   },
   follicular: {
-    title: 'Desarrollo de Fuerza y Resistencia',
-    desc: 'El ascenso de estrógenos mejora la energía, la síntesis proteica y la tolerancia al esfuerzo. Es el momento perfecto para sobrecarga progresiva y entrenamientos de fuerza.',
-    intensity: 'Moderada - Alta',
-    focus: 'Construcción muscular y energía',
+    title: 'Buen momento para progresar',
+    desc: 'Muchas mujeres notan más energía después de la regla. Aprovecha para tus sesiones de fuerza con más carga o para el cardio más exigente de la semana.',
+    intensity: 'Moderada a alta',
+    focus: 'Fuerza progresiva y cardio',
     icon: 'fitness_center',
   },
   ovulation: {
-    title: 'Pico de Rendimiento y Potencia',
-    desc: 'Estrógenos en su punto máximo y un aumento de testosterona. Tu fuerza y resistencia alcanzan su pico. Ideal para sesiones intensas, retos de fuerza o circuitos dinámicos.',
+    title: 'Sesiones exigentes si te sientes fuerte',
+    desc: 'Suele ser una ventana de buena energía. Fuerza, intervalos o circuitos encajan bien; calienta con calma y cuida la técnica.',
     intensity: 'Alta',
-    focus: 'Fuerza máxima y potencia',
+    focus: 'Fuerza e intervalos',
     icon: 'bolt',
   },
   luteal: {
-    title: 'Fuerza Controlada y Bajo Impacto',
-    desc: 'El predominio de progesterona eleva el gasto basal pero también la sensibilidad al estrés. Prioriza pilates, fuerza controlada y movilidad para tonificar sin elevar el cortisol.',
-    intensity: 'Baja - Moderada',
-    focus: 'Fuerza de bajo impacto y equilibrio',
+    title: 'Mantén la constancia',
+    desc: 'Al acercarse la regla pueden aparecer cansancio, hinchazón o peor sueño. Mantén la fuerza con cargas que controles y baja la intensidad los días que lo necesites, sin dejar de moverte.',
+    intensity: 'Moderada',
+    focus: 'Fuerza controlada y bajo impacto',
     icon: 'self_improvement',
   },
 };
+
+const EFFORT_COPY: Record<Effort, { label: string; examples: string }> = {
+  gentle: { label: 'Hoy: sesión suave', examples: 'Caminata, movilidad, yoga o pilates suave.' },
+  moderate: { label: 'Hoy: sesión moderada', examples: 'Fuerza con cargas cómodas, pilates o cardio a ritmo de conversación.' },
+  strong: { label: 'Hoy: sesión exigente', examples: 'Fuerza con más carga, intervalos o un circuito.' },
+};
+
+function effortReason(reason: EffortReason, energy: number | null): string {
+  switch (reason) {
+    case 'lowEnergy': return `Registraste energía ${energy}/10: prioriza recuperarte, aunque tu fase invite a más.`;
+    case 'highEnergy': return `Registraste energía ${energy}/10: buen día para fuerza o intervalos, sea cual sea tu fase.`;
+    case 'latePeriod': return 'Tu regla va con retraso, así que la fase es incierta: guíate por tu energía.';
+    default: return energy == null
+      ? 'Según tu fase. Registra tu energía en el diario de hoy para ajustar la sugerencia.'
+      : `Según tu fase y tu energía de hoy (${energy}/10).`;
+  }
+}
 
 const CATEGORIES: { id: VideoCategory | 'all'; label: string; icon: string }[] = [
   { id: 'all', label: 'Todos', icon: 'grid_view' },
@@ -74,9 +97,10 @@ const INTENSITIES: { id: VideoIntensity | 'all'; label: string }[] = [
   { id: 'high', label: 'Intensa' },
 ];
 
-type RoutineTab = 'phase' | 'videos' | 'builder' | 'log';
+type RoutineTab = 'programs' | 'phase' | 'videos' | 'builder' | 'log';
 
 const TABS: { id: RoutineTab; label: string; icon: string; description: string }[] = [
+  { id: 'programs', label: 'Casa & Gym', icon: 'fitness_center', description: '29 programas completos con demostraciones en video HD integradas' },
   { id: 'phase', label: 'Para tu Fase', icon: 'auto_awesome', description: 'Recomendaciones y playlists adaptadas a tu momento hormonal' },
   { id: 'videos', label: 'Videos Guiados', icon: 'videocam', description: 'Catálogo de sesiones en video con filtros por disciplina' },
   { id: 'builder', label: 'Mis Rutinas', icon: 'calendar_month', description: 'Rutinas guardadas y creador semanal de ejercicios' },
@@ -86,8 +110,10 @@ const TABS: { id: RoutineTab; label: string; icon: string; description: string }
 const Routines: React.FC = () => {
   const { cycleInfo, loading: cycleLoading } = useCycleInfo();
   const { streak, completeWorkout } = useRoutineStore();
+  const workoutLogs = useWorkoutLogs();
+  const [energyToday, setEnergyToday] = useState<number | null>(null);
 
-  const [activeTab, setActiveTab] = useState<RoutineTab>('phase');
+  const [activeTab, setActiveTab] = useState<RoutineTab>('programs');
   const [recommendedExercises, setRecommendedExercises] = useState<Exercise[]>([]);
   const [workoutVideos, setWorkoutVideos] = useState<WorkoutVideo[]>([]);
   const [videoCategory, setVideoCategory] = useState<VideoCategory | 'all'>('all');
@@ -104,8 +130,27 @@ const Routines: React.FC = () => {
   const phaseNameEs = PHASE_NAMES_ES[phaseKey] || 'Fase Folicular';
   const guidance = PHASE_GUIDANCE[phaseKey] || PHASE_GUIDANCE.follicular;
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = localDay();
   const isCompletedToday = streak.lastCompletedDate === today;
+  const periodLate = (cycleInfo?.daysLate ?? 0) > 0;
+  const week = useMemo(() => summarizeWeek(workoutLogs.logs), [workoutLogs.logs]);
+  const suggestion = suggestEffort(phaseKey, energyToday, periodLate);
+  const effort = EFFORT_COPY[suggestion.effort];
+
+  // Today's energy from the daily log, used to adjust the phase suggestion.
+  useEffect(() => {
+    (async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) return;
+      const { data } = await supabase
+        .from('daily_logs')
+        .select('energy_level')
+        .eq('user_id', session.user.id)
+        .eq('date', localDay())
+        .maybeSingle();
+      setEnergyToday(data?.energy_level ?? null);
+    })();
+  }, []);
 
   const visibleVideos = workoutVideos
     .filter((v) => videoCategory === 'all' || v.category === videoCategory)
@@ -177,6 +222,18 @@ const Routines: React.FC = () => {
 
   const handleCompleteWorkout = () => {
     completeWorkout();
+    // A finished video also goes to the workout log so its minutes count toward the weekly goal.
+    if (activeVideo) {
+      void workoutLogs.addLog({
+        exercise: `${activeVideo.category === 'gym' ? 'Fuerza: ' : ''}${activeVideo.title}`.slice(0, 80),
+        sets: null,
+        weightKg: null,
+        durationMinutes: activeVideo.durationMinutes > 0 ? Math.round(activeVideo.durationMinutes) : null,
+        feeling: 3,
+        notes: 'Video guiado',
+        phase: phaseKey,
+      });
+    }
   };
 
   return (
@@ -190,7 +247,7 @@ const Routines: React.FC = () => {
               Rutinas y Entrenamiento
             </h1>
             <p className="text-muted-foreground text-base md:text-lg leading-relaxed">
-              Sincroniza tu actividad física con tu ciclo menstrual para trabajar a favor de tu fisiología hormonal, prevenir fatiga y maximizar tus resultados.
+              Tu fase es el punto de partida y tu energía de hoy decide. Con PMOS lo que más cuenta es el total de la semana: 150 minutos de actividad y 2 días de fuerza.
             </p>
           </div>
 
@@ -206,13 +263,18 @@ const Routines: React.FC = () => {
                   <div>
                     <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Tu Fase Actual</span>
                     <h2 className="text-xl font-bold text-foreground">
-                      {cycleLoading ? 'Cargando...' : `${phaseNameEs} • Día ${cycleInfo?.cycleDay ?? '?'}`}
+                      {cycleLoading ? 'Cargando...' : periodLate ? `Día ${cycleInfo?.cycleDay ?? '?'} • Regla con retraso` : `${phaseNameEs} • Día ${cycleInfo?.cycleDay ?? '?'}`}
                     </h2>
                   </div>
                 </div>
                 <span className="text-xs font-bold px-3 py-1 rounded-full bg-primary/10 text-primary shrink-0">
-                  {guidance.intensity}
+                  {effort.label}
                 </span>
+              </div>
+
+              <div className="text-sm">
+                <p className="font-semibold text-foreground">{effort.examples}</p>
+                <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">{effortReason(suggestion.reason, energyToday)}</p>
               </div>
 
               <div className="bg-secondary/40 rounded-xl p-3.5 border border-border/50 text-sm">
@@ -273,6 +335,8 @@ const Routines: React.FC = () => {
               </div>
             </div>
           </div>
+
+          <WeeklyGoalCard week={week} loading={workoutLogs.loading} onLog={() => setActiveTab('log')} />
         </section>
 
         {error && (
@@ -283,7 +347,7 @@ const Routines: React.FC = () => {
 
         {/* Sticky Tab Navigation */}
         <div className="sticky top-0 z-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-2.5 bg-background/85 backdrop-blur-md border-y border-border/50">
-          <div className="grid grid-cols-2 lg:grid-cols-4 p-1.5 rounded-2xl bg-secondary/50 border border-border gap-1.5 shadow-xs">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 p-1.5 rounded-2xl bg-secondary/50 border border-border gap-1.5 shadow-xs">
             {TABS.map((tab) => {
               const isActive = activeTab === tab.id;
               return (
@@ -291,7 +355,7 @@ const Routines: React.FC = () => {
                   key={tab.id}
                   type="button"
                   onClick={() => setActiveTab(tab.id)}
-                  className={`flex items-center justify-center sm:justify-start gap-2.5 px-3 sm:px-4 py-3 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
+                  className={`flex items-center justify-center sm:justify-start gap-2 px-3 sm:px-3.5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
                     isActive
                       ? 'bg-card text-foreground shadow-sm border border-border/80 font-bold'
                       : 'text-muted-foreground hover:text-foreground hover:bg-card/40 border border-transparent'
@@ -301,6 +365,13 @@ const Routines: React.FC = () => {
                     {tab.icon}
                   </span>
                   <span className="truncate">{tab.label}</span>
+                  {tab.id === 'programs' && (
+                    <span className={`hidden sm:inline-block text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-auto shrink-0 ${
+                      isActive ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'
+                    }`}>
+                      29
+                    </span>
+                  )}
                   {tab.id === 'phase' && (
                     <span className={`hidden sm:inline-block text-[10px] font-bold px-2 py-0.5 rounded-full ml-auto shrink-0 ${
                       isActive ? 'bg-primary/15 text-primary' : 'bg-muted text-muted-foreground'
@@ -326,6 +397,23 @@ const Routines: React.FC = () => {
               );
             })}
           </div>
+        </div>
+
+        {/* Tab 0: Programas Casa & Gym */}
+        <div className={activeTab === 'programs' ? 'flex flex-col gap-6' : 'hidden'}>
+          <ProgramsExplorer
+            onLogWorkout={(exerciseName, sets, reps) => {
+              void workoutLogs.addLog({
+                exercise: `${exerciseName} (${sets ?? 3}x${reps ?? '12'})`.slice(0, 80),
+                sets: sets ?? 3,
+                weightKg: null,
+                durationMinutes: 30,
+                feeling: 4,
+                notes: 'Programa guiado con video',
+                phase: phaseKey,
+              });
+            }}
+          />
         </div>
 
         {/* Tab 1: Para tu Fase */}
@@ -540,7 +628,7 @@ const Routines: React.FC = () => {
             description="Anota qué hiciste y cómo te sentiste para ver cómo responde tu cuerpo en cada fase."
             icon="edit_note"
           >
-            <WorkoutLogSection phaseKey={phaseKey} />
+            <WorkoutLogSection phaseKey={phaseKey} state={workoutLogs} />
           </RoutineSection>
         </div>
 

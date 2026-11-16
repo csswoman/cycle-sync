@@ -1,6 +1,12 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+/** YYYY-MM-DD in the user's timezone. toISOString() is UTC and flips to tomorrow in the evening west of UTC. */
+export function localDay(d: Date = new Date()): string {
+  const pad = (n: number) => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
 interface RoutineStreak {
   currentStreak: number;
   longestStreak: number;
@@ -47,14 +53,14 @@ export const useRoutineStore = create<RoutineState>()(
       newBadges: [],
 
       completeWorkout: () => {
-        const today = new Date().toISOString().split('T')[0];
+        const today = localDay();
         const { streak, badges } = get();
 
         if (streak.lastCompletedDate === today) return;
 
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayStr = yesterday.toISOString().split('T')[0];
+        const yesterdayStr = localDay(yesterday);
 
         const isConsecutive = streak.lastCompletedDate === yesterdayStr;
         const newCurrent = isConsecutive ? streak.currentStreak + 1 : 1;
