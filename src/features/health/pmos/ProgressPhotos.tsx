@@ -17,12 +17,14 @@ const T = {
     title: 'Fotos de progreso', sub: 'Privadas: solo tú puedes verlas, nunca se incluyen en reportes ni en el asistente. Toma la foto con la misma luz y el mismo ángulo cada mes.',
     areas: { face: 'Cara (acné)', chin: 'Mentón y cuello', scalp: 'Cuero cabelludo', body: 'Cuerpo', other: 'Otra' } as Record<Area, string>,
     add: 'Agregar foto', uploading: 'Subiendo…', note: 'Nota (opcional)', first: 'Primera', latest: 'Más reciente', none: 'Aún no hay fotos de esta zona.',
+    reveal: 'Toca para ver', hide: 'Ocultar',
     del: 'Eliminar', confirmDel: '¿Eliminar esta foto?', error: 'No se pudo subir. Revisa que sea JPG, PNG o WebP y que esté aplicada la migración.', all: (n: number) => `Ver todas (${n})`,
   },
   en: {
     title: 'Progress photos', sub: 'Private: only you can see them; they are never included in reports or the assistant. Take them in the same light and angle each month.',
     areas: { face: 'Face (acne)', chin: 'Chin and neck', scalp: 'Scalp', body: 'Body', other: 'Other' } as Record<Area, string>,
     add: 'Add photo', uploading: 'Uploading…', note: 'Note (optional)', first: 'First', latest: 'Latest', none: 'No photos of this area yet.',
+    reveal: 'Tap to view', hide: 'Hide',
     del: 'Delete', confirmDel: 'Delete this photo?', error: 'Upload failed. Use JPG, PNG or WebP and make sure the migration is applied.', all: (n: number) => `See all (${n})`,
   },
 };
@@ -47,6 +49,7 @@ export const ProgressPhotos: React.FC<{ lang: Lang }> = ({ lang }) => {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(false);
   const [showAll, setShowAll] = useState(false);
+  const [revealed, setRevealed] = useState<Set<string>>(new Set());
   const input = useRef<HTMLInputElement>(null);
 
   const load = useCallback(async () => {
@@ -90,6 +93,11 @@ export const ProgressPhotos: React.FC<{ lang: Lang }> = ({ lang }) => {
     setPhotos((prev) => prev.filter((x) => x.id !== p.id));
   };
 
+  const toggle = (id: string) => setRevealed((prev) => {
+    const next = new Set(prev);
+    if (!next.delete(id)) next.add(id);
+    return next;
+  });
   const inArea = photos.filter((p) => p.area === area);
   const first = inArea[0];
   const latest = inArea.length > 1 ? inArea[inArea.length - 1] : null;
@@ -98,7 +106,14 @@ export const ProgressPhotos: React.FC<{ lang: Lang }> = ({ lang }) => {
   const Tile: React.FC<{ p: Photo; label?: string }> = ({ p, label }) => (
     <figure className="relative flex flex-col gap-1">
       {p.url
-        ? <img src={p.url} alt={`${t.areas[p.area]} · ${fmt(p.date)}`} className="w-full aspect-[3/4] object-cover rounded-xl border border-border bg-secondary" />
+        ? (
+          <button type="button" onClick={() => toggle(p.id)} aria-label={revealed.has(p.id) ? t.hide : t.reveal}
+            className="relative block w-full aspect-[3/4] overflow-hidden rounded-xl border border-border bg-secondary">
+            <img src={p.url} alt={`${t.areas[p.area]} · ${fmt(p.date)}`}
+              className={`w-full h-full object-cover transition-[filter] ${revealed.has(p.id) ? '' : 'blur-2xl scale-110'}`} />
+            {!revealed.has(p.id) && <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-foreground bg-background/30">{t.reveal}</span>}
+          </button>
+        )
         : <div className="w-full aspect-[3/4] rounded-xl bg-secondary" />}
       <figcaption className="text-xs text-muted-foreground">
         {label && <strong className="text-foreground">{label} · </strong>}{fmt(p.date)}{p.note ? ` · ${p.note}` : ''}

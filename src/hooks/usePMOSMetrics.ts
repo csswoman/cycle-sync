@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import type { GlucoseContext, PMOSMetricEntry } from '@/lib/pmos/metrics';
+import { insertMetric, mealColumnsAvailable } from '@/services/mealGlucoseService';
 
 export type NewMetricEntry = Partial<Omit<PMOSMetricEntry, 'id' | 'user_id'>> & { date: string };
 
@@ -11,6 +12,7 @@ export function usePMOSMetrics() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mealColumns, setMealColumns] = useState(true);
 
   const load = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -27,15 +29,15 @@ export function usePMOSMetrics() {
   }, []);
 
   useEffect(() => { load(); }, [load]);
+  useEffect(() => { mealColumnsAvailable().then((ok) => { if (!ok) setMealColumns(false); }); }, []);
 
   const add = async (entry: NewMetricEntry & { glucose_context?: GlucoseContext | null }) => {
     setSaving(true);
     setError(null);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) return false;
-      const { error: err } = await supabase.from('pmos_metrics').insert({ ...entry, user_id: session.user.id });
-      if (err) { setError(err.message); return false; }
+      const res = await insertMetric(entry);
+      if (res.ok === false) { setError(res.message); return false; }
+      if (res.mealColumnsMissing) setMealColumns(false);
       await load();
       return true;
     } finally {
@@ -49,5 +51,5 @@ export function usePMOSMetrics() {
     else setEntries((prev) => prev.filter((e) => e.id !== id));
   };
 
-  return { entries, loading, saving, error, add, remove };
+  return { entries, loading, saving, error, mealColumns, add, remove };
 }

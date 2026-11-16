@@ -33,6 +33,33 @@ export function scoreWellbeing(a: WellbeingAnswers): WellbeingResult {
   return { phq2, gad2, moodFlag: phq2 >= SCREEN_CUTOFF, anxietyFlag: gad2 >= SCREEN_CUTOFF, sleepFlag: sleepSigns >= 2 };
 }
 
+/**
+ * SCOFF: five yes/no questions about eating. Two or more "yes" answers is a positive screen that
+ * deserves a conversation with a professional. It is optional and asked every 90 days.
+ */
+export const SCOFF_QUESTIONS = ['sick', 'control', 'weight', 'fat', 'food'] as const;
+export type ScoffKey = (typeof SCOFF_QUESTIONS)[number];
+export type ScoffAnswers = Record<ScoffKey, boolean>;
+export const SCOFF_CUTOFF = 2;
+export const SCOFF_INTERVAL_DAYS = 90;
+export function scoreScoff(answers: Partial<ScoffAnswers>): { score: number; positive: boolean } {
+  const score = SCOFF_QUESTIONS.filter((k) => answers[k] === true).length;
+  return { score, positive: score >= SCOFF_CUTOFF };
+}
+/** True when SCOFF was never shown, or the last time it was answered or skipped was 90 days ago or more. */
+export function isScoffDue(lastDate: string | null, today: string): boolean {
+  if (!lastDate) return true;
+  const [y1, m1, d1] = lastDate.split('-').map(Number);
+  const [y2, m2, d2] = today.split('-').map(Number);
+  return (new Date(y2, m2 - 1, d2).getTime() - new Date(y1, m1 - 1, d1).getTime()) / 86_400_000 >= SCOFF_INTERVAL_DAYS;
+}
+/** Quick-log symptom keys (stored in daily_logs.symptoms) used to follow eating patterns. */
+export const EATING_SYMPTOMS = {
+  binge: 'Binge / Loss of Control',
+  emotional: 'Emotional Eating',
+  skipped: 'Skipped Meals',
+} as const;
+
 export function isCheckDue(lastDate: string | null, today: string): boolean {
   if (!lastDate) return true;
   const [y1, m1, d1] = lastDate.split('-').map(Number);

@@ -9,6 +9,7 @@ import { TodayPlanCard } from './components/TodayPlanCard';
 import { PhaseRecommendations } from './components/PhaseRecommendations';
 import { HabitsProgress } from './components/HabitsProgress';
 import { WeeklySummaryCard } from './components/WeeklySummaryCard';
+import { AppointmentBanner } from './components/AppointmentBanner';
 import HealthConnectWidget from './components/HealthConnectWidget';
 import { dashboardText } from './dashboardText';
 
@@ -32,6 +33,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userName }) => {
                     <p className="text-muted-foreground text-sm sm:text-base">{text.subtitle}</p>
                 </header>
 
+                <AppointmentBanner />
                 <CycleHero overview={overview} />
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">

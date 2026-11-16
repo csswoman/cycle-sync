@@ -3,6 +3,14 @@ import React, { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Icon } from '@/components/ui/Icon';
 import { supabase } from '@/lib/supabase';
+import type { PMOSOverviewData } from '@/hooks/usePMOSOverview';
+import { useAppointments } from '@/hooks/useAppointments';
+import { nextAppointment } from '@/lib/pmos/appointments';
+import { toLocalISO } from '@/lib/medications/schedule';
+import { useDisplayPrefs } from '@/hooks/useDisplayPrefs';
+import { insightsFromOverview } from '@/lib/pmos/overviewInsights';
+import { suggestQuestions } from '@/lib/pmos/suggestedQuestions';
+import AppointmentSection from './AppointmentSection';
 
 type Lang = 'es' | 'en';
 export interface DoctorQuestion { id: string; question: string; answer: string | null; done: boolean; created_at: string }
@@ -27,20 +35,22 @@ const SUGGESTIONS = {
 const T = {
   es: {
     title: 'Preparar mi próxima cita', sub: 'Anota tus dudas cuando surjan durante el mes. Se incluyen en tu reporte PDF.',
-    ph: 'Escribe una pregunta…', add: 'Agregar', ideas: 'Ideas', pending: 'Pendientes', done: 'Ya respondidas',
+    ph: 'Escribe una pregunta…', add: 'Agregar', ideas: 'Ideas', fromData: 'Según tus datos', pending: 'Pendientes', done: 'Ya respondidas',
     answerPh: '¿Qué te respondió?', markDone: 'Respondida', reopen: 'Reabrir', del: 'Eliminar', none: 'Aún no tienes preguntas.',
     report: 'Generar reporte para mi médico', error: 'No se pudo guardar. Falta aplicar la migración de la base de datos.',
   },
   en: {
     title: 'Prepare my next appointment', sub: 'Write down questions as they come up during the month. They are included in your PDF report.',
-    ph: 'Write a question…', add: 'Add', ideas: 'Ideas', pending: 'Pending', done: 'Answered',
+    ph: 'Write a question…', add: 'Add', ideas: 'Ideas', fromData: 'Based on your data', pending: 'Pending', done: 'Answered',
     answerPh: 'What did they say?', markDone: 'Answered', reopen: 'Reopen', del: 'Delete', none: 'No questions yet.',
     report: 'Generate report for my doctor', error: 'Could not save. The database migration has not been applied yet.',
   },
 };
 
-export const DoctorQuestions: React.FC<{ lang: Lang }> = ({ lang }) => {
+export const DoctorQuestions: React.FC<{ lang: Lang; data?: PMOSOverviewData | null; onOpenLabs?: () => void }> = ({ lang, data = null, onOpenLabs }) => {
   const t = T[lang];
+  const { items: appointments } = useAppointments();
+  const upcoming = nextAppointment(appointments, data?.today ?? toLocalISO(new Date()));
   const [items, setItems] = useState<DoctorQuestion[]>([]);
   const [text, setText] = useState('');
   const [error, setError] = useState(false);
@@ -59,7 +69,10 @@ export const DoctorQuestions: React.FC<{ lang: Lang }> = ({ lang }) => {
     if (!question) return;
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) return;
-    const { error: err } = await supabase.from('doctor_questions').insert({ user_id: session.user.id, question: question.slice(0, 500) });
+    const row: Record<string, unknown> = { user_id: session.user.id, question: question.slice(0, 500) };
+    let { error: err } = await supabase.from('doctor_questions').insert(upcoming ? { ...row, appointment_id: upcoming.id } : row);
+    // The appointment_id column arrives with the phase 7 migration; fall back to the old shape.
+    if (err && upcoming) ({ error: err } = await supabase.from('doctor_questions').insert(row));
     setError(!!err);
     if (!err) { setText(''); await load(); }
   };
@@ -76,9 +89,14 @@ export const DoctorQuestions: React.FC<{ lang: Lang }> = ({ lang }) => {
 
   const pending = items.filter((i) => !i.done);
   const done = items.filter((i) => i.done);
+  const { hideNumbers } = useDisplayPrefs();
+  const fromData = (data ? suggestQuestions(data, insightsFromOverview(data, hideNumbers)) : [])
+    .map((q) => q[lang]).filter((s) => !items.some((i) => i.question === s));
   const unused = SUGGESTIONS[lang].filter((s) => !items.some((i) => i.question === s));
 
   return (
+    <div className="flex flex-col gap-6">
+    <AppointmentSection lang={lang} data={data} questions={items} onOpenLabs={onOpenLabs} />
     <section className="bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-6 flex flex-col gap-4">
       <div className="flex items-start gap-3">
         <div className="size-10 shrink-0 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
@@ -97,6 +115,18 @@ export const DoctorQuestions: React.FC<{ lang: Lang }> = ({ lang }) => {
       </form>
       {error && <p role="alert" className="text-sm text-destructive">{t.error}</p>}
 
+      {fromData.length > 0 && (
+        <div className="flex flex-col gap-2">
+          <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">{t.fromData}</p>
+          <div className="flex flex-col gap-2">
+            {fromData.map((s) => (
+              <button key={s} onClick={() => add(s)} className="text-left px-3 py-2 rounded-xl text-xs font-semibold bg-primary/5 text-foreground border border-primary/30 hover:border-primary/60">
+                + {s}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
       {unused.length > 0 && (
         <div className="flex flex-col gap-2">
           <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">{t.ideas}</p>
@@ -147,6 +177,7 @@ export const DoctorQuestions: React.FC<{ lang: Lang }> = ({ lang }) => {
         <Icon name="download" size={16} /> {t.report}
       </Link>
     </section>
+    </div>
   );
 };
 

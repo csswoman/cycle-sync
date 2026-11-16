@@ -6,6 +6,8 @@ import {
   derivedSeries, FAI_HIGH, freeAndrogenIndex, homaIr, LAB_MARKERS, markerInfo, markerLabel, markerStatus,
   type LabGroup, type LabMarker,
 } from '@/lib/pmos/metrics';
+import { convertToCanonical, unitOptions } from '@/lib/pmos/units';
+import LabScanDialog from './LabScanDialog';
 import { INPUT_CLASS, parseNum, todayLocal } from './shared';
 
 type Lang = 'es' | 'en';
@@ -20,7 +22,8 @@ const T = {
   es: {
     title: 'Análisis de laboratorio', test: 'Análisis', value: 'Valor', date: 'Fecha del análisis', add: 'Agregar resultado', saving: 'Guardando…',
     errValue: 'Escribe un valor mayor que 0.', loading: 'Cargando…', none: 'Sin resultados', results: 'Resultados', del: 'Eliminar',
-    status: { ok: 'En rango', low: 'Bajo', high: 'Alto' },
+    status: { ok: 'En rango', low: 'Bajo', high: 'Alto', none: 'Sin rango' },
+    unit: 'Unidad', noRange: 'Sin rango de referencia en la app',
     groups: { hormones: 'Hormonas', metabolic: 'Glucosa e insulina', lipids: 'Lípidos', other: 'Vitaminas' } as Record<LabGroup, string>,
     derived: 'Calculado', fai: 'Índice de andrógenos libres (FAI)',
     faiNote: `Se calcula con testosterona total y SHBG del mismo día. Alrededor de ${FAI_HIGH} o más suele leerse como elevado.`,
@@ -30,7 +33,8 @@ const T = {
   en: {
     title: 'Lab results', test: 'Test', value: 'Value', date: 'Lab date', add: 'Add result', saving: 'Saving…',
     errValue: 'Enter a value greater than 0.', loading: 'Loading…', none: 'No results yet', results: 'Results', del: 'Delete',
-    status: { ok: 'In range', low: 'Below range', high: 'Above range' },
+    status: { ok: 'In range', low: 'Below range', high: 'Above range', none: 'No range' },
+    unit: 'Unit', noRange: 'No reference range in the app',
     groups: { hormones: 'Hormones', metabolic: 'Glucose & insulin', lipids: 'Lipids', other: 'Vitamins' } as Record<LabGroup, string>,
     derived: 'Calculated', fai: 'Free androgen index (FAI)',
     faiNote: `Calculated from same-day total testosterone and SHBG. Around ${FAI_HIGH} or more is commonly read as elevated.`,
@@ -43,9 +47,10 @@ const GROUPS: LabGroup[] = ['hormones', 'metabolic', 'lipids', 'other'];
 
 const LabResultsSection: React.FC<{ lang?: Lang }> = ({ lang = 'en' }) => {
   const t = T[lang];
-  const { results, loading, saving, error, add, remove } = useLabResults();
+  const { results, loading, saving, error, add, addMany, remove } = useLabResults();
   const [marker, setMarker] = useState<LabMarker>('testosterone');
   const [value, setValue] = useState('');
+  const [unit, setUnit] = useState('');
   const [date, setDate] = useState(todayLocal());
   const [formError, setFormError] = useState<string | null>(null);
   const [group, setGroup] = useState<LabGroup>('hormones');
@@ -58,11 +63,14 @@ const LabResultsSection: React.FC<{ lang?: Lang }> = ({ lang = 'en' }) => {
     e.preventDefault();
     const v = parseNum(value);
     if (v == null) { setFormError(t.errValue); return; }
+    const converted = convertToCanonical(marker, v, unit || markerInfo(marker).unit);
+    if (converted == null) { setFormError(t.errValue); return; }
     setFormError(null);
-    if (await add(marker, v, date)) { setValue(''); setGroup(markerInfo(marker).group); }
+    if (await add(marker, converted, date)) { setValue(''); setGroup(markerInfo(marker).group); }
   };
 
   const selected = markerInfo(marker);
+  const units = unitOptions(marker);
   const label = (k: LabMarker) => markerLabel(markerInfo(k), lang);
 
   return (
@@ -77,7 +85,7 @@ const LabResultsSection: React.FC<{ lang?: Lang }> = ({ lang = 'en' }) => {
       <form onSubmit={handleSubmit} className="p-6 grid grid-cols-2 md:grid-cols-4 gap-4 border-b border-border">
         <label className="flex flex-col gap-1 text-xs text-muted-foreground col-span-2 md:col-span-1">
           {t.test}
-          <select value={marker} onChange={(ev) => setMarker(ev.target.value as LabMarker)} className={INPUT_CLASS}>
+          <select value={marker} onChange={(ev) => { setMarker(ev.target.value as LabMarker); setUnit(''); }} className={INPUT_CLASS}>
             {GROUPS.map((g) => (
               <optgroup key={g} label={t.groups[g]}>
                 {LAB_MARKERS.filter((m) => m.group === g).map((m) => <option key={m.key} value={m.key}>{markerLabel(m, lang)}</option>)}
@@ -86,18 +94,30 @@ const LabResultsSection: React.FC<{ lang?: Lang }> = ({ lang = 'en' }) => {
           </select>
         </label>
         <label className="flex flex-col gap-1 text-xs text-muted-foreground">
-          {t.value}{selected.unit && ` (${selected.unit})`}
-          <input inputMode="decimal" value={value} onChange={(ev) => setValue(ev.target.value)} className={INPUT_CLASS} />
+          {t.value}
+          <div className="flex gap-2">
+            <input inputMode="decimal" value={value} onChange={(ev) => setValue(ev.target.value)} className={INPUT_CLASS} />
+            {units.length > 1 ? (
+              <select value={unit || units[0].label} onChange={(ev) => setUnit(ev.target.value)} className={`${INPUT_CLASS} w-28 shrink-0`} aria-label={t.unit}>
+                {units.map((u) => <option key={u.label} value={u.label}>{u.label}</option>)}
+              </select>
+            ) : (
+              selected.unit && <span className="self-center text-xs whitespace-nowrap">{selected.unit}</span>
+            )}
+          </div>
         </label>
         <label className="flex flex-col gap-1 text-xs text-muted-foreground">
           {t.date}
           <input type="date" value={date} max={todayLocal()} onChange={(ev) => setDate(ev.target.value)} className={INPUT_CLASS} required />
         </label>
-        <div className="flex items-end col-span-2 md:col-span-1">
+        <div className="flex items-end gap-2 col-span-2 md:col-span-1">
           <button type="submit" disabled={saving}
             className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 rounded-lg disabled:opacity-60">
             {saving ? t.saving : t.add}
           </button>
+        </div>
+        <div className="col-span-full">
+          <LabScanDialog lang={lang} saving={saving} onSave={addMany} />
         </div>
         {(lang === 'es' ? selected.noteEs : selected.noteEn) && (
           <p className="col-span-full text-xs text-muted-foreground">{lang === 'es' ? selected.noteEs : selected.noteEn}</p>
@@ -131,12 +151,15 @@ const LabResultsSection: React.FC<{ lang?: Lang }> = ({ lang = 'en' }) => {
                 <div key={info.key} className="flex flex-col gap-2">
                   <div className="flex justify-between items-center gap-2">
                     <h4 className="text-sm font-semibold text-foreground">{markerLabel(info, lang)}</h4>
-                    {latest && status && (
+                    {latest && status && status !== 'none' && (
                       <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${STATUS_STYLE[status]}`}>
                         {latest.value} {info.unit} · {t.status[status]}
                       </span>
                     )}
                   </div>
+                  {latest && status === 'none' && (
+                    <p className="text-xs text-muted-foreground">{latest.value} {info.unit} · {t.noRange}</p>
+                  )}
                   {points.length === 0 ? (
                     <p className="text-xs text-muted-foreground py-4">{t.none}</p>
                   ) : (

@@ -19,12 +19,18 @@ export interface PMOSReportExtra {
   cycleLengths: number[];
   daysSinceLastPeriod: number | null;
   ovulation: { start: string; length?: number; status: string }[];
+  /** Bleeding intensity and pain per period (last 3), plus the heavy-bleeding flags. */
+  bleeding?: { flags: string[]; periods: { start: string; days: { date: string; flow: string | null; clots: boolean; pain: number | null }[] }[] };
   medications: { name: string; dose: string | null; schedule: string; notes: string | null; adherencePct: number | null; since: string | null }[];
   labs: { label: string; value: string; date: string; flag: 'low' | 'high' | 'ok' | null }[];
   bloodPressure: { value: string; date: string; category: string } | null;
   hirsutism: { total: number; date: string; previous: { total: number; date: string } | null } | null;
   wellbeing: { date: string; phq2: number; gad2: number; sleepSigns: number } | null;
   questions: string[];
+  /** Diagnosis card as the patient entered it, with ultrasounds and other events. */
+  diagnosis?: { phenotype: string | null; diagnosedOn: string | null; criteria: string[]; notes: string | null; events: { date: string; kind: string; summary: string }[] };
+  /** Side effects logged per medication (most recent first). */
+  sideEffects?: { medication: string; entries: { date: string; effect: string; severity: string }[] }[];
 }
 
 const COLORS = {
@@ -119,6 +125,21 @@ function drawPMOSSections(doc: jsPDF, p: PMOSReportExtra, y: number): number {
     y = drawDivider(doc, y + 2);
   }
 
+  // Bleeding intensity and pain
+  if (p.bleeding && p.bleeding.periods.length) {
+    y = drawSectionTitle(doc, 'Bleeding Intensity & Pain', y);
+    for (const f of p.bleeding.flags) {
+      y = drawParagraph(doc, f === 'heavyAfterGap'
+        ? 'Heavy period after 90 or more days without bleeding: worth discussing at the appointment.'
+        : 'Two or more very heavy days (or heavy with clots) in a recent period: worth discussing, and checking iron.', y, 20, 170, true);
+    }
+    for (const per of p.bleeding.periods) {
+      const days = per.days.map((d) => `${d.date.slice(5)}: ${[d.flow ? d.flow.replace('_', ' ') : '', d.clots ? 'clots' : '', d.pain != null ? `pain ${d.pain}/10` : ''].filter(Boolean).join(', ')}`);
+      y = drawParagraph(doc, `Period starting ${per.start}`, y, 20, 170, true);
+      y = drawParagraph(doc, days.join('  |  '), y, 24, 166);
+    }
+    y = drawDivider(doc, y + 2);
+  }
   // Medications
   if (p.medications.length) {
     y = drawSectionTitle(doc, 'Medications & Adherence (last 30 days)', y);
@@ -127,6 +148,26 @@ function drawPMOSSections(doc: jsPDF, p: PMOSReportExtra, y: number): number {
       y = drawParagraph(doc, `${m.schedule}${m.since ? ` · since ${m.since}` : ''}`, y, 24, 166);
       if (m.notes) y = drawParagraph(doc, `Doctor's instructions: ${m.notes}`, y, 24, 166);
     }
+    y = drawDivider(doc, y + 2);
+  }
+
+  // Side effects
+  if (p.sideEffects && p.sideEffects.length) {
+    y = drawSectionTitle(doc, 'Medication Side Effects (self-reported)', y);
+    for (const m of p.sideEffects) {
+      y = drawParagraph(doc, m.medication, y, 20, 170, true);
+      y = drawParagraph(doc, m.entries.map((e) => `${e.date}: ${e.effect} (${e.severity})`).join('  |  '), y, 24, 166);
+    }
+    y = drawDivider(doc, y + 2);
+  }
+  // Diagnosis and events
+  if (p.diagnosis) {
+    y = drawSectionTitle(doc, 'Diagnosis & Medical Events (as reported by the patient)', y);
+    if (p.diagnosis.phenotype) y = drawKeyValue(doc, 'Phenotype', p.diagnosis.phenotype, y);
+    if (p.diagnosis.diagnosedOn) y = drawKeyValue(doc, 'Diagnosed on', p.diagnosis.diagnosedOn, y);
+    if (p.diagnosis.criteria.length) y = drawParagraph(doc, `Criteria marked: ${p.diagnosis.criteria.join('; ')}`, y, 20, 170);
+    if (p.diagnosis.notes) y = drawParagraph(doc, `Notes: ${p.diagnosis.notes}`, y, 20, 170);
+    for (const e of p.diagnosis.events) y = drawParagraph(doc, `${e.date} · ${e.kind}: ${e.summary}`, y, 24, 166);
     y = drawDivider(doc, y + 2);
   }
 

@@ -13,6 +13,9 @@ export interface PMOSMetricEntry {
   hip_cm: number | null;
   systolic?: number | null;
   diastolic?: number | null;
+  meal_slot?: 'breakfast' | 'lunch' | 'snack' | 'dinner' | null;
+  meal_label?: string | null;
+  minutes_after_meal?: 60 | 120 | null;
 }
 
 /** Blood pressure category (ACC/AHA 2017) for a single reading. */
@@ -41,7 +44,9 @@ export function homaIr(fastingGlucoseMgDl: number | null | undefined, fastingIns
 export type LabMarker =
   | 'testosterone' | 'lh' | 'fsh' | 'homa_ir' | 'tsh' | 'vitamin_d'
   | 'shbg' | 'amh' | 'prolactin' | 'hba1c' | 'fasting_glucose' | 'fasting_insulin'
-  | 'total_cholesterol' | 'ldl' | 'hdl' | 'triglycerides' | 'vitamin_b12';
+  | 'total_cholesterol' | 'ldl' | 'hdl' | 'triglycerides' | 'vitamin_b12'
+  | 'ferritin' | 'dheas' | 'androstenedione' | 'free_testosterone' | 'ohp17'
+  | 'glucose_2h' | 'alt' | 'ast' | 'progesterone' | 'estradiol';
 
 export type LabGroup = 'hormones' | 'metabolic' | 'lipids' | 'other';
 
@@ -81,6 +86,20 @@ export const LAB_MARKERS: LabMarkerInfo[] = [
   { key: 'vitamin_d', label: 'Vitamin D (25-OH)', labelEs: 'Vitamina D (25-OH)', unit: 'ng/mL', group: 'other', low: 30, high: 100 },
   { key: 'vitamin_b12', label: 'Vitamin B12', labelEs: 'Vitamina B12', unit: 'pg/mL', group: 'other', low: 200, high: 900,
     noteEs: 'Conviene revisarla si tomas metformina por mucho tiempo.', noteEn: 'Worth checking on long-term metformin.' },
+  // Markers below have no reference range until a clinical source is chosen: they are stored without a flag.
+  { key: 'ferritin', label: 'Ferritin', labelEs: 'Ferritina', unit: 'ng/mL', group: 'other', low: null, high: null },
+  { key: 'dheas', label: 'DHEA-S', labelEs: 'DHEA-S', unit: 'µg/dL', group: 'hormones', low: null, high: null },
+  { key: 'androstenedione', label: 'Androstenedione', labelEs: 'Androstenediona', unit: 'ng/mL', group: 'hormones', low: null, high: null },
+  { key: 'free_testosterone', label: 'Free testosterone', labelEs: 'Testosterona libre', unit: 'pg/mL', group: 'hormones', low: null, high: null },
+  { key: 'ohp17', label: '17-OH progesterone', labelEs: '17-OH progesterona', unit: 'ng/mL', group: 'hormones', low: null, high: null },
+  { key: 'estradiol', label: 'Estradiol', labelEs: 'Estradiol', unit: 'pg/mL', group: 'hormones', low: null, high: null,
+    noteEs: 'Cambia mucho según la fase del ciclo.', noteEn: 'Varies a lot with cycle phase.' },
+  { key: 'progesterone', label: 'Progesterone', labelEs: 'Progesterona', unit: 'ng/mL', group: 'hormones', low: null, high: null,
+    noteEs: 'Un valor de fase lútea por encima de unos 3 ng/mL sugiere que hubo ovulación.', noteEn: 'A luteal-phase value above about 3 ng/mL suggests ovulation occurred.' },
+  { key: 'glucose_2h', label: 'Glucose at 2 h (OGTT)', labelEs: 'Glucosa a las 2 h (curva)', unit: 'mg/dL', group: 'metabolic', low: null, high: 139.9,
+    noteEs: 'Menos de 140 normal, 140 a 199 prediabetes, 200 o más diabetes.', noteEn: 'Under 140 normal, 140 to 199 prediabetes, 200 or more diabetes.' },
+  { key: 'alt', label: 'ALT', labelEs: 'ALT (TGP)', unit: 'U/L', group: 'other', low: null, high: null },
+  { key: 'ast', label: 'AST', labelEs: 'AST (TGO)', unit: 'U/L', group: 'other', low: null, high: null },
 ];
 
 /** Converts total testosterone from ng/dL to nmol/L. */
@@ -126,7 +145,8 @@ export function markerInfo(key: LabMarker): LabMarkerInfo {
   return LAB_MARKERS.find((m) => m.key === key)!;
 }
 
-export function markerStatus(info: LabMarkerInfo, value: number): 'low' | 'high' | 'ok' {
+export function markerStatus(info: LabMarkerInfo, value: number): 'low' | 'high' | 'ok' | 'none' {
+  if (info.low == null && info.high == null) return 'none';
   if (info.low != null && value < info.low) return 'low';
   if (info.high != null && value > info.high) return 'high';
   return 'ok';

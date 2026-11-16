@@ -8,6 +8,7 @@ import { daysOfStockLeft, doseStatus, instructionLabel, packPosition, parseLocal
 import MedicationForm from './components/MedicationForm';
 import MedicationCalendar from './components/MedicationCalendar';
 import MedicationCareTips from './components/MedicationCareTips';
+import SideEffectsLog from './components/SideEffectsLog';
 
 export interface MedicationSummary { taken: number; total: number }
 
@@ -142,6 +143,8 @@ const Medications: React.FC<MedicationsProps> = ({ embedded = false, onSummary }
         <MedicationCareTips lang={lang} medications={medications} today={today} onRefill={refill}
           takenToday={(id) => todayDoses.filter((d) => d.med.id === id && isTaken(id, d.time)).length} />
       )}
+
+      {!loading && medications.length > 0 && <SideEffectsLog lang={lang} medications={medications} />}
 
       {!loading && medications.length === 0 && editing === null && (
         <div className="bg-card rounded-2xl border border-dashed border-border p-6 sm:p-8 flex flex-col items-center text-center gap-3">

@@ -7,11 +7,12 @@ import { usePMOSOverview } from '@/hooks/usePMOSOverview';
 import PeriodForecastCard from './PeriodForecastCard';
 import BodyMetricsSection from './BodyMetricsSection';
 import LabResultsSection from './LabResultsSection';
-import { CycleStatusCard, InsightsCard, ScreeningCard } from './PMOSOverviewCards';
+import { CycleStatusCard, InsightsCard, MealGlucoseCard, ScreeningCard } from './PMOSOverviewCards';
 import WellbeingCheck from './WellbeingCheck';
 import HirsutismTracker from './HirsutismTracker';
 import ProgressPhotos from './ProgressPhotos';
 import DoctorQuestions from './DoctorQuestions';
+import DiagnosisCard from './DiagnosisCard';
 
 type Tab = 'summary' | 'labs' | 'skin' | 'wellbeing' | 'visit';
 const TABS: { id: Tab; icon: string; es: string; en: string }[] = [
@@ -53,7 +54,9 @@ const MemberContent: React.FC<{ lang: 'es' | 'en' }> = ({ lang }) => {
         loading || !data ? <p className="text-sm text-muted-foreground">{lang === 'es' ? 'Cargando…' : 'Loading…'}</p> : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
             <div className="flex flex-col gap-6">
+              <DiagnosisCard lang={lang} />
               <InsightsCard lang={lang} data={data} />
+              <MealGlucoseCard lang={lang} data={data} />
               <ScreeningCard lang={lang} data={data} onOpenLabs={() => go('labs')} />
             </div>
             <div className="flex flex-col gap-6">
@@ -76,7 +79,7 @@ const MemberContent: React.FC<{ lang: 'es' | 'en' }> = ({ lang }) => {
         </div>
       )}
       {tab === 'wellbeing' && <WellbeingCheck lang={lang} />}
-      {tab === 'visit' && <DoctorQuestions lang={lang} />}
+      {tab === 'visit' && <DoctorQuestions lang={lang} data={data} onOpenLabs={() => go('labs')} />}
     </div>
   );
 };

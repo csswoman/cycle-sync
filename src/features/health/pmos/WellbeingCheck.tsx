@@ -3,10 +3,12 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Icon } from '@/components/ui/Icon';
 import { supabase } from '@/lib/supabase';
 import { toLocalISO, parseLocalDate } from '@/lib/medications/schedule';
-import { isCheckDue, scoreWellbeing, type WellbeingAnswers } from '@/lib/pmos/wellbeing';
+import { isCheckDue, isScoffDue, scoreScoff, scoreWellbeing, SCOFF_CUTOFF, SCOFF_QUESTIONS, type ScoffAnswers, type ScoffKey, type WellbeingAnswers } from '@/lib/pmos/wellbeing';
+import { useDisplayPrefs } from '@/hooks/useDisplayPrefs';
 
 type Lang = 'es' | 'en';
-interface Row extends WellbeingAnswers { id: string; date: string }
+interface Row extends WellbeingAnswers { id: string; date: string; scoff?: number | null }
+const SCOFF_SKIP_KEY = 'cycle_sync_scoff_skipped';
 
 const T = {
   es: {
@@ -30,6 +32,17 @@ const T = {
     crisis: 'Si tienes pensamientos de hacerte daño, busca ayuda ahora: en México, Línea de la Vida 800 911 2000 (24 h, gratis) o el 911.',
     error: 'No se pudo guardar. Si es la primera vez, falta aplicar la migración de la base de datos.',
     score: (p: number, g: number) => `Ánimo ${p}/6 · Ansiedad ${g}/6`,
+    scoffTitle: 'Sobre tu relación con la comida', scoffIntro: 'Cinco preguntas opcionales que se repiten cada 3 meses. Con PMOS, la alimentación desordenada es más frecuente y conviene mirarla con calma.',
+    scoffAnswer: 'Responder', scoffSkip: 'Saltar por ahora',
+    scoffQ: {
+      sick: '¿Te provocas el vómito porque te sientes mal por haber comido de más?',
+      control: '¿Sientes que has perdido el control sobre cuánto comes?',
+      weight: '¿Has perdido más de 6 kg en 3 meses?',
+      fat: '¿Te ves gorda aunque otras personas digan que estás delgada?',
+      food: '¿Dirías que la comida domina tu vida?',
+    } as Record<ScoffKey, string>,
+    scoffFlag: 'Algunas respuestas sugieren que puede ayudarte hablar de tu alimentación con una profesional. No es un diagnóstico y no hay prisa. Si quieres, puedes ocultar calorías, peso y medidas en la app.',
+    scoffHide: 'Activar modo sin números', scoffHidden: 'Modo sin números activado.',
   },
   en: {
     title: 'Mood, anxiety and sleep', sub: 'A short monthly check. Depression, anxiety and sleep apnea are more common with PMOS, and catching them early helps.',
@@ -52,6 +65,17 @@ const T = {
     crisis: 'If you have thoughts of harming yourself, get help now: call your local emergency number or a crisis line.',
     error: 'Could not save. If this is the first time, the database migration has not been applied yet.',
     score: (p: number, g: number) => `Mood ${p}/6 · Anxiety ${g}/6`,
+    scoffTitle: 'About your relationship with food', scoffIntro: 'Five optional questions, repeated every 3 months. Disordered eating is more common with PMOS and is worth looking at calmly.',
+    scoffAnswer: 'Answer', scoffSkip: 'Skip for now',
+    scoffQ: {
+      sick: 'Do you make yourself sick because you feel uncomfortably full?',
+      control: 'Do you worry you have lost control over how much you eat?',
+      weight: 'Have you recently lost more than 6 kg (14 lb) in a 3-month period?',
+      fat: 'Do you believe yourself to be fat when others say you are too thin?',
+      food: 'Would you say that food dominates your life?',
+    } as Record<ScoffKey, string>,
+    scoffFlag: 'Some answers suggest it may help to talk about your eating with a professional. This is not a diagnosis and there is no rush. If you like, you can hide calories, weight and measurements in the app.',
+    scoffHide: 'Turn on no-numbers mode', scoffHidden: 'No-numbers mode is on.',
   },
 };
 
@@ -67,6 +91,11 @@ export const WellbeingCheck: React.FC<{ lang: Lang }> = ({ lang }) => {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState(false);
+  const { hideNumbers, update: updateDisplayPrefs } = useDisplayPrefs();
+  const [scoffMode, setScoffMode] = useState<'ask' | 'answering' | 'skipped'>('ask');
+  const [scoffAnswers, setScoffAnswers] = useState<Partial<ScoffAnswers>>({});
+  const [skippedOn, setSkippedOn] = useState<string | null>(null);
+  useEffect(() => { try { setSkippedOn(localStorage.getItem(SCOFF_SKIP_KEY)); } catch { /* storage blocked */ } }, []);
 
   const load = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -80,16 +109,27 @@ export const WellbeingCheck: React.FC<{ lang: Lang }> = ({ lang }) => {
   const due = isCheckDue(last?.date ?? null, today);
   const showForm = editing || due;
   const result = last ? scoreWellbeing(last) : null;
+  const lastScoffRow = rows.find((x) => x.scoff != null) ?? null;
+  const lastScoffSeen = [lastScoffRow?.date ?? null, skippedOn].filter((d): d is string => !!d).sort().at(-1) ?? null;
+  const scoffDue = isScoffDue(lastScoffSeen, today);
+  const scoffPositive = lastScoffRow != null && (lastScoffRow.scoff as number) >= SCOFF_CUTOFF;
+  const skipScoff = () => {
+    try { localStorage.setItem(SCOFF_SKIP_KEY, today); } catch { /* storage blocked */ }
+    setSkippedOn(today); setScoffMode('skipped');
+  };
   const fmt = (iso: string) => parseLocalDate(iso).toLocaleDateString(lang === 'es' ? 'es-MX' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' });
 
   const save = async () => {
     setSaving(true); setError(false);
     const { data: { session } } = await supabase.auth.getSession();
     if (!session?.user) { setSaving(false); return; }
-    const { error: err } = await supabase.from('wellbeing_checks').insert({ ...answers, user_id: session.user.id, date: today });
+    const { error: err } = await supabase.from('wellbeing_checks').insert({
+      ...answers, user_id: session.user.id, date: today,
+      ...(scoffMode === 'answering' ? { scoff: scoreScoff(scoffAnswers).score } : {}),
+    });
     setSaving(false);
     if (err) { setError(true); return; }
-    setEditing(false); setAnswers(EMPTY);
+    setEditing(false); setAnswers(EMPTY); setScoffAnswers({}); setScoffMode('ask');
     await load();
   };
 
@@ -108,12 +148,20 @@ export const WellbeingCheck: React.FC<{ lang: Lang }> = ({ lang }) => {
       {result && last && !showForm && (
         <div className="flex flex-col gap-2">
           <p className="text-sm text-muted-foreground">{t.notDue(fmt(last.date))}</p>
-          {!result.moodFlag && !result.anxietyFlag && !result.sleepFlag && (
+          {!result.moodFlag && !result.anxietyFlag && !result.sleepFlag && !scoffPositive && (
             <p className="text-sm text-foreground bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3">{t.okMood}</p>
           )}
           {result.moodFlag && <p className="text-sm text-foreground bg-amber-500/10 border border-amber-500/40 rounded-xl p-3">{t.moodFlag}</p>}
           {result.anxietyFlag && <p className="text-sm text-foreground bg-amber-500/10 border border-amber-500/40 rounded-xl p-3">{t.anxFlag}</p>}
           {result.sleepFlag && <p className="text-sm text-foreground bg-sky-500/10 border border-sky-500/30 rounded-xl p-3">{t.sleepFlag}</p>}
+          {scoffPositive && (
+            <div className="text-sm text-foreground bg-sky-500/10 border border-sky-500/30 rounded-xl p-3 flex flex-col gap-2">
+              <p>{t.scoffFlag}</p>
+              {hideNumbers
+                ? <p className="text-xs text-muted-foreground">{t.scoffHidden}</p>
+                : <button onClick={() => void updateDisplayPrefs({ hideNumbers: true })} className="self-start font-bold text-primary hover:underline">{t.scoffHide}</button>}
+            </div>
+          )}
           <button onClick={() => setEditing(true)} className="self-start text-sm font-bold text-primary hover:underline">{t.again}</button>
         </div>
       )}
@@ -142,6 +190,30 @@ export const WellbeingCheck: React.FC<{ lang: Lang }> = ({ lang }) => {
               {t[k]}
             </label>
           ))}
+          {scoffDue && scoffMode !== 'skipped' && (
+            <div className="flex flex-col gap-3 border-t border-border pt-4">
+              <p className="text-sm font-semibold text-foreground">{t.scoffTitle}</p>
+              {scoffMode === 'ask' ? (
+                <>
+                  <p className="text-xs text-muted-foreground">{t.scoffIntro}</p>
+                  <div className="flex gap-3">
+                    <button type="button" onClick={() => setScoffMode('answering')} className="px-4 py-2 rounded-full text-xs font-bold bg-secondary text-foreground hover:bg-secondary/70">{t.scoffAnswer}</button>
+                    <button type="button" onClick={skipScoff} className="px-4 py-2 rounded-full text-xs font-bold text-muted-foreground hover:text-foreground">{t.scoffSkip}</button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {SCOFF_QUESTIONS.map((k) => (
+                    <label key={k} className="flex items-start gap-3 text-sm text-foreground cursor-pointer">
+                      <input type="checkbox" className="size-4 mt-0.5 accent-primary" checked={scoffAnswers[k] === true} onChange={(e) => setScoffAnswers({ ...scoffAnswers, [k]: e.target.checked })} />
+                      {t.scoffQ[k]}
+                    </label>
+                  ))}
+                  <button type="button" onClick={skipScoff} className="self-start text-xs font-bold text-muted-foreground hover:text-foreground">{t.scoffSkip}</button>
+                </>
+              )}
+            </div>
+          )}
           {error && <p role="alert" className="text-sm text-destructive">{t.error}</p>}
           <button onClick={save} disabled={saving} className="self-start bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-full font-bold text-sm disabled:opacity-60">
             {saving ? t.saving : t.save}

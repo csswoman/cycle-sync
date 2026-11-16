@@ -38,7 +38,7 @@ export interface ScreeningInput {
 }
 
 const MARKERS: Record<Exclude<ScreeningKey, 'blood_pressure'>, string[]> = {
-  glucose: ['hba1c', 'fasting_glucose'],
+  glucose: ['hba1c', 'fasting_glucose', 'glucose_2h'],
   lipids: ['total_cholesterol', 'ldl', 'hdl', 'triglycerides'],
   vitamin_b12: ['vitamin_b12'],
 };

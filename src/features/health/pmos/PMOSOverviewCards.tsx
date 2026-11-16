@@ -3,10 +3,14 @@ import React, { useMemo } from 'react';
 import Link from 'next/link';
 import { Icon } from '@/components/ui/Icon';
 import type { PMOSOverviewData } from '@/hooks/usePMOSOverview';
-import { buildInsights, type InsightTone } from '@/lib/pmos/insights';
+import type { InsightTone } from '@/lib/pmos/insights';
+import { insightsFromOverview } from '@/lib/pmos/overviewInsights';
 import { ovulationHistory, periodGap, type OvulationStatus } from '@/lib/pmos/cycleStatus';
+import { cycleHealthFlags } from '@/lib/cycle/cycleAnalysis';
 import { screeningPlan, type ScreeningKey } from '@/lib/pmos/screening';
+import { useDisplayPrefs } from '@/hooks/useDisplayPrefs';
 import { medicationStart, parseLocalDate } from '@/lib/medications/schedule';
+import { groupMealGlucose, hasEnoughMealData, SPIKE_THRESHOLD_MG_DL } from '@/lib/pmos/mealGlucose';
 
 type Lang = 'es' | 'en';
 const fmt = (iso: string, lang: Lang) => parseLocalDate(iso).toLocaleDateString(lang === 'es' ? 'es-MX' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' });
@@ -35,19 +39,12 @@ const TONE: Record<InsightTone, string> = {
 /* ---------------- 1. What is working ---------------- */
 
 export const InsightsCard: React.FC<{ lang: Lang; data: PMOSOverviewData }> = ({ lang, data }) => {
-  const insights = useMemo(() => buildInsights({
-    today: data.today,
-    periodStarts: data.periodStarts,
-    medications: data.medications.map((m) => ({ ...m, start: medicationStart(m) })),
-    medLogs: data.medLogs,
-    symptomTotals: data.symptomTotals,
-    fastingGlucose: data.fastingGlucose,
-    dailyLogs: data.dailyLogs,
-  }), [data]);
+  const { hideNumbers } = useDisplayPrefs();
+  const insights = useMemo(() => insightsFromOverview(data, hideNumbers), [data, hideNumbers]);
 
   return (
     <Card icon="insights" title={lang === 'es' ? '¿Mi tratamiento está funcionando?' : 'Is my treatment working?'}
-      subtitle={lang === 'es' ? 'Relacionamos lo que ya registras: tratamiento, ciclos, glucosa, síntomas y sueño.' : 'Links between what you already log: treatment, cycles, glucose, symptoms and sleep.'}>
+      subtitle={lang === 'es' ? 'Relacionamos lo que ya registras: tratamiento, ciclos, glucosa, síntomas, sueño y actividad.' : 'Links between what you already log: treatment, cycles, glucose, symptoms, sleep and activity.'}>
       {insights.length === 0 ? (
         <p className="text-sm text-muted-foreground bg-secondary/30 rounded-xl p-4">
           {lang === 'es'
@@ -87,6 +84,10 @@ export const CycleStatusCard: React.FC<{ lang: Lang; data: PMOSOverviewData }> =
   const gap = periodGap(data.periodStarts, data.today);
   const history = useMemo(() => ovulationHistory(data.periodStarts, data.signs, data.today), [data]);
   const es = lang === 'es';
+  const bleedingFlags = useMemo(
+    () => cycleHealthFlags(data.periodRuns, parseLocalDate(data.today), data.signs).filter((f) => f === 'heavyBleeding' || f === 'heavyAfterGap'),
+    [data],
+  );
   const confirmed = history.filter((h) => h.end && h.status === 'confirmed').length;
   const finished = history.filter((h) => h.end && h.status !== 'no_data').length;
 
@@ -121,6 +122,21 @@ export const CycleStatusCard: React.FC<{ lang: Lang; data: PMOSOverviewData }> =
         </div>
       )}
 
+      {bleedingFlags.length > 0 && (
+        <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 flex flex-col gap-1.5">
+          <h4 className="text-sm font-bold text-foreground">{es ? 'Sangrado abundante' : 'Heavy bleeding'}</h4>
+          {bleedingFlags.includes('heavyBleeding') && (
+            <p className="text-sm text-foreground/90 leading-relaxed">{es
+              ? 'En una de tus últimas reglas anotaste 2 o más días de sangrado muy abundante (o abundante con coágulos). Conviene comentarlo y revisar tu hierro.'
+              : 'In one of your recent periods you logged 2 or more days of very heavy bleeding (or heavy with clots). Worth mentioning, and worth checking your iron.'}</p>
+          )}
+          {bleedingFlags.includes('heavyAfterGap') && (
+            <p className="text-sm text-foreground/90 leading-relaxed">{es
+              ? 'Tuviste una regla abundante después de 90 días o más sin sangrado. Conviene comentarlo en consulta.'
+              : 'You had a heavy period after 90 days or more without bleeding. Worth mentioning at your appointment.'}</p>
+          )}
+        </div>
+      )}
       {!data.hormonal && history.length > 0 && (
         <div className="flex flex-col gap-2">
           <div className="flex items-baseline justify-between gap-2">
@@ -199,6 +215,41 @@ export const ScreeningCard: React.FC<{ lang: Lang; data: PMOSOverviewData; onOpe
       <button onClick={onOpenLabs} className="self-start text-sm font-bold text-primary hover:underline">
         {es ? 'Registrar un resultado →' : 'Log a result →'}
       </button>
+    </Card>
+  );
+};
+
+/* ---------------- Meals that raise glucose the most ---------------- */
+export const MealGlucoseCard: React.FC<{ lang: Lang; data: PMOSOverviewData }> = ({ lang, data }) => {
+  const groups = useMemo(() => groupMealGlucose(data.mealReadings ?? []), [data]);
+  if (!hasEnoughMealData(groups)) return null;
+  const es = lang === 'es';
+  return (
+    <Card icon="restaurant" title={es ? 'Comidas que más te suben' : 'Meals that raise your glucose most'}
+      subtitle={es ? 'Promedio de tus lecturas de glucosa después de comer, por comida.' : 'Average of your post-meal glucose readings, by meal.'}>
+      <ul className="flex flex-col gap-2.5">
+        {groups.map((g) => (
+          <li key={g.key} className="rounded-xl border border-border bg-secondary/30 p-3 flex flex-col gap-1.5">
+            <div className="flex items-baseline justify-between gap-3">
+              <span className="text-sm font-semibold text-foreground">{g.label}</span>
+              <span className="text-sm text-foreground">{Math.round(g.averageMgDl)} mg/dL</span>
+            </div>
+            <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+              <span>{es ? `${g.count} lecturas` : `${g.count} readings`}</span>
+              {g.aboveThreshold && (
+                <span className="font-semibold rounded-full px-2.5 py-1 border border-amber-500/40 bg-amber-500/10 text-foreground">
+                  {es ? `Promedio a las 2 h por encima de ${SPIKE_THRESHOLD_MG_DL} mg/dL` : `2 h average above ${SPIKE_THRESHOLD_MG_DL} mg/dL`}
+                </span>
+              )}
+            </div>
+          </li>
+        ))}
+      </ul>
+      <p className="text-xs text-muted-foreground">
+        {es
+          ? 'Es una observación de tus propios datos, no un diagnóstico. Manda el rango de referencia de tu laboratorio.'
+          : 'This is an observation from your own data, not a diagnosis. Your laboratory\'s reference range prevails.'}
+      </p>
     </Card>
   );
 };
