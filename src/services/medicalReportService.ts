@@ -1,4 +1,4 @@
-import type { CycleInfo, DailyLog, PCOSSymptomEntry, Habit, HabitLog } from '@/types';
+import type { CycleInfo, DailyLog, PMOSSymptomEntry, Habit, HabitLog } from '@/types';
 import type jsPDF from 'jspdf';
 
 interface ReportData {
@@ -8,7 +8,7 @@ interface ReportData {
   cycleLength: number;
   lastPeriodStart: string | null;
   dailyLogs: DailyLog[];
-  pcosEntries: PCOSSymptomEntry[];
+  pmosEntries: PMOSSymptomEntry[];
   habits: Habit[];
   habitLogs: HabitLog[];
 }
@@ -164,9 +164,9 @@ export function generateMedicalReport(data: ReportData, jsPDFClass: JsPDFConstru
     y = drawDivider(doc, y + 2);
   }
 
-  // PCOS Symptoms
-  if (data.pcosEntries.length > 0) {
-    y = drawSectionTitle(doc, `PCOS Symptom Tracking (${data.pcosEntries.length} entries, last 30 days)`, y);
+  // PMOS Symptoms
+  if (data.pmosEntries.length > 0) {
+    y = drawSectionTitle(doc, `PMOS Symptom Tracking (${data.pmosEntries.length} entries, last 30 days)`, y);
 
     const symptomKeys = ['acne', 'fatigue', 'hirsutism', 'hair_loss', 'mood_swings', 'bloating'] as const;
     const labels: Record<string, string> = {
@@ -180,7 +180,7 @@ export function generateMedicalReport(data: ReportData, jsPDFClass: JsPDFConstru
 
     symptomKeys.forEach((key) => {
       if (y > 275) { doc.addPage(); y = 20; }
-      const avg = data.pcosEntries.reduce((s, e) => s + (e[key] ?? 0), 0) / data.pcosEntries.length;
+      const avg = data.pmosEntries.reduce((s, e) => s + (e[key] ?? 0), 0) / data.pmosEntries.length;
       const barWidth = (avg / 3) * 80;
       const color = avg >= 2 ? COLORS.red : avg >= 1 ? COLORS.primary : COLORS.green;
 
@@ -205,7 +205,7 @@ export function generateMedicalReport(data: ReportData, jsPDFClass: JsPDFConstru
 
     // Alert section
     const alertSymptoms = symptomKeys.filter((key) => {
-      const recent = data.pcosEntries.slice(-7);
+      const recent = data.pmosEntries.slice(-7);
       if (recent.length < 7) return false;
       const avg = recent.reduce((s, e) => s + (e[key] ?? 0), 0) / recent.length;
       return avg >= 2;
