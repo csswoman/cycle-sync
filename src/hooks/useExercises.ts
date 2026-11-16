@@ -55,9 +55,9 @@ export const useExercises = () => {
         }
     };
 
-    const loadVideos = async (query: string = 'women workout', duration: string = 'medium') => {
+    const loadVideos = async () => {
         try {
-            const data = await fetchWorkoutVideos(query, duration);
+            const data = await fetchWorkoutVideos();
             setVideos(data);
         } catch (err) {
             console.error('Error loading workout videos:', err);

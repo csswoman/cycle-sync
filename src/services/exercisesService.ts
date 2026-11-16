@@ -1,4 +1,7 @@
 import { Exercise, WorkoutVideo, BodyPart, Equipment } from '@/types/exercises';
+import { supabase } from '@/lib/supabase';
+import { parseYouTubeId } from '@/lib/youtube';
+import workoutVideosData from '@/data/workoutVideos.json';
 
 // Requests go through /api/exercises, which adds the RapidAPI key on the server.
 
@@ -195,45 +198,49 @@ const getFallbackExercises = (): Exercise[] => {
 };
 
 /**
- * Fetch workout videos from YouTube (mock implementation - would need YouTube API key)
+ * Curated workout videos from the workout_videos table. Falls back to the bundled
+ * JSON when offline or when the table is unavailable.
  */
-export const fetchWorkoutVideos = async (
-    query: string = 'women workout',
-    duration: string = 'medium'
-): Promise<WorkoutVideo[]> => {
-    // This would use YouTube Data API v3 in production
-    // For now, returning curated static videos
+export const fetchWorkoutVideos = async (): Promise<WorkoutVideo[]> => {
+    try {
+        const { data, error } = await supabase
+            .from('workout_videos')
+            .select('id, url, youtube_id, title, channel_name, category, phases, duration_minutes, intensity')
+            .order('created_at', { ascending: false });
+        if (error) throw error;
+        if (data && data.length > 0) {
+            return data.map((v) => ({
+                id: v.id,
+                url: v.url,
+                videoId: v.youtube_id,
+                title: v.title,
+                channelName: v.channel_name ?? '',
+                category: v.category,
+                phases: v.phases,
+                durationMinutes: v.duration_minutes,
+                intensity: v.intensity,
+            }));
+        }
+    } catch (error) {
+        console.error('Error fetching workout videos:', error);
+    }
     return getFallbackVideos();
 };
 
-const getFallbackVideos = (): WorkoutVideo[] => {
-    return [
-        {
-            id: '1',
-            title: '20 Min Full Body Workout - No Equipment',
-            thumbnailUrl: 'https://i.ytimg.com/vi/ml6XDkPJEHo/hqdefault.jpg',
-            channelName: 'Fitness Blender',
-            duration: '20:00',
-            videoId: 'ml6XDkPJEHo',
-            description: 'Complete full body workout requiring no equipment'
-        },
-        {
-            id: '2',
-            title: '15 Min Low Impact Cardio Workout',
-            thumbnailUrl: 'https://i.ytimg.com/vi/gC_L9qAHVJ8/hqdefault.jpg',
-            channelName: 'POPSUGAR Fitness',
-            duration: '15:00',
-            videoId: 'gC_L9qAHVJ8',
-            description: 'Gentle cardio perfect for all fitness levels'
-        },
-        {
-            id: '3',
-            title: '30 Min Yoga Flow for Beginners',
-            thumbnailUrl: 'https://i.ytimg.com/vi/v7AYKMP6rOE/hqdefault.jpg',
-            channelName: 'Yoga With Adriene',
-            duration: '30:00',
-            videoId: 'v7AYKMP6rOE',
-            description: 'Relaxing yoga flow to reduce stress'
-        }
-    ];
-};
+const getFallbackVideos = (): WorkoutVideo[] =>
+    (workoutVideosData as any[]).flatMap((v, i) => {
+        const videoId = parseYouTubeId(v.url);
+        return videoId
+            ? [{
+                id: `local-${i}`,
+                url: v.url,
+                videoId,
+                title: v.title,
+                channelName: v.channel_name ?? '',
+                category: v.category,
+                phases: v.phases,
+                durationMinutes: v.duration_minutes,
+                intensity: v.intensity,
+            }]
+            : [];
+    });

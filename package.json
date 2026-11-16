@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "videos:import": "tsx scripts/import-videos.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",

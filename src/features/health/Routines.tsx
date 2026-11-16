@@ -2,13 +2,14 @@
 
 import React, { useEffect, useState } from 'react';
 import { fetchWorkoutVideos } from '@/services/exercisesService';
-import { Exercise, WorkoutVideo, Routine } from '@/types/exercises';
+import { Exercise, WorkoutVideo, Routine, VideoCategory, VideoIntensity } from '@/types/exercises';
 import phaseData from '@/data/phaseExercises.json';
 import { supabase } from '@/lib/supabase';
 import { useCycleInfo } from '@/hooks/useCycleInfo';
 import { useRoutineStore } from '@/stores/routineStore';
 import { ExerciseCard, RoutineSection, SavedRoutineCard, VideoCard } from './components/RoutinesComponents';
 
+const VIDEOS_PAGE = 9;
 const PHASE_KEY_MAP: Record<string, string> = {
   Menstrual: 'menstrual',
   Follicular: 'follicular',
@@ -46,6 +47,9 @@ const Routines: React.FC = () => {
   const [recommendedExercises, setRecommendedExercises] = useState<Exercise[]>([]);
   const [pcosExercises, setPcosExercises] = useState<Exercise[]>([]);
   const [workoutVideos, setWorkoutVideos] = useState<WorkoutVideo[]>([]);
+  const [videoCategory, setVideoCategory] = useState<VideoCategory | 'all'>('all');
+  const [videoIntensity, setVideoIntensity] = useState<VideoIntensity | 'all'>('all');
+  const [videosShown, setVideosShown] = useState(VIDEOS_PAGE);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userRoutines, setUserRoutines] = useState<Routine[]>([]);
@@ -55,6 +59,10 @@ const Routines: React.FC = () => {
   const phaseKey = cycleInfo ? PHASE_KEY_MAP[cycleInfo.phase] || 'follicular' : 'follicular';
   const guidance = PHASE_GUIDANCE[phaseKey];
 
+  const visibleVideos = workoutVideos
+    .filter((v) => videoCategory === 'all' || v.category === videoCategory)
+    .filter((v) => videoIntensity === 'all' || v.intensity === videoIntensity)
+    .sort((a, b) => Number(b.phases.includes(phaseKey as any)) - Number(a.phases.includes(phaseKey as any)));
   useEffect(() => {
     if (newBadges.length > 0) {
       setShowBadgeModal(true);
@@ -297,17 +305,66 @@ const Routines: React.FC = () => {
           </div>
         )}
 
-        {/* Saved Routines */}
-        {userRoutines.length > 0 && (
-          <RoutineSection title="My Saved Routines" icon="bookmark">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {userRoutines.map((routine) => (
-                <SavedRoutineCard key={routine.id} routine={routine} />
+        {/* Videos */}
+        <RoutineSection
+          title="Home Workout Videos"
+          description={`Sorted with the ones that suit your ${cycleInfo?.phase ?? 'current'} phase first.`}
+          icon="videocam"
+          rightElement={
+            <span className="text-xs font-bold px-3 py-1 rounded-full bg-primary/10 text-primary">
+              {visibleVideos.length} videos
+            </span>
+          }
+        >
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-wrap gap-2">
+              {(['all', 'gym', 'dance', 'yoga', 'pilates'] as const).map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => { setVideoCategory(c); setVideosShown(VIDEOS_PAGE); }}
+                  className={`px-3 py-1 rounded-full text-xs font-bold border ${videoCategory === c ? 'bg-primary text-white border-primary' : 'bg-card text-foreground border-border'}`}
+                >
+                  {c === 'all' ? 'All' : c.charAt(0).toUpperCase() + c.slice(1)}
+                </button>
               ))}
             </div>
-          </RoutineSection>
-        )}
-
+            <div className="flex flex-wrap gap-2">
+              {(['all', 'low', 'medium', 'high'] as const).map((l) => (
+                <button
+                  key={l}
+                  type="button"
+                  onClick={() => { setVideoIntensity(l); setVideosShown(VIDEOS_PAGE); }}
+                  className={`px-3 py-1 rounded-full text-xs font-bold border ${videoIntensity === l ? 'bg-foreground text-background border-foreground' : 'bg-card text-foreground border-border'}`}
+                >
+                  {l === 'all' ? 'Any intensity' : `${l.charAt(0).toUpperCase() + l.slice(1)} intensity`}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {loading ? (
+              [...Array(3)].map((_, i) => (
+                <div key={i} className="aspect-video rounded-2xl bg-card animate-pulse border border-border" />
+              ))
+            ) : visibleVideos.length === 0 ? (
+              <p className="text-muted-foreground text-sm col-span-full">No videos match these filters.</p>
+            ) : (
+              visibleVideos.slice(0, videosShown).map((video) => (
+                <VideoCard key={video.id} video={video} />
+              ))
+            )}
+          </div>
+          {!loading && visibleVideos.length > videosShown && (
+            <button
+              type="button"
+              onClick={() => setVideosShown((n) => n + VIDEOS_PAGE)}
+              className="self-center px-5 py-2 rounded-full text-sm font-bold border border-border bg-card text-foreground hover:border-primary/50 transition-colors"
+            >
+              Show more ({visibleVideos.length - videosShown} left)
+            </button>
+          )}
+        </RoutineSection>
         {/* Phase Exercises */}
         <RoutineSection
           title={`Recommended for ${cycleInfo?.phase ?? 'Your'} Phase`}
@@ -332,24 +389,6 @@ const Routines: React.FC = () => {
                   onSave={() => onSaveExercise(ex)}
                   saving={saving}
                 />
-              ))
-            )}
-          </div>
-        </RoutineSection>
-
-        {/* Videos */}
-        <RoutineSection
-          title="Suggested Videos"
-          icon="videocam"
-        >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {loading ? (
-              [...Array(3)].map((_, i) => (
-                <div key={i} className="aspect-video rounded-2xl bg-card animate-pulse border border-border" />
-              ))
-            ) : (
-              workoutVideos.map((video) => (
-                <VideoCard key={video.id} video={video} />
               ))
             )}
           </div>

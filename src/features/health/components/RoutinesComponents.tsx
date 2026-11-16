@@ -1,5 +1,6 @@
 import React from 'react';
 import { Exercise, Routine, WorkoutVideo } from '@/types/exercises';
+import { youtubeEmbedUrl, youtubeThumbnailUrl } from '@/lib/youtube';
 
 interface ExerciseCardProps {
     exercise: Exercise;
@@ -155,31 +156,53 @@ export const SavedRoutineCard: React.FC<{ routine: Routine }> = ({ routine }) =>
     );
 };
 
+const CATEGORY_LABEL: Record<string, string> = { gym: 'Gym', dance: 'Dance', yoga: 'Yoga', pilates: 'Pilates' };
+const INTENSITY_LABEL: Record<string, string> = { low: 'Low', medium: 'Medium', high: 'High' };
+
 export const VideoCard: React.FC<{ video: WorkoutVideo }> = ({ video }) => {
+    const [playing, setPlaying] = React.useState(false);
     return (
-        <div 
-            className="flex flex-col gap-3 group cursor-pointer" 
-            onClick={() => window.open(`https://youtube.com/watch?v=${video.videoId}`, '_blank')}
-        >
-            <div className="relative aspect-video rounded-2xl overflow-hidden shadow-sm">
-                <img
-                    src={video.thumbnailUrl}
-                    alt={video.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center text-primary shadow-xl">
-                        <span className="material-symbols-outlined scale-150">play_arrow</span>
-                    </div>
-                </div>
-                <div className="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">
-                    {video.duration}
-                </div>
+        <div className="flex flex-col gap-3 group">
+            <div className="relative aspect-video rounded-2xl overflow-hidden shadow-sm bg-black">
+                {playing ? (
+                    <iframe
+                        src={youtubeEmbedUrl(video.videoId, true)}
+                        title={video.title}
+                        className="absolute inset-0 w-full h-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                        referrerPolicy="strict-origin-when-cross-origin"
+                    />
+                ) : (
+                    <button
+                        type="button"
+                        onClick={() => setPlaying(true)}
+                        aria-label={`Play ${video.title}`}
+                        className="absolute inset-0 w-full h-full cursor-pointer"
+                    >
+                        <img
+                            src={youtubeThumbnailUrl(video.videoId)}
+                            alt=""
+                            loading="lazy"
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
+                        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 focus-visible:opacity-100 transition-opacity">
+                            <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center text-primary shadow-xl">
+                                <span className="material-symbols-outlined scale-150">play_arrow</span>
+                            </div>
+                        </div>
+                        <div className="absolute bottom-2 right-2 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">
+                            {video.durationMinutes} min
+                        </div>
+                    </button>
+                )}
             </div>
             <div>
-                <h4 className="text-foreground font-bold text-sm line-clamp-2 group-hover:text-primary transition-colors">{video.title}</h4>
-                <p className="text-muted-foreground text-xs mt-1">{video.channelName}</p>
+                <h4 className="text-foreground font-bold text-sm line-clamp-2">{video.title}</h4>
+                <p className="text-muted-foreground text-xs mt-1">
+                    {[CATEGORY_LABEL[video.category], `${INTENSITY_LABEL[video.intensity]} intensity`, video.channelName].filter(Boolean).join(' · ')}
+                </p>
             </div>
         </div>
     );

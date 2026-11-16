@@ -9,14 +9,19 @@ export interface Exercise {
     secondaryMuscles?: string[];
 }
 
+export type VideoCategory = 'gym' | 'dance' | 'yoga' | 'pilates';
+export type VideoIntensity = 'low' | 'medium' | 'high';
+export type VideoPhase = 'menstrual' | 'follicular' | 'ovulation' | 'luteal' | 'any';
 export interface WorkoutVideo {
     id: string;
-    title: string;
-    thumbnailUrl: string;
-    channelName: string;
-    duration: string;
+    url: string;
     videoId: string;
-    description?: string;
+    title: string;
+    channelName: string;
+    category: VideoCategory;
+    phases: VideoPhase[];
+    durationMinutes: number;
+    intensity: VideoIntensity;
 }
 
 export type BodyPart = 'back' | 'cardio' | 'chest' | 'lower arms' | 'lower legs' | 'neck' | 'shoulders' | 'upper arms' | 'upper legs' | 'waist';
