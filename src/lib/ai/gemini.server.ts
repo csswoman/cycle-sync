@@ -3,9 +3,9 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 // Server-only: this file reads GEMINI_API_KEY and must never be imported from client components.
 
 const DEFAULT_MODELS = [
-  'gemini-2.5-flash',
-  'gemini-flash-latest',
-  'gemini-2.5-flash-lite',
+  'gemini-4-hydrogen',
+  'gemini-3.8-flash',
+  'gemini-3.5-flash-lite',
 ];
 
 /** Fallback order, overridable with GEMINI_MODELS="model-a,model-b" without touching code. */
@@ -76,6 +76,28 @@ export async function analyzeMedia(dataUrl: string, prompt: string) {
   return withFallback(async modelName => {
     const model = genAI.getGenerativeModel({ model: modelName });
     const result = await model.generateContent([prompt, { inlineData: { mimeType, data } }]);
+    return result.response.text();
+  });
+}
+
+/**
+ * Asks Gemini for a JSON answer. `mediaDataUrl` is an optional data URL (image or PDF)
+ * sent together with the prompt.
+ */
+export async function generateJson(prompt: string, mediaDataUrl?: string) {
+  const genAI = getClient();
+  const parts: any[] = [prompt];
+  if (mediaDataUrl) {
+    const matches = mediaDataUrl.match(/^data:(.+?);base64,(.+)$/);
+    if (!matches) throw new Error('Invalid base64 media data');
+    parts.push({ inlineData: { mimeType: matches[1], data: matches[2] } });
+  }
+  return withFallback(async modelName => {
+    const model = genAI.getGenerativeModel({
+      model: modelName,
+      generationConfig: { responseMimeType: 'application/json' },
+    });
+    const result = await model.generateContent(parts);
     return result.response.text();
   });
 }

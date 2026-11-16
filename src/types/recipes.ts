@@ -1,67 +1,48 @@
-export interface Recipe {
-    id: number;
-    title: string;
-    image: string;
-    readyInMinutes: number;
-    servings: number;
-    sourceUrl: string;
-    summary?: string;
-    cuisines?: string[];
-    dishTypes?: string[];
-    diets?: string[];
-    healthScore?: number;
-}
-
-export interface RecipeDetails extends Recipe {
-    ingredients: Ingredient[];
-    instructions: string;
-    nutrition?: NutritionInfo;
-    analyzedInstructions?: AnalyzedInstruction[];
-}
-
-export interface Ingredient {
-    id: number;
-    name: string;
-    amount: number;
-    unit: string;
-    original: string;
-    image?: string;
-}
+export type RecipeSource = 'gemini' | 'pdf' | 'custom';
+export type RecipeLanguage = 'es' | 'en';
 
 export interface NutritionInfo {
-    calories: number;
-    protein: number;
-    fat: number;
-    carbohydrates: number;
+    calories?: number;
+    protein?: number;
+    carbohydrates?: number;
+    fat?: number;
     fiber?: number;
-    sugar?: number;
 }
 
-export interface AnalyzedInstruction {
-    name: string;
-    steps: InstructionStep[];
+/** A recipe as stored in public.recipes (catalog or private). */
+export interface Recipe {
+    id: string;
+    ownerId: string | null;
+    source: RecipeSource;
+    language: RecipeLanguage;
+    title: string;
+    description: string;
+    imageUrl: string | null;
+    readyInMinutes: number | null;
+    servings: number | null;
+    ingredients: string[];
+    steps: string[];
+    nutrition?: NutritionInfo;
+    tags: string[];
+    createdAt: string;
 }
 
-export interface InstructionStep {
-    number: number;
-    step: string;
-    ingredients?: { id: number; name: string }[];
-    equipment?: { id: number; name: string }[];
+/** A recipe plus the current user's favorite flag and personal tags. */
+export interface LibraryRecipe extends Recipe {
+    isFavorite: boolean;
+    myTags: string[];
 }
 
-export interface RecipeFilters {
-    query?: string;
-    cuisine?: string;
-    diet?: string;
-    intolerances?: string;
-    type?: string;
-    maxReadyTime?: number;
-    number?: number;
-}
-
-export interface APIQuotaStatus {
-    used: number;
-    limit: number;
-    remaining: number;
-    resetTime?: Date;
+/** Recipe content before it gets an id (generated, imported or typed by the user). */
+export interface NewRecipe {
+    title: string;
+    description?: string;
+    language: RecipeLanguage;
+    imageUrl?: string | null;
+    readyInMinutes?: number | null;
+    servings?: number | null;
+    ingredients: string[];
+    steps: string[];
+    nutrition?: NutritionInfo | null;
+    tags: string[];
 }
