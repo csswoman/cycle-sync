@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { localDateString, type Medication, type MedicationLog } from '@/hooks/useMedications';
+import { isScheduledOn, instructionLabel } from '@/lib/medications/schedule';
 
 const CHECK_MS = 30_000;
 const GRACE_MIN = 60; // still remind up to 1h after the scheduled time
@@ -13,7 +14,7 @@ export async function requestMedicationNotifications(): Promise<NotificationPerm
 }
 
 async function show(title: string, body: string, tag: string) {
-  const options: NotificationOptions = { body, tag, icon: '/icons/icon-192x192.png', data: { url: '/medications' } };
+  const options: NotificationOptions = { body, tag, icon: '/icons/icon-192x192.png', data: { url: '/log?tab=meds' } };
   const reg = await navigator.serviceWorker?.getRegistration();
   if (reg) await reg.showNotification(title, options);
   else new Notification(title, options);
@@ -43,6 +44,8 @@ export function useMedicationReminders() {
       const now = new Date();
       const nowMin = now.getHours() * 60 + now.getMinutes();
       for (const med of (medsRes.data as Medication[]) ?? []) {
+        if (!isScheduledOn(med, date)) continue;
+        const es = (document.documentElement.lang || navigator.language).startsWith('es');
         for (const time of med.times) {
           const [h, m] = time.split(':').map(Number);
           const diff = nowMin - (h * 60 + m);
@@ -51,7 +54,9 @@ export function useMedicationReminders() {
           const key = `med-notified:${med.id}:${date}:${time}`;
           if (localStorage.getItem(key)) continue;
           localStorage.setItem(key, '1');
-          await show(`💊 ${med.name}`, `${med.dose ? med.dose + ' · ' : ''}${time}`, key);
+          const instruction = instructionLabel(med.time_instructions?.[time], es ? 'es' : 'en');
+          const body = [med.dose, time, instruction, med.notes].filter(Boolean).join(' · ');
+          await show(`💊 ${med.name}`, body, key);
         }
       }
     };
