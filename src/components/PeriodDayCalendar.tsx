@@ -14,7 +14,19 @@ interface PeriodDayCalendarProps {
   ovulationDays?: string[];
   /** First month displayed (defaults to the current month). */
   initialMonth?: Date;
+  /**
+   * 'period' marks bleeding days (default). 'spotting' and 'sex' toggle that marker on the tapped
+   * day through onMarkerToggle instead.
+   */
+  mode?: CalendarMode;
+  onMarkerToggle?: (iso: string) => void;
+  spottingDays?: string[];
+  sexDays?: string[];
+  /** Ovulation confirmed by a basal temperature shift (stronger than the calendar estimate). */
+  confirmedOvulationDays?: string[];
 }
+
+export type CalendarMode = 'period' | 'spotting' | 'sex';
 
 const MAX_RANGE_DAYS = 10;
 
@@ -24,6 +36,7 @@ const MAX_RANGE_DAYS = 10;
  */
 export const PeriodDayCalendar: React.FC<PeriodDayCalendarProps> = ({
   selected, onChange, saved = [], fertileDays = [], ovulationDays = [], initialMonth,
+  mode = 'period', onMarkerToggle, spottingDays = [], sexDays = [], confirmedOvulationDays = [],
 }) => {
   const { language, t } = useLanguage();
   const locale = language === 'es' ? 'es' : 'en';
@@ -41,6 +54,10 @@ export const PeriodDayCalendar: React.FC<PeriodDayCalendarProps> = ({
   const savedSet = useMemo(() => new Set(saved), [saved]);
   const fertileSet = useMemo(() => new Set(fertileDays), [fertileDays]);
   const ovulationSet = useMemo(() => new Set(ovulationDays), [ovulationDays]);
+  const spottingSet = useMemo(() => new Set(spottingDays), [spottingDays]);
+  const sexSet = useMemo(() => new Set(sexDays), [sexDays]);
+  const confirmedSet = useMemo(() => new Set(confirmedOvulationDays), [confirmedOvulationDays]);
+  const es = locale === 'es';
 
   const monthLabel = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(month);
   const weekdays = useMemo(() => {
@@ -58,6 +75,12 @@ export const PeriodDayCalendar: React.FC<PeriodDayCalendarProps> = ({
   const isNextDisabled = new Date(month.getFullYear(), month.getMonth() + 1, 1) > new Date(today.getFullYear(), today.getMonth() + 3, 1);
 
   const handleDay = (iso: string) => {
+    if (mode !== 'period') {
+      // Spotting is bleeding outside a period, so it cannot go on a period day.
+      if (mode === 'spotting' && (savedSet.has(iso) || selectedSet.has(iso))) return;
+      onMarkerToggle?.(iso);
+      return;
+    }
     if (savedSet.has(iso)) return;
     if (selectedSet.has(iso)) {
       onChange(selected.filter((d) => d !== iso));
@@ -110,10 +133,14 @@ export const PeriodDayCalendar: React.FC<PeriodDayCalendarProps> = ({
           const isSaved = savedSet.has(iso);
           const isSelected = selectedSet.has(iso);
           const isOvulation = ovulationSet.has(iso);
+          const isConfirmed = confirmedSet.has(iso);
           const isFertile = fertileSet.has(iso);
+          const hasSpotting = spottingSet.has(iso);
+          const hasSex = sexSet.has(iso);
           let cls = 'hover:bg-secondary';
-          if (isSaved) cls = 'bg-primary/40 text-foreground cursor-default';
+          if (isSaved) cls = `bg-primary/40 text-foreground ${mode === 'period' ? 'cursor-default' : ''}`;
           else if (isSelected) cls = 'bg-primary text-primary-foreground shadow-lg shadow-primary/40 font-bold';
+          else if (isConfirmed) cls = 'bg-sky-500/30 text-foreground font-bold ring-2 ring-sky-500';
           else if (isOvulation) cls = 'bg-sky-500/30 text-foreground font-bold';
           else if (isFertile) cls = 'bg-sky-500/10 text-foreground';
           return (
@@ -122,9 +149,17 @@ export const PeriodDayCalendar: React.FC<PeriodDayCalendarProps> = ({
               type="button"
               disabled={future}
               onClick={() => handleDay(iso)}
-              className={`h-10 w-10 mx-auto flex items-center justify-center rounded-full text-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${cls} ${anchor === iso ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''}`}
+              aria-label={[
+                iso,
+                hasSpotting ? (es ? 'manchado' : 'spotting') : '',
+                hasSex ? (es ? 'relación sexual' : 'sexual activity') : '',
+                isConfirmed ? (es ? 'ovulación confirmada' : 'confirmed ovulation') : '',
+              ].filter(Boolean).join(', ')}
+              className={`relative h-10 w-10 mx-auto flex items-center justify-center rounded-full text-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${cls} ${anchor === iso ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''}`}
             >
               {Number(iso.slice(8))}
+              {hasSpotting && <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 size-1.5 rounded-full bg-rose-500" />}
+              {hasSex && <span className="material-symbols-outlined absolute -top-0.5 -right-0.5 text-[13px] text-fuchsia-500" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>}
             </button>
           );
         })}
@@ -133,6 +168,9 @@ export const PeriodDayCalendar: React.FC<PeriodDayCalendarProps> = ({
         <span className="flex items-center gap-1.5"><span className="size-3 rounded-full bg-primary" />{t.legendNewDays}</span>
         {saved.length > 0 && <span className="flex items-center gap-1.5"><span className="size-3 rounded-full bg-primary/40" />{t.legendSavedDays}</span>}
         {fertileDays.length > 0 && <span className="flex items-center gap-1.5"><span className="size-3 rounded-full bg-sky-500/30" />{t.legendFertile}</span>}
+        {confirmedOvulationDays.length > 0 && <span className="flex items-center gap-1.5"><span className="size-3 rounded-full ring-2 ring-sky-500" />{es ? 'Ovulación confirmada (temperatura)' : 'Confirmed ovulation (temperature)'}</span>}
+        {spottingDays.length > 0 && <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-rose-500" />{es ? 'Manchado' : 'Spotting'}</span>}
+        {sexDays.length > 0 && <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[13px] text-fuchsia-500" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>{es ? 'Relación sexual' : 'Sexual activity'}</span>}
       </div>
     </div>
   );

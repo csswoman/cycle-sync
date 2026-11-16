@@ -3,10 +3,14 @@ import { supabase } from '@/lib/supabase';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { loadOnboardingAnswers, usesHormonalContraception, type OnboardingAnswers } from '@/features/setup/onboarding';
 import { CycleAnalysisCard } from './CycleAnalysisCard';
-import { PeriodDayCalendar } from '@/components/PeriodDayCalendar';
+import { PeriodDayCalendar, type CalendarMode } from '@/components/PeriodDayCalendar';
 import {
     addDays, daysBetween, estimateCycle, groupDaysIntoPeriods, parseLocalDate, projectCycles, toISODate,
 } from '@/lib/cycle/cycleEngine';
+import { detectTemperatureShift, readingsInCycle } from '@/lib/cycle/fertilitySigns';
+import { useCycleSigns } from '@/hooks/useCycleSigns';
+
+const SIGNS_FROM = toISODate(addDays(new Date(), -400));
 
 interface Period {
     id: string;
@@ -24,6 +28,16 @@ const PeriodHistory: React.FC = () => {
     const [answers, setAnswers] = useState<OnboardingAnswers>({});
 
     const [mobileTab, setMobileTab] = useState<'log' | 'history'>('log');
+    const [calendarMode, setCalendarMode] = useState<CalendarMode>('period');
+    const { signs, signFor, saveSign, error: signsError } = useCycleSigns(SIGNS_FROM);
+    const spottingDays = useMemo(() => signs.filter((s) => s.spotting).map((s) => s.date), [signs]);
+    const sexDays = useMemo(() => signs.filter((s) => s.sexCount > 0).map((s) => s.date), [signs]);
+
+    const toggleMarker = (iso: string) => {
+        const s = signFor(iso);
+        if (calendarMode === 'spotting') void saveSign({ ...s, spotting: !s.spotting });
+        else if (calendarMode === 'sex') void saveSign({ ...s, sexCount: s.sexCount > 0 ? 0 : 1, sexProtection: s.sexCount > 0 ? null : s.sexProtection });
+    };
 
     useEffect(() => {
         setAnswers(loadOnboardingAnswers());
@@ -87,16 +101,29 @@ const PeriodHistory: React.FC = () => {
         return days;
     }, [periods]);
 
-    // Past cycles: ovulation is placed 14 days before the next period; fertile window = 5 days before to 1 day after.
+    // Ovulation confirmed by a basal temperature shift, per logged cycle (including the current one).
+    const confirmedOvulations = useMemo(() => {
+        const starts = Array.from(new Set(periods.map((p) => p.start_date.slice(0, 10)))).sort();
+        const out = new Map<string, string>(); // cycle start -> ovulation day
+        starts.forEach((start, i) => {
+            const shift = detectTemperatureShift(readingsInCycle(signs, start, starts[i + 1]));
+            if (shift) out.set(start, shift.ovulationDate);
+        });
+        return out;
+    }, [periods, signs]);
+
+    // Past cycles: ovulation is placed 14 days before the next period, unless the temperature
+    // confirmed it; fertile window = 5 days before to 1 day after.
     const pastWindows = useMemo(() => {
         const out: { ovulation: Date; fertileStart: Date; fertileEnd: Date }[] = [];
-        cycleSpans.forEach((span) => {
+        cycleSpans.forEach((span, start) => {
             if (span.days < 15) return;
-            const ovulation = addDays(parseLocalDate(span.next), -14);
+            const confirmed = confirmedOvulations.get(start);
+            const ovulation = confirmed ? parseLocalDate(confirmed) : addDays(parseLocalDate(span.next), -14);
             out.push({ ovulation, fertileStart: addDays(ovulation, -5), fertileEnd: addDays(ovulation, 1) });
         });
         return out;
-    }, [cycleSpans]);
+    }, [cycleSpans, confirmedOvulations]);
 
     const fertileDays = useMemo(() => {
         const days: string[] = [];
@@ -345,9 +372,38 @@ const PeriodHistory: React.FC = () => {
                                     <h3 className="text-foreground font-bold text-lg">{t.addPeriod}</h3>
                                 </div>
                                 <p className="text-muted-foreground text-xs leading-relaxed">
-                                    {locale === 'es' ? 'Toca el primer y último día de sangrado para marcar el rango.' : t.calendarHint}
+                                    {calendarMode === 'period'
+                                        ? (locale === 'es' ? 'Toca el primer y último día de sangrado para marcar el rango.' : t.calendarHint)
+                                        : calendarMode === 'spotting'
+                                        ? (locale === 'es' ? 'Toca un día para marcar o quitar manchado (sangrado leve fuera de la regla). Se guarda al momento y no cuenta como regla.' : 'Tap a day to add or remove spotting (light bleeding outside your period). It saves right away and does not count as a period.')
+                                        : (locale === 'es' ? 'Toca un día para marcar o quitar una relación sexual. Se guarda al momento y solo tú puedes verlo. Para añadir detalles (protección, número de veces) usa el registro diario.' : 'Tap a day to add or remove sexual activity. It saves right away and only you can see it. Add details (protection, times) in the daily log.')}
                                 </p>
                             </div>
+
+                            <div role="radiogroup" aria-label={locale === 'es' ? 'Qué marcar' : 'What to mark'} className="grid grid-cols-3 p-1 rounded-xl bg-secondary/60 gap-1">
+                                {([
+                                    { id: 'period', icon: 'water_drop', es: 'Regla', en: 'Period' },
+                                    { id: 'spotting', icon: 'grain', es: 'Manchado', en: 'Spotting' },
+                                    { id: 'sex', icon: 'favorite', es: 'Relación', en: 'Sex' },
+                                ] as const).map((m) => (
+                                    <button
+                                        key={m.id}
+                                        type="button"
+                                        role="radio"
+                                        aria-checked={calendarMode === m.id}
+                                        onClick={() => setCalendarMode(m.id)}
+                                        className={`flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-all ${calendarMode === m.id ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                                    >
+                                        <span className="material-symbols-outlined text-[16px]">{m.icon}</span>
+                                        {locale === 'es' ? m.es : m.en}
+                                    </button>
+                                ))}
+                            </div>
+                            {signsError && calendarMode !== 'period' && (
+                                <p className="text-xs font-semibold text-destructive" role="alert">
+                                    {locale === 'es' ? 'No se pudo guardar. Falta aplicar la migración de la tabla cycle_signs.' : 'Could not save. The cycle_signs migration has not been applied.'}
+                                </p>
+                            )}
 
                             <div className="flex justify-center">
                                 <PeriodDayCalendar
@@ -356,10 +412,15 @@ const PeriodHistory: React.FC = () => {
                                     saved={savedDays}
                                     fertileDays={fertileDays}
                                     ovulationDays={ovulationDays}
+                                    mode={calendarMode}
+                                    onMarkerToggle={toggleMarker}
+                                    spottingDays={spottingDays}
+                                    sexDays={sexDays}
+                                    confirmedOvulationDays={Array.from(confirmedOvulations.values())}
                                 />
                             </div>
 
-                            <div className="pt-3 border-t border-border/60 flex flex-col gap-3">
+                            <div className={`pt-3 border-t border-border/60 flex-col gap-3 ${calendarMode === 'period' ? 'flex' : 'hidden'}`}>
                                 <div className="flex items-center justify-between text-xs">
                                     <span className="font-medium text-muted-foreground">
                                         {selectedDays.length === 0

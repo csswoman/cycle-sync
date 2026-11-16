@@ -26,9 +26,13 @@ export function computeCycleInfo(config: CycleConfig, periods: Period[], now: Da
   today.setHours(0, 0, 0, 0);
   lastPeriodStart.setHours(0, 0, 0, 0);
 
-  const diffDays = Math.floor((today.getTime() - lastPeriodStart.getTime()) / (1000 * 60 * 60 * 24));
-  const cycleDay = (((diffDays % cycleLength) + cycleLength) % cycleLength) + 1;
-  const daysUntilNextPeriod = cycleLength - cycleDay + 1;
+  const diffDays = Math.round((today.getTime() - lastPeriodStart.getTime()) / (1000 * 60 * 60 * 24));
+  // A cycle only restarts when a new period is logged. Past the expected length the count keeps
+  // growing and the period is late: with PMOS that is common, and restarting on our own would show
+  // a menstrual phase with no bleeding. Dates before the reference period are projected backwards.
+  const cycleDay = diffDays >= 0 ? diffDays + 1 : (((diffDays % cycleLength) + cycleLength) % cycleLength) + 1;
+  const daysUntilNextPeriod = Math.max(0, cycleLength - cycleDay + 1);
+  const daysLate = Math.max(0, cycleDay - 1 - estimate.longestExpected);
 
   let phase: CyclePhase;
   if (cycleDay <= estimate.periodLength) {
@@ -51,6 +55,8 @@ export function computeCycleInfo(config: CycleConfig, periods: Period[], now: Da
     fertileEndDay: estimate.fertileEndDay,
     irregular: estimate.irregular,
     confidence: estimate.confidence,
+    overdue: cycleDay > cycleLength,
+    daysLate,
   };
 }
 

@@ -34,17 +34,35 @@ describe('computeCycleInfo', () => {
     expect(phaseOn(1)).toBe(CyclePhase.MENSTRUAL);
     expect(phaseOn(5)).toBe(CyclePhase.MENSTRUAL);
     expect(phaseOn(6)).toBe(CyclePhase.FOLLICULAR);
-    expect(phaseOn(13)).toBe(CyclePhase.FOLLICULAR);
-    expect(phaseOn(14)).toBe(CyclePhase.OVULATION);
+    expect(phaseOn(14)).toBe(CyclePhase.FOLLICULAR);
     expect(phaseOn(15)).toBe(CyclePhase.OVULATION);
-    expect(phaseOn(16)).toBe(CyclePhase.LUTEAL);
+    expect(phaseOn(16)).toBe(CyclePhase.OVULATION);
+    expect(phaseOn(17)).toBe(CyclePhase.LUTEAL);
     expect(phaseOn(28)).toBe(CyclePhase.LUTEAL);
   });
 
-  it('wraps to a new cycle after cycle_length days', () => {
+  it('keeps counting instead of starting a new cycle when no period is logged', () => {
     const info = computeCycleInfo(config(), [period('2025-01-01')], day(29));
-    expect(info.cycleDay).toBe(1);
-    expect(info.phase).toBe(CyclePhase.MENSTRUAL);
+    expect(info.cycleDay).toBe(29);
+    expect(info.phase).toBe(CyclePhase.LUTEAL);
+    expect(info.overdue).toBe(true);
+    expect(info.daysUntilNextPeriod).toBe(0);
+    // Still inside the expected range (28 +/- 7 with no history), so not late yet.
+    expect(info.daysLate).toBe(0);
+  });
+
+  it('reports days late once the expected range has passed', () => {
+    // Feb 9 is cycle day 40. The range ends on cycle day 36 (Jan 1 + 35 days).
+    const info = computeCycleInfo(config(), [period('2025-01-01')], new Date(2025, 1, 9, 12));
+    expect(info.cycleDay).toBe(40);
+    expect(info.phase).toBe(CyclePhase.LUTEAL);
+    expect(info.daysLate).toBe(4);
+  });
+
+  it('is not late on a normal cycle day', () => {
+    const info = computeCycleInfo(config(), [period('2025-01-01')], day(10));
+    expect(info.overdue).toBe(false);
+    expect(info.daysLate).toBe(0);
   });
 
   it('computes days until next period', () => {
@@ -55,10 +73,10 @@ describe('computeCycleInfo', () => {
   it('scales ovulation with custom cycle length', () => {
     const c = config({ cycle_length: 32 });
     const phaseOn = (n: number) => computeCycleInfo(c, [period('2025-01-01')], day(n)).phase;
-    expect(phaseOn(17)).toBe(CyclePhase.FOLLICULAR);
-    expect(phaseOn(18)).toBe(CyclePhase.OVULATION);
+    expect(phaseOn(18)).toBe(CyclePhase.FOLLICULAR);
     expect(phaseOn(19)).toBe(CyclePhase.OVULATION);
-    expect(phaseOn(20)).toBe(CyclePhase.LUTEAL);
+    expect(phaseOn(20)).toBe(CyclePhase.OVULATION);
+    expect(phaseOn(21)).toBe(CyclePhase.LUTEAL);
   });
 
   it('learns the cycle length from logged history', () => {
@@ -66,7 +84,7 @@ describe('computeCycleInfo', () => {
     const info = computeCycleInfo(config(), periods, new Date(2025, 2, 6, 12));
     expect(info.cycleLength).toBe(32);
     expect(info.cycleDay).toBe(2);
-    expect(info.ovulationDay).toBe(18);
+    expect(info.ovulationDay).toBe(19);
   });
 
   it('falls back to 28 when cycle_length is 0', () => {

@@ -73,3 +73,44 @@ export function analyzeCycles(periods: PeriodInput[], now: Date = new Date()): C
     daysToNextPeriod,
   };
 }
+
+/**
+ * Patterns worth raising with a clinician. Thresholds follow the 2023 International Evidence-based
+ * Guideline for PCOS (irregular cycles in adults: shorter than 21 or longer than 35 days, fewer
+ * than 8 cycles a year, or any single cycle longer than 90 days) and FIGO (bleeding longer than
+ * 8 days is prolonged). They describe the log, they are not a diagnosis.
+ */
+export type CycleFlag = 'noPeriod90' | 'longCycles' | 'shortCycles' | 'fewPeriodsYear' | 'longBleeding';
+
+export const NO_PERIOD_DAYS = 90;
+export const MIN_CYCLES_PER_YEAR = 8;
+export const PROLONGED_BLEEDING_DAYS = 8;
+
+export function cycleHealthFlags(periods: PeriodInput[], now: Date = new Date()): CycleFlag[] {
+  const starts = Array.from(new Set(periods.map((p) => p.start_date.slice(0, 10)))).sort().map(parseLocalDate);
+  if (starts.length === 0) return [];
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const flags: CycleFlag[] = [];
+
+  if (daysBetween(starts[starts.length - 1], today) > NO_PERIOD_DAYS) flags.push('noPeriod90');
+
+  const cycles: number[] = [];
+  for (let i = 1; i < starts.length; i++) cycles.push(daysBetween(starts[i - 1], starts[i]));
+  const recent = cycles.slice(-6);
+  // Two cycles outside the range make it a pattern; a single one can be a one-off.
+  if (recent.filter((c) => c > NORMAL_CYCLE_MAX).length >= 2) flags.push('longCycles');
+  if (recent.filter((c) => c < NORMAL_CYCLE_MIN).length >= 2) flags.push('shortCycles');
+
+  // Only meaningful with a full year of tracking behind the user.
+  const yearAgo = addDays(today, -365);
+  if (starts[0] <= yearAgo && starts.filter((s) => s > yearAgo).length < MIN_CYCLES_PER_YEAR) flags.push('fewPeriodsYear');
+
+  const bleeds = [...periods]
+    .sort((a, b) => a.start_date.localeCompare(b.start_date))
+    .filter((p) => p.end_date)
+    .map((p) => daysBetween(parseLocalDate(p.start_date), parseLocalDate(p.end_date as string)) + 1)
+    .slice(-3);
+  if (bleeds.filter((n) => n > PROLONGED_BLEEDING_DAYS).length >= 2) flags.push('longBleeding');
+
+  return flags;
+}

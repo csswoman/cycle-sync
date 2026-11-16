@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useCycleInfo } from '@/hooks/useCycleInfo';
 import type { DailyLog } from '@/types';
+import { toISODate } from '@/lib/cycle/cycleEngine';
 
 interface SymptomCount {
   name: string;
@@ -27,7 +28,7 @@ const Trends: React.FC = () => {
         .from('daily_logs')
         .select('*')
         .eq('user_id', user.id)
-        .gte('date', thirtyDaysAgo.toISOString().split('T')[0])
+        .gte('date', toISODate(thirtyDaysAgo))
         .order('date', { ascending: true });
 
       setLogs((data as DailyLog[]) ?? []);
@@ -56,7 +57,7 @@ const Trends: React.FC = () => {
   const phase = cycleInfo?.phase ?? '...';
   const cycleDay = cycleInfo?.cycleDay ?? 0;
   const cycleLength = cycleInfo?.cycleLength ?? 28;
-  const progressPct = cycleLength > 0 ? Math.round((cycleDay / cycleLength) * 100) : 0;
+  const progressPct = cycleLength > 0 ? Math.min(100, Math.round((cycleDay / cycleLength) * 100)) : 0;
 
   const readinessLabel = Number(avgEnergy) >= 7 ? 'High Intensity' : Number(avgEnergy) >= 4 ? 'Moderate' : 'Low Intensity';
   const readinessTag = Number(avgEnergy) >= 7 ? 'Performance Ready' : Number(avgEnergy) >= 4 ? 'Balanced' : 'Recovery Focus';

@@ -5,9 +5,14 @@ import { Icon } from '@/components/ui/Icon';
 interface MoodSelectorProps {
     selectedMood: Mood;
     onMoodSelect: (mood: Mood) => void;
+    lang?: 'es' | 'en';
 }
 
-export const MoodSelector: React.FC<MoodSelectorProps> = ({ selectedMood, onMoodSelect }) => {
+const MOOD_ES: Record<Mood, string> = {
+    [Mood.ROUGH]: 'Muy mal', [Mood.DOWN]: 'Bajo', [Mood.OKAY]: 'Normal', [Mood.GOOD]: 'Bien', [Mood.GREAT]: 'Genial',
+};
+
+export const MoodSelector: React.FC<MoodSelectorProps> = ({ selectedMood, onMoodSelect, lang = 'en' }) => {
     const moodOptions = [
         { type: Mood.ROUGH, icon: 'sentiment_very_dissatisfied' },
         { type: Mood.DOWN, icon: 'sentiment_dissatisfied' },
@@ -21,7 +26,7 @@ export const MoodSelector: React.FC<MoodSelectorProps> = ({ selectedMood, onMood
             <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
                     <Icon name="mood" size={22} weight="duotone" className="text-primary" />
-                    Mood & Mental State
+                    {lang === 'es' ? 'Ánimo y estado mental' : 'Mood & Mental State'}
                 </h3>
             </div>
             <div className="grid grid-cols-5 gap-2 md:gap-4">
@@ -29,6 +34,7 @@ export const MoodSelector: React.FC<MoodSelectorProps> = ({ selectedMood, onMood
                     <button
                         key={option.type}
                         onClick={() => onMoodSelect(option.type)}
+                        aria-pressed={selectedMood === option.type}
                         className="flex flex-col items-center gap-2 group focus:outline-none"
                     >
                         <div className={`size-12 md:size-14 rounded-full flex items-center justify-center border-2 transition-all
@@ -44,7 +50,7 @@ export const MoodSelector: React.FC<MoodSelectorProps> = ({ selectedMood, onMood
                             />
                         </div>
                         <span className={`text-xs font-medium ${selectedMood === option.type ? 'text-foreground font-bold' : 'text-muted-foreground group-hover:text-foreground'}`}>
-                            {option.type}
+                            {lang === 'es' ? MOOD_ES[option.type] : option.type}
                         </span>
                     </button>
                 ))}

@@ -1,5 +1,33 @@
 import { describe, it, expect } from 'vitest';
-import { analyzeCycles } from './cycleAnalysis';
+import { analyzeCycles, cycleHealthFlags } from './cycleAnalysis';
+
+describe('cycleHealthFlags', () => {
+  const p = (starts: string[]) => starts.map((s) => ({ start_date: s }));
+
+  it('returns nothing for regular cycles', () => {
+    expect(cycleHealthFlags(p(['2025-01-01', '2025-01-29', '2025-02-26', '2025-03-26']), new Date(2025, 3, 1))).toEqual([]);
+  });
+  it('flags more than 90 days without a period', () => {
+    expect(cycleHealthFlags(p(['2025-01-01']), new Date(2025, 3, 1))).toEqual([]); // day 90
+    expect(cycleHealthFlags(p(['2025-01-01']), new Date(2025, 3, 5))).toEqual(['noPeriod90']);
+  });
+  it('flags repeated cycles longer than 35 days but not a single one', () => {
+    expect(cycleHealthFlags(p(['2025-01-01', '2025-02-10', '2025-03-10']), new Date(2025, 2, 15))).toEqual([]);
+    expect(cycleHealthFlags(p(['2025-01-01', '2025-02-10', '2025-03-25']), new Date(2025, 3, 1))).toEqual(['longCycles']);
+  });
+  it('flags fewer than 8 periods in the last year only with a year of history', () => {
+    const sparse = ['2024-01-10', '2024-06-01', '2024-08-01', '2024-10-01', '2024-12-01', '2025-01-20'];
+    expect(cycleHealthFlags(p(sparse), new Date(2025, 1, 1))).toContain('fewPeriodsYear');
+    expect(cycleHealthFlags(p(sparse.slice(1)), new Date(2025, 1, 1))).not.toContain('fewPeriodsYear');
+  });
+  it('flags repeated bleeding longer than 8 days', () => {
+    const periods = [
+      { start_date: '2025-01-01', end_date: '2025-01-10' },
+      { start_date: '2025-01-30', end_date: '2025-02-08' },
+    ];
+    expect(cycleHealthFlags(periods, new Date(2025, 1, 10))).toEqual(['longBleeding']);
+  });
+});
 
 describe('analyzeCycles', () => {
   it('reports exact spans, range, mean and variation', () => {

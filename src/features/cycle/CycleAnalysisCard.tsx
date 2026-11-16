@@ -2,8 +2,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { daysBetween, type PeriodInput } from '@/lib/cycle/cycleEngine';
 import {
-    analyzeCycles, MAX_REGULAR_DIFFERENCE, NORMAL_CYCLE_MAX, NORMAL_CYCLE_MIN, NORMAL_PERIOD_MAX, NORMAL_PERIOD_MIN,
-    type Rating,
+    analyzeCycles, cycleHealthFlags, MAX_REGULAR_DIFFERENCE, MIN_CYCLES_PER_YEAR, NO_PERIOD_DAYS, NORMAL_CYCLE_MAX,
+    NORMAL_CYCLE_MIN, NORMAL_PERIOD_MAX, NORMAL_PERIOD_MIN, PROLONGED_BLEEDING_DAYS,
+    type CycleFlag, type Rating,
 } from '@/lib/cycle/cycleAnalysis';
 
 const copy = {
@@ -28,6 +29,15 @@ const copy = {
         aboutPeriod: 'Sobre la duración del período',
         aboutPeriodBody: [`Un período dura normalmente entre ${NORMAL_PERIOD_MIN} y ${NORMAL_PERIOD_MAX} días.`],
         ok: 'Entendido', info: 'Información', notEnough: 'Registra al menos dos períodos para ver tus ciclos.',
+        flagsTitle: 'Para comentar con tu médica',
+        flagsBody: 'Son patrones de tu registro según la guía internacional de SOP/PMOS (2023). No son un diagnóstico.',
+        flags: {
+            noPeriod90: `Llevas más de ${NO_PERIOD_DAYS} días sin registrar una regla. Si no es un olvido de registro, conviene revisarlo: las pausas largas sin sangrado pueden necesitar tratamiento para proteger el endometrio.`,
+            longCycles: `Varios de tus ciclos recientes duraron más de ${NORMAL_CYCLE_MAX} días, lo que suele indicar ovulación tardía o ausente.`,
+            shortCycles: `Varios de tus ciclos recientes duraron menos de ${NORMAL_CYCLE_MIN} días.`,
+            fewPeriodsYear: `Has tenido menos de ${MIN_CYCLES_PER_YEAR} reglas en el último año.`,
+            longBleeding: `Tus últimas reglas duraron más de ${PROLONGED_BLEEDING_DAYS} días. Si además son abundantes, vale la pena revisar tu hierro.`,
+        } as Record<CycleFlag, string>,
     },
     en: {
         title: 'Cycle analysis',
@@ -50,6 +60,15 @@ const copy = {
         aboutPeriod: 'About period length',
         aboutPeriodBody: [`A period usually lasts between ${NORMAL_PERIOD_MIN} and ${NORMAL_PERIOD_MAX} days.`],
         ok: 'Got it', info: 'Information', notEnough: 'Log at least two periods to see your cycles.',
+        flagsTitle: 'Worth raising with your doctor',
+        flagsBody: 'These are patterns in your log based on the international PCOS/PMOS guideline (2023). They are not a diagnosis.',
+        flags: {
+            noPeriod90: `It has been more than ${NO_PERIOD_DAYS} days since you logged a period. If that is not a missed entry, get it checked: long gaps without bleeding may need treatment to protect the uterine lining.`,
+            longCycles: `Several of your recent cycles lasted more than ${NORMAL_CYCLE_MAX} days, which usually points to late or absent ovulation.`,
+            shortCycles: `Several of your recent cycles lasted less than ${NORMAL_CYCLE_MIN} days.`,
+            fewPeriodsYear: `You have had fewer than ${MIN_CYCLES_PER_YEAR} periods in the last year.`,
+            longBleeding: `Your last periods lasted more than ${PROLONGED_BLEEDING_DAYS} days. If they are also heavy, it is worth checking your iron.`,
+        } as Record<CycleFlag, string>,
     },
 };
 
@@ -102,6 +121,7 @@ export const CycleAnalysisCard: React.FC<Props> = ({ periods, expectedNext }) =>
         return () => clearInterval(id);
     }, []);
     const a = useMemo(() => analyzeCycles(periods, now), [periods, now]);
+    const flags = useMemo(() => cycleHealthFlags(periods, now), [periods, now]);
     const [modal, setModal] = useState<'cycle' | 'period' | null>(null);
 
     return (
@@ -187,6 +207,21 @@ export const CycleAnalysisCard: React.FC<Props> = ({ periods, expectedNext }) =>
                     )}
                 </div>
             </div>
+
+            {flags.length > 0 && (
+                <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-5 flex flex-col gap-2.5">
+                    <h4 className="font-bold text-foreground text-base flex items-center gap-2">
+                        <span className="material-symbols-outlined text-amber-500 text-[20px]">stethoscope</span>
+                        {c.flagsTitle}
+                    </h4>
+                    <ul className="flex flex-col gap-1.5 list-disc pl-5">
+                        {flags.map((f) => (
+                            <li key={f} className="text-sm text-foreground leading-relaxed">{c.flags[f]}</li>
+                        ))}
+                    </ul>
+                    <p className="text-xs text-muted-foreground">{c.flagsBody}</p>
+                </div>
+            )}
 
             {modal && (
                 <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-4" onClick={() => setModal(null)}>
