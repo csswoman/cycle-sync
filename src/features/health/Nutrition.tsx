@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useRecipes, EMPTY_RECIPE_FILTERS } from '@/hooks/useRecipes';
 import { useNutritionAI } from '@/hooks/useNutritionAI';
 import { useCycleInfo } from '@/hooks/useCycleInfo';
@@ -9,14 +9,19 @@ import { generateRecipes, suggestedTags, type GenerateResult } from '@/services/
 import { RecipeCard } from './components/RecipeCard';
 import { RecipeDetailModal } from './components/RecipeDetailModal';
 import { RecipeForm } from './components/RecipeForm';
+import { PlateBuilder } from './components/PlateBuilder';
+import { MacroWaterCalculator } from './components/MacroWaterCalculator';
+import { Icon } from '@/components/ui/Icon';
 
-type ActiveTab = 'recipes' | 'analyze' | 'generate';
+type ActiveTab = 'plate' | 'calculator' | 'recipes' | 'analyze' | 'generate';
 
 const Nutrition: React.FC = () => {
   const library = useRecipes();
   const { analysis, analyzePlate } = useNutritionAI();
   const { cycleInfo } = useCycleInfo();
   const { language } = useLanguage();
+  const isEs = language === 'es';
+
   const [openRecipeId, setOpenRecipeId] = useState<string | null>(null);
   const [showRecipeForm, setShowRecipeForm] = useState(false);
   const [generation, setGeneration] = useState<{ loading: boolean; error: string | null; result: GenerateResult | null }>({
@@ -24,7 +29,29 @@ const Nutrition: React.FC = () => {
     error: null,
     result: null,
   });
-  const [activeTab, setActiveTab] = useState<ActiveTab>('recipes');
+  const [activeTab, setActiveTab] = useState<ActiveTab>('plate');
+
+  // Weight state for macro & water calculation
+  const [userWeightKg, setUserWeightKg] = useState<number>(65);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('cycle_sync_user_weight_kg');
+      if (saved) {
+        const parsed = parseFloat(saved);
+        if (!isNaN(parsed) && parsed > 0) {
+          setUserWeightKg(parsed);
+        }
+      }
+    }
+  }, []);
+
+  const handleWeightChange = (newWeight: number) => {
+    setUserWeightKg(newWeight);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('cycle_sync_user_weight_kg', newWeight.toString());
+    }
+  };
 
   // Analyze tab state
   const [previewImage, setPreviewImage] = useState<string | null>(null);
@@ -86,9 +113,11 @@ const Nutrition: React.FC = () => {
   };
 
   const tabs: { id: ActiveTab; label: string; icon: string }[] = [
-    { id: 'recipes', label: 'Recipes', icon: 'restaurant' },
-    { id: 'analyze', label: 'Analyze Plate', icon: 'photo_camera' },
-    { id: 'generate', label: 'AI Recipes', icon: 'auto_awesome' },
+    { id: 'plate', label: isEs ? 'Armar Plato & Alimentos' : 'Plate Builder', icon: 'bowl_food' },
+    { id: 'calculator', label: isEs ? 'Metas según Peso' : 'Weight Targets', icon: 'barbell' },
+    { id: 'recipes', label: isEs ? 'Recetas' : 'Recipes', icon: 'restaurant' },
+    { id: 'analyze', label: isEs ? 'Analizar Plato' : 'Analyze Plate', icon: 'photo_camera' },
+    { id: 'generate', label: isEs ? 'Recetas IA' : 'AI Recipes', icon: 'auto_awesome' },
   ];
 
   return (
@@ -99,36 +128,124 @@ const Nutrition: React.FC = () => {
         <section className="w-full rounded-3xl overflow-hidden relative bg-gradient-to-br from-card via-card to-blossom-soft/40 border border-border shadow-sm">
           <div className="flex flex-col gap-4 items-start justify-center px-6 py-8 md:px-10 relative z-20">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blossom-soft text-blossom text-xs font-bold uppercase tracking-wider">
-              <span className="material-symbols-outlined text-sm">water_drop</span>
+              <Icon name="drop" size={14} weight="bold" />
               {phase} Phase {cycleInfo ? `• Day ${cycleInfo.cycleDay}` : ''}
             </div>
             <h1 className="text-3xl md:text-5xl font-semibold leading-tight tracking-tight text-foreground max-w-2xl">
               Nourish Your Body
             </h1>
             <p className="text-muted-foreground text-sm md:text-base font-normal leading-relaxed max-w-xl">
-              Cycle-synced nutrition powered by AI. Analyze your meals, discover recipes, and optimize for your hormonal phase.
+              Nutrición inteligente y sincronizada con tu ciclo: calcula requerimientos de proteína y agua según tu peso para ganar músculo y quemar grasa, diseña tus platos en gramos y explora recetas antiinflamatorias.
             </p>
           </div>
         </section>
 
 
         {/* Tab Switcher */}
-        <div className="w-full flex gap-1.5 bg-card/80 backdrop-blur p-1.5 rounded-full border border-border shadow-sm">
+        <div className="w-full flex gap-1 sm:gap-1.5 bg-card/80 backdrop-blur p-1.5 rounded-2xl border border-border shadow-sm overflow-x-auto scrollbar-hide">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-sm font-bold transition-all ${
+              className={`flex-1 min-w-[100px] sm:min-w-0 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${
                 activeTab === tab.id
                   ? 'bg-primary text-primary-foreground shadow-md shadow-blossom/20'
                   : 'text-muted-foreground hover:text-foreground hover:bg-card'
               }`}
             >
-              <span className="material-symbols-outlined text-[18px]">{tab.icon}</span>
-              <span className="hidden sm:inline">{tab.label}</span>
+              <Icon name={tab.icon} size={18} weight={activeTab === tab.id ? 'bold' : 'duotone'} />
+              <span>{tab.label}</span>
             </button>
           ))}
         </div>
+
+        {/* === TAB 1: PLATE BUILDER & FOODS === */}
+        {activeTab === 'plate' && (
+          <section className="w-full flex flex-col gap-6">
+            <MacroWaterCalculator
+              weightKg={userWeightKg}
+              onWeightChange={handleWeightChange}
+              compact
+            />
+            <PlateBuilder
+              weightKg={userWeightKg}
+              language={language}
+              onSaveAsRecipe={async (recipe) => {
+                await library.addCustom(recipe);
+              }}
+            />
+          </section>
+        )}
+
+        {/* === TAB 2: WEIGHT TARGETS & SCIENCE === */}
+        {activeTab === 'calculator' && (
+          <section className="w-full max-w-4xl mx-auto flex flex-col gap-6">
+            <MacroWaterCalculator
+              weightKg={userWeightKg}
+              onWeightChange={handleWeightChange}
+              compact={false}
+            />
+
+            {/* Scientific Explanation & Guidelines Card */}
+            <div className="bg-card rounded-2xl border border-border p-6 shadow-sm flex flex-col gap-5">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-leaf/10 text-leaf flex items-center justify-center shrink-0">
+                  <Icon name="science" size={22} weight="duotone" />
+                </div>
+                <div>
+                  <h3 className="text-foreground text-lg font-bold">
+                    Lógica Nutricional: Ganar Músculo y Bajar de Peso sin Perder Masa Muscular
+                  </h3>
+                  <p className="text-muted-foreground text-xs sm:text-sm">
+                    Fundamentos basados en las guías de la Sociedad Internacional de Nutrición Deportiva (ISSN) y McMaster University
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-foreground/90">
+                <div className="bg-secondary/40 rounded-xl p-4 border border-border/50 flex flex-col gap-2">
+                  <div className="flex items-center gap-2 font-bold text-primary">
+                    <Icon name="barbell" size={18} weight="bold" />
+                    ¿Por qué 1.6 a 2.2 g de proteína por kg?
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Al buscar perder peso (déficit calórico), el cuerpo tiende a utilizar reservas de aminoácidos musculares si no recibe suficiente proteína. Consumir entre <strong>1.8 y 2.2 g/kg</strong> asegura balance de nitrógeno positivo, repara miofibrillas y provee mayor termogénesis (el 20-30% de las calorías de la proteína se queman simplemente digiriéndola).
+                  </p>
+                </div>
+
+                <div className="bg-secondary/40 rounded-xl p-4 border border-border/50 flex flex-col gap-2">
+                  <div className="flex items-center gap-2 font-bold text-blue-500">
+                    <Icon name="drop" size={18} weight="bold" />
+                    ¿Por qué 35 a 40 ml de agua por kg?
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    El tejido muscular magro se compone de más de un <strong>75% de agua</strong>. La deshidratación celular de tan solo un 2% reduce la fuerza muscular hasta un 15% y frena la lipólisis (quema de grasa). Para {userWeightKg} kg, tu consumo óptimo es de <strong>{(userWeightKg * 0.037).toFixed(1)} Litros</strong> al día.
+                  </p>
+                </div>
+
+                <div className="bg-secondary/40 rounded-xl p-4 border border-border/50 flex flex-col gap-2">
+                  <div className="flex items-center gap-2 font-bold text-amber-600 dark:text-amber-400">
+                    <Icon name="flame" size={18} weight="bold" />
+                    Déficit moderado (15% - 20%)
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Los déficits agresivos (&gt;25%) provocan desaceleración metabólica, fatiga de la hormona tiroidea T3 y canibalización de la masa magra. Un déficit controlado de <strong>300-500 kcal</strong> mantiene alta tu energía y preserva tu tono muscular.
+                  </p>
+                </div>
+
+                <div className="bg-secondary/40 rounded-xl p-4 border border-border/50 flex flex-col gap-2">
+                  <div className="flex items-center gap-2 font-bold text-purple-500">
+                    <Icon name="bowl_food" size={18} weight="bold" />
+                    Distribución en cada plato
+                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    Para activar la vía mTOR de síntesis proteica, busca incluir al menos <strong>25 a 35g de proteína de alta biodisponibilidad</strong> en cada comida principal (pechuga, salmón, huevos, ternera magra, tofu) junto a carbohidratos complejos y fibra saciante.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* === RECIPES TAB === */}
         {activeTab === 'recipes' && (

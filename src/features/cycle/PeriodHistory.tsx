@@ -161,6 +161,19 @@ const PeriodHistory: React.FC = () => {
     const next = projections[0];
     const periodsFound = groupDaysIntoPeriods(selectedDays).length;
 
+    const periodsByYear = useMemo(() => {
+        const map = new Map<number, Period[]>();
+        for (const p of periods) {
+            const year = parseLocalDate(p.start_date).getFullYear();
+            const list = map.get(year) ?? [];
+            list.push(p);
+            map.set(year, list);
+        }
+        return Array.from(map.entries())
+            .sort(([a], [b]) => b - a)
+            .map(([year, list]) => ({ year, periods: list }));
+    }, [periods]);
+
     const countdownDays = useMemo(() => {
         if (!next) return null;
         const today = new Date();
@@ -413,76 +426,92 @@ const PeriodHistory: React.FC = () => {
                                     </div>
                                 </div>
                             ) : (
-                                <div className="relative pl-6 space-y-4 before:absolute before:left-2.5 before:top-3 before:bottom-3 before:w-0.5 before:bg-border/60">
-                                    {periods.map((period) => {
-                                        const start = fmtFull(period.start_date);
-                                        const end = period.end_date ? fmtFull(period.end_date) : null;
-                                        const span = cycleSpans.get(period.start_date.slice(0, 10));
-                                        const isLatest = period.start_date.slice(0, 10) === latestStart;
-                                        const todayLocal = new Date();
-                                        const currentDay = isLatest
-                                            ? daysBetween(parseLocalDate(period.start_date), new Date(todayLocal.getFullYear(), todayLocal.getMonth(), todayLocal.getDate())) + 1
-                                            : null;
-                                        const duration = period.end_date
-                                            ? Math.round((parseLocalDate(period.end_date).getTime() - parseLocalDate(period.start_date).getTime()) / (1000 * 60 * 60 * 24)) + 1
-                                            : null;
-
-                                        return (
-                                            <div key={period.id} className="relative group">
-                                                {/* Node dot on timeline */}
-                                                <div className={`absolute -left-6 top-4 size-3 rounded-full ring-4 ring-background transition-colors ${
-                                                    isLatest ? 'bg-primary ring-primary/20' : 'bg-muted-foreground/40 group-hover:bg-primary/70'
-                                                }`} />
-
-                                                <div className="bg-card/70 hover:bg-card border border-border/70 hover:border-primary/40 rounded-2xl p-4 sm:p-5 transition-all shadow-sm">
-                                                    <div className="flex items-start justify-between gap-3">
-                                                        <div className="flex flex-col gap-1">
-                                                            <div className="flex flex-wrap items-center gap-2">
-                                                                <p className="text-foreground font-bold text-base sm:text-lg">
-                                                                    {end ? `${start} – ${end}` : start}
-                                                                </p>
-                                                                {isLatest && (
-                                                                    <span className="text-[11px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-                                                                        {locale === 'es' ? 'Más reciente' : 'Latest'}
-                                                                    </span>
-                                                                )}
-                                                            </div>
-
-                                                            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                                                                {duration && (
-                                                                    <span className="font-medium text-foreground bg-secondary/80 px-2 py-0.5 rounded-md">
-                                                                        {duration} {t.daysUnit} {locale === 'es' ? 'de sangrado' : 'bleeding'}
-                                                                    </span>
-                                                                )}
-                                                                {span && (
-                                                                    <span className="text-muted-foreground">
-                                                                        · {t.cycleOfDays} <strong className="text-foreground">{span.days} {t.daysUnit}</strong>
-                                                                    </span>
-                                                                )}
-                                                            </div>
-
-                                                            {currentDay && (
-                                                                <p className="text-xs font-semibold text-primary mt-1 flex items-center gap-1.5">
-                                                                    <span className="size-1.5 rounded-full bg-primary" />
-                                                                    {t.currentCycleDay} {currentDay}
-                                                                </p>
-                                                            )}
-                                                        </div>
-
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => deletePeriod(period.id)}
-                                                            className="opacity-60 group-hover:opacity-100 text-muted-foreground hover:text-destructive p-2 rounded-lg hover:bg-destructive/10 transition-all shrink-0"
-                                                            aria-label={t.deletePeriod}
-                                                            title={t.deletePeriod}
-                                                        >
-                                                            <span className="material-symbols-outlined text-[18px]">delete</span>
-                                                        </button>
-                                                    </div>
-                                                </div>
+                                <div className="space-y-8">
+                                    {periodsByYear.map(({ year, periods: yearPeriods }) => (
+                                        <div key={year} className="flex flex-col gap-4">
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-xs font-black text-foreground bg-secondary/80 px-3 py-1 rounded-full border border-border/70 tracking-wide">
+                                                    {year}
+                                                </span>
+                                                <span className="text-xs text-muted-foreground font-medium">
+                                                    {yearPeriods.length} {yearPeriods.length === 1 ? t.periodSingular : t.periodPlural}
+                                                </span>
+                                                <div className="h-px flex-1 bg-border/40" />
                                             </div>
-                                        );
-                                    })}
+
+                                            <div className="relative pl-6 space-y-4 before:absolute before:left-2.5 before:top-3 before:bottom-3 before:w-0.5 before:bg-border/60">
+                                                {yearPeriods.map((period) => {
+                                                    const start = fmtFull(period.start_date);
+                                                    const end = period.end_date ? fmtFull(period.end_date) : null;
+                                                    const span = cycleSpans.get(period.start_date.slice(0, 10));
+                                                    const isLatest = period.start_date.slice(0, 10) === latestStart;
+                                                    const todayLocal = new Date();
+                                                    const currentDay = isLatest
+                                                        ? daysBetween(parseLocalDate(period.start_date), new Date(todayLocal.getFullYear(), todayLocal.getMonth(), todayLocal.getDate())) + 1
+                                                        : null;
+                                                    const duration = period.end_date
+                                                        ? Math.round((parseLocalDate(period.end_date).getTime() - parseLocalDate(period.start_date).getTime()) / (1000 * 60 * 60 * 24)) + 1
+                                                        : null;
+
+                                                    return (
+                                                        <div key={period.id} className="relative group">
+                                                            {/* Node dot on timeline */}
+                                                            <div className={`absolute -left-6 top-4 size-3 rounded-full ring-4 ring-background transition-colors ${
+                                                                isLatest ? 'bg-primary ring-primary/20' : 'bg-muted-foreground/40 group-hover:bg-primary/70'
+                                                            }`} />
+
+                                                            <div className="bg-card/70 hover:bg-card border border-border/70 hover:border-primary/40 rounded-2xl p-4 sm:p-5 transition-all shadow-sm">
+                                                                <div className="flex items-start justify-between gap-3">
+                                                                    <div className="flex flex-col gap-1">
+                                                                        <div className="flex flex-wrap items-center gap-2">
+                                                                            <p className="text-foreground font-bold text-base sm:text-lg">
+                                                                                {end ? `${start} – ${end}` : start}
+                                                                            </p>
+                                                                            {isLatest && (
+                                                                                <span className="text-[11px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                                                                                    {locale === 'es' ? 'Más reciente' : 'Latest'}
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+
+                                                                        <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                                                                            {duration && (
+                                                                                <span className="font-medium text-foreground bg-secondary/80 px-2 py-0.5 rounded-md">
+                                                                                    {duration} {t.daysUnit} {locale === 'es' ? 'de sangrado' : 'bleeding'}
+                                                                                </span>
+                                                                            )}
+                                                                            {span && (
+                                                                                <span className="text-muted-foreground">
+                                                                                    · {t.cycleOfDays} <strong className="text-foreground">{span.days} {t.daysUnit}</strong>
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+
+                                                                        {currentDay && (
+                                                                            <p className="text-xs font-semibold text-primary mt-1 flex items-center gap-1.5">
+                                                                                <span className="size-1.5 rounded-full bg-primary" />
+                                                                                {t.currentCycleDay} {currentDay}
+                                                                            </p>
+                                                                        )}
+                                                                    </div>
+
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => deletePeriod(period.id)}
+                                                                        className="opacity-60 group-hover:opacity-100 text-muted-foreground hover:text-destructive p-2 rounded-lg hover:bg-destructive/10 transition-all shrink-0"
+                                                                        aria-label={t.deletePeriod}
+                                                                        title={t.deletePeriod}
+                                                                    >
+                                                                        <span className="material-symbols-outlined text-[18px]">delete</span>
+                                                                    </button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             )}
                         </section>
