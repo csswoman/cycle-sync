@@ -1,10 +1,11 @@
-import { Article, ArticleFilters } from '@/types/articles';
+import { Article, ArticleFilters, InAppArticle, ArticleCategory, ArticleAudience } from '@/types/articles';
+import { IN_APP_ARTICLES } from '@/data/articlesData';
 
 // Requests go through /api/articles, which adds the NewsAPI key on the server.
 
 // Topic to search query mapping
 const TOPIC_QUERIES = {
-    'PCOS': 'PCOS OR polycystic ovary syndrome',
+    'PMOS': 'PMOS OR PCOS OR polyendocrine metabolic ovarian syndrome OR polycystic ovary syndrome',
     'wellness': 'women wellness OR women health',
     'nutrition': 'women nutrition OR healthy eating',
     'menstrual-health': 'menstrual cycle OR period health OR hormonal health'
@@ -93,74 +94,64 @@ export const searchArticles = async (
 };
 
 /**
- * Fallback articles when API fails or quota exceeded
+ * Get in-app educational articles with dual language and PMOS/Regular cycle perspectives
+ */
+export const getInAppArticles = (
+    language: 'en' | 'es' = 'es',
+    options?: {
+        category?: ArticleCategory | 'all';
+        audience?: ArticleAudience | 'all';
+        query?: string;
+    }
+): InAppArticle[] => {
+    let result = [...IN_APP_ARTICLES];
+
+    if (options?.category && options.category !== 'all') {
+        result = result.filter(a => a.category === options.category);
+    }
+
+    if (options?.audience && options.audience !== 'all') {
+        result = result.filter(a => a.targetAudience === options.audience || a.targetAudience === 'all');
+    }
+
+    if (options?.query && options.query.trim()) {
+        const q = options.query.toLowerCase().trim();
+        result = result.filter(a => {
+            const content = a[language];
+            return (
+                content.title.toLowerCase().includes(q) ||
+                content.summary.toLowerCase().includes(q) ||
+                content.keyTakeaway.toLowerCase().includes(q) ||
+                a.tags.some(t => t.toLowerCase().includes(q))
+            );
+        });
+    }
+
+    return result;
+};
+
+/**
+ * Get a single in-app article by ID
+ */
+export const getInAppArticleById = (id: string): InAppArticle | undefined => {
+    return IN_APP_ARTICLES.find(a => a.id === id);
+};
+
+/**
+ * Fallback articles when API fails or quota exceeded (backed by our in-app clinical library)
  */
 const getFallbackArticles = (language: 'en' | 'es'): Article[] => {
-    const articlesEN = [
-        {
-            id: 'fallback-1',
-            title: 'Understanding Your Menstrual Cycle: A Complete Guide',
-            description: 'Learn about the four phases of your menstrual cycle and how to sync your lifestyle with each phase for optimal health.',
-            url: 'https://www.healthline.com/health/womens-health/stages-of-menstrual-cycle',
-            imageUrl: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=400',
-            source: 'Healthline',
+    return IN_APP_ARTICLES.map(a => {
+        const content = a[language];
+        return {
+            id: a.id,
+            title: content.title,
+            description: content.summary,
+            url: `/articles?id=${a.id}`,
+            imageUrl: a.imageUrl,
+            source: 'CycleSync Health Library',
             publishedAt: new Date().toISOString(),
-            author: 'Health Team'
-        },
-        {
-            id: 'fallback-2',
-            title: 'PCOS: Symptoms, Causes, and Natural Management',
-            description: 'Discover evidence-based strategies for managing PCOS through nutrition, exercise, and lifestyle modifications.',
-            url: 'https://www.healthline.com/health/polycystic-ovary-disease',
-            imageUrl: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400',
-            source: 'Medical News',
-            publishedAt: new Date().toISOString(),
-            author: 'Dr. Sarah Johnson'
-        },
-        {
-            id: 'fallback-3',
-            title: 'Cycle Syncing Your Workouts for Better Results',
-            description: 'Optimize your fitness routine by aligning your workouts with your hormonal fluctuations throughout the month.',
-            url: 'https://www.womenshealthmag.com/fitness/a19966121/menstrual-cycle-workout-plan/',
-            imageUrl: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=400',
-            source: "Women's Health",
-            publishedAt: new Date().toISOString(),
-            author: 'Fitness Team'
-        }
-    ];
-
-    const articlesES = [
-        {
-            id: 'fallback-1',
-            title: 'Entendiendo tu Ciclo Menstrual: Guía Completa',
-            description: 'Aprende sobre las cuatro fases de tu ciclo menstrual y cómo sincronizar tu estilo de vida con cada fase para una salud óptima.',
-            url: 'https://www.healthline.com/health/womens-health/stages-of-menstrual-cycle',
-            imageUrl: 'https://images.unsplash.com/photo-1505751172876-fa1923c5c528?w=400',
-            source: 'Healthline',
-            publishedAt: new Date().toISOString(),
-            author: 'Equipo de Salud'
-        },
-        {
-            id: 'fallback-2',
-            title: 'SOP: Síntomas, Causas y Manejo Natural',
-            description: 'Descubre estrategias basadas en evidencia para manejar el SOP a través de nutrición, ejercicio y modificaciones del estilo de vida.',
-            url: 'https://www.healthline.com/health/polycystic-ovary-disease',
-            imageUrl: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=400',
-            source: 'Noticias Médicas',
-            publishedAt: new Date().toISOString(),
-            author: 'Dra. Sarah Johnson'
-        },
-        {
-            id: 'fallback-3',
-            title: 'Sincroniza tus Entrenamientos con tu Ciclo',
-            description: 'Optimiza tu rutina de ejercicios alineando tus entrenamientos con tus fluctuaciones hormonales durante el mes.',
-            url: 'https://www.womenshealthmag.com/fitness/a19966121/menstrual-cycle-workout-plan/',
-            imageUrl: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=400',
-            source: 'Salud Femenina',
-            publishedAt: new Date().toISOString(),
-            author: 'Equipo Fitness'
-        }
-    ];
-
-    return language === 'es' ? articlesES : articlesEN;
+            author: 'Dra. CycleSync & Medical Team'
+        };
+    });
 };
