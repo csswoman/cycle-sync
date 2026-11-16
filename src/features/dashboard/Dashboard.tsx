@@ -1,176 +1,54 @@
 'use client';
-
 import React from 'react';
-import { View, CyclePhase } from '@/types';
-import { Card, CardHeader, CardContent } from '@/components/ui/Card';
-import { DashboardHeader } from './components/DashboardHeader';
-import { DailyActionPanel } from './components/DailyActionPanel';
-import { SectionMovement } from './components/SectionMovement';
-import { SectionNourishment } from './components/SectionNourishment';
-import { HabitsProgress } from './components/HabitsProgress';
-import { useCycleInfo } from '@/hooks/useCycleInfo';
+import { View } from '@/types';
 import { useLanguage } from '@/i18n/LanguageContext';
-import HealthConnectWidget from './components/HealthConnectWidget';
-import { Flower } from '@/components/ui/Flower';
+import { useCycleOverview } from '@/hooks/useCycleOverview';
+import { CycleHero } from './components/CycleHero';
+import { TodayChecklist } from './components/TodayChecklist';
+import { TodayPlanCard } from './components/TodayPlanCard';
+import { PhaseRecommendations } from './components/PhaseRecommendations';
+import { HabitsProgress } from './components/HabitsProgress';
 import { WeeklySummaryCard } from './components/WeeklySummaryCard';
+import HealthConnectWidget from './components/HealthConnectWidget';
+import { dashboardText } from './dashboardText';
 
 interface DashboardProps {
     onNavigate: (view: View) => void;
     userName?: string;
 }
 
-const phaseHormones: Record<string, string> = {
-    Menstrual: 'Low Estrogen & Progesterone',
-    Follicular: 'Rising Estrogen',
-    Ovulation: 'Peak Estrogen & LH Surge',
-    Luteal: 'High Progesterone',
-};
-
-const phaseFocus: Record<string, string> = {
-    Menstrual: 'Rest & Recovery',
-    Follicular: 'Build Strength',
-    Ovulation: 'Peak Performance',
-    Luteal: 'Stabilize Blood Sugar',
-};
-
-const phaseMovement: Record<string, { title: string; desc: string; duration: string; intensity: string; why: string }> = {
-    Menstrual: {
-        title: 'Gentle Yoga & Stretching',
-        desc: 'Restorative flow focusing on hip openers and gentle twists to ease cramps and support circulation.',
-        duration: '20 Min', intensity: 'Restorative',
-        why: 'During menstruation, prostaglandins cause uterine contractions. Gentle movement increases blood flow and releases endorphins to naturally reduce pain.',
-    },
-    Follicular: {
-        title: 'Progressive Strength Training',
-        desc: 'Compound movements with progressive overload. Your body is primed for muscle building as estrogen rises.',
-        duration: '40 Min', intensity: 'Moderate-High',
-        why: 'Rising estrogen improves muscle recovery and pain tolerance. This is your window for strength gains and trying new challenging exercises.',
-    },
-    Ovulation: {
-        title: 'HIIT & Power Circuit',
-        desc: 'High-intensity intervals with explosive movements. Take advantage of peak energy and coordination.',
-        duration: '35 Min', intensity: 'High Intensity',
-        why: 'Peak estrogen and testosterone boost strength, speed and coordination. Your body can handle maximum effort with faster recovery.',
-    },
-    Luteal: {
-        title: 'Low Impact Strength Flow',
-        desc: 'A gentle but effective session combining slow strength movements with mobility. Designed to maintain muscle tone without adding stress.',
-        duration: '30 Min', intensity: 'Low Impact',
-        why: 'During the luteal phase, your body temperature is higher and your resting heart rate increases. We focus on strength maintenance without spiking cortisol.',
-    },
-};
-
-const Dashboard: React.FC<DashboardProps> = ({ onNavigate, userName }) => {
-    const { t } = useLanguage();
-    const { cycleInfo, loading } = useCycleInfo();
-
-    const phase = cycleInfo?.phase ?? CyclePhase.FOLLICULAR;
-    const cycleDay = cycleInfo?.cycleDay ?? 1;
-    const daysUntil = cycleInfo?.daysUntilNextPeriod ?? 28;
-    const hormone = phaseHormones[phase] ?? '';
-    const focus = phaseFocus[phase] ?? '';
-    const movement = phaseMovement[phase] ?? phaseMovement.Follicular;
-
-    const nourishmentData = [
-        {
-            title: "Salmon & Quinoa Bowl",
-            imageUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuAhhjTsyhqnm1zdZP93JOa_6ABVtIhKhUX4bxOTlzByglwEU6Y8dPHHFCvyp-aALjoVTqpr2-ZBhuTWUrrnBBIlDbE4zUyPXZ-GiWj2s0kMSiABx2hmWu9FFUlnqKSDgVQG3Uu7tu84plSj0X9RJ2TpOBkm0zQ1U6oEbDDjHlGPs3l9wagoTBbUQJvqWz2dYD-PKrVGMSuvwr9EzxEkcXu3oyCGxvdRgfEwG6ePnYz0ov0PPi3z-t3UFSc3qe32brbPdHkYJEc-9x8",
-            focus: "Hormone Balance Focus",
-            description: "Rich in Omega-3s and complex carbs.",
-            why: "Complex carbs aid serotonin production which can dip during the late luteal phase, helping to stabilize mood and reduce cravings.",
-            linkText: "View Recipe"
-        },
-        {
-            title: "Magnesium Rich Snack",
-            imageUrl: "https://lh3.googleusercontent.com/aida-public/AB6AXuChtgD126zZdUHP4U8G_DKhYxP2FJ9R15QhYL14_Vufbq-f2Hhcd4QXU7R9cd_efVoRcrdwVtafwkYu0Mz6Au5vQ4FTGg9qheKWQcxBm-9IDMIQh5Kj9Oe6m_1ntoRvvnWBlzFYXbPggIg2MNeHqhGLvbsyfs1Nbw6e9V8r5YpvRGZbwqq3Pmqfh1AbkqrK45abZlzx8bGI1XJxpv1mX3QlmIOmsnp3aS9Y4gSXRKEHCs66vTw8Z_fVpjk6w6X74sftm20i8rhqjhs",
-            focus: "Symptom Management",
-            description: "Dark chocolate (>70%) and raw almonds.",
-            why: "Magnesium helps relax smooth muscle tissue in the uterus, potentially reducing the severity of upcoming cramps.",
-            linkText: "Learn More"
-        }
-    ];
+const Dashboard: React.FC<DashboardProps> = ({ userName }) => {
+    const { language } = useLanguage();
+    const text = dashboardText[language === 'es' ? 'es' : 'en'];
+    const overview = useCycleOverview();
 
     return (
         <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-8 pb-32">
-                <DashboardHeader
-                    phase={loading ? '...' : phase}
-                    day={cycleDay}
-                    focus={focus}
-                    userName={userName}
-                />
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 pb-32">
+                <header className="flex flex-col gap-1">
+                    <h1 className="text-foreground text-3xl sm:text-4xl font-semibold leading-tight tracking-tight">
+                        {text.greeting(userName?.split(' ')[0])}
+                    </h1>
+                    <p className="text-muted-foreground text-sm sm:text-base">{text.subtitle}</p>
+                </header>
 
-                {/* Top Phase Metric Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <Card className="rounded-3xl border border-border/80 bg-card/90 shadow-sm p-5">
-                        <Flower petal="var(--sun)" center="var(--blossom-soft)" rotate={8} className="absolute -top-7 -right-7 size-28 opacity-70 pointer-events-none" />
-                        <CardHeader title="Current Phase" />
-                        <CardContent>
-                            <p className="relative text-foreground text-2xl sm:text-3xl font-bold tracking-tight">{loading ? '...' : phase}</p>
-                            <p className="relative text-xs text-muted-foreground mt-1 font-medium">{hormone}</p>
-                        </CardContent>
-                    </Card>
-                    <Card className="rounded-3xl border border-border/80 bg-card/90 shadow-sm p-5">
-                        <Flower petal="var(--leaf-soft)" center="var(--coral)" petals={5} rotate={-14} className="absolute -top-7 -right-7 size-28 opacity-70 pointer-events-none" />
-                        <CardHeader title="Cycle Day" />
-                        <CardContent>
-                            <p className="relative text-foreground text-2xl sm:text-3xl font-bold tracking-tight">Day {cycleDay}</p>
-                            <p className="relative text-xs text-muted-foreground mt-1 font-medium">~{daysUntil} Days to Menstruation</p>
-                        </CardContent>
-                    </Card>
-                    <Card className="rounded-3xl border border-border/80 bg-card/90 shadow-sm p-5">
-                        <Flower petal="var(--blossom-soft)" center="var(--sun)" petals={7} rotate={20} className="absolute -top-7 -right-7 size-28 opacity-70 pointer-events-none" />
-                        <CardHeader title="Archetype" />
-                        <CardContent>
-                            <p className="relative text-foreground text-2xl sm:text-3xl font-bold tracking-tight">Powerhouse</p>
-                            <p className="relative text-xs text-muted-foreground mt-1 font-medium">Focus on Consistency</p>
-                        </CardContent>
-                    </Card>
-                </div>
+                <CycleHero overview={overview} />
 
-                {/* Balanced Two-Column Dashboard Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-                    {/* Primary Daily Actions & Recommendations */}
-                    <div className="lg:col-span-8 flex flex-col gap-8">
-                        <DailyActionPanel
-                            title="Daily Check-In"
-                            description="How are your symptoms today? Logging your mood and energy helps us refine your plan for tomorrow."
-                            buttonText="Log Symptoms"
-                            onAction={() => onNavigate(View.LOG)}
-                        />
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    <div className="lg:col-span-8 flex flex-col gap-6">
+                        <TodayChecklist />
+                        <TodayPlanCard />
+                        <HealthConnectWidget />
+                        {overview.info && <PhaseRecommendations phase={overview.info.phase} answers={overview.answers} />}
                         <WeeklySummaryCard />
-
-                        <SectionMovement
-                            title={movement.title}
-                            description={movement.desc}
-                            duration={movement.duration}
-                            intensity={movement.intensity}
-                            imageUrl="https://lh3.googleusercontent.com/aida-public/AB6AXuBhkMw5OiVrHssOpEse9L-QT9Bu5m6KhbS2Q0iFroBtbgs2Zepod0qFxAdS5MddjGO7t1G3zcamGliodgud5en1EXzSbzTGrx0VEsWcfgtDNcFuGfSulLPE12pg1gQ7GbQI_t2SryscKT0eHdQl9eOF5G1MGffb3Bve2y4lnRiWz9X5-XJWSdeAx2NxkbI31hZcYCTR1GH-k2IKABS89VufoS5sh36iV8rlyQMD7aIJGCVTUmJh9MTXDY5t6W-z5Ax095saet7A1A0"
-                            whyItWorks={movement.why}
-                        />
-
-                        <SectionNourishment meals={nourishmentData} />
                     </div>
-
-                    {/* Secondary Tracking & Wearables Column */}
                     <div className="lg:col-span-4 flex flex-col gap-6">
                         <HabitsProgress />
-
-                        <div className="bg-card rounded-3xl border border-border p-5 shadow-sm flex flex-col gap-3">
-                            <div className="flex items-center gap-2 text-foreground font-semibold text-sm">
-                                <span className="material-symbols-outlined text-primary text-lg">watch</span>
-                                <h3>{t.wearableSectionTitle}</h3>
-                            </div>
-                            <p className="text-xs text-muted-foreground leading-relaxed">{t.wearableHealthConnectHint}</p>
-                            <HealthConnectWidget />
-                        </div>
                     </div>
                 </div>
 
-                <footer className="mt-4 pt-6 border-t border-border/60 flex flex-col items-center justify-center gap-2 text-center">
-                    <p className="text-[11px] text-muted-foreground/80 max-w-lg leading-relaxed">
-                        Disclaimer: This plan is generated based on your tracked data. Listen to your body first. Consult a healthcare professional for specific medical advice regarding PMOS.
-                    </p>
+                <footer className="pt-4 border-t border-border/60 text-center">
+                    <p className="text-[11px] text-muted-foreground/80 max-w-lg mx-auto leading-relaxed">{text.disclaimer}</p>
                 </footer>
             </div>
         </div>

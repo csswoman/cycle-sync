@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { saveHabitLogOffline, getUnsyncedHabitLogs } from '@/lib/offlineHelpers';
 import { syncAll } from '@/hooks/useOfflineSync';
 import type { Habit, HabitLog } from '@/types';
+import { toISODate } from '@/lib/cycle/cycleEngine';
 
 const DEFAULT_HABITS: Omit<Habit, 'id' | 'user_id'>[] = [
   { name: 'Water Intake', type: 'water', goal: 8, unit: 'glasses', active: true },
@@ -12,19 +13,47 @@ const DEFAULT_HABITS: Omit<Habit, 'id' | 'user_id'>[] = [
   { name: 'Mindfulness', type: 'mindfulness', goal: 10, unit: 'minutes', active: true },
 ];
 
+// Several components mount useHabits at once on the home page. Without this guard each one
+// saw an empty table and inserted its own copy of the defaults (duplicated "Water Intake").
+const seeding = new Map<string, Promise<Habit[]>>();
+
+function seedDefaults(userId: string): Promise<Habit[]> {
+  let pending = seeding.get(userId);
+  if (!pending) {
+    pending = (async () => {
+      const inserts = DEFAULT_HABITS.map((h) => ({ ...h, user_id: userId }));
+      const { data } = await supabase.from('habits').insert(inserts).select();
+      return (data as Habit[]) ?? [];
+    })().finally(() => seeding.delete(userId));
+    seeding.set(userId, pending);
+  }
+  return pending;
+}
+
+/** Built-in habits (water, sleep, mindfulness) exist once per user; keeps the oldest row of each. */
+function dedupeBuiltIns(list: Habit[]): Habit[] {
+  const seen = new Set<string>();
+  return list.filter((h) => {
+    if (h.type === 'custom') return true;
+    if (seen.has(h.type)) return false;
+    seen.add(h.type);
+    return true;
+  });
+}
+
 export function useHabits() {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [todayLogs, setTodayLogs] = useState<HabitLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [weekLogs, setWeekLogs] = useState<HabitLog[]>([]);
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = toISODate(new Date());
 
   const loadData = useCallback(async () => {
     const { data: { session } } = await supabase.auth.getSession();
     const user = session?.user;
     if (!user) { setLoading(false); return; }
-    const weekStart = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0];
+    const weekStart = toISODate(new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() - 7));
     try {
       const [habitsRes, weekRes] = await Promise.all([
         supabase.from('habits').select('*').eq('user_id', user.id).eq('active', true).order('created_at'),
@@ -35,11 +64,9 @@ export function useHabits() {
       if (!habitsRes.error) {
         let userHabits = (habitsRes.data as Habit[]) ?? [];
         if (userHabits.length === 0) {
-          const inserts = DEFAULT_HABITS.map((h) => ({ ...h, user_id: user.id }));
-          const { data: created } = await supabase.from('habits').insert(inserts).select();
-          userHabits = (created as Habit[]) ?? [];
+          userHabits = await seedDefaults(user.id);
         }
-        setHabits(userHabits);
+        setHabits(dedupeBuiltIns(userHabits));
       }
       const remoteWeek = weekRes.error ? [] : ((weekRes.data as HabitLog[]) ?? []);
       // Overlay logs saved locally that have not reached Supabase yet.
@@ -112,7 +139,7 @@ export function useHabits() {
     let streak = 0;
     const d = new Date();
     for (let i = 0; i < 7; i++) {
-      const dateStr = d.toISOString().split('T')[0];
+      const dateStr = toISODate(d);
       if (habitWeekLogs.includes(dateStr)) {
         streak++;
       } else if (i > 0) {
