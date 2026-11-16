@@ -31,70 +31,93 @@ import {
 const TEXT = {
     es: {
         title: 'Plan semanal',
-        subtitle: 'Menús y entrenamiento de la semana, con seguimiento y lista del súper.',
+        subtitle: 'Menús y entrenamientos sincronizados con la fisiología de tu ciclo menstrual.',
+        phaseContext: 'Fase actual',
         generate: 'Generar con IA',
         generateMeals: 'Solo comidas',
         generateWorkouts: 'Solo entrenos',
-        generating: 'Generando…',
+        generating: 'Generando plan…',
         clear: 'Vaciar semana',
         today: 'Hoy',
         slots: { breakfast: 'Desayuno', lunch: 'Almuerzo', snack: 'Snack', dinner: 'Cena' } as Record<MealSlot, string>,
-        workout: 'Entreno',
-        none: 'Sin plan',
-        rest: 'Descanso',
-        gym: 'Gym',
-        mealTitle: 'Plato',
+        slotIcons: { breakfast: 'meal_ideas', lunch: 'restaurant', snack: 'plant', dinner: 'nutrition' } as Record<MealSlot, string>,
+        workout: 'Entrenamiento',
+        none: 'Sin entreno',
+        rest: 'Día de descanso',
+        gym: 'Gimnasio / Fuerza',
+        mealTitle: 'Nombre del plato',
         mealIngredients: 'Ingredientes (separados por coma)',
         save: 'Guardar',
         cancel: 'Cancelar',
+        addMealPrompt: 'Agregar plato',
         grocery: 'Lista del súper',
-        groceryEmpty: 'Agrega comidas con ingredientes para ver la lista.',
-        pantry: 'Despensa',
-        pantryHint: 'Lo que ya tienes. No aparece en la lista y la IA lo usa primero.',
+        groceryEmpty: 'Agrega comidas con ingredientes a tu semana para consolidar tu lista de compras automáticamente.',
+        groceryCompleted: 'comprados',
+        pantry: 'Mi despensa',
+        pantryHint: 'Ingredientes que ya tienes en casa. La IA los prioriza y se omiten de tu lista del súper.',
         pantryAdd: 'Agregar',
-        pantryPlaceholder: 'Ej. arroz',
-        progress: 'Cumplido esta semana',
+        pantryPlaceholder: 'Ej. avena, arroz integral, chía...',
+        pantryQuickSuggestions: 'Sugerencias frecuentes:',
+        progress: 'Cumplimiento semanal',
+        completedText: 'completado',
         error: 'Algo salió mal. Intenta de nuevo.',
         confirmClear: '¿Vaciar todas las comidas y entrenos de esta semana?',
     },
     en: {
         title: 'Weekly plan',
-        subtitle: 'Meals and workouts for the week, with tracking and a grocery list.',
+        subtitle: 'Meals and workouts synchronized with your menstrual cycle physiology.',
+        phaseContext: 'Current phase',
         generate: 'Generate with AI',
         generateMeals: 'Meals only',
         generateWorkouts: 'Workouts only',
-        generating: 'Generating…',
+        generating: 'Generating plan…',
         clear: 'Clear week',
         today: 'Today',
         slots: { breakfast: 'Breakfast', lunch: 'Lunch', snack: 'Snack', dinner: 'Dinner' } as Record<MealSlot, string>,
+        slotIcons: { breakfast: 'meal_ideas', lunch: 'restaurant', snack: 'plant', dinner: 'nutrition' } as Record<MealSlot, string>,
         workout: 'Workout',
-        none: 'Not planned',
-        rest: 'Rest',
-        gym: 'Gym',
-        mealTitle: 'Dish',
+        none: 'No workout',
+        rest: 'Rest day',
+        gym: 'Gym / Strength',
+        mealTitle: 'Dish name',
         mealIngredients: 'Ingredients (comma separated)',
         save: 'Save',
         cancel: 'Cancel',
+        addMealPrompt: 'Add dish',
         grocery: 'Grocery list',
-        groceryEmpty: 'Add meals with ingredients to see the list.',
-        pantry: 'Pantry',
-        pantryHint: 'What you already have. It is left off the list and the AI uses it first.',
+        groceryEmpty: 'Add meals with ingredients to your week to consolidate your grocery list automatically.',
+        groceryCompleted: 'purchased',
+        pantry: 'My pantry',
+        pantryHint: 'Ingredients already in your kitchen. AI prioritizes them and leaves them off your shopping list.',
         pantryAdd: 'Add',
-        pantryPlaceholder: 'e.g. rice',
-        progress: 'Done this week',
+        pantryPlaceholder: 'e.g. oats, brown rice, chia seeds...',
+        pantryQuickSuggestions: 'Common suggestions:',
+        progress: 'Weekly progress',
+        completedText: 'completed',
         error: 'Something went wrong. Try again.',
         confirmClear: 'Clear all meals and workouts of this week?',
     },
 };
 
+const PHASE_NAMES: Record<string, { es: string; en: string }> = {
+    Menstrual: { es: 'Fase Menstrual', en: 'Menstrual Phase' },
+    Follicular: { es: 'Fase Folicular', en: 'Follicular Phase' },
+    Ovulation: { es: 'Fase Ovulatoria', en: 'Ovulatory Phase' },
+    Luteal: { es: 'Fase Lútea', en: 'Luteal Phase' },
+};
+
+const QUICK_PANTRY_SUGGESTIONS = ['Avena', 'Huevos', 'Arroz integral', 'Espinacas', 'Semillas de chía', 'Aceite de oliva'];
+
 const inputClass =
-    'w-full rounded-lg border border-border bg-background px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40';
+    'w-full rounded-lg border border-border bg-background px-2.5 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-colors placeholder:text-muted-foreground/60';
 
 const WeeklyPlanner: React.FC = () => {
     const { language } = useLanguage();
-    const tx = TEXT[language === 'es' ? 'es' : 'en'];
+    const isEs = language === 'es';
+    const tx = TEXT[isEs ? 'es' : 'en'];
     const { cycleInfo } = useCycleInfo();
     const phase = cycleInfo?.phase ?? 'Follicular';
+    const phaseLabel = PHASE_NAMES[phase] ? PHASE_NAMES[phase][isEs ? 'es' : 'en'] : phase;
 
     const [weekStart, setWeekStart] = useState(() => weekStartOf());
     const [meals, setMeals] = useState<MealEntry[]>([]);
@@ -111,6 +134,8 @@ const WeeklyPlanner: React.FC = () => {
 
     const days = useMemo(() => weekDays(weekStart), [weekStart]);
     const todayISO = toISODate(new Date());
+    const currentWeekStart = useMemo(() => weekStartOf(), []);
+    const isCurrentWeek = weekStart === currentWeekStart;
 
     const fail = (err: unknown) => {
         console.error('Planner error:', err);
@@ -151,8 +176,14 @@ const WeeklyPlanner: React.FC = () => {
         [meals, pantry],
     );
 
+    const groceryCheckedCount = useMemo(
+        () => grocery.filter((g) => checked.has(g.key)).length,
+        [grocery, checked],
+    );
+
     const planned = meals.length + workouts.filter((w) => w.kind !== 'rest').length;
     const completed = meals.filter((m) => m.done).length + workouts.filter((w) => w.kind !== 'rest' && w.done).length;
+    const progressPercent = planned > 0 ? Math.round((completed / planned) * 100) : 0;
 
     const run = async (fn: () => Promise<void>) => {
         setBusy(true);
@@ -169,7 +200,7 @@ const WeeklyPlanner: React.FC = () => {
     const generate = (includeMeals: boolean, includeWorkouts: boolean) =>
         run(async () => {
             const plan = await requestPlan({
-                language: language === 'es' ? 'es' : 'en',
+                language: isEs ? 'es' : 'en',
                 phase,
                 pantry: pantry.map((p) => p.name),
                 includeMeals,
@@ -233,10 +264,10 @@ const WeeklyPlanner: React.FC = () => {
         setGroceryChecked(weekStart, key, next).catch(fail);
     };
 
-    const addPantry = async () => {
-        const name = pantryInput.trim();
+    const addPantry = async (suggestedName?: string) => {
+        const name = (suggestedName || pantryInput).trim();
         if (!name) return;
-        setPantryInput('');
+        if (!suggestedName) setPantryInput('');
         try {
             const item = await addPantryItem(name);
             setPantry((prev) => (prev.some((p) => p.id === item.id) ? prev : [...prev, item].sort((a, b) => a.name.localeCompare(b.name))));
@@ -246,155 +277,493 @@ const WeeklyPlanner: React.FC = () => {
     };
 
     const dayLabel = (iso: string) =>
-        parseISODate(iso).toLocaleDateString(language === 'es' ? 'es' : 'en', { weekday: 'short', day: 'numeric', month: 'short' });
+        parseISODate(iso).toLocaleDateString(isEs ? 'es' : 'en', { weekday: 'short', day: 'numeric', month: 'short' });
+    const dayNameShort = (iso: string) =>
+        parseISODate(iso).toLocaleDateString(isEs ? 'es' : 'en', { weekday: 'long' });
+    const dayDateNum = (iso: string) =>
+        parseISODate(iso).toLocaleDateString(isEs ? 'es' : 'en', { day: 'numeric', month: 'short' });
+
     const rangeLabel = `${dayLabel(days[0])} – ${dayLabel(days[6])}`;
 
     return (
-        <div className="flex flex-col gap-6">
-            <div className="flex flex-col gap-1">
-                <h1 className="text-2xl font-bold">{tx.title}</h1>
-                <p className="text-muted-foreground text-sm">{tx.subtitle}</p>
-            </div>
+        <div className="flex-1 overflow-y-auto h-full scrollbar-hide">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 sm:gap-8 pb-36 md:pb-28">
+                {/* HERO HEADER */}
+                <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border/60 pb-5">
+                    <div className="flex flex-col gap-1.5">
+                        <div className="flex items-center gap-2.5 flex-wrap">
+                            <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground text-wrap-balance">
+                                {tx.title}
+                            </h1>
+                            <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 text-xs font-semibold shrink-0">
+                                <Icon name="sparkles" size={13} weight="bold" />
+                                <span>{phaseLabel}</span>
+                                {cycleInfo?.cycleDay && <span className="opacity-75">• Día {cycleInfo.cycleDay}</span>}
+                            </div>
+                        </div>
+                        <p className="text-muted-foreground text-sm sm:text-base leading-relaxed text-wrap-pretty max-w-2xl">
+                            {tx.subtitle}
+                        </p>
+                    </div>
 
-            <div className="flex flex-wrap items-center gap-2">
-                <Button variant="ghost" size="sm" icon="chevron_left" label="←" onClick={() => setWeekStart(addDays(weekStart, -7))} />
-                <span className="text-sm font-semibold min-w-[12rem] text-center">{rangeLabel}</span>
-                <Button variant="ghost" size="sm" icon="chevron_right" label="→" onClick={() => setWeekStart(addDays(weekStart, 7))} />
-                <Button variant="ghost" size="sm" onClick={() => setWeekStart(weekStartOf())}>{tx.today}</Button>
-                <div className="flex flex-wrap gap-2 sm:ml-auto">
-                    <Button size="sm" icon="auto_awesome" disabled={busy} onClick={() => generate(true, true)}>
-                        {busy ? tx.generating : tx.generate}
-                    </Button>
-                    <Button size="sm" variant="secondary" disabled={busy} onClick={() => generate(true, false)}>{tx.generateMeals}</Button>
-                    <Button size="sm" variant="secondary" disabled={busy} onClick={() => generate(false, true)}>{tx.generateWorkouts}</Button>
-                    <Button
-                        size="sm"
-                        variant="ghost"
-                        icon="delete"
-                        disabled={busy || planned === 0}
-                        onClick={() => window.confirm(tx.confirmClear) && run(() => clearWeek(weekStart))}
-                    >
-                        {tx.clear}
-                    </Button>
-                </div>
-            </div>
-
-            {error && <p role="alert" className="text-sm text-red-500">{error}</p>}
-
-            {planned > 0 && (
-                <p className="text-sm text-muted-foreground">
-                    {tx.progress}: <span className="font-semibold text-foreground">{completed}/{planned}</span>
-                </p>
-            )}
-
-            <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-                {days.map((date) => {
-                    const w = workoutAt(date);
-                    return (
-                        <Card key={date} hoverable={false} className={`p-4 ${date === todayISO ? 'ring-2 ring-primary/50' : ''}`}>
-                            <p className="text-sm font-bold capitalize mb-3">{dayLabel(date)}</p>
-
-                            <div className="mb-3 flex flex-col gap-1">
-                                <div className="flex items-center gap-2">
-                                    <Icon name="fitness_center" size={16} className="text-primary" />
-                                    {w && w.kind !== 'rest' && (
-                                        <input type="checkbox" checked={w.done} onChange={() => toggle('workout', w)} aria-label={tx.workout} />
-                                    )}
-                                    <select
-                                        className={inputClass}
-                                        aria-label={tx.workout}
-                                        value={w ? (w.kind === 'video' ? w.videoId ?? '' : w.kind) : ''}
-                                        onChange={(e) => changeWorkout(date, e.target.value)}
-                                        disabled={busy}
-                                    >
-                                        <option value="">{tx.none}</option>
-                                        <option value="rest">{tx.rest}</option>
-                                        <option value="gym">{tx.gym}</option>
-                                        {videos.map((v) => (
-                                            <option key={v.id} value={v.id}>{v.title} ({v.durationMinutes}′)</option>
-                                        ))}
-                                    </select>
+                    {/* WEEKLY PROGRESS METRIC */}
+                    {planned > 0 && (
+                        <div className="flex items-center gap-3.5 bg-card/80 border border-border/70 rounded-2xl p-3 sm:px-4 shadow-xs self-start md:self-auto shrink-0">
+                            <div className="flex items-center justify-center size-9 rounded-xl bg-primary/10 text-primary shrink-0">
+                                <Icon name="task_alt" size={18} weight="bold" />
+                            </div>
+                            <div className="flex flex-col gap-1">
+                                <div className="flex items-center justify-between gap-3 text-xs">
+                                    <span className="font-semibold text-muted-foreground">{tx.progress}</span>
+                                    <span className="font-bold text-foreground tabular-nums">
+                                        {completed} / {planned} <span className="text-[11px] font-normal text-muted-foreground">({progressPercent}%)</span>
+                                    </span>
+                                </div>
+                                <div className="w-36 sm:w-44 bg-muted rounded-full h-1.5 overflow-hidden">
+                                    <div
+                                        className="bg-primary h-full rounded-full transition-all duration-500"
+                                        style={{ width: `${progressPercent}%` }}
+                                    />
                                 </div>
                             </div>
+                        </div>
+                    )}
+                </header>
 
-                            <ul className="flex flex-col gap-2">
-                                {MEAL_SLOTS.map((slot) => {
-                                    const m = mealAt(date, slot);
-                                    const isEditing = editing?.date === date && editing.slot === slot;
-                                    return (
-                                        <li key={slot} className="text-sm">
-                                            <p className="text-[11px] uppercase tracking-wider text-muted-foreground">{tx.slots[slot]}</p>
-                                            {isEditing ? (
-                                                <div className="flex flex-col gap-1">
-                                                    <input className={inputClass} autoFocus placeholder={tx.mealTitle} value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} />
-                                                    <input className={inputClass} placeholder={tx.mealIngredients} value={draft.ingredients} onChange={(e) => setDraft({ ...draft, ingredients: e.target.value })} />
-                                                    <div className="flex gap-2">
-                                                        <Button size="sm" onClick={submitMeal}>{tx.save}</Button>
-                                                        <Button size="sm" variant="ghost" onClick={() => setEditing(null)}>{tx.cancel}</Button>
+                {/* CONTROLS & ACTION TOOLBAR */}
+                <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3.5 bg-card/60 backdrop-blur-sm border border-border/70 rounded-2xl p-3 sm:p-4 shadow-xs">
+                    {/* Date Navigation */}
+                    <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                        <div className="flex items-center bg-background rounded-xl border border-border/80 shadow-xs p-0.5">
+                            <button
+                                type="button"
+                                onClick={() => setWeekStart(addDays(weekStart, -7))}
+                                className="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground rounded-lg transition-colors cursor-pointer"
+                                aria-label="Semana anterior"
+                                title="Semana anterior"
+                            >
+                                <Icon name="chevron_left" size={18} weight="bold" />
+                            </button>
+                            <div className="flex items-center gap-1.5 px-3 py-1 text-sm font-semibold text-foreground min-w-[13rem] justify-center capitalize select-none shrink-0">
+                                <Icon name="calendar" size={15} className="text-primary/80" />
+                                <span>{rangeLabel}</span>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setWeekStart(addDays(weekStart, 7))}
+                                className="p-1.5 hover:bg-muted text-muted-foreground hover:text-foreground rounded-lg transition-colors cursor-pointer shrink-0"
+                                aria-label="Semana siguiente"
+                                title="Semana siguiente"
+                            >
+                                <Icon name="chevron_right" size={18} weight="bold" />
+                            </button>
+                        </div>
+
+                        <Button
+                            variant={isCurrentWeek ? 'secondary' : 'primary'}
+                            size="sm"
+                            onClick={() => setWeekStart(currentWeekStart)}
+                            className="text-xs shrink-0"
+                        >
+                            {tx.today}
+                        </Button>
+                    </div>
+
+                    {/* AI Actions & Clear */}
+                    <div className="flex items-center gap-2 flex-wrap justify-end">
+                        <Button
+                            size="sm"
+                            icon="auto_awesome"
+                            disabled={busy}
+                            onClick={() => generate(true, true)}
+                            className="shadow-sm"
+                        >
+                            {busy ? tx.generating : tx.generate}
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant="secondary"
+                            disabled={busy}
+                            onClick={() => generate(true, false)}
+                            className="text-xs"
+                        >
+                            {tx.generateMeals}
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant="secondary"
+                            disabled={busy}
+                            onClick={() => generate(false, true)}
+                            className="text-xs"
+                        >
+                            {tx.generateWorkouts}
+                        </Button>
+                        <Button
+                            size="sm"
+                            variant="ghost"
+                            icon="delete"
+                            disabled={busy || planned === 0}
+                            onClick={() => window.confirm(tx.confirmClear) && run(() => clearWeek(weekStart))}
+                            className="text-muted-foreground hover:text-red-500 text-xs"
+                        >
+                            {tx.clear}
+                        </Button>
+                    </div>
+                </div>
+
+                {error && (
+                    <div role="alert" className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-sm flex items-center gap-2">
+                        <Icon name="close" size={16} />
+                        <span>{error}</span>
+                    </div>
+                )}
+
+                {/* 7-DAY WEEKLY GRID */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7 gap-4 items-start">
+                    {days.map((date) => {
+                        const w = workoutAt(date);
+                        const isToday = date === todayISO;
+                        const dayMeals = MEAL_SLOTS.map((s) => mealAt(date, s)).filter(Boolean);
+                        const dayPlanned = dayMeals.length + (w && w.kind !== 'rest' ? 1 : 0);
+                        const dayDone = dayMeals.filter((m) => m?.done).length + (w && w.kind !== 'rest' && w.done ? 1 : 0);
+
+                        return (
+                            <div
+                                key={date}
+                                className={`rounded-2xl border transition-all duration-200 bg-card p-4 flex flex-col gap-3.5 shadow-xs ${
+                                    isToday
+                                        ? 'ring-2 ring-primary/60 border-primary/40 bg-gradient-to-b from-primary/5 via-card to-card'
+                                        : 'border-border/80 hover:border-border'
+                                }`}
+                            >
+                                {/* DAY CARD HEADER */}
+                                <div className="flex items-center justify-between pb-2 border-b border-border/50">
+                                    <div className="flex flex-col">
+                                        <span className="text-sm font-bold text-foreground capitalize leading-snug">
+                                            {dayNameShort(date)}
+                                        </span>
+                                        <span className="text-xs text-muted-foreground capitalize">
+                                            {dayDateNum(date)}
+                                        </span>
+                                    </div>
+                                    <div className="flex items-center gap-1.5">
+                                        {dayPlanned > 0 && (
+                                            <span className="text-[11px] font-semibold tabular-nums text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                                                {dayDone}/{dayPlanned}
+                                            </span>
+                                        )}
+                                        {isToday && (
+                                            <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-primary text-primary-foreground tracking-wide uppercase">
+                                                {tx.today}
+                                            </span>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* WORKOUT SECTION */}
+                                <div className="rounded-xl bg-secondary/35 border border-border/60 p-2.5 flex flex-col gap-1.5 transition-colors">
+                                    <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
+                                        <div className="flex items-center gap-1.5">
+                                            <Icon name="fitness_center" size={14} className="text-primary" />
+                                            <span>{tx.workout}</span>
+                                        </div>
+                                        {w && w.durationMinutes && (
+                                            <span className="text-[11px] font-medium text-muted-foreground tabular-nums">
+                                                {w.durationMinutes}′
+                                            </span>
+                                        )}
+                                    </div>
+
+                                    <div className="flex items-center gap-2">
+                                        {w && w.kind !== 'rest' && (
+                                            <input
+                                                type="checkbox"
+                                                checked={w.done}
+                                                onChange={() => toggle('workout', w)}
+                                                aria-label={tx.workout}
+                                                className="size-4 rounded border-border text-primary focus:ring-primary/40 cursor-pointer accent-primary shrink-0"
+                                            />
+                                        )}
+                                        <select
+                                            className={`${inputClass} text-xs py-1.5 ${w?.done ? 'line-through opacity-70' : ''}`}
+                                            aria-label={tx.workout}
+                                            value={w ? (w.kind === 'video' ? w.videoId ?? '' : w.kind) : ''}
+                                            onChange={(e) => changeWorkout(date, e.target.value)}
+                                            disabled={busy}
+                                        >
+                                            <option value="">{tx.none}</option>
+                                            <option value="rest">☕ {tx.rest}</option>
+                                            <option value="gym">🏋️ {tx.gym}</option>
+                                            {videos.map((v) => (
+                                                <option key={v.id} value={v.id}>
+                                                    ▶ {v.title} ({v.durationMinutes}′)
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                {/* MEAL SLOTS */}
+                                <div className="flex flex-col gap-2.5 pt-1">
+                                    {MEAL_SLOTS.map((slot) => {
+                                        const m = mealAt(date, slot);
+                                        const isEditing = editing?.date === date && editing.slot === slot;
+                                        const slotIcon = tx.slotIcons[slot];
+
+                                        return (
+                                            <div key={slot} className="flex flex-col gap-1">
+                                                <div className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80">
+                                                    <Icon name={slotIcon} size={12} className="opacity-70" />
+                                                    <span>{tx.slots[slot]}</span>
+                                                </div>
+
+                                                {isEditing ? (
+                                                    <div className="flex flex-col gap-1.5 p-2 rounded-xl bg-background border border-primary/50 shadow-xs">
+                                                        <input
+                                                            className={inputClass}
+                                                            autoFocus
+                                                            placeholder={tx.mealTitle}
+                                                            value={draft.title}
+                                                            onChange={(e) => setDraft({ ...draft, title: e.target.value })}
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === 'Enter') submitMeal();
+                                                                else if (e.key === 'Escape') setEditing(null);
+                                                            }}
+                                                        />
+                                                        <input
+                                                            className={inputClass}
+                                                            placeholder={tx.mealIngredients}
+                                                            value={draft.ingredients}
+                                                            onChange={(e) => setDraft({ ...draft, ingredients: e.target.value })}
+                                                            onKeyDown={(e) => {
+                                                                if (e.key === 'Enter') submitMeal();
+                                                                else if (e.key === 'Escape') setEditing(null);
+                                                            }}
+                                                        />
+                                                        <div className="flex items-center justify-end gap-1.5 pt-1">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => setEditing(null)}
+                                                                className="px-2 py-1 text-xs font-medium text-muted-foreground hover:text-foreground rounded-lg transition-colors cursor-pointer"
+                                                            >
+                                                                {tx.cancel}
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={submitMeal}
+                                                                className="px-2.5 py-1 text-xs font-semibold bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
+                                                            >
+                                                                {tx.save}
+                                                            </button>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            ) : m ? (
-                                                <div className="flex items-start gap-2">
-                                                    <input className="mt-1" type="checkbox" checked={m.done} onChange={() => toggle('meal', m)} aria-label={m.title} />
-                                                    <button type="button" className={`flex-1 text-left ${m.done ? 'line-through text-muted-foreground' : ''}`} onClick={() => startEdit(date, slot)}>
-                                                        {m.title}
+                                                ) : m ? (
+                                                    <div className="group flex items-start gap-2 p-1.5 rounded-xl hover:bg-muted/40 transition-colors">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={m.done}
+                                                            onChange={() => toggle('meal', m)}
+                                                            aria-label={m.title}
+                                                            className="mt-0.5 size-4 rounded border-border text-primary focus:ring-primary/40 cursor-pointer accent-primary shrink-0"
+                                                        />
+                                                        <div
+                                                            className="flex-1 min-w-0 cursor-pointer"
+                                                            onClick={() => startEdit(date, slot)}
+                                                            role="button"
+                                                            tabIndex={0}
+                                                            onKeyDown={(e) => e.key === 'Enter' && startEdit(date, slot)}
+                                                        >
+                                                            <p
+                                                                className={`text-xs font-medium leading-snug break-words transition-colors hover:text-primary ${
+                                                                    m.done ? 'line-through text-muted-foreground' : 'text-foreground'
+                                                                }`}
+                                                            >
+                                                                {m.title}
+                                                            </p>
+                                                            {m.ingredients && m.ingredients.length > 0 && (
+                                                                <p className="text-[11px] text-muted-foreground/80 line-clamp-1 truncate mt-0.5">
+                                                                    {m.ingredients.join(', ')}
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            aria-label="Eliminar comida"
+                                                            className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-red-500 transition-opacity p-0.5 cursor-pointer shrink-0"
+                                                            onClick={() => remove('meal', m.id)}
+                                                        >
+                                                            <Icon name="close" size={13} />
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <button
+                                                        type="button"
+                                                        className="w-full py-1 px-2 rounded-lg border border-dashed border-border/70 hover:border-primary/50 hover:bg-primary/5 text-muted-foreground hover:text-primary text-xs font-medium flex items-center justify-center gap-1.5 transition-all cursor-pointer group"
+                                                        onClick={() => startEdit(date, slot)}
+                                                    >
+                                                        <Icon name="plus" size={12} className="opacity-70 group-hover:opacity-100 transition-opacity" />
+                                                        <span>{tx.addMealPrompt}</span>
                                                     </button>
-                                                    <button type="button" aria-label="delete" className="text-muted-foreground hover:text-red-500" onClick={() => remove('meal', m.id)}>
-                                                        <Icon name="close" size={14} />
-                                                    </button>
-                                                </div>
-                                            ) : (
-                                                <button type="button" className="text-muted-foreground hover:text-primary" onClick={() => startEdit(date, slot)}>
-                                                    + {tx.mealTitle}
-                                                </button>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        );
+                    })}
+                </div>
+
+                {/* BOTTOM SECTION: GROCERY & PANTRY */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-2">
+                    {/* GROCERY LIST CARD */}
+                    <Card hoverable={false} className="p-5 flex flex-col gap-4 border border-border/70 shadow-xs">
+                        <div className="flex items-center justify-between pb-2 border-b border-border/60">
+                            <div className="flex items-center gap-2.5">
+                                <div className="flex items-center justify-center size-8 rounded-xl bg-primary/10 text-primary">
+                                    <Icon name="task_alt" size={17} weight="bold" />
+                                </div>
+                                <h2 className="text-base font-bold text-foreground">{tx.grocery}</h2>
+                            </div>
+                            {grocery.length > 0 && (
+                                <span className="text-xs font-semibold tabular-nums text-muted-foreground bg-muted px-2.5 py-1 rounded-full">
+                                    {groceryCheckedCount} / {grocery.length} {tx.groceryCompleted}
+                                </span>
+                            )}
+                        </div>
+
+                        {loading ? (
+                            <p className="text-sm text-muted-foreground py-4 text-center">Cargando lista…</p>
+                        ) : grocery.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-8 text-center px-4">
+                                <div className="size-12 rounded-2xl bg-muted/60 flex items-center justify-center text-muted-foreground mb-3">
+                                    <Icon name="meal_ideas" size={24} />
+                                </div>
+                                <p className="text-sm text-muted-foreground max-w-sm text-wrap-pretty leading-relaxed">
+                                    {tx.groceryEmpty}
+                                </p>
+                            </div>
+                        ) : (
+                            <ul className="flex flex-col gap-2 max-h-80 overflow-y-auto pr-1">
+                                {grocery.map((item) => {
+                                    const isItemChecked = checked.has(item.key);
+                                    return (
+                                        <li
+                                            key={item.key}
+                                            className={`flex items-center justify-between gap-2.5 p-2 rounded-xl transition-colors ${
+                                                isItemChecked ? 'bg-muted/30 opacity-60' : 'hover:bg-muted/40'
+                                            }`}
+                                        >
+                                            <label className="flex items-center gap-2.5 text-sm cursor-pointer flex-1 select-none">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={isItemChecked}
+                                                    onChange={() => toggleGrocery(item.key)}
+                                                    className="size-4 rounded border-border text-primary focus:ring-primary/40 cursor-pointer accent-primary"
+                                                />
+                                                <span className={`font-medium ${isItemChecked ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+                                                    {item.label}
+                                                </span>
+                                            </label>
+                                            {item.count > 1 && (
+                                                <span className="text-[11px] font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-full tabular-nums shrink-0">
+                                                    ×{item.count}
+                                                </span>
                                             )}
                                         </li>
                                     );
                                 })}
                             </ul>
-                        </Card>
-                    );
-                })}
-            </div>
+                        )}
+                    </Card>
 
-            <div className="grid gap-4 lg:grid-cols-2">
-                <Card hoverable={false} className="p-4">
-                    <h2 className="font-bold mb-3 flex items-center gap-2"><Icon name="task_alt" size={18} className="text-primary" />{tx.grocery}</h2>
-                    {loading ? null : grocery.length === 0 ? (
-                        <p className="text-sm text-muted-foreground">{tx.groceryEmpty}</p>
-                    ) : (
-                        <ul className="flex flex-col gap-1.5">
-                            {grocery.map((item) => (
-                                <li key={item.key}>
-                                    <label className="flex items-center gap-2 text-sm cursor-pointer">
-                                        <input type="checkbox" checked={checked.has(item.key)} onChange={() => toggleGrocery(item.key)} />
-                                        <span className={checked.has(item.key) ? 'line-through text-muted-foreground' : ''}>{item.label}</span>
-                                        {item.count > 1 && <span className="text-xs text-muted-foreground">×{item.count}</span>}
-                                    </label>
-                                </li>
-                            ))}
-                        </ul>
-                    )}
-                </Card>
-
-                <Card hoverable={false} className="p-4">
-                    <h2 className="font-bold mb-1 flex items-center gap-2"><Icon name="restaurant" size={18} className="text-primary" />{tx.pantry}</h2>
-                    <p className="text-xs text-muted-foreground mb-3">{tx.pantryHint}</p>
-                    <form className="flex gap-2 mb-3" onSubmit={(e) => { e.preventDefault(); addPantry(); }}>
-                        <input className={inputClass} placeholder={tx.pantryPlaceholder} value={pantryInput} onChange={(e) => setPantryInput(e.target.value)} />
-                        <Button size="sm" type="submit">{tx.pantryAdd}</Button>
-                    </form>
-                    <div className="flex flex-wrap gap-2">
-                        {pantry.map((p) => (
-                            <span key={p.id} className="inline-flex items-center gap-1 rounded-full bg-muted px-3 py-1 text-xs">
-                                {p.name}
-                                <button type="button" aria-label={`remove ${p.name}`} onClick={() => removePantryItem(p.id).then(() => setPantry((prev) => prev.filter((x) => x.id !== p.id))).catch(fail)}>
-                                    <Icon name="close" size={12} />
-                                </button>
+                    {/* PANTRY CARD */}
+                    <Card hoverable={false} className="p-5 flex flex-col gap-4 border border-border/70 shadow-xs">
+                        <div className="flex items-center justify-between pb-2 border-b border-border/60">
+                            <div className="flex items-center gap-2.5">
+                                <div className="flex items-center justify-center size-8 rounded-xl bg-primary/10 text-primary">
+                                    <Icon name="restaurant" size={17} weight="bold" />
+                                </div>
+                                <h2 className="text-base font-bold text-foreground">{tx.pantry}</h2>
+                            </div>
+                            <span className="text-xs font-semibold tabular-nums text-muted-foreground bg-muted px-2.5 py-1 rounded-full">
+                                {pantry.length} ingredientes
                             </span>
-                        ))}
-                    </div>
-                </Card>
+                        </div>
+
+                        <p className="text-xs text-muted-foreground leading-relaxed -mt-1 text-wrap-pretty">
+                            {tx.pantryHint}
+                        </p>
+
+                        <form
+                            className="flex gap-2"
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                addPantry();
+                            }}
+                        >
+                            <input
+                                className={inputClass}
+                                placeholder={tx.pantryPlaceholder}
+                                value={pantryInput}
+                                onChange={(e) => setPantryInput(e.target.value)}
+                            />
+                            <Button size="sm" type="submit" disabled={!pantryInput.trim()} className="shrink-0">
+                                {tx.pantryAdd}
+                            </Button>
+                        </form>
+
+                        {/* Quick Suggestions */}
+                        <div className="flex flex-col gap-1.5 pt-1">
+                            <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80">
+                                {tx.pantryQuickSuggestions}
+                            </span>
+                            <div className="flex flex-wrap gap-1.5">
+                                {QUICK_PANTRY_SUGGESTIONS.filter((s) => !pantry.some((p) => p.name.toLowerCase() === s.toLowerCase())).map((sug) => (
+                                    <button
+                                        key={sug}
+                                        type="button"
+                                        onClick={() => addPantry(sug)}
+                                        className="inline-flex items-center gap-1 rounded-lg border border-dashed border-border/80 px-2 py-0.5 text-xs text-muted-foreground hover:text-primary hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer"
+                                    >
+                                        <Icon name="plus" size={10} />
+                                        <span>{sug}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Pantry tags */}
+                        <div className="flex flex-wrap gap-2 pt-2 border-t border-border/50 max-h-48 overflow-y-auto">
+                            {pantry.length === 0 ? (
+                                <p className="text-xs text-muted-foreground italic py-2">
+                                    Tu despensa está vacía. Agrega lo que tienes en cocina para que la IA lo use primero.
+                                </p>
+                            ) : (
+                                pantry.map((p) => (
+                                    <span
+                                        key={p.id}
+                                        className="inline-flex items-center gap-1.5 rounded-full bg-secondary/60 border border-border/70 px-3 py-1 text-xs font-medium text-foreground transition-colors group"
+                                    >
+                                        <span>{p.name}</span>
+                                        <button
+                                            type="button"
+                                            aria-label={`Quitar ${p.name}`}
+                                            className="text-muted-foreground hover:text-red-500 transition-colors cursor-pointer"
+                                            onClick={() =>
+                                                removePantryItem(p.id)
+                                                    .then(() => setPantry((prev) => prev.filter((x) => x.id !== p.id)))
+                                                    .catch(fail)
+                                            }
+                                        >
+                                            <Icon name="close" size={11} />
+                                        </button>
+                                    </span>
+                                ))
+                            )}
+                        </div>
+                    </Card>
+                </div>
             </div>
         </div>
     );
