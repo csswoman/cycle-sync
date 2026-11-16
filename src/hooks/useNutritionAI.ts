@@ -32,13 +32,24 @@ Format with markdown headers and bullet points. Be concise but thorough. Respond
 Formatea con encabezados markdown y viñetas. Sé conciso pero completo. Responde completamente en español.`,
 };
 
-export function useNutritionAI() {
+/** Same analysis without calories or macros, for no-numbers mode. */
+function withoutNumbers(prompt: string): string {
+  return prompt
+    .split('\n')
+    .filter((line) => !/^\d+\. \*\*(Estimated Calories|Macronutrients|Calorías estimadas|Macronutrientes)\*\*/.test(line))
+    .map((line) => line.replace(/^(\d+)\. /, ''))
+    .map((line, i, all) => (/^\*\*/.test(line) ? `${all.slice(0, i + 1).filter((l) => /^\*\*/.test(l)).length}. ${line}` : line))
+    .join('\n')
+    .concat('\nDo not mention calories, weight or numeric nutrient amounts. / No menciones calorías, peso ni cantidades numéricas de nutrientes.');
+}
+
+export function useNutritionAI(hideNumbers = false) {
   const [analysis, setAnalysis] = useState<NutritionAnalysis>({ raw: '', loading: false, error: null });
 
   const analyzePlate = async (base64Image: string, lang: Language = 'en') => {
     setAnalysis({ raw: '', loading: true, error: null });
     try {
-      const result = await analyzeImage(base64Image, ANALYZE_PROMPTS[lang]);
+      const result = await analyzeImage(base64Image, hideNumbers ? withoutNumbers(ANALYZE_PROMPTS[lang]) : ANALYZE_PROMPTS[lang]);
       setAnalysis({ raw: result, loading: false, error: null });
     } catch (err: any) {
       setAnalysis({ raw: '', loading: false, error: err.message || 'Failed to analyze image' });

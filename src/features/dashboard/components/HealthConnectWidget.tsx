@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLanguage } from '@/i18n/LanguageContext';
 import Link from 'next/link';
+import { useDisplayPrefs } from '@/hooks/useDisplayPrefs';
 import { Icon } from '@/components/ui/Icon';
 import ManualHealthEntry from './ManualHealthEntry';
 
@@ -28,6 +29,7 @@ const REFRESH_MS = 5 * 60 * 1000;
 
 const HealthConnectWidget: React.FC = () => {
   const { t } = useLanguage();
+  const { hideNumbers } = useDisplayPrefs();
   const [summary, setSummary] = useState<HealthSummary | null>(null);
   const [tokenConfigured, setTokenConfigured] = useState<boolean | null>(null);
   const [syncing, setSyncing] = useState(false);
@@ -77,7 +79,7 @@ const HealthConnectWidget: React.FC = () => {
 
   const activityValue = () => {
     if (summary?.active_minutes) return `${summary.active_minutes} min`;
-    if (summary?.active_calories) return `${Math.round(summary.active_calories)} kcal`;
+    if (!hideNumbers && summary?.active_calories) return `${Math.round(summary.active_calories)} kcal`;
     return '—';
   };
 
@@ -134,7 +136,7 @@ const HealthConnectWidget: React.FC = () => {
         />
       </div>
 
-      {summary && (heartRate || summary.distance_meters > 0 || (summary.weight_kg ?? 0) > 0) && (
+      {summary && (heartRate || summary.distance_meters > 0 || (!hideNumbers && (summary.weight_kg ?? 0) > 0)) && (
         <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-muted-foreground">
           {heartRate ? (
             <span className="flex items-center gap-1">
@@ -148,7 +150,7 @@ const HealthConnectWidget: React.FC = () => {
               {t.distanceLabel}: <b className="text-foreground tabular-nums">{formatDistance(summary.distance_meters)}</b>
             </span>
           )}
-          {(summary.weight_kg ?? 0) > 0 && (
+          {!hideNumbers && (summary.weight_kg ?? 0) > 0 && (
             <span className="flex items-center gap-1">
               <Icon name="monitor_weight" size={14} weight="duotone" className="text-purple-500" />
               {t.weightLabel}: <b className="text-foreground tabular-nums">{summary.weight_kg!.toFixed(1)} kg</b>

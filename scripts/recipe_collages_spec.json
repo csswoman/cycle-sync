@@ -1,0 +1,862 @@
+{
+  "total_recipes": 85,
+  "total_collages": 22,
+  "batches": [
+    {
+      "batch_id": "collage_01",
+      "grid": "2x2",
+      "recipes": [
+        "Pasta con Calabacin y Huevos",
+        "Noquis de Calabaza",
+        "Pastel de Frijoles (Bunuelos)",
+        "Pastel de Remolacha"
+      ],
+      "items": [
+        {
+          "position": "Top-Left",
+          "title": "Pasta con Calabacin y Huevos",
+          "category": "almuerzo",
+          "description": "Pasta ligera con calabacin en tiras finas y tortilla de huevo cortada en rodajas, con opcion de salsa fria o picante.",
+          "has_image": false
+        },
+        {
+          "position": "Top-Right",
+          "title": "Noquis de Calabaza",
+          "category": "almuerzo",
+          "description": "Noquis caseros hechos con pure de calabaza, huevo y harina, servidos con tu salsa favorita.",
+          "has_image": true
+        },
+        {
+          "position": "Bottom-Left",
+          "title": "Pastel de Frijoles (Bunuelos)",
+          "category": "almuerzo",
+          "description": "Buñuelos de frijoles blancos con zanahoria rallada. Se pueden hacer en sarten, horneados o fritos.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Right",
+          "title": "Pastel de Remolacha",
+          "category": "postre",
+          "description": "Bizcocho dulce de remolacha con cobertura de chocolate.",
+          "has_image": false
+        }
+      ]
+    },
+    {
+      "batch_id": "collage_02",
+      "grid": "2x2",
+      "recipes": [
+        "Zumo de Cascara de Fruta",
+        "Jugo de Naranja, Hinojo y Menta",
+        "Pastel de Frijoles (Dulce)",
+        "Pastel de Avena"
+      ],
+      "items": [
+        {
+          "position": "Top-Left",
+          "title": "Zumo de Cascara de Fruta",
+          "category": "bebida",
+          "description": "Jugo nutritivo elaborado con cascaras de frutas variadas. Rico en Vitaminas C y B1, Potasio, Fosforo, Calcio y Magnesio.",
+          "has_image": false
+        },
+        {
+          "position": "Top-Right",
+          "title": "Jugo de Naranja, Hinojo y Menta",
+          "category": "bebida",
+          "description": "Jugo refrescante con naranja, hinojo y menta.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Left",
+          "title": "Pastel de Frijoles (Dulce)",
+          "category": "postre",
+          "description": "Bizcocho dulce hecho con frijoles cocidos licuados.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Right",
+          "title": "Pastel de Avena",
+          "category": "postre",
+          "description": "Bizcocho sencillo de avena con opcion de cobertura de chocolate.",
+          "has_image": false
+        }
+      ]
+    },
+    {
+      "batch_id": "collage_03",
+      "grid": "2x2",
+      "recipes": [
+        "Albondigas en Salsa de Papaya",
+        "Arroz Verde",
+        "Crema de Naranja y Zanahoria",
+        "Pastel de Naranja con Cascara"
+      ],
+      "items": [
+        {
+          "position": "Top-Left",
+          "title": "Albondigas en Salsa de Papaya",
+          "category": "almuerzo",
+          "description": "Albondigas de carne picada con una salsa cremosa de papaya.",
+          "has_image": false
+        },
+        {
+          "position": "Top-Right",
+          "title": "Arroz Verde",
+          "category": "almuerzo",
+          "description": "Arroz salteado con verduras de hoja verde: tallos de berro, perejil y hojas de zanahoria.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Left",
+          "title": "Crema de Naranja y Zanahoria",
+          "category": "postre",
+          "description": "Crema dulce de naranja y zanahoria, ideal como relleno para tartas.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Right",
+          "title": "Pastel de Naranja con Cascara",
+          "category": "postre",
+          "description": "Bizcocho de naranja preparado con naranjas enteras (con cascara).",
+          "has_image": false
+        }
+      ]
+    },
+    {
+      "batch_id": "collage_04",
+      "grid": "2x2",
+      "recipes": [
+        "Galletas de Hojas, Tallos o Cascaras de Vegetales",
+        "Receta con Pan Duro (Version Dulce)",
+        "Receta con Pan Duro (Version Salada)",
+        "Panqueque de Arroz (Salado)"
+      ],
+      "items": [
+        {
+          "position": "Top-Left",
+          "title": "Galletas de Hojas, Tallos o Cascaras de Vegetales",
+          "category": "snack",
+          "description": "Galletas saladas hechas con hojas, tallos o cascaras de vegetales.",
+          "has_image": false
+        },
+        {
+          "position": "Top-Right",
+          "title": "Receta con Pan Duro (Version Dulce)",
+          "category": "postre",
+          "description": "Aprovechamiento de pan duro en un pudin dulce con manzana y pasas.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Left",
+          "title": "Receta con Pan Duro (Version Salada)",
+          "category": "almuerzo",
+          "description": "Aprovechamiento de pan duro en un plato salado con tomate, cebolla y queso.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Right",
+          "title": "Panqueque de Arroz (Salado)",
+          "category": "almuerzo",
+          "description": "Panqueques salados hechos con arroz blanco sobrante.",
+          "has_image": false
+        }
+      ]
+    },
+    {
+      "batch_id": "collage_05",
+      "grid": "2x2",
+      "recipes": [
+        "Arroz Dulce con Especias",
+        "Pastel Rico en Vitaminas (con Cascaras)",
+        "Ensalada de Cascaras Sobrantes",
+        "Solterito Arequipeno"
+      ],
+      "items": [
+        {
+          "position": "Top-Left",
+          "title": "Arroz Dulce con Especias",
+          "category": "postre",
+          "description": "Arroz cremoso dulce con canela, clavo, jengibre, nuez moscada y curcuma.",
+          "has_image": false
+        },
+        {
+          "position": "Top-Right",
+          "title": "Pastel Rico en Vitaminas (con Cascaras)",
+          "category": "postre",
+          "description": "Bizcocho nutritivo hecho con naranjas, remolacha, zanahorias con cascara, chia y linaza.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Left",
+          "title": "Ensalada de Cascaras Sobrantes",
+          "category": "almuerzo",
+          "description": "Ensalada ligera hecha con cascaras de calabaza, berenjena y chayote.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Right",
+          "title": "Solterito Arequipeno",
+          "category": "almuerzo",
+          "description": "Ensalada fria arequipena con habas, choclo, queso fresco, aceitunas y rocoto.",
+          "has_image": true
+        }
+      ]
+    },
+    {
+      "batch_id": "collage_06",
+      "grid": "2x2",
+      "recipes": [
+        "Pastel de Aguacate",
+        "Panqueque Super Facil",
+        "Pastel de Calabacin y Remolacha",
+        "Yuquitas Fritas"
+      ],
+      "items": [
+        {
+          "position": "Top-Left",
+          "title": "Pastel de Aguacate",
+          "category": "postre",
+          "description": "Bizcocho humedo de aguacate con leche de coco y semillas de chia.",
+          "has_image": false
+        },
+        {
+          "position": "Top-Right",
+          "title": "Panqueque Super Facil",
+          "category": "desayuno",
+          "description": "Panqueques rapidos con zanahoria, harina de maiz y leche de coco.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Left",
+          "title": "Pastel de Calabacin y Remolacha",
+          "category": "postre",
+          "description": "Bizcocho saludable de calabacin y remolacha con cacao.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Right",
+          "title": "Yuquitas Fritas",
+          "category": "snack",
+          "description": "Bastones de yuca frita crujientes por fuera y suaves por dentro, clasico acompanamiento peruano.",
+          "has_image": false
+        }
+      ]
+    },
+    {
+      "batch_id": "collage_07",
+      "grid": "2x2",
+      "recipes": [
+        "Pastel de Verduras",
+        "Tortilla de Verduras",
+        "Tallarines Verdes con Pollo",
+        "Compota de Entrecascara de Naranja"
+      ],
+      "items": [
+        {
+          "position": "Top-Left",
+          "title": "Pastel de Verduras",
+          "category": "almuerzo",
+          "description": "Bizcocho salado con mezcla de verduras cocidas y picadas finamente.",
+          "has_image": false
+        },
+        {
+          "position": "Top-Right",
+          "title": "Tortilla de Verduras",
+          "category": "almuerzo",
+          "description": "Tortilla jugosa de huevo con papa, arvejas y pimiento. Ideal para almuerzo rapido o cena ligera.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Left",
+          "title": "Tallarines Verdes con Pollo",
+          "category": "almuerzo",
+          "description": "Pasta peruana en salsa verde de albahaca y espinaca con pollo a la plancha. Clasico de la cocina criolla.",
+          "has_image": true
+        },
+        {
+          "position": "Bottom-Right",
+          "title": "Compota de Entrecascara de Naranja",
+          "category": "postre",
+          "description": "Compota dulce hecha con la parte blanca de la cascara de naranja.",
+          "has_image": false
+        }
+      ]
+    },
+    {
+      "batch_id": "collage_08",
+      "grid": "2x2",
+      "recipes": [
+        "Tamal de Pollo",
+        "Trufa de Platano y Chocolate",
+        "Aguadito de Pollo",
+        "Croqueta de Camote y Pollo"
+      ],
+      "items": [
+        {
+          "position": "Top-Left",
+          "title": "Tamal de Pollo",
+          "category": "almuerzo",
+          "description": "Tamal peruano de masa de maiz relleno de pollo, aceitunas y huevo, envuelto en hoja de platano.",
+          "has_image": false
+        },
+        {
+          "position": "Top-Right",
+          "title": "Trufa de Platano y Chocolate",
+          "category": "postre",
+          "description": "Trufas saludables de platano con cacao al 70% y canela.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Left",
+          "title": "Aguadito de Pollo",
+          "category": "almuerzo",
+          "description": "Sopa espesa peruana de pollo con arroz, cilantro y verduras. Reconfortante y nutritiva.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Right",
+          "title": "Croqueta de Camote y Pollo",
+          "category": "snack",
+          "description": "Croquetas horneadas de camote y pollo.",
+          "has_image": false
+        }
+      ]
+    },
+    {
+      "batch_id": "collage_09",
+      "grid": "2x2",
+      "recipes": [
+        "Albondigas de Pollo y Queso con Verduras",
+        "Salsa Criolla",
+        "Saltado de Verduras",
+        "Helado de Platano"
+      ],
+      "items": [
+        {
+          "position": "Top-Left",
+          "title": "Albondigas de Pollo y Queso con Verduras",
+          "category": "almuerzo",
+          "description": "Albondigas horneadas con pollo, queso y verduras ralladas.",
+          "has_image": false
+        },
+        {
+          "position": "Top-Right",
+          "title": "Salsa Criolla",
+          "category": "almuerzo",
+          "description": "Clasica guarnicion peruana de cebolla roja, tomate y aji marinada en limon. Ideal para carnes y ceviches.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Left",
+          "title": "Saltado de Verduras",
+          "category": "almuerzo",
+          "description": "Salteado peruano de verduras al wok con sillao, ideal como acompanamiento o plato ligero.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Right",
+          "title": "Helado de Platano",
+          "category": "postre",
+          "description": "Helado saludable de solo 3 ingredientes.",
+          "has_image": false
+        }
+      ]
+    },
+    {
+      "batch_id": "collage_10",
+      "grid": "2x2",
+      "recipes": [
+        "Chifles",
+        "Pollo Fragante",
+        "Tomates Asados para Salsa Rustica",
+        "Pan con Chicharron"
+      ],
+      "items": [
+        {
+          "position": "Top-Left",
+          "title": "Chifles",
+          "category": "snack",
+          "description": "Chips crujientes de platano verde fritos, snack clasico peruano.",
+          "has_image": false
+        },
+        {
+          "position": "Top-Right",
+          "title": "Pollo Fragante",
+          "category": "cena",
+          "description": "Muslos de pollo deshuesados marinados en condimento aromatico con verduras al horno.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Left",
+          "title": "Tomates Asados para Salsa Rustica",
+          "category": "almuerzo",
+          "description": "Tomates asados lentamente al horno para hacer una salsa rustica.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Right",
+          "title": "Pan con Chicharron",
+          "category": "almuerzo",
+          "description": "Sandwich peruano de cerdo frito crujiente con camote y salsa criolla en pan frances.",
+          "has_image": false
+        }
+      ]
+    },
+    {
+      "batch_id": "collage_11",
+      "grid": "2x2",
+      "recipes": [
+        "Lomo Saltado",
+        "Aji de Gallina",
+        "Arroz con Pollo",
+        "Papa a la Huancaina"
+      ],
+      "items": [
+        {
+          "position": "Top-Left",
+          "title": "Lomo Saltado",
+          "category": "almuerzo",
+          "description": "Clasico plato peruano de lomo fino salteado con cebolla, tomate y aji amarillo, acompanado de papas fritas y arroz.",
+          "has_image": true
+        },
+        {
+          "position": "Top-Right",
+          "title": "Aji de Gallina",
+          "category": "almuerzo",
+          "description": "Cremosa preparacion peruana de pollo desmenuzado en salsa de aji amarillo con pecanas y queso, servido con papa amarilla y arroz.",
+          "has_image": true
+        },
+        {
+          "position": "Bottom-Left",
+          "title": "Arroz con Pollo",
+          "category": "almuerzo",
+          "description": "Arroz verde peruano cocinado con pollo, cilantro, aji amarillo y verduras. Plato emblematico de la cocina criolla.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Right",
+          "title": "Papa a la Huancaina",
+          "category": "almuerzo",
+          "description": "Entrada clasica peruana de papas amarillas banadas en cremosa salsa de aji amarillo con queso fresco y leche.",
+          "has_image": false
+        }
+      ]
+    },
+    {
+      "batch_id": "collage_12",
+      "grid": "2x2",
+      "recipes": [
+        "Causa Limena",
+        "Seco de Pollo",
+        "Mazamorra Morada",
+        "Avena con Platano y Canela"
+      ],
+      "items": [
+        {
+          "position": "Top-Left",
+          "title": "Causa Limena",
+          "category": "almuerzo",
+          "description": "Plato frio peruano de papa amarilla prensada con limon y aji, rellena de pollo o atun con mayonesa y palta.",
+          "has_image": true
+        },
+        {
+          "position": "Top-Right",
+          "title": "Seco de Pollo",
+          "category": "almuerzo",
+          "description": "Guiso peruano de pollo en salsa verde de cilantro y espinaca, con papas y zanahoria. Plato reconfortante y nutritivo.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Left",
+          "title": "Mazamorra Morada",
+          "category": "postre",
+          "description": "Postre tradicional peruano a base de maiz morado con frutas, canela y clavo. Dulce, reconfortante y bajo en grasa.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Right",
+          "title": "Avena con Platano y Canela",
+          "category": "desayuno",
+          "description": "Desayuno clasico fitness: avena cocida con platano, canela y miel. Alto en fibra y energia para entrenar.",
+          "has_image": false
+        }
+      ]
+    },
+    {
+      "batch_id": "collage_13",
+      "grid": "2x2",
+      "recipes": [
+        "Huevos Revueltos con Tomate y Cebolla",
+        "Pan con Palta y Huevo",
+        "Batido Proteico de Platano y Avena",
+        "Tortilla de Espinaca y Queso"
+      ],
+      "items": [
+        {
+          "position": "Top-Left",
+          "title": "Huevos Revueltos con Tomate y Cebolla",
+          "category": "desayuno",
+          "description": "Desayuno alto en proteina con huevos revueltos, tomate y cebolla. Rapido y nutritivo.",
+          "has_image": true
+        },
+        {
+          "position": "Top-Right",
+          "title": "Pan con Palta y Huevo",
+          "category": "desayuno",
+          "description": "Tostada con palta y huevo frito, desayuno peruano moderno rico en grasas saludables y proteina.",
+          "has_image": true
+        },
+        {
+          "position": "Bottom-Left",
+          "title": "Batido Proteico de Platano y Avena",
+          "category": "desayuno",
+          "description": "Smoothie energetico con platano, avena, leche y mantequilla de mani. Perfecto antes de entrenar.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Right",
+          "title": "Tortilla de Espinaca y Queso",
+          "category": "desayuno",
+          "description": "Tortilla francesa rellena de espinaca y queso fresco. Alta en proteina y baja en carbohidratos.",
+          "has_image": false
+        }
+      ]
+    },
+    {
+      "batch_id": "collage_14",
+      "grid": "2x2",
+      "recipes": [
+        "Quinua con Leche y Frutas",
+        "Pollo a la Plancha con Ensalada Fresca",
+        "Pescado al Horno con Brocoli",
+        "Ensalada de Atun con Palta"
+      ],
+      "items": [
+        {
+          "position": "Top-Left",
+          "title": "Quinua con Leche y Frutas",
+          "category": "desayuno",
+          "description": "Desayuno andino peruano de quinua cocida en leche con frutas frescas. Nutritivo y energizante.",
+          "has_image": false
+        },
+        {
+          "position": "Top-Right",
+          "title": "Pollo a la Plancha con Ensalada Fresca",
+          "category": "cena",
+          "description": "Cena ligera alta en proteina: pechuga de pollo a la plancha con ensalada de lechuga, tomate y palta.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Left",
+          "title": "Pescado al Horno con Brocoli",
+          "category": "cena",
+          "description": "Filete de pescado horneado con brocoli al vapor. Cena ligera rica en omega-3 y proteina.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Right",
+          "title": "Ensalada de Atun con Palta",
+          "category": "cena",
+          "description": "Ensalada fria rapida de atun con palta, tomate y cebolla. Cena practica alta en proteina.",
+          "has_image": false
+        }
+      ]
+    },
+    {
+      "batch_id": "collage_15",
+      "grid": "2x2",
+      "recipes": [
+        "Tortilla de Claras con Verduras",
+        "Crema de Zapallo con Pollo Deshilachado",
+        "Trucha a la Plancha con Ensalada",
+        "Pan con Queso Fresco y Aceituna"
+      ],
+      "items": [
+        {
+          "position": "Top-Left",
+          "title": "Tortilla de Claras con Verduras",
+          "category": "cena",
+          "description": "Cena ultra ligera de claras de huevo con pimiento, cebolla y champiñones. Minima grasa, maxima proteina.",
+          "has_image": false
+        },
+        {
+          "position": "Top-Right",
+          "title": "Crema de Zapallo con Pollo Deshilachado",
+          "category": "cena",
+          "description": "Sopa cremosa de zapallo con pollo deshilachado. Cena reconfortante peruana baja en grasa.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Left",
+          "title": "Trucha a la Plancha con Ensalada",
+          "category": "cena",
+          "description": "Filete de trucha a la plancha con ensalada fresca. Cena rica en omega-3 y proteina con pescado peruano.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Right",
+          "title": "Pan con Queso Fresco y Aceituna",
+          "category": "desayuno",
+          "description": "Desayuno clasico peruano: pan frances con queso fresco, aceitunas y un cafe con leche.",
+          "has_image": false
+        }
+      ]
+    },
+    {
+      "batch_id": "collage_16",
+      "grid": "2x2",
+      "recipes": [
+        "Panqueques de Avena con Platano",
+        "Yogurt con Granola y Frutas",
+        "Sandwich de Pollo con Palta",
+        "Avena con Manzana y Pecanas"
+      ],
+      "items": [
+        {
+          "position": "Top-Left",
+          "title": "Panqueques de Avena con Platano",
+          "category": "desayuno",
+          "description": "Panqueques fitness de avena y platano sin harina refinada. Altos en fibra y energia.",
+          "has_image": false
+        },
+        {
+          "position": "Top-Right",
+          "title": "Yogurt con Granola y Frutas",
+          "category": "desayuno",
+          "description": "Bowl de yogurt natural con granola casera y frutas frescas de temporada.",
+          "has_image": true
+        },
+        {
+          "position": "Bottom-Left",
+          "title": "Sandwich de Pollo con Palta",
+          "category": "desayuno",
+          "description": "Sandwich proteico con pollo deshilachado, palta y tomate en pan integral.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Right",
+          "title": "Avena con Manzana y Pecanas",
+          "category": "desayuno",
+          "description": "Avena cocida con trozos de manzana, pecanas y canela. Desayuno reconfortante y nutritivo.",
+          "has_image": false
+        }
+      ]
+    },
+    {
+      "batch_id": "collage_17",
+      "grid": "2x2",
+      "recipes": [
+        "Huevos Duros con Pan Integral y Palta",
+        "Jugo Verde con Tostada de Huevo",
+        "Tamal Verde de Pollo",
+        "Ceviche de Bonito"
+      ],
+      "items": [
+        {
+          "position": "Top-Left",
+          "title": "Huevos Duros con Pan Integral y Palta",
+          "category": "desayuno",
+          "description": "Desayuno rapido y completo: huevos duros con pan integral tostado y palta.",
+          "has_image": false
+        },
+        {
+          "position": "Top-Right",
+          "title": "Jugo Verde con Tostada de Huevo",
+          "category": "desayuno",
+          "description": "Combinacion energizante: jugo verde de espinaca con fruta y tostada de huevo revuelto.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Left",
+          "title": "Tamal Verde de Pollo",
+          "category": "desayuno",
+          "description": "Tamal peruano de masa de maiz con cilantro relleno de pollo. Desayuno contundente para dias de entreno fuerte.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Right",
+          "title": "Ceviche de Bonito",
+          "category": "cena",
+          "description": "Ceviche fresco de bonito marinado en limon con cebolla roja y aji limo. Cena ligera clasica peruana.",
+          "has_image": true
+        }
+      ]
+    },
+    {
+      "batch_id": "collage_18",
+      "grid": "2x2",
+      "recipes": [
+        "Sopa de Pollo con Fideos",
+        "Pechuga al Horno con Camote",
+        "Tiradito de Pescado",
+        "Ensalada de Quinua con Pollo"
+      ],
+      "items": [
+        {
+          "position": "Top-Left",
+          "title": "Sopa de Pollo con Fideos",
+          "category": "cena",
+          "description": "Sopa casera de pollo con fideos y verduras. Cena reconfortante y facil de digerir.",
+          "has_image": false
+        },
+        {
+          "position": "Top-Right",
+          "title": "Pechuga al Horno con Camote",
+          "category": "cena",
+          "description": "Pechuga de pollo horneada con camote asado y ensalada. Cena completa alta en proteina.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Left",
+          "title": "Tiradito de Pescado",
+          "category": "cena",
+          "description": "Laminas finas de pescado fresco en salsa de aji amarillo y limon. Entrada-cena peruana ligera.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Right",
+          "title": "Ensalada de Quinua con Pollo",
+          "category": "cena",
+          "description": "Ensalada tibia de quinua con pollo a la plancha, palta y verduras frescas. Cena completa y nutritiva.",
+          "has_image": true
+        }
+      ]
+    },
+    {
+      "batch_id": "collage_19",
+      "grid": "2x2",
+      "recipes": [
+        "Arroz de Coliflor con Pollo Salteado",
+        "Wrap de Pollo con Verduras",
+        "Causa Rellena Light de Atun",
+        "Zumo Detox de Pepino y Limon"
+      ],
+      "items": [
+        {
+          "position": "Top-Left",
+          "title": "Arroz de Coliflor con Pollo Salteado",
+          "category": "cena",
+          "description": "Pollo salteado sobre arroz de coliflor rallada. Cena baja en carbohidratos ideal para definicion.",
+          "has_image": false
+        },
+        {
+          "position": "Top-Right",
+          "title": "Wrap de Pollo con Verduras",
+          "category": "cena",
+          "description": "Wrap ligero de tortilla integral con pollo, lechuga, tomate y salsa de yogurt.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Left",
+          "title": "Causa Rellena Light de Atun",
+          "category": "cena",
+          "description": "Version ligera de la causa peruana con atun en agua y palta. Sin mayonesa, baja en grasa.",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Right",
+          "title": "Zumo Detox de Pepino y Limon",
+          "category": "jugo-detox",
+          "description": "Hidratacion, desintoxicacion, vitamina C, digestion",
+          "has_image": false
+        }
+      ]
+    },
+    {
+      "batch_id": "collage_20",
+      "grid": "2x2",
+      "recipes": [
+        "Zumo Detox de Remolacha y Zanahoria",
+        "Zumo Tropical Detox",
+        "Batido Verde Detox",
+        "Batido Detox de Aguaymanto y Fresa"
+      ],
+      "items": [
+        {
+          "position": "Top-Left",
+          "title": "Zumo Detox de Remolacha y Zanahoria",
+          "category": "jugo-detox",
+          "description": "Antioxidante, vitamina A, hierro, desintoxicacion hepatica",
+          "has_image": false
+        },
+        {
+          "position": "Top-Right",
+          "title": "Zumo Tropical Detox",
+          "category": "jugo-detox",
+          "description": "Vitamina C, digestion, hidratacion tropical, enzimas digestivas",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Left",
+          "title": "Batido Verde Detox",
+          "category": "jugo-detox",
+          "description": "Clorofila, hierro, fibra, desintoxicacion, vitaminas K y A",
+          "has_image": true
+        },
+        {
+          "position": "Bottom-Right",
+          "title": "Batido Detox de Aguaymanto y Fresa",
+          "category": "jugo-detox",
+          "description": "Antioxidantes, vitamina C, antiinflamatorio, salud cardiovascular",
+          "has_image": false
+        }
+      ]
+    },
+    {
+      "batch_id": "collage_21",
+      "grid": "2x2",
+      "recipes": [
+        "Zumo Detox de Sandia",
+        "Zumo Detox Citrico",
+        "Zumo Detox de Zanahoria y Jengibre",
+        "Zumo Detox de Maracuya y Remolacha"
+      ],
+      "items": [
+        {
+          "position": "Top-Left",
+          "title": "Zumo Detox de Sandia",
+          "category": "jugo-detox",
+          "description": "Hidratacion, licopeno, vitaminas A y C, diuretico natural",
+          "has_image": false
+        },
+        {
+          "position": "Top-Right",
+          "title": "Zumo Detox Citrico",
+          "category": "jugo-detox",
+          "description": "Vitamina C, refuerzo inmunologico, antioxidante, energia natural",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Left",
+          "title": "Zumo Detox de Zanahoria y Jengibre",
+          "category": "jugo-detox",
+          "description": "Vitamina A, antiinflamatorio, digestion, sistema inmunologico",
+          "has_image": false
+        },
+        {
+          "position": "Bottom-Right",
+          "title": "Zumo Detox de Maracuya y Remolacha",
+          "category": "jugo-detox",
+          "description": "Antioxidante potente, hierro, vitamina C, salud cardiovascular",
+          "has_image": false
+        }
+      ]
+    },
+    {
+      "batch_id": "collage_22",
+      "grid": "2x2",
+      "recipes": [
+        "Zumo Detox de Pepino y Menta"
+      ],
+      "items": [
+        {
+          "position": "Top-Left",
+          "title": "Zumo Detox de Pepino y Menta",
+          "category": "jugo-detox",
+          "description": "Hidratacion, frescura, digestion, diuretico, vitamina C",
+          "has_image": false
+        }
+      ]
+    }
+  ]
+}

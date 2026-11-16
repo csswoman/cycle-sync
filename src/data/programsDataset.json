@@ -759,7 +759,7 @@
     {
       "id": "home-cardio",
       "name": "Cardio Fit",
-      "description": "12 ejercicios cardiovasculares de alta intensidad para quemar grasa en casa.",
+      "description": "12 ejercicios cardiovasculares de alta intensidad para hacer en casa.",
       "category": "home",
       "difficulty": "intermedio",
       "durationWeeks": 4,
@@ -1707,7 +1707,7 @@
     {
       "id": "home-pilates",
       "name": "Pilates en Casa",
-      "description": "26 ejercicios de Pilates incluyendo Gymstick para adelgazamiento, tonificacion, flexibilidad y conciencia corporal.",
+      "description": "26 ejercicios de Pilates incluyendo Gymstick para tonificacion, flexibilidad y conciencia corporal.",
       "category": "home",
       "difficulty": "principiante",
       "durationWeeks": 4,
@@ -2533,7 +2533,7 @@
     {
       "id": "home-hiit",
       "name": "HIIT en Casa",
-      "description": "Entrenamiento de alta intensidad por intervalos. Quema grasa y mejora resistencia en 20-30 minutos.",
+      "description": "Entrenamiento de alta intensidad por intervalos. Mejora la resistencia en 20-30 minutos.",
       "category": "home",
       "difficulty": "intermedio",
       "durationWeeks": 4,

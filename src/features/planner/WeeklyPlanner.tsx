@@ -12,6 +12,9 @@ import { fetchWorkoutVideos } from '@/services/exercisesService';
 import type { WorkoutVideo } from '@/types/exercises';
 import { MEAL_SLOTS, addDays, parseISODate, toISODate, weekDays, weekStartOf, type MealSlot } from '@/lib/planner/week';
 import { buildGroceryList } from '@/lib/planner/grocery';
+import { buildMealColumns, canAddGlucoseFromMeal } from '@/lib/pmos/mealGlucoseEntry';
+import { insertMetric, mealColumnsAvailable } from '@/services/mealGlucoseService';
+import { parseNum } from '@/features/health/pmos/shared';
 import {
     addPantryItem,
     applyGeneratedPlan,
@@ -34,6 +37,12 @@ import {
 const TEXT = {
     es: {
         title: 'Plan semanal',
+        addGlucose: 'Añadir glucosa',
+        glucoseValue: 'Glucosa (mg/dL)',
+        oneHour: '1 h después',
+        twoHours: '2 h después',
+        glucoseSaveError: 'No se pudo guardar la glucosa.',
+        glucoseInvalid: 'Escribe un valor de glucosa válido.',
         subtitle: 'Menús y entrenamientos sincronizados con la fisiología de tu ciclo menstrual.',
         phaseContext: 'Fase actual',
         fromRecipes: 'Planear con mis recetas',
@@ -75,6 +84,12 @@ const TEXT = {
     },
     en: {
         title: 'Weekly plan',
+        addGlucose: 'Add glucose',
+        glucoseValue: 'Glucose (mg/dL)',
+        oneHour: '1 h after',
+        twoHours: '2 h after',
+        glucoseSaveError: 'Could not save the glucose reading.',
+        glucoseInvalid: 'Enter a valid glucose value.',
         subtitle: 'Meals and workouts synchronized with your menstrual cycle physiology.',
         phaseContext: 'Current phase',
         fromRecipes: 'Plan with my recipes',
@@ -151,6 +166,10 @@ const WeeklyPlanner: React.FC = () => {
     const [notice, setNotice] = useState<string | null>(null);
     const [gaps, setGaps] = useState<{ day: number; slot: MealSlot }[]>([]);
     const foodPrefs = useFoodPreferences();
+    const [mealCols, setMealCols] = useState(false);
+    const [glucoseFor, setGlucoseFor] = useState<string | null>(null);
+    const [glucoseDraft, setGlucoseDraft] = useState<{ value: string; interval: 1 | 2 | null }>({ value: '', interval: null });
+    const [glucoseError, setGlucoseError] = useState<string | null>(null);
 
     const days = useMemo(() => weekDays(weekStart), [weekStart]);
     const todayISO = toISODate(new Date());
@@ -185,10 +204,32 @@ const WeeklyPlanner: React.FC = () => {
     useEffect(() => {
         listPantry().then(setPantry).catch(fail);
         fetchWorkoutVideos().then(setVideos).catch(() => undefined);
+        mealColumnsAvailable().then(setMealCols);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const mealAt = (date: string, slot: MealSlot) => meals.find((m) => m.date === date && m.slot === slot);
+    const saveGlucose = async (m: MealEntry) => {
+        const value = parseNum(glucoseDraft.value);
+        if (value == null || value <= 0) { setGlucoseError(tx.glucoseInvalid); return; }
+        const built = buildMealColumns({
+            context: 'post_meal',
+            selection: { kind: 'planner', slot: m.slot, title: m.title },
+            interval: glucoseDraft.interval,
+        });
+        if (!built.ok) { setGlucoseError(tx.glucoseSaveError); return; }
+        const res = await insertMetric({
+            date: m.date,
+            glucose_mg_dl: value,
+            glucose_context: 'post_meal',
+            ...built.columns,
+        });
+        if (!res.ok) { setGlucoseError(tx.glucoseSaveError); return; }
+        if (res.mealColumnsMissing) setMealCols(false);
+        setGlucoseFor(null);
+        setGlucoseError(null);
+        setGlucoseDraft({ value: '', interval: null });
+    };
     const workoutAt = (date: string) => workouts.find((w) => w.date === date);
 
     const grocery = useMemo(
@@ -620,6 +661,7 @@ const WeeklyPlanner: React.FC = () => {
                                                         </div>
                                                     </div>
                                                 ) : m ? (
+                                                    <>
                                                     <div className="group flex items-start gap-2 p-1.5 rounded-xl hover:bg-muted/40 transition-colors">
                                                         <input
                                                             type="checkbox"
@@ -648,6 +690,21 @@ const WeeklyPlanner: React.FC = () => {
                                                                 </p>
                                                             )}
                                                         </div>
+                                                        {canAddGlucoseFromMeal(m.done, mealCols) && (
+                                                            <button
+                                                                type="button"
+                                                                aria-label={tx.addGlucose}
+                                                                title={tx.addGlucose}
+                                                                className="text-muted-foreground hover:text-primary transition-colors p-0.5 cursor-pointer shrink-0"
+                                                                onClick={() => {
+                                                                    setGlucoseFor(glucoseFor === m.id ? null : m.id);
+                                                                    setGlucoseError(null);
+                                                                    setGlucoseDraft({ value: '', interval: null });
+                                                                }}
+                                                            >
+                                                                <Icon name="glucose" size={13} />
+                                                            </button>
+                                                        )}
                                                         <button
                                                             type="button"
                                                             aria-label="Eliminar comida"
@@ -657,6 +714,37 @@ const WeeklyPlanner: React.FC = () => {
                                                             <Icon name="close" size={13} />
                                                         </button>
                                                     </div>
+                                                    {glucoseFor === m.id && canAddGlucoseFromMeal(m.done, mealCols) && (
+                                                        <div className="flex flex-col gap-1.5 p-1.5">
+                                                            <input
+                                                                inputMode="decimal"
+                                                                value={glucoseDraft.value}
+                                                                onChange={(e) => setGlucoseDraft((d) => ({ ...d, value: e.target.value }))}
+                                                                placeholder={tx.glucoseValue}
+                                                                aria-label={tx.glucoseValue}
+                                                                className={inputClass}
+                                                            />
+                                                            <select
+                                                                value={glucoseDraft.interval ?? ''}
+                                                                onChange={(e) => setGlucoseDraft((d) => ({ ...d, interval: e.target.value === '' ? null : (Number(e.target.value) as 1 | 2) }))}
+                                                                className={inputClass}
+                                                            >
+                                                                <option value="">—</option>
+                                                                <option value="1">{tx.oneHour}</option>
+                                                                <option value="2">{tx.twoHours}</option>
+                                                            </select>
+                                                            {glucoseError && <p className="text-[11px] text-destructive">{glucoseError}</p>}
+                                                            <div className="flex justify-end gap-1.5">
+                                                                <button type="button" onClick={() => setGlucoseFor(null)} className="px-2.5 py-1 text-xs text-muted-foreground cursor-pointer">
+                                                                    {tx.cancel}
+                                                                </button>
+                                                                <button type="button" onClick={() => saveGlucose(m)} className="px-2.5 py-1 text-xs font-semibold bg-primary text-primary-foreground rounded-lg hover:opacity-90 cursor-pointer">
+                                                                    {tx.save}
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                    </>
                                                 ) : (
                                                     <button
                                                         type="button"

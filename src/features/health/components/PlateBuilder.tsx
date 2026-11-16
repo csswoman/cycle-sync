@@ -14,6 +14,7 @@ import {
   NutritionTargets,
 } from '@/lib/nutrition/targets';
 import { Icon } from '@/components/ui/Icon';
+import { useDisplayPrefs } from '@/hooks/useDisplayPrefs';
 import { NewRecipe } from '@/types/recipes';
 
 interface PlateBuilderProps {
@@ -74,6 +75,7 @@ export const PlateBuilder: React.FC<PlateBuilderProps> = ({
   onSaveAsRecipe,
   language = 'es',
 }) => {
+  const { hideNumbers } = useDisplayPrefs();
   const [plate, setPlate] = useState<PlateIngredient[]>([
     { food: FOOD_DATABASE.find((f) => f.id === 'pechuga-pollo')!, grams: 150 },
     { food: FOOD_DATABASE.find((f) => f.id === 'arroz-blanco')!, grams: 100 },
@@ -160,19 +162,25 @@ export const PlateBuilder: React.FC<PlateBuilderProps> = ({
     setIsSaving(true);
     setSaveSuccessMsg(null);
     try {
-      const title = `Plato Alto en Proteína (${plateTotals.protein}g P · ${plateTotals.calories} kcal)`;
-      const ingredients = plate.map(
-        (item) => `${item.grams}g de ${item.food.name} (~${Math.round((item.food.protein * item.grams) / 100)}g proteína, ${Math.round((item.food.calories * item.grams) / 100)} kcal)`
+      const title = hideNumbers ? 'Mi plato' : `Plato Alto en Proteína (${plateTotals.protein}g P · ${plateTotals.calories} kcal)`;
+      const ingredients = plate.map((item) =>
+        hideNumbers
+          ? `${item.grams}g de ${item.food.name}`
+          : `${item.grams}g de ${item.food.name} (~${Math.round((item.food.protein * item.grams) / 100)}g proteína, ${Math.round((item.food.calories * item.grams) / 100)} kcal)`
       );
       const steps = [
         'Pesar y cocinar cada alimento según el método preferido (plancha, horno o vapor).',
         'Emplatar combinando la fuente principal de proteína con los carbohidratos y vegetales seleccionados.',
-        `Disfrutar este plato que aporta ${plateTotals.protein}g de proteína y ${plateTotals.calories} kcal ajustadas a tu requerimiento diario.`,
+        hideNumbers
+          ? 'Disfrutar este plato con calma.'
+          : `Disfrutar este plato que aporta ${plateTotals.protein}g de proteína y ${plateTotals.calories} kcal ajustadas a tu requerimiento diario.`,
       ];
 
       await onSaveAsRecipe({
         title,
-        description: `Plato balanceado diseñado para ganar músculo y perder grasa sin perder masa muscular. Aporta ${plateTotals.protein}g de proteína (${plateTotals.proteinPercentOfDaily}% de tu meta diaria).`,
+        description: hideNumbers
+          ? 'Plato armado con el constructor de platos.'
+          : `Plato con buena proteína para tu músculo y tu glucosa. Aporta ${plateTotals.protein}g de proteína (${plateTotals.proteinPercentOfDaily}% de tu meta diaria).`,
         language: 'es',
         readyInMinutes: 20,
         servings: 1,
@@ -184,7 +192,7 @@ export const PlateBuilder: React.FC<PlateBuilderProps> = ({
           carbohydrates: plateTotals.carbohydrates,
           fat: plateTotals.fat,
         },
-        tags: ['Alto en Proteína', 'Recomposición', 'Plate Builder'],
+        tags: hideNumbers ? ['Plate Builder'] : ['Alto en Proteína', 'Plate Builder'],
       });
 
       setSaveSuccessMsg('¡Plato guardado con éxito en tus Recetas!');
@@ -272,7 +280,7 @@ export const PlateBuilder: React.FC<PlateBuilderProps> = ({
             </div>
 
             {/* Macro Totals Summary Box */}
-            <div className="bg-secondary/70 rounded-xl p-4 flex flex-col gap-3 border border-border/40">
+            {!hideNumbers && <div className="bg-secondary/70 rounded-xl p-4 flex flex-col gap-3 border border-border/40">
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
                 <div className="bg-card p-2 rounded-lg border border-border/60">
                   <span className="text-[10px] uppercase font-bold text-muted-foreground block">
@@ -334,10 +342,10 @@ export const PlateBuilder: React.FC<PlateBuilderProps> = ({
                 <p className="text-[11px] text-muted-foreground leading-snug">
                   Este plato aporta <strong>{plateTotals.protein}g</strong> de tu objetivo
                   diario de <strong>{targets.proteinGrams}g</strong> para conservar y generar
-                  músculo mientras quemas grasa con tu peso ({targets.weightKg} kg).
+                  músculo y cuidar tu glucosa, con tu peso ({targets.weightKg} kg).
                 </p>
               </div>
-            </div>
+            </div>}
 
             {/* List of ingredients in plate */}
             <div className="flex flex-col gap-2 max-h-[380px] overflow-y-auto pr-1">
@@ -346,7 +354,7 @@ export const PlateBuilder: React.FC<PlateBuilderProps> = ({
                   <Icon name="bowl_food" size={40} weight="duotone" className="text-muted-foreground/40" />
                   <p className="text-sm text-muted-foreground">Tu plato está vacío.</p>
                   <p className="text-xs text-muted-foreground/80 max-w-xs">
-                    Selecciona alimentos del catálogo de la derecha para calcular sus calorías y proteínas en gramos.
+                    {hideNumbers ? 'Selecciona alimentos del catálogo de la derecha para armar tu plato.' : 'Selecciona alimentos del catálogo de la derecha para calcular sus calorías y proteínas en gramos.'}
                   </p>
                 </div>
               ) : (
@@ -366,7 +374,7 @@ export const PlateBuilder: React.FC<PlateBuilderProps> = ({
                             {item.food.name}
                           </span>
                           <span className="text-[11px] text-muted-foreground">
-                            {itemCals} kcal · <strong className="text-primary font-bold">{itemProt}g prot</strong>
+                            {hideNumbers ? `${item.grams}g` : <>{itemCals} kcal · <strong className="text-primary font-bold">{itemProt}g prot</strong></>}
                           </span>
                         </div>
                         <button
@@ -452,7 +460,7 @@ export const PlateBuilder: React.FC<PlateBuilderProps> = ({
             <div>
               <h3 className="font-bold text-foreground text-base sm:text-lg flex items-center gap-2">
                 <Icon name="restaurant" size={20} weight="duotone" className="text-primary" />
-                Catálogo de Alimentos (Calorías & Proteínas)
+                {hideNumbers ? 'Catálogo de Alimentos' : 'Catálogo de Alimentos (Calorías & Proteínas)'}
               </h3>
               <p className="text-xs text-muted-foreground">
                 Selecciona alimentos para sumar a tu plato. Valores exactos por cada 100 gramos.
@@ -544,7 +552,7 @@ export const PlateBuilder: React.FC<PlateBuilderProps> = ({
                       </div>
 
                       {/* Nutrients per 100g */}
-                      <div className="flex items-center justify-between text-xs pt-1 border-t border-border/50">
+                      {!hideNumbers && <div className="flex items-center justify-between text-xs pt-1 border-t border-border/50">
                         <div className="flex items-center gap-2">
                           <span className="font-extrabold text-foreground">
                             {food.calories}{' '}
@@ -564,7 +572,7 @@ export const PlateBuilder: React.FC<PlateBuilderProps> = ({
                             {food.carbohydrates}g C / {food.fat}g G
                           </span>
                         </div>
-                      </div>
+                      </div>}
 
                       {/* Add Button */}
                       <button

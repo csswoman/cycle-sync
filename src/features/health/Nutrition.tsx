@@ -7,6 +7,7 @@ import { useFoodPreferences } from '@/hooks/useFoodPreferences';
 import { entriesToNames } from '@/lib/nutrition/foodPreferences';
 import { useCycleInfo } from '@/hooks/useCycleInfo';
 import { useLanguage } from '@/i18n/LanguageContext';
+import { useDisplayPrefs } from '@/hooks/useDisplayPrefs';
 import { generateRecipes, suggestedTags, type GenerateResult } from '@/services/recipesService';
 import { RecipeCard } from './components/RecipeCard';
 import { RecipeDetailModal } from './components/RecipeDetailModal';
@@ -21,7 +22,8 @@ type ActiveTab = 'plate' | 'calculator' | 'tastes' | 'recipes' | 'analyze' | 'ge
 const Nutrition: React.FC = () => {
   const foodPrefs = useFoodPreferences();
   const library = useRecipes(foodPrefs.prefs);
-  const { analysis, analyzePlate } = useNutritionAI();
+  const { hideNumbers } = useDisplayPrefs();
+  const { analysis, analyzePlate } = useNutritionAI(hideNumbers);
   const { cycleInfo } = useCycleInfo();
   const { language } = useLanguage();
   const isEs = language === 'es';
@@ -34,6 +36,11 @@ const Nutrition: React.FC = () => {
     result: null,
   });
   const [activeTab, setActiveTab] = useState<ActiveTab>('plate');
+  // Deep link such as /nutrition?tab=tastes
+  useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get('tab');
+    if (requested && ['plate', 'calculator', 'tastes', 'recipes', 'analyze', 'generate'].includes(requested)) setActiveTab(requested as ActiveTab);
+  }, []);
 
   // Weight state for macro & water calculation
   const [userWeightKg, setUserWeightKg] = useState<number>(65);
@@ -124,7 +131,7 @@ const Nutrition: React.FC = () => {
     }
   };
 
-  const tabs: { id: ActiveTab; label: string; icon: string }[] = [
+  const allTabs: { id: ActiveTab; label: string; icon: string }[] = [
     { id: 'plate', label: isEs ? 'Armar Plato & Alimentos' : 'Plate Builder', icon: 'bowl_food' },
     { id: 'calculator', label: isEs ? 'Metas según Peso' : 'Weight Targets', icon: 'barbell' },
     { id: 'tastes', label: isEs ? 'Mis gustos' : 'My Tastes', icon: 'favorite' },
@@ -132,6 +139,9 @@ const Nutrition: React.FC = () => {
     { id: 'analyze', label: isEs ? 'Analizar Plato' : 'Analyze Plate', icon: 'photo_camera' },
     { id: 'generate', label: isEs ? 'Recetas IA' : 'AI Recipes', icon: 'auto_awesome' },
   ];
+  // The weight-based targets tab is all numbers: it is not shown in no-numbers mode.
+  const tabs = hideNumbers ? allTabs.filter((tab) => tab.id !== 'calculator') : allTabs;
+  const shownTab: ActiveTab = hideNumbers && activeTab === 'calculator' ? 'plate' : activeTab;
 
   return (
     <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide">
@@ -148,7 +158,9 @@ const Nutrition: React.FC = () => {
               Nourish Your Body
             </h1>
             <p className="text-muted-foreground text-sm md:text-base font-normal leading-relaxed max-w-xl">
-              Nutrición inteligente y sincronizada con tu ciclo: calcula tus requerimientos de proteína y agua para cuidar tu músculo, tu energía y tu glucosa, diseña tus platos en gramos y explora recetas antiinflamatorias.
+              {hideNumbers
+                ? 'Nutrición sincronizada con tu ciclo: diseña tus platos, explora recetas antiinflamatorias y cuida tu energía y tu glucosa.'
+                : 'Nutrición inteligente y sincronizada con tu ciclo: calcula tus requerimientos de proteína y agua para cuidar tu músculo, tu energía y tu glucosa, diseña tus platos en gramos y explora recetas antiinflamatorias.'}
             </p>
           </div>
         </section>
@@ -161,19 +173,19 @@ const Nutrition: React.FC = () => {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex-1 min-w-[100px] sm:min-w-0 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${
-                activeTab === tab.id
+                shownTab === tab.id
                   ? 'bg-primary text-primary-foreground shadow-md shadow-blossom/20'
                   : 'text-muted-foreground hover:text-foreground hover:bg-card'
               }`}
             >
-              <Icon name={tab.icon} size={18} weight={activeTab === tab.id ? 'bold' : 'duotone'} />
+              <Icon name={tab.icon} size={18} weight={shownTab === tab.id ? 'bold' : 'duotone'} />
               <span>{tab.label}</span>
             </button>
           ))}
         </div>
 
         {/* === TAB 1: PLATE BUILDER & FOODS === */}
-        {activeTab === 'plate' && (
+        {shownTab === 'plate' && (
           <section className="w-full flex flex-col gap-6">
             <MacroWaterCalculator
               weightKg={userWeightKg}
@@ -191,7 +203,7 @@ const Nutrition: React.FC = () => {
         )}
 
         {/* === TAB 2: WEIGHT TARGETS & SCIENCE === */}
-        {activeTab === 'calculator' && (
+        {shownTab === 'calculator' && (
           <section className="w-full max-w-4xl mx-auto flex flex-col gap-6">
             <MacroWaterCalculator
               weightKg={userWeightKg}
@@ -239,10 +251,10 @@ const Nutrition: React.FC = () => {
                 <div className="bg-secondary/40 rounded-xl p-4 border border-border/50 flex flex-col gap-2">
                   <div className="flex items-center gap-2 font-bold text-amber-600 dark:text-amber-400">
                     <Icon name="flame" size={18} weight="bold" />
-                    Déficit moderado (15% - 20%)
+                    Comer suficiente
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    Los déficits agresivos (&gt;25%) provocan desaceleración metabólica, fatiga de la hormona tiroidea T3 y canibalización de la masa magra. Un déficit controlado de <strong>300-500 kcal</strong> mantiene alta tu energía y preserva tu tono muscular.
+                    Comer muy por debajo de lo que gastas puede alterar la ovulación, el sueño y la tiroides. Reparte la proteína en tus comidas y deja que el hambre y la energía guíen las porciones.
                   </p>
                 </div>
 
@@ -261,7 +273,7 @@ const Nutrition: React.FC = () => {
         )}
 
         {/* === MY TASTES TAB === */}
-        {activeTab === 'tastes' && (
+        {shownTab === 'tastes' && (
           <FoodPreferencesPanel
             prefs={foodPrefs.prefs}
             language={language}
@@ -282,7 +294,7 @@ const Nutrition: React.FC = () => {
         )}
 
         {/* === RECIPES TAB === */}
-        {activeTab === 'recipes' && (
+        {shownTab === 'recipes' && (
           <section className="w-full flex flex-col gap-6">
             <div className="bg-card rounded-xl p-5 border border-border shadow-sm flex flex-col gap-4">
               <div className="flex flex-col sm:flex-row gap-3">
@@ -414,7 +426,7 @@ const Nutrition: React.FC = () => {
         )}
 
         {/* === ANALYZE PLATE TAB === */}
-        {activeTab === 'analyze' && (
+        {shownTab === 'analyze' && (
           <section className="w-full max-w-3xl mx-auto flex flex-col gap-6">
             <div className="bg-card rounded-xl border border-border p-6 flex flex-col gap-6">
               <div className="flex items-center gap-3">
@@ -497,7 +509,7 @@ const Nutrition: React.FC = () => {
         )}
 
         {/* === AI RECIPE GENERATOR TAB === */}
-        {activeTab === 'generate' && (
+        {shownTab === 'generate' && (
           <section className="w-full max-w-3xl mx-auto flex flex-col gap-6">
             <div className="bg-card rounded-xl border border-border p-6 flex flex-col gap-6">
               <div className="flex items-center gap-3">

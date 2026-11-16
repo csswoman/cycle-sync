@@ -52,7 +52,7 @@ const MEAL_TAGS: Record<MealSlot, string[]> = {
   dinner: ['cena', 'dinner'],
   snack: ['snack', 'postre', 'dessert', 'merienda'],
 };
-const NOT_A_MEAL = ['bebida', 'drink', 'jugo detox', 'jugo-detox', 'juice'];
+const NOT_A_MEAL = ['bebida', 'drink', 'jugo detox', 'jugo-detox', 'jugos', 'juice'];
 
 /** Meal slots a recipe suits, from its tags. Untagged recipes count as lunch or dinner. */
 export function slotsOf(recipe: Pick<PlannableRecipe, 'tags'>): MealSlot[] {

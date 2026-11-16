@@ -4,8 +4,8 @@ import type { LibraryRecipe, NewRecipe, Recipe, RecipeLanguage } from '@/types/r
 import { CATALOG_RECIPES } from '@/data/seedRecipes';
 
 const SUGGESTED_TAGS: Record<RecipeLanguage, string[]> = {
-    es: ['Bajo IG', 'Antiinflamatoria', 'Desayuno', 'Almuerzo', 'Cena', 'Snack', 'Postre', 'Bebida', 'Detox'],
-    en: ['Low GI', 'Anti-inflammatory', 'Breakfast', 'Lunch', 'Dinner', 'Snack', 'Dessert', 'Drink', 'Detox'],
+    es: ['Bajo IG', 'Antiinflamatoria', 'Desayuno', 'Almuerzo', 'Cena', 'Snack', 'Postre', 'Bebida', 'Fresca'],
+    en: ['Low GI', 'Anti-inflammatory', 'Breakfast', 'Lunch', 'Dinner', 'Snack', 'Dessert', 'Drink', 'Refreshing'],
 };
 
 export const suggestedTags = (language: RecipeLanguage) => SUGGESTED_TAGS[language] ?? SUGGESTED_TAGS.en;

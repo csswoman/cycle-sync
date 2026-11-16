@@ -23,7 +23,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/pasta-con-calabacin-y-huevos.webp"
   },
   {
     "title": "Noquis de Calabaza",
@@ -52,7 +53,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/noquis-de-calabaza.webp"
   },
   {
     "title": "Pastel de Frijoles (Bunuelos)",
@@ -290,7 +292,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/arroz-verde.webp"
   },
   {
     "title": "Crema de Naranja y Zanahoria",
@@ -622,7 +625,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/solterito-arequipeno.webp"
   },
   {
     "title": "Pastel de Aguacate",
@@ -747,7 +751,8 @@
     "tags": [
       "ganar-musculo",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/yuquitas-fritas.webp"
   },
   {
     "title": "Pastel de Verduras",
@@ -806,7 +811,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/tortilla-de-verduras.webp"
   },
   {
     "title": "Tallarines Verdes con Pollo",
@@ -841,7 +847,8 @@
     "tags": [
       "ganar-musculo",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/tallarines-verdes-con-pollo.webp"
   },
   {
     "title": "Compota de Entrecascara de Naranja",
@@ -977,7 +984,8 @@
     "servings": 1,
     "tags": [
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/aguadito-de-pollo.webp"
   },
   {
     "title": "Croqueta de Camote y Pollo",
@@ -1002,7 +1010,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/croqueta-de-camote-y-pollo.webp"
   },
   {
     "title": "Albondigas de Pollo y Queso con Verduras",
@@ -1027,7 +1036,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/albondigas-de-pollo-y-queso-con-verduras.webp"
   },
   {
     "title": "Salsa Criolla",
@@ -1094,7 +1104,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/saltado-de-verduras.webp"
   },
   {
     "title": "Helado de Platano",
@@ -1147,7 +1158,8 @@
     "servings": 1,
     "tags": [
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/chifles.webp"
   },
   {
     "title": "Pollo Fragante",
@@ -1257,7 +1269,8 @@
     "servings": 1,
     "tags": [
       "ganar-musculo"
-    ]
+    ],
+    "imageUrl": "/recipes/pan-con-chicharron.webp"
   },
   {
     "title": "Lomo Saltado",
@@ -1296,7 +1309,8 @@
     "tags": [
       "ganar-musculo",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/lomo-saltado.webp"
   },
   {
     "title": "Aji de Gallina",
@@ -1334,7 +1348,8 @@
     "tags": [
       "ganar-musculo",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/aji-de-gallina.webp"
   },
   {
     "title": "Arroz con Pollo",
@@ -1375,7 +1390,8 @@
     "servings": 1,
     "tags": [
       "ganar-musculo"
-    ]
+    ],
+    "imageUrl": "/recipes/arroz-con-pollo.webp"
   },
   {
     "title": "Papa a la Huancaina",
@@ -1409,7 +1425,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/papa-a-la-huancaina.webp"
   },
   {
     "title": "Causa Limena",
@@ -1445,7 +1462,8 @@
     "servings": 1,
     "tags": [
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/causa-limena.webp"
   },
   {
     "title": "Seco de Pollo",
@@ -1486,7 +1504,8 @@
     "tags": [
       "ganar-musculo",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/seco-de-pollo.webp"
   },
   {
     "title": "Mazamorra Morada",
@@ -1527,7 +1546,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/mazamorra-morada.webp"
   },
   {
     "title": "Avena con Platano y Canela",
@@ -1588,7 +1608,8 @@
       "perder-peso",
       "ganar-musculo",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/huevos-revueltos-con-tomate-y-cebolla.webp"
   },
   {
     "title": "Pan con Palta y Huevo",
@@ -1618,7 +1639,8 @@
     "tags": [
       "ganar-musculo",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/pan-con-palta-y-huevo.webp"
   },
   {
     "title": "Batido Proteico de Platano y Avena",
@@ -1707,7 +1729,8 @@
     "tags": [
       "ganar-musculo",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/quinua-con-leche-y-frutas.webp"
   },
   {
     "title": "Pollo a la Plancha con Ensalada Fresca",
@@ -1740,7 +1763,8 @@
       "perder-peso",
       "ganar-musculo",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/pollo-a-la-plancha-con-ensalada-fresca.webp"
   },
   {
     "title": "Pescado al Horno con Brocoli",
@@ -1771,7 +1795,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/pescado-al-horno-con-brocoli.webp"
   },
   {
     "title": "Ensalada de Atun con Palta",
@@ -1804,7 +1829,8 @@
       "perder-peso",
       "ganar-musculo",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/ensalada-de-atun-con-palta.webp"
   },
   {
     "title": "Tortilla de Claras con Verduras",
@@ -1836,7 +1862,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/tortilla-de-claras-con-verduras.webp"
   },
   {
     "title": "Crema de Zapallo con Pollo Deshilachado",
@@ -1869,7 +1896,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/crema-de-zapallo-con-pollo-deshilachado.webp"
   },
   {
     "title": "Trucha a la Plancha con Ensalada",
@@ -1901,7 +1929,8 @@
     "tags": [
       "ganar-musculo",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/trucha-a-la-plancha-con-ensalada.webp"
   },
   {
     "title": "Pan con Queso Fresco y Aceituna",
@@ -1927,7 +1956,8 @@
     "servings": 1,
     "tags": [
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/pan-con-queso-fresco-y-aceituna.webp"
   },
   {
     "title": "Panqueques de Avena con Platano",
@@ -1957,7 +1987,8 @@
     "tags": [
       "ganar-musculo",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/panqueques-de-avena-con-platano.webp"
   },
   {
     "title": "Yogurt con Granola y Frutas",
@@ -1986,7 +2017,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/yogurt-con-granola-y-frutas.webp"
   },
   {
     "title": "Sandwich de Pollo con Palta",
@@ -2015,7 +2047,8 @@
     "tags": [
       "ganar-musculo",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/sandwich-de-pollo-con-palta.webp"
   },
   {
     "title": "Avena con Manzana y Pecanas",
@@ -2043,7 +2076,8 @@
     "tags": [
       "ganar-musculo",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/avena-con-manzana-y-pecanas.webp"
   },
   {
     "title": "Huevos Duros con Pan Integral y Palta",
@@ -2072,7 +2106,8 @@
       "perder-peso",
       "ganar-musculo",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/huevos-duros-con-pan-integral-y-palta.webp"
   },
   {
     "title": "Jugo Verde con Tostada de Huevo",
@@ -2102,7 +2137,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/jugo-verde-con-tostada-de-huevo.webp"
   },
   {
     "title": "Tamal Verde de Pollo",
@@ -2169,7 +2205,8 @@
       "perder-peso",
       "ganar-musculo",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/ceviche-de-bonito.webp"
   },
   {
     "title": "Sopa de Pollo con Fideos",
@@ -2203,7 +2240,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/sopa-de-pollo-con-fideos.webp"
   },
   {
     "title": "Pechuga al Horno con Camote",
@@ -2235,7 +2273,8 @@
     "tags": [
       "ganar-musculo",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/pechuga-al-horno-con-camote.webp"
   },
   {
     "title": "Tiradito de Pescado",
@@ -2266,7 +2305,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/tiradito-de-pescado.webp"
   },
   {
     "title": "Ensalada de Quinua con Pollo",
@@ -2299,7 +2339,8 @@
     "tags": [
       "ganar-musculo",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/ensalada-de-quinua-con-pollo.webp"
   },
   {
     "title": "Arroz de Coliflor con Pollo Salteado",
@@ -2332,7 +2373,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/arroz-de-coliflor-con-pollo-salteado.webp"
   },
   {
     "title": "Wrap de Pollo con Verduras",
@@ -2398,12 +2440,14 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/causa-rellena-light-de-atun.webp"
   },
   {
-    "title": "Zumo Detox de Pepino y Limon",
-    "description": "Hidratacion, desintoxicacion, vitamina C, digestion",
-    "category": "jugo-detox",
+    "title": "Zumo de Pepino y Limon",
+    "idSeed": "Zumo Detox de Pepino y Limon",
+    "description": "Hidratacion, frescura, vitamina C, digestion",
+    "category": "jugos",
     "calories": null,
     "protein": null,
     "carbs": null,
@@ -2423,17 +2467,17 @@
     "prepTime": null,
     "servings": 1,
     "tags": [
-      "detox",
       "hidratacion",
-      "desintoxicacion",
       "vitamina c",
       "digestion"
-    ]
+    ],
+    "imageUrl": "/recipes/zumo-de-pepino-y-limon.webp"
   },
   {
-    "title": "Zumo Detox de Remolacha y Zanahoria",
-    "description": "Antioxidante, vitamina A, hierro, desintoxicacion hepatica",
-    "category": "jugo-detox",
+    "title": "Zumo de Remolacha y Zanahoria",
+    "idSeed": "Zumo Detox de Remolacha y Zanahoria",
+    "description": "Antioxidante, vitamina A, hierro, higado",
+    "category": "jugos",
     "calories": null,
     "protein": null,
     "carbs": null,
@@ -2452,17 +2496,17 @@
     "prepTime": null,
     "servings": 1,
     "tags": [
-      "detox",
       "antioxidante",
       "vitamina a",
-      "hierro",
-      "desintoxicacion hepatica"
-    ]
+      "hierro"
+    ],
+    "imageUrl": "/recipes/zumo-de-remolacha-y-zanahoria.webp"
   },
   {
-    "title": "Zumo Tropical Detox",
+    "title": "Zumo Tropical",
+    "idSeed": "Zumo Tropical Detox",
     "description": "Vitamina C, digestion, hidratacion tropical, enzimas digestivas",
-    "category": "jugo-detox",
+    "category": "jugos",
     "calories": null,
     "protein": null,
     "carbs": null,
@@ -2479,17 +2523,18 @@
     "prepTime": null,
     "servings": 1,
     "tags": [
-      "detox",
       "vitamina c",
       "digestion",
       "hidratacion tropical",
       "enzimas digestivas"
-    ]
+    ],
+    "imageUrl": "/recipes/zumo-tropical.webp"
   },
   {
-    "title": "Batido Verde Detox",
-    "description": "Clorofila, hierro, fibra, desintoxicacion, vitaminas K y A",
-    "category": "jugo-detox",
+    "title": "Batido Verde",
+    "idSeed": "Batido Verde Detox",
+    "description": "Clorofila, hierro, fibra, frescura, vitaminas K y A",
+    "category": "jugos",
     "calories": null,
     "protein": null,
     "carbs": null,
@@ -2507,18 +2552,18 @@
     "prepTime": null,
     "servings": 1,
     "tags": [
-      "detox",
       "clorofila",
       "hierro",
       "fibra",
-      "desintoxicacion",
       "vitaminas k y a"
-    ]
+    ],
+    "imageUrl": "/recipes/batido-verde-detox.webp"
   },
   {
-    "title": "Batido Detox de Aguaymanto y Fresa",
+    "title": "Batido de Aguaymanto y Fresa",
+    "idSeed": "Batido Detox de Aguaymanto y Fresa",
     "description": "Antioxidantes, vitamina C, antiinflamatorio, salud cardiovascular",
-    "category": "jugo-detox",
+    "category": "jugos",
     "calories": null,
     "protein": null,
     "carbs": null,
@@ -2536,17 +2581,18 @@
     "prepTime": null,
     "servings": 1,
     "tags": [
-      "detox",
       "antioxidantes",
       "vitamina c",
       "antiinflamatorio",
       "salud cardiovascular"
-    ]
+    ],
+    "imageUrl": "/recipes/batido-de-aguaymanto-y-fresa.webp"
   },
   {
-    "title": "Zumo Detox de Sandia",
+    "title": "Zumo de Sandia",
+    "idSeed": "Zumo Detox de Sandia",
     "description": "Hidratacion, licopeno, vitaminas A y C, diuretico natural",
-    "category": "jugo-detox",
+    "category": "jugos",
     "calories": null,
     "protein": null,
     "carbs": null,
@@ -2563,17 +2609,18 @@
     "prepTime": null,
     "servings": 1,
     "tags": [
-      "detox",
       "hidratacion",
       "licopeno",
       "vitaminas a y c",
       "diuretico natural"
-    ]
+    ],
+    "imageUrl": "/recipes/zumo-de-sandia.webp"
   },
   {
-    "title": "Zumo Detox Citrico",
+    "title": "Zumo Citrico",
+    "idSeed": "Zumo Detox Citrico",
     "description": "Vitamina C, refuerzo inmunologico, antioxidante, energia natural",
-    "category": "jugo-detox",
+    "category": "jugos",
     "calories": null,
     "protein": null,
     "carbs": null,
@@ -2590,17 +2637,18 @@
     "prepTime": null,
     "servings": 1,
     "tags": [
-      "detox",
       "vitamina c",
       "refuerzo inmunologico",
       "antioxidante",
       "energia natural"
-    ]
+    ],
+    "imageUrl": "/recipes/zumo-citrico.webp"
   },
   {
-    "title": "Zumo Detox de Zanahoria y Jengibre",
+    "title": "Zumo de Zanahoria y Jengibre",
+    "idSeed": "Zumo Detox de Zanahoria y Jengibre",
     "description": "Vitamina A, antiinflamatorio, digestion, sistema inmunologico",
-    "category": "jugo-detox",
+    "category": "jugos",
     "calories": null,
     "protein": null,
     "carbs": null,
@@ -2617,17 +2665,18 @@
     "prepTime": null,
     "servings": 1,
     "tags": [
-      "detox",
       "vitamina a",
       "antiinflamatorio",
       "digestion",
       "sistema inmunologico"
-    ]
+    ],
+    "imageUrl": "/recipes/zumo-de-zanahoria-y-jengibre.webp"
   },
   {
-    "title": "Zumo Detox de Maracuya y Remolacha",
+    "title": "Zumo de Maracuya y Remolacha",
+    "idSeed": "Zumo Detox de Maracuya y Remolacha",
     "description": "Antioxidante potente, hierro, vitamina C, salud cardiovascular",
-    "category": "jugo-detox",
+    "category": "jugos",
     "calories": null,
     "protein": null,
     "carbs": null,
@@ -2644,7 +2693,6 @@
     "prepTime": null,
     "servings": 1,
     "tags": [
-      "detox",
       "antioxidante potente",
       "hierro",
       "vitamina c",
@@ -2652,9 +2700,10 @@
     ]
   },
   {
-    "title": "Zumo Detox de Pepino y Menta",
+    "title": "Zumo de Pepino y Menta",
+    "idSeed": "Zumo Detox de Pepino y Menta",
     "description": "Hidratacion, frescura, digestion, diuretico, vitamina C",
-    "category": "jugo-detox",
+    "category": "jugos",
     "calories": null,
     "protein": null,
     "carbs": null,
@@ -2672,12 +2721,12 @@
     "prepTime": null,
     "servings": 1,
     "tags": [
-      "detox",
       "hidratacion",
       "frescura",
       "digestion",
       "diuretico",
       "vitamina c"
-    ]
+    ],
+    "imageUrl": "/recipes/zumo-de-pepino-y-menta.webp"
   }
 ]

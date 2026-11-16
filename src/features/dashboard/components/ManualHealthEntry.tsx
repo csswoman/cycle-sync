@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLanguage } from '@/i18n/LanguageContext';
+import { useDisplayPrefs } from '@/hooks/useDisplayPrefs';
 
 type EntryType = 'steps' | 'sleep' | 'activity';
 
@@ -37,6 +38,7 @@ interface Props {
 
 const ManualHealthEntry: React.FC<Props> = ({ onChanged, request }) => {
   const { t } = useLanguage();
+  const { hideNumbers } = useDisplayPrefs();
   const [open, setOpen] = useState(false);
   const [type, setType] = useState<EntryType>('steps');
   const [date, setDate] = useState(todayLocal);
@@ -130,7 +132,7 @@ const ManualHealthEntry: React.FC<Props> = ({ onChanged, request }) => {
       const m = Math.round((en.value % 3600) / 60);
       return `${t.manualHealthSleep}: ${h}h ${m}m`;
     }
-    const kc = en.details?.kcal ? ` · ${Math.round(en.details.kcal)} kcal` : '';
+    const kc = !hideNumbers && en.details?.kcal ? ` · ${Math.round(en.details.kcal)} kcal` : '';
     return `${en.details?.type ?? t.manualHealthActivity}: ${Math.round(en.value)} min${kc}`;
   };
 
@@ -264,7 +266,7 @@ const ManualHealthEntry: React.FC<Props> = ({ onChanged, request }) => {
                     className={inputClass}
                   />
                 </label>
-                <label className="flex flex-col gap-1 text-[11px] font-bold text-muted-foreground uppercase tracking-wider col-span-2">
+                {!hideNumbers && <label className="flex flex-col gap-1 text-[11px] font-bold text-muted-foreground uppercase tracking-wider col-span-2">
                   {t.manualHealthKcal}
                   <input
                     type="number"
@@ -275,7 +277,7 @@ const ManualHealthEntry: React.FC<Props> = ({ onChanged, request }) => {
                     onChange={(e) => setKcal(e.target.value)}
                     className={inputClass}
                   />
-                </label>
+                </label>}
               </>
             )}
 

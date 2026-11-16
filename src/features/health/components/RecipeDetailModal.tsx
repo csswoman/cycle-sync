@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import type { LibraryRecipe } from '@/types/recipes';
 import { TagEditor } from './TagEditor';
+import { useDisplayPrefs } from '@/hooks/useDisplayPrefs';
 
 interface RecipeDetailModalProps {
   recipe: LibraryRecipe;
@@ -23,6 +24,7 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
   suggestions,
 }) => {
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const { hideNumbers } = useDisplayPrefs();
 
   return (
     <div
@@ -104,7 +106,7 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
               </ol>
             </div>
           )}
-          {recipe.nutrition && (
+          {recipe.nutrition && !hideNumbers && (
             <div>
               <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Nutrition (per serving)</h3>
               <p className="text-sm text-foreground">

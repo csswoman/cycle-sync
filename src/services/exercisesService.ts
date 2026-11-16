@@ -2,6 +2,7 @@ import { Exercise, WorkoutVideo, BodyPart, Equipment } from '@/types/exercises';
 import { supabase } from '@/lib/supabase';
 import { parseYouTubeId } from '@/lib/youtube';
 import workoutVideosData from '@/data/workoutVideos.json';
+import { displayVideoTitle } from '@/data/videoTitleOverrides';
 import dataset from '@/data/exercisesDataset.json';
 
 // Exercise data comes from https://github.com/hasaneyldrm/exercises-dataset (bundled JSON).
@@ -90,7 +91,7 @@ export const fetchWorkoutVideos = async (): Promise<WorkoutVideo[]> => {
                 id: v.id,
                 url: v.url,
                 videoId: v.youtube_id,
-                title: v.title,
+                title: displayVideoTitle(v.title),
                 channelName: v.channel_name ?? '',
                 category: v.category,
                 phases: v.phases,
@@ -112,7 +113,7 @@ const getFallbackVideos = (): WorkoutVideo[] =>
                 id: `local-${i}`,
                 url: v.url,
                 videoId,
-                title: v.title,
+                title: displayVideoTitle(v.title),
                 channelName: v.channel_name ?? '',
                 category: v.category,
                 phases: v.phases,

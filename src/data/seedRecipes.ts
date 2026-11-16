@@ -10,6 +10,8 @@ function slugify(text: string): string {
     .replace(/(^-|-$)+/g, '');
 }
 
+/** Catalog entries renamed after publishing keep `idSeed` (their old title) so saved favorites still match. */
+
 export const CATALOG_RECIPES: Recipe[] = (catalogData as any[]).map((r, idx) => {
   const categoryTag = r.category
     ? r.category.charAt(0).toUpperCase() + r.category.slice(1)
@@ -25,13 +27,13 @@ export const CATALOG_RECIPES: Recipe[] = (catalogData as any[]).map((r, idx) => 
   );
 
   return {
-    id: `catalog-${slugify(r.title)}-${idx}`,
+    id: `catalog-${slugify(r.idSeed ?? r.title)}-${idx}`,
     ownerId: null,
     source: 'custom',
     language: 'es',
     title: r.title,
     description: r.description || '',
-    imageUrl: null,
+    imageUrl: r.imageUrl || null,
     readyInMinutes: r.prepTime ?? 25,
     servings: r.servings ?? 1,
     ingredients: r.ingredients || [],

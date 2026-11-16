@@ -41,7 +41,7 @@ export const MacroWaterCalculator: React.FC<MacroWaterCalculatorProps> = ({
             <h3 className="text-foreground text-base sm:text-lg font-bold flex items-center gap-2">
               Metas según tu Peso
               <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blossom-soft text-blossom border border-blossom/20">
-                Ganar Músculo & Bajar Grasa
+                Músculo y energía
               </span>
             </h3>
             <p className="text-muted-foreground text-xs sm:text-sm">
@@ -114,7 +114,7 @@ export const MacroWaterCalculator: React.FC<MacroWaterCalculatorProps> = ({
             </div>
             {!compact && (
               <p className="text-muted-foreground/90 leading-relaxed mt-1">
-                En déficit calórico, un aporte de 2.0 g/kg protege tu tejido muscular del catabolismo y aumenta la saciedad.
+                Un aporte cercano a 2.0 g/kg ayuda a conservar tu músculo y da saciedad.
               </p>
             )}
           </div>
@@ -163,11 +163,11 @@ export const MacroWaterCalculator: React.FC<MacroWaterCalculatorProps> = ({
           <div className="flex items-start justify-between">
             <div>
               <span className="text-xs font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-                Calorías Recomendadas
+                Energía de referencia
               </span>
               <div className="flex items-baseline gap-1.5 mt-1">
                 <span className="text-3xl font-extrabold text-foreground tracking-tight">
-                  ~{targets.cuttingCalories}
+                  ~{targets.maintenanceCalories}
                 </span>
                 <span className="text-sm font-bold text-muted-foreground">kcal / día</span>
               </div>
@@ -178,17 +178,9 @@ export const MacroWaterCalculator: React.FC<MacroWaterCalculatorProps> = ({
           </div>
 
           <div className="flex flex-col gap-1.5 text-xs">
-            <div className="flex items-center justify-between text-muted-foreground font-medium">
-              <span>Mantenimiento aprox:</span>
-              <span className="font-bold text-foreground">~{targets.maintenanceCalories} kcal</span>
-            </div>
-            <div className="flex items-center justify-between text-muted-foreground font-medium">
-              <span>Déficit moderado:</span>
-              <span className="font-bold text-amber-600 dark:text-amber-400">-15% a -20%</span>
-            </div>
             {!compact && (
               <p className="text-muted-foreground/90 leading-relaxed mt-1">
-                Un déficit moderado permite perder grasa constante sin fatigar tu tiroides ni destruir masa muscular.
+                Es una estimación. Tu hambre, tu energía y tu ciclo dicen más que la cifra, y comer suficiente también cuida tu tiroides y tu ovulación.
               </p>
             )}
           </div>
