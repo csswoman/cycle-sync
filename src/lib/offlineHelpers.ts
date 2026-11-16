@@ -107,14 +107,39 @@ export async function saveWorkoutLogOffline(data: {
   });
   return remoteId;
 }
+export async function saveCycleSignOffline(data: {
+  userId: string;
+  date: string;
+  spotting: boolean;
+  bbtCelsius: number | null;
+  bbtDisturbed: boolean;
+  cervicalMucus: string | null;
+  sexCount: number;
+  sexProtection: string | null;
+  notes: string | null;
+  lhTest: string | null;
+  flow: string | null;
+  clots: boolean;
+  pain: number | null;
+  deleted: boolean;
+}) {
+  const existing = await db.cycleSigns
+    .where('[userId+date]')
+    .equals([data.userId, data.date])
+    .first();
+  const record = { ...data, synced: false, updatedAt: new Date().toISOString() };
+  if (existing?.id != null) await db.cycleSigns.update(existing.id, record);
+  else await db.cycleSigns.add(record);
+}
 export async function getPendingSyncCount(): Promise<number> {
-  const [dailyCount, habitCount, pmosCount, workoutCount] = await Promise.all([
+  const [dailyCount, habitCount, pmosCount, workoutCount, signCount] = await Promise.all([
     db.dailyLogs.filter((r) => !r.synced).count(),
     db.habitLogs.filter((r) => !r.synced).count(),
     db.pcosEntries.filter((r) => !r.synced).count(),
     db.workoutLogs.filter((r) => !r.synced).count(),
+    db.cycleSigns.filter((r) => !r.synced).count(),
   ]);
-  return dailyCount + habitCount + pmosCount + workoutCount;
+  return dailyCount + habitCount + pmosCount + workoutCount + signCount;
 }
 
 /** Unsynced (or any local) records, used to overlay remote data while offline. */

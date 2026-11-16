@@ -26,6 +26,10 @@ const SYMPTOMS: { key: string; es: string }[] = [
     { key: 'Acne Flare', es: 'Brote de acné' },
     { key: 'Anxiety', es: 'Ansiedad' },
     { key: 'High Libido', es: 'Libido alta' },
+    // Eating patterns: the keys match EATING_SYMPTOMS in lib/pmos/wellbeing.ts.
+    { key: 'Binge / Loss of Control', es: 'Atracón o pérdida de control' },
+    { key: 'Emotional Eating', es: 'Comer por emociones' },
+    { key: 'Skipped Meals', es: 'Me salté comidas' },
 ];
 
 export const SymptomGrid: React.FC<SymptomGridProps> = ({ activeSymptoms, toggleSymptom, lang = 'en' }) => {

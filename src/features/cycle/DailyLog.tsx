@@ -15,7 +15,8 @@ import SymptomCheckin, { type SymptomSummary } from '@/features/health/pmos/Symp
 import { useConfiguredSymptoms } from '@/features/health/pmos/useConfiguredSymptoms';
 import Medications, { type MedicationSummary } from '@/features/medications/Medications';
 import BodySignsPanel from './components/BodySignsPanel';
-import { loadOnboardingAnswers, usesHormonalContraception } from '@/features/setup/onboarding';
+import { usesHormonalContraception } from '@/features/setup/onboarding';
+import { useOnboardingAnswers } from '@/hooks/useOnboardingAnswers';
 import { addDays, toISODate } from '@/lib/cycle/cycleEngine';
 
 type Tab = 'today' | 'body' | 'symptoms' | 'meds';
@@ -49,14 +50,13 @@ const DailyLog: React.FC = () => {
   const lang: 'es' | 'en' = language === 'es' ? 'es' : 'en';
   const [tab, setTab] = useState<Tab>('today');
   const [bodyDate, setBodyDate] = useState<string | undefined>(undefined);
-  const [hormonal, setHormonal] = useState(false);
+  const hormonal = usesHormonalContraception(useOnboardingAnswers());
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const requested = params.get('tab');
     if (requested === 'symptoms' || requested === 'meds' || requested === 'today' || requested === 'body') setTab(requested);
     const date = params.get('date');
     if (date && /^\d{4}-\d{2}-\d{2}$/.test(date)) setBodyDate(date);
-    setHormonal(usesHormonalContraception(loadOnboardingAnswers()));
   }, []);
   const [configuredSymptoms, setConfiguredSymptoms] = useConfiguredSymptoms();
   const [symptomSummary, setSymptomSummary] = useState<SymptomSummary>({ total: 0, max: 18 });

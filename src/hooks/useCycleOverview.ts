@@ -7,7 +7,8 @@ import {
   type CycleEstimate, type CycleProjection,
 } from '@/lib/cycle/cycleEngine';
 import { cycleHealthFlags, type CycleFlag } from '@/lib/cycle/cycleAnalysis';
-import { loadOnboardingAnswers, type OnboardingAnswers } from '@/features/setup/onboarding';
+import type { OnboardingAnswers } from '@/features/setup/onboarding';
+import { useOnboardingAnswers } from '@/hooks/useOnboardingAnswers';
 import type { CycleConfig, CycleInfo, Period } from '@/types';
 
 export interface CycleOverview {
@@ -32,11 +33,10 @@ export interface CycleOverview {
 export function useCycleOverview(): CycleOverview {
   const [config, setConfig] = useState<CycleConfig | null>(null);
   const [periods, setPeriods] = useState<Period[]>([]);
-  const [answers, setAnswers] = useState<OnboardingAnswers>({});
+  const answers = useOnboardingAnswers();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setAnswers(loadOnboardingAnswers());
     (async () => {
       const { data: { session } } = await supabase.auth.getSession();
       const user = session?.user;
@@ -47,8 +47,6 @@ export function useCycleOverview(): CycleOverview {
       ]);
       setConfig(configRes.data as CycleConfig | null);
       setPeriods((periodsRes.data as Period[]) ?? []);
-      const remote = (configRes.data as { onboarding_answers?: OnboardingAnswers } | null)?.onboarding_answers;
-      if (remote) setAnswers(remote);
       setLoading(false);
     })();
   }, []);

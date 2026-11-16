@@ -7,12 +7,15 @@ import {
   type CervicalMucus, type CycleSign,
 } from '@/lib/cycle/fertilitySigns';
 import { useCycleSigns } from '@/hooks/useCycleSigns';
+import { FlowFields } from './FlowFields';
 
 type Lang = 'es' | 'en';
 
 const copy = {
   es: {
     date: 'Día', today: 'Hoy',
+    flowSectionTitle: 'Sangrado y dolor',
+    flowSectionHelp: 'Para los días de regla. El sangrado muy abundante o con coágulos es útil comentarlo en consulta.',
     spottingTitle: 'Manchado (spotting)',
     spottingHelp: 'Sangrado leve fuera de la regla: unas gotas, rosado o marrón, sin necesitar compresa. No cuenta como regla ni cambia tus predicciones.',
     spottingToggle: 'Tuve manchado este día',
@@ -54,6 +57,8 @@ const copy = {
   },
   en: {
     date: 'Day', today: 'Today',
+    flowSectionTitle: 'Bleeding and pain',
+    flowSectionHelp: 'For period days. Very heavy bleeding or clots are worth mentioning at your appointment.',
     spottingTitle: 'Spotting',
     spottingHelp: 'Light bleeding outside your period: a few drops, pink or brown, no pad needed. It does not count as a period or change your predictions.',
     spottingToggle: 'I had spotting this day',
@@ -205,6 +210,9 @@ const BodySignsPanel: React.FC<Props> = ({ lang, cycleStart, hormonal, initialDa
 
         {hormonal && <p className="text-sm text-amber-600 dark:text-amber-400 bg-amber-500/10 rounded-xl px-4 py-2.5">{c.hormonal}</p>}
 
+        <Section icon="monitoring" title={c.flowSectionTitle} help={c.flowSectionHelp}>
+          <FlowFields lang={lang} value={draft} onChange={update} />
+        </Section>
         <Section icon="water_drop" title={c.spottingTitle} help={c.spottingHelp}>
           <label className="flex items-center gap-3 text-sm font-semibold text-foreground cursor-pointer">
             <input type="checkbox" className="size-5 accent-[hsl(var(--primary))]" checked={draft.spotting} onChange={(e) => update({ spotting: e.target.checked })} />

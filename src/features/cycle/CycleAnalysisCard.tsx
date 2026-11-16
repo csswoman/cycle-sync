@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { daysBetween, type PeriodInput } from '@/lib/cycle/cycleEngine';
+import type { BleedingSign } from '@/lib/cycle/bleeding';
 import {
     analyzeCycles, cycleHealthFlags, MAX_REGULAR_DIFFERENCE, MIN_CYCLES_PER_YEAR, NO_PERIOD_DAYS, NORMAL_CYCLE_MAX,
     NORMAL_CYCLE_MIN, NORMAL_PERIOD_MAX, NORMAL_PERIOD_MIN, PROLONGED_BLEEDING_DAYS,
@@ -37,6 +38,8 @@ const copy = {
             shortCycles: `Varios de tus ciclos recientes duraron menos de ${NORMAL_CYCLE_MIN} días.`,
             fewPeriodsYear: `Has tenido menos de ${MIN_CYCLES_PER_YEAR} reglas en el último año.`,
             longBleeding: `Tus últimas reglas duraron más de ${PROLONGED_BLEEDING_DAYS} días. Si además son abundantes, vale la pena revisar tu hierro.`,
+            heavyBleeding: 'En una de tus últimas reglas anotaste 2 o más días de sangrado muy abundante (o abundante con coágulos). Conviene comentarlo y revisar tu hierro.',
+            heavyAfterGap: 'Tuviste una regla abundante después de 90 días o más sin sangrado. Conviene comentarlo en consulta.',
         } as Record<CycleFlag, string>,
     },
     en: {
@@ -68,6 +71,8 @@ const copy = {
             shortCycles: `Several of your recent cycles lasted less than ${NORMAL_CYCLE_MIN} days.`,
             fewPeriodsYear: `You have had fewer than ${MIN_CYCLES_PER_YEAR} periods in the last year.`,
             longBleeding: `Your last periods lasted more than ${PROLONGED_BLEEDING_DAYS} days. If they are also heavy, it is worth checking your iron.`,
+            heavyBleeding: 'In one of your recent periods you logged 2 or more days of very heavy bleeding (or heavy with clots). Worth mentioning, and worth checking your iron.',
+            heavyAfterGap: 'You had a heavy period after 90 days or more without bleeding. Worth mentioning at your appointment.',
         } as Record<CycleFlag, string>,
     },
 };
@@ -107,11 +112,13 @@ const Bars: React.FC<{ values: number[]; mean: number; avgLabel: string; color: 
 
 interface Props {
     periods: PeriodInput[];
+    /** Per-day flow log, used for the heavy-bleeding flags. */
+    signs?: BleedingSign[];
     /** Expected start of the next period (same date as the forecast card). */
     expectedNext?: Date;
 }
 
-export const CycleAnalysisCard: React.FC<Props> = ({ periods, expectedNext }) => {
+export const CycleAnalysisCard: React.FC<Props> = ({ periods, signs = [], expectedNext }) => {
     const { language } = useLanguage();
     const c = copy[language === 'es' ? 'es' : 'en'];
     // Re-render every minute so the countdown drops by one when the day changes.
@@ -121,7 +128,7 @@ export const CycleAnalysisCard: React.FC<Props> = ({ periods, expectedNext }) =>
         return () => clearInterval(id);
     }, []);
     const a = useMemo(() => analyzeCycles(periods, now), [periods, now]);
-    const flags = useMemo(() => cycleHealthFlags(periods, now), [periods, now]);
+    const flags = useMemo(() => cycleHealthFlags(periods, now, signs), [periods, now, signs]);
     const [modal, setModal] = useState<'cycle' | 'period' | null>(null);
 
     return (

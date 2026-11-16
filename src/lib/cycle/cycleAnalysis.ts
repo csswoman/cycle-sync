@@ -1,4 +1,5 @@
 import { addDays, daysBetween, parseLocalDate, type PeriodInput } from './cycleEngine';
+import { heavyAfterGap, heavyPeriods, type BleedingSign } from './bleeding';
 
 export type Rating = 'normal' | 'abnormal';
 
@@ -80,13 +81,14 @@ export function analyzeCycles(periods: PeriodInput[], now: Date = new Date()): C
  * than 8 cycles a year, or any single cycle longer than 90 days) and FIGO (bleeding longer than
  * 8 days is prolonged). They describe the log, they are not a diagnosis.
  */
-export type CycleFlag = 'noPeriod90' | 'longCycles' | 'shortCycles' | 'fewPeriodsYear' | 'longBleeding';
+export type CycleFlag = 'noPeriod90' | 'longCycles' | 'shortCycles' | 'fewPeriodsYear' | 'longBleeding' | 'heavyBleeding' | 'heavyAfterGap';
 
 export const NO_PERIOD_DAYS = 90;
 export const MIN_CYCLES_PER_YEAR = 8;
 export const PROLONGED_BLEEDING_DAYS = 8;
 
-export function cycleHealthFlags(periods: PeriodInput[], now: Date = new Date()): CycleFlag[] {
+/** `signs` (optional) adds the heavy-bleeding flags from the per-day flow log. */
+export function cycleHealthFlags(periods: PeriodInput[], now: Date = new Date(), signs: BleedingSign[] = []): CycleFlag[] {
   const starts = Array.from(new Set(periods.map((p) => p.start_date.slice(0, 10)))).sort().map(parseLocalDate);
   if (starts.length === 0) return [];
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -111,6 +113,8 @@ export function cycleHealthFlags(periods: PeriodInput[], now: Date = new Date())
     .map((p) => daysBetween(parseLocalDate(p.start_date), parseLocalDate(p.end_date as string)) + 1)
     .slice(-3);
   if (bleeds.filter((n) => n > PROLONGED_BLEEDING_DAYS).length >= 2) flags.push('longBleeding');
+  if (heavyPeriods(periods, signs).length > 0) flags.push('heavyBleeding');
+  if (heavyAfterGap(periods, signs)) flags.push('heavyAfterGap');
 
   return flags;
 }

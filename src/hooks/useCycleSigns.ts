@@ -1,6 +1,7 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
+import { saveCycleSignOffline } from '@/lib/offlineHelpers';
 import { emptySign, isEmptySign, type CycleSign } from '@/lib/cycle/fertilitySigns';
 
 function fromRow(r: any): CycleSign {
@@ -14,12 +15,18 @@ function fromRow(r: any): CycleSign {
     sexProtection: r.sex_protection ?? null,
     notes: r.notes ?? null,
     lhTest: r.lh_test ?? null,
+    flow: r.flow ?? null,
+    clots: !!r.clots,
+    pain: r.pain != null ? Number(r.pain) : null,
   };
 }
 
+function isNetworkError(err: { message?: string } | null, offline: boolean): boolean {
+  return offline || /fetch|network|failed to load/i.test(err?.message ?? '');
+}
 /**
  * Spotting, basal temperature, cervical mucus and sexual activity per day, from `fromDate` on.
- * Online only for now: unlike the daily log these rows are not queued in the offline store.
+ * Saves that fail because there is no connection are queued in the offline store and synced on reconnect.
  */
 export function useCycleSigns(fromDate: string) {
   const [signs, setSigns] = useState<CycleSign[]>([]);
@@ -77,14 +84,42 @@ export function useCycleSigns(fromDate: string) {
       sex_count: sign.sexCount,
       sex_protection: sign.sexCount > 0 ? sign.sexProtection : null,
       notes: sign.notes,
+      flow: sign.flow ?? null,
+      clots: !!sign.clots,
+      pain: sign.pain ?? null,
       updated_at: new Date().toISOString(),
     };
     let res = isEmptySign(sign)
       ? await supabase.from('cycle_signs').delete().eq('user_id', user.id).eq('date', sign.date)
       : await supabase.from('cycle_signs').upsert({ ...row, lh_test: sign.lhTest ?? null }, { onConflict: 'user_id,date' });
-    // lh_test comes from a later migration; save the rest if it is not applied yet.
-    if (res.error && /lh_test/.test(res.error.message ?? '') && !isEmptySign(sign)) {
-      res = await supabase.from('cycle_signs').upsert(row, { onConflict: 'user_id,date' });
+    // lh_test and the flow columns come from later migrations; save the rest if they are not applied yet.
+    if (res.error && /lh_test|flow|clots|pain/.test(res.error.message ?? '') && !isEmptySign(sign)) {
+      const { flow: _f, clots: _c, pain: _p, ...older } = row;
+      res = await supabase.from('cycle_signs').upsert(older, { onConflict: 'user_id,date' });
+    }
+    if (res.error && isNetworkError(res.error, typeof navigator !== 'undefined' && !navigator.onLine)) {
+      try {
+        await saveCycleSignOffline({
+          userId: user.id,
+          date: sign.date,
+          spotting: sign.spotting,
+          bbtCelsius: sign.bbtCelsius,
+          bbtDisturbed: sign.bbtDisturbed,
+          cervicalMucus: sign.cervicalMucus,
+          sexCount: sign.sexCount,
+          sexProtection: sign.sexProtection,
+          notes: sign.notes,
+          lhTest: sign.lhTest ?? null,
+          flow: sign.flow ?? null,
+          clots: !!sign.clots,
+          pain: sign.pain ?? null,
+          deleted: isEmptySign(sign),
+        });
+        setError(null);
+        return true;
+      } catch (e) {
+        console.error('Error queuing cycle sign offline:', e);
+      }
     }
     if (res.error) {
       console.error('Error saving cycle sign:', res.error);

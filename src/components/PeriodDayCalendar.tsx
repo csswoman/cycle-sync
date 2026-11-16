@@ -20,6 +20,10 @@ interface PeriodDayCalendarProps {
    */
   mode?: CalendarMode;
   onMarkerToggle?: (iso: string) => void;
+  /** Period mode: a saved bleeding day was tapped (e.g. to log its flow and pain). */
+  onSavedDayClick?: (iso: string) => void;
+  /** Days with bleeding intensity logged, mapped to their level, shown as a dot. */
+  flowByDay?: Record<string, 'light' | 'medium' | 'heavy' | 'very_heavy'>;
   spottingDays?: string[];
   sexDays?: string[];
   /** Ovulation confirmed by a basal temperature shift (stronger than the calendar estimate). */
@@ -36,7 +40,7 @@ const MAX_RANGE_DAYS = 10;
  */
 export const PeriodDayCalendar: React.FC<PeriodDayCalendarProps> = ({
   selected, onChange, saved = [], fertileDays = [], ovulationDays = [], initialMonth,
-  mode = 'period', onMarkerToggle, spottingDays = [], sexDays = [], confirmedOvulationDays = [],
+  mode = 'period', onMarkerToggle, onSavedDayClick, flowByDay = {}, spottingDays = [], sexDays = [], confirmedOvulationDays = [],
 }) => {
   const { language, t } = useLanguage();
   const locale = language === 'es' ? 'es' : 'en';
@@ -81,7 +85,10 @@ export const PeriodDayCalendar: React.FC<PeriodDayCalendarProps> = ({
       onMarkerToggle?.(iso);
       return;
     }
-    if (savedSet.has(iso)) return;
+    if (savedSet.has(iso)) {
+      onSavedDayClick?.(iso);
+      return;
+    }
     if (selectedSet.has(iso)) {
       onChange(selected.filter((d) => d !== iso));
       setAnchor(null);
@@ -137,6 +144,7 @@ export const PeriodDayCalendar: React.FC<PeriodDayCalendarProps> = ({
           const isFertile = fertileSet.has(iso);
           const hasSpotting = spottingSet.has(iso);
           const hasSex = sexSet.has(iso);
+          const flow = flowByDay[iso];
           let cls = 'hover:bg-secondary';
           if (isSaved) cls = `bg-primary/40 text-foreground ${mode === 'period' ? 'cursor-default' : ''}`;
           else if (isSelected) cls = 'bg-primary text-primary-foreground shadow-lg shadow-primary/40 font-bold';
@@ -158,6 +166,7 @@ export const PeriodDayCalendar: React.FC<PeriodDayCalendarProps> = ({
               className={`relative h-10 w-10 mx-auto flex items-center justify-center rounded-full text-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${cls} ${anchor === iso ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''}`}
             >
               {Number(iso.slice(8))}
+              {flow && <span className={`absolute bottom-0.5 left-1/2 -translate-x-1/2 rounded-full bg-red-600 ${flow === 'very_heavy' ? 'w-4 h-1.5' : flow === 'heavy' ? 'w-3 h-1.5' : flow === 'medium' ? 'size-1.5' : 'size-1 opacity-60'}`} />}
               {hasSpotting && <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 size-1.5 rounded-full bg-rose-500" />}
               {hasSex && <span className="material-symbols-outlined absolute -top-0.5 -right-0.5 text-[13px] text-fuchsia-500" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>}
             </button>
@@ -169,6 +178,7 @@ export const PeriodDayCalendar: React.FC<PeriodDayCalendarProps> = ({
         {saved.length > 0 && <span className="flex items-center gap-1.5"><span className="size-3 rounded-full bg-primary/40" />{t.legendSavedDays}</span>}
         {fertileDays.length > 0 && <span className="flex items-center gap-1.5"><span className="size-3 rounded-full bg-sky-500/30" />{t.legendFertile}</span>}
         {confirmedOvulationDays.length > 0 && <span className="flex items-center gap-1.5"><span className="size-3 rounded-full ring-2 ring-sky-500" />{es ? 'Ovulación confirmada (temperatura)' : 'Confirmed ovulation (temperature)'}</span>}
+        {Object.keys(flowByDay).length > 0 && <span className="flex items-center gap-1.5"><span className="h-1.5 w-3 rounded-full bg-red-600" />{es ? 'Intensidad del sangrado' : 'Bleeding intensity'}</span>}
         {spottingDays.length > 0 && <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-rose-500" />{es ? 'Manchado' : 'Spotting'}</span>}
         {sexDays.length > 0 && <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[13px] text-fuchsia-500" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>{es ? 'Relación sexual' : 'Sexual activity'}</span>}
       </div>

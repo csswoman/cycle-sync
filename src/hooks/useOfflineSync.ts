@@ -90,9 +90,40 @@ async function syncWorkoutLogs() {
     }
   }
 }
+async function syncCycleSigns() {
+  const pending = await db.cycleSigns.filter((r) => !r.synced).toArray();
+  for (const sign of pending) {
+    const base = {
+      user_id: sign.userId,
+      date: sign.date,
+      spotting: sign.spotting,
+      bbt_celsius: sign.bbtCelsius,
+      bbt_disturbed: sign.bbtDisturbed,
+      cervical_mucus: sign.cervicalMucus,
+      sex_count: sign.sexCount,
+      sex_protection: sign.sexCount > 0 ? sign.sexProtection : null,
+      notes: sign.notes,
+      flow: sign.flow,
+      clots: sign.clots,
+      pain: sign.pain,
+      updated_at: sign.updatedAt,
+    };
+    let res = sign.deleted
+      ? await supabase.from('cycle_signs').delete().eq('user_id', sign.userId).eq('date', sign.date)
+      : await supabase.from('cycle_signs').upsert({ ...base, lh_test: sign.lhTest }, { onConflict: 'user_id,date' });
+    // lh_test and the flow columns come from later migrations; save the rest if they are not applied yet.
+    if (res.error && /lh_test|flow|clots|pain/.test(res.error.message ?? '') && !sign.deleted) {
+      const { flow: _f, clots: _c, pain: _p, ...older } = base;
+      res = await supabase.from('cycle_signs').upsert(older, { onConflict: 'user_id,date' });
+    }
+    if (!res.error && sign.id != null) {
+      await db.cycleSigns.update(sign.id, { synced: true });
+    }
+  }
+}
 export async function syncAll() {
   try {
-    await Promise.all([syncDailyLogs(), syncHabitLogs(), syncPMOSEntries(), syncWorkoutLogs()]);
+    await Promise.all([syncDailyLogs(), syncHabitLogs(), syncPMOSEntries(), syncWorkoutLogs(), syncCycleSigns()]);
   } catch {
     // Will retry on next online event
   }

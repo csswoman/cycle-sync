@@ -29,6 +29,22 @@ describe('cycleHealthFlags', () => {
   });
 });
 
+describe('cycleHealthFlags with bleeding intensity', () => {
+  const periods = [
+    { start_date: '2026-01-01', end_date: '2026-01-05' },
+    { start_date: '2026-04-15', end_date: '2026-04-20' },
+  ];
+  const veryHeavy = (date: string) => ({ date, flow: 'very_heavy' as const });
+  it('raises heavyBleeding and heavyAfterGap for two very heavy days after 100 days without a period', () => {
+    const flags = cycleHealthFlags(periods, new Date(2026, 3, 25), [veryHeavy('2026-04-16'), veryHeavy('2026-04-17')]);
+    expect(flags).toContain('heavyBleeding');
+    expect(flags).toContain('heavyAfterGap');
+  });
+  it('ignores a single heavy day and works without signs', () => {
+    expect(cycleHealthFlags(periods, new Date(2026, 3, 25), [veryHeavy('2026-04-16')])).not.toContain('heavyBleeding');
+    expect(cycleHealthFlags(periods, new Date(2026, 3, 25))).not.toContain('heavyAfterGap');
+  });
+});
 describe('analyzeCycles', () => {
   it('reports exact spans, range, mean and variation', () => {
     const starts = ['2025-01-01', '2025-01-29', '2025-02-26', '2025-03-26'];

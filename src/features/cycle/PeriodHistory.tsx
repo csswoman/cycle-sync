@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useLanguage } from '@/i18n/LanguageContext';
-import { loadOnboardingAnswers, usesHormonalContraception, type OnboardingAnswers } from '@/features/setup/onboarding';
+import { usesHormonalContraception } from '@/features/setup/onboarding';
+import { useOnboardingAnswers } from '@/hooks/useOnboardingAnswers';
 import { CycleAnalysisCard } from './CycleAnalysisCard';
 import { PeriodDayCalendar, type CalendarMode } from '@/components/PeriodDayCalendar';
 import {
@@ -9,6 +10,8 @@ import {
 } from '@/lib/cycle/cycleEngine';
 import { detectTemperatureShift, readingsInCycle } from '@/lib/cycle/fertilitySigns';
 import { useCycleSigns } from '@/hooks/useCycleSigns';
+import { FlowQuickEditor } from './components/FlowQuickEditor';
+import { periodBleedingDays } from '@/lib/cycle/bleeding';
 
 const SIGNS_FROM = toISODate(addDays(new Date(), -400));
 
@@ -25,11 +28,17 @@ const PeriodHistory: React.FC = () => {
     const [configLength, setConfigLength] = useState<number | null>(null);
     const [selectedDays, setSelectedDays] = useState<string[]>([]);
     const [saving, setSaving] = useState(false);
-    const [answers, setAnswers] = useState<OnboardingAnswers>({});
+    const answers = useOnboardingAnswers();
 
     const [mobileTab, setMobileTab] = useState<'log' | 'history'>('log');
     const [calendarMode, setCalendarMode] = useState<CalendarMode>('period');
     const { signs, signFor, saveSign, error: signsError } = useCycleSigns(SIGNS_FROM);
+    const [flowDay, setFlowDay] = useState<string | null>(null);
+    const flowByDay = useMemo(() => {
+        const out: Record<string, NonNullable<(typeof signs)[number]['flow']>> = {};
+        for (const s of signs) if (s.flow) out[s.date] = s.flow;
+        return out;
+    }, [signs]);
     const spottingDays = useMemo(() => signs.filter((s) => s.spotting).map((s) => s.date), [signs]);
     const sexDays = useMemo(() => signs.filter((s) => s.sexCount > 0).map((s) => s.date), [signs]);
 
@@ -40,7 +49,6 @@ const PeriodHistory: React.FC = () => {
     };
 
     useEffect(() => {
-        setAnswers(loadOnboardingAnswers());
         fetchPeriods();
     }, []);
 
@@ -414,12 +422,23 @@ const PeriodHistory: React.FC = () => {
                                     ovulationDays={ovulationDays}
                                     mode={calendarMode}
                                     onMarkerToggle={toggleMarker}
+                                    onSavedDayClick={setFlowDay}
+                                    flowByDay={flowByDay}
                                     spottingDays={spottingDays}
                                     sexDays={sexDays}
                                     confirmedOvulationDays={Array.from(confirmedOvulations.values())}
                                 />
                             </div>
 
+                            {calendarMode === 'period' && (
+                                flowDay ? (
+                                    <FlowQuickEditor lang={locale} sign={signFor(flowDay)} onSave={saveSign} onClose={() => setFlowDay(null)} />
+                                ) : savedDays.length > 0 ? (
+                                    <p className="text-xs text-muted-foreground">
+                                        {locale === 'es' ? 'Toca un día de regla ya guardado para anotar la intensidad del sangrado y el dolor.' : 'Tap a saved period day to log bleeding intensity and pain.'}
+                                    </p>
+                                ) : null
+                            )}
                             <div className={`pt-3 border-t border-border/60 flex-col gap-3 ${calendarMode === 'period' ? 'flex' : 'hidden'}`}>
                                 <div className="flex items-center justify-between text-xs">
                                     <span className="font-medium text-muted-foreground">
@@ -456,7 +475,7 @@ const PeriodHistory: React.FC = () => {
                     {/* Column 2: Analysis & Connected Timeline (Desktop Right, Mobile when mobileTab === 'history') */}
                     <div className={`lg:col-span-7 xl:col-span-7 flex flex-col gap-8 ${mobileTab === 'history' ? 'block' : 'hidden lg:block'}`}>
                         {periods.length > 0 && (
-                            <CycleAnalysisCard periods={periods} expectedNext={projections[0]?.periodStart} />
+                            <CycleAnalysisCard periods={periods} signs={signs} expectedNext={projections[0]?.periodStart} />
                         )}
 
                         {/* Connected Timeline for Logged Periods */}
@@ -548,6 +567,25 @@ const PeriodHistory: React.FC = () => {
                                                                             )}
                                                                         </div>
 
+                                                                        {(() => {
+                                                                            const days = periodBleedingDays(signs, period);
+                                                                            if (days.length === 0) return null;
+                                                                            const flowText = locale === 'es'
+                                                                                ? { light: 'ligero', medium: 'medio', heavy: 'abundante', very_heavy: 'muy abundante' }
+                                                                                : { light: 'light', medium: 'medium', heavy: 'heavy', very_heavy: 'very heavy' };
+                                                                            return (
+                                                                                <ul className="flex flex-wrap gap-1.5 mt-2">
+                                                                                    {days.map((d) => (
+                                                                                        <li key={d.date} className={`text-[11px] font-medium px-2 py-1 rounded-md border ${d.flow === 'very_heavy' || d.flow === 'heavy' ? 'border-red-500/40 bg-red-500/10 text-foreground' : 'border-border bg-secondary/50 text-muted-foreground'}`}>
+                                                                                            {Number(d.date.slice(8))}
+                                                                                            {d.flow ? ` · ${flowText[d.flow]}` : ''}
+                                                                                            {d.clots ? (locale === 'es' ? ' · coágulos' : ' · clots') : ''}
+                                                                                            {d.pain != null ? (locale === 'es' ? ` · dolor ${d.pain}/10` : ` · pain ${d.pain}/10`) : ''}
+                                                                                        </li>
+                                                                                    ))}
+                                                                                </ul>
+                                                                            );
+                                                                        })()}
                                                                         {currentDay && (
                                                                             <p className="text-xs font-semibold text-primary mt-1 flex items-center gap-1.5">
                                                                                 <span className="size-1.5 rounded-full bg-primary" />
