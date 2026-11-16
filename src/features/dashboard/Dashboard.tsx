@@ -11,6 +11,7 @@ import { HabitsProgress } from './components/HabitsProgress';
 import { useCycleInfo } from '@/hooks/useCycleInfo';
 import { useLanguage } from '@/i18n/LanguageContext';
 import HealthConnectWidget from './components/HealthConnectWidget';
+import { WeeklySummaryCard } from './components/WeeklySummaryCard';
 
 interface DashboardProps {
     onNavigate: (view: View) => void;
@@ -137,6 +138,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onNavigate, userName }) => {
                     buttonText="Log Symptoms"
                     onAction={() => onNavigate(View.LOG)}
                 />
+                <WeeklySummaryCard />
 
                 <SectionMovement
                     title={movement.title}
