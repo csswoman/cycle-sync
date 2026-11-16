@@ -48,12 +48,12 @@ const SYSTEM_INSTRUCTIONS = {
 
 export type ChatHistory = { role: 'user' | 'model'; parts: { text: string }[] }[];
 
-export async function chat(message: string, history: ChatHistory, language: 'en' | 'es') {
+export async function chat(message: string, history: ChatHistory, language: 'en' | 'es', userContext = '') {
   const genAI = getClient();
   return withFallback(async modelName => {
     const model = genAI.getGenerativeModel({
       model: modelName,
-      systemInstruction: SYSTEM_INSTRUCTIONS[language] ?? SYSTEM_INSTRUCTIONS.en,
+      systemInstruction: [SYSTEM_INSTRUCTIONS[language] ?? SYSTEM_INSTRUCTIONS.en, userContext].filter(Boolean).join('\n\n'),
     });
     const session = model.startChat({
       history: history.map(h => ({

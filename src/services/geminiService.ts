@@ -24,8 +24,10 @@ async function postAI(path: string, body: unknown): Promise<string> {
 export const sendChatMessage = (
   message: string,
   history: { role: 'user' | 'model'; parts: { text: string }[] }[],
-  language: 'en' | 'es' = 'en'
-): Promise<string> => postAI('/api/ai/chat', { message, history, language });
+  language: 'en' | 'es' = 'en',
+  cycle?: { phase: string; cycleDay: number },
+  today?: string
+): Promise<string> => postAI('/api/ai/chat', { message, history, language, cycle, today });
 
 /**
  * Analyzes an image (data URL) with a text prompt.

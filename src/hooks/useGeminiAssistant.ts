@@ -1,8 +1,11 @@
 import { useState } from 'react';
 import { ChatMessage } from '@/types';
 import { sendChatMessage, analyzeImage, analyzeVideo } from '@/services/geminiService';
+import { useCycleInfo } from '@/hooks/useCycleInfo';
+import { toISODate } from '@/lib/planner/week';
 
 export const useGeminiAssistant = (initialMessages: ChatMessage[], language: 'en' | 'es' = 'en') => {
+    const { cycleInfo } = useCycleInfo();
     const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
     const [isChatLoading, setIsChatLoading] = useState(false);
     const [isImageLoading, setIsImageLoading] = useState(false);
@@ -27,7 +30,13 @@ export const useGeminiAssistant = (initialMessages: ChatMessage[], language: 'en
                 parts: [{ text: m.text }]
             }));
 
-            const responseText = await sendChatMessage(text, history, language);
+            const responseText = await sendChatMessage(
+                text,
+                history,
+                language,
+                cycleInfo ? { phase: cycleInfo.phase, cycleDay: cycleInfo.cycleDay } : undefined,
+                toISODate(new Date())
+            );
 
             const botMessage: ChatMessage = {
                 id: (Date.now() + 1).toString(),
