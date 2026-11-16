@@ -14,6 +14,7 @@ import { Flower } from '@/components/ui/Flower';
 import GuestSignupModal from '@/components/layout/GuestSignupModal';
 import { isGuestRoute } from '@/lib/guestAccess';
 import { Icon } from '@/components/ui/Icon';
+import PinLock from '@/components/layout/PinLock';
 
 export default function AppLayoutClient({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -186,6 +187,7 @@ export default function AppLayoutClient({ children }: { children: React.ReactNod
         {/* Page Content */}
         <div className="flex-1 overflow-hidden relative">{children}</div>
       </main>
+      <PinLock />
 
       {/* Mobile Bottom Navigation Bar */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-card/90 backdrop-blur-xl border-t border-border/60 py-1 px-2 flex justify-around items-center shadow-lg transition-colors">

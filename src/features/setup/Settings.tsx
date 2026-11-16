@@ -3,9 +3,13 @@ import { useLanguage } from '@/i18n/LanguageContext';
 import { supabase } from '@/lib/supabase';
 import { SettingsSection, FormField } from './components/SettingsComponents';
 import HealthWebhookSettings from './HealthWebhookSettings';
+import PrivacySettings from './PrivacySettings';
+import { useDisplayPrefs } from '@/hooks/useDisplayPrefs';
 
 const Settings: React.FC = () => {
-    const { t } = useLanguage();
+    const { t, language } = useLanguage();
+    const { hideNumbers, update: updateDisplayPrefs } = useDisplayPrefs();
+    const es = language === 'es';
     const [fullName, setFullName] = useState('');
     const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
     const [newPassword, setNewPassword] = useState('');
@@ -166,6 +170,26 @@ const Settings: React.FC = () => {
                     </form>
                 </SettingsSection>
 
+                {/* Display: hide calories, macros, weight and waist */}
+                <SettingsSection title={es ? 'Cómo ver tus datos' : 'How you see your data'} icon="visibility_off">
+                    <label className="flex items-start gap-4 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            role="switch"
+                            className="size-5 mt-0.5 accent-primary"
+                            checked={hideNumbers}
+                            onChange={(e) => void updateDisplayPrefs({ hideNumbers: e.target.checked })}
+                        />
+                        <span className="flex flex-col gap-1">
+                            <span className="text-foreground font-semibold">{es ? 'Modo sin números' : 'No-numbers mode'}</span>
+                            <span className="text-sm text-muted-foreground">
+                                {es
+                                    ? 'Oculta calorías, macros, peso y cintura en la app y en el informe. También le pide al asistente que no hable de peso ni de calorías.'
+                                    : 'Hides calories, macros, weight and waist in the app and in the report. It also asks the assistant not to talk about weight or calories.'}
+                            </span>
+                        </span>
+                    </label>
+                </SettingsSection>
                 {/* Wearable: Health Connect (recommended for Samsung / Galaxy Watch) */}
                 <SettingsSection title={t.healthWebhookSection} icon="sync_alt">
                     <p className="text-sm text-muted-foreground mb-4">{t.wearableHealthConnectHint}</p>
@@ -206,6 +230,7 @@ const Settings: React.FC = () => {
                         </button>
                     </form>
                 </SettingsSection>
+                <PrivacySettings />
             </div>
         </div>
     );

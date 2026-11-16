@@ -42,6 +42,8 @@ export interface Translations {
     suggestMeals: string;
     suggestCramps: string;
     suggestWorkout: string;
+    suggestLabs: string;
+    suggestCycles: string;
     uploadTooltip: string;
     quickActions: string;
 
@@ -277,6 +279,8 @@ export const translations: Record<Language, Translations> = {
         suggestMeals: 'Phase-friendly foods?',
         suggestCramps: 'How to ease cramps?',
         suggestWorkout: 'Best workout for today?',
+        suggestLabs: 'Explain my latest lab results',
+        suggestCycles: 'How are my cycles going?',
         uploadTooltip: 'Upload image or video',
         quickActions: 'Quick suggestions',
 
@@ -511,6 +515,8 @@ export const translations: Record<Language, Translations> = {
         suggestMeals: '¿Qué comer según mi fase?',
         suggestCramps: '¿Cómo aliviar los cólicos?',
         suggestWorkout: '¿Qué ejercicio me conviene hoy?',
+        suggestLabs: 'Explícame mis últimos análisis',
+        suggestCycles: '¿Cómo van mis ciclos?',
         uploadTooltip: 'Subir imagen o video',
         quickActions: 'Sugerencias rápidas',
 

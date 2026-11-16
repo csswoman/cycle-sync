@@ -4,13 +4,14 @@ export default function PrivacyPage() {
       <div className="max-w-[700px] mx-auto">
         <h1 className="text-3xl font-black text-foreground mb-6">Privacy Policy</h1>
         <div className="prose prose-sm dark:prose-invert text-muted-foreground flex flex-col gap-4">
-          <p><strong>Last updated:</strong> March 18, 2026</p>
+          <p><strong>Last updated:</strong> November 2026</p>
 
           <h2 className="text-lg font-bold text-foreground mt-4">1. Information We Collect</h2>
           <p>CycleSync collects the following types of information:</p>
           <ul className="list-disc pl-5 space-y-1">
             <li><strong>Account data:</strong> email address, name, and profile picture.</li>
             <li><strong>Health data:</strong> menstrual cycle logs, daily symptoms, mood, and PMOS tracking entries.</li>
+            <li><strong>Sensitive entries:</strong> bleeding, basal temperature, sexual activity, lab results, medication, mental-health questionnaires and progress photos. Progress photos are stored in a private bucket and shown through short-lived links. Sexual activity and photos are never sent to the AI assistant or included in exported reports.</li>
             <li><strong>Wearable data:</strong> steps, heart rate, sleep, and activity data that you send from Health Connect or enter manually.</li>
           </ul>
 
@@ -44,11 +45,16 @@ export default function PrivacyPage() {
             <li>Delete your account and all associated data.</li>
             <li>Export your health data.</li>
           </ul>
+          <p>
+            Both are in <strong>Settings → Privacy and data</strong>. &ldquo;Download my data&rdquo; gives you a JSON file with all your records.
+            &ldquo;Delete my account&rdquo; permanently removes your account, every record linked to it, your progress photos and your profile picture, and also clears the copy stored in this browser.
+            You can also set a PIN lock in the same place. The PIN is kept only on your device and works as a privacy screen; it does not encrypt your data.
+          </p>
 
           <h2 className="text-lg font-bold text-foreground mt-4">6. Data Retention</h2>
           <p>
-            Wearable and manual health entries are deleted when you delete your account.
-            Your account data is retained until you request deletion.
+            All your data, files included, is deleted immediately and permanently when you delete your account from the app.
+            Otherwise it is kept until you delete it.
           </p>
 
           <h2 className="text-lg font-bold text-foreground mt-4">7. Contact</h2>
