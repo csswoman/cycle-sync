@@ -3,12 +3,12 @@
 import React, { useState } from 'react';
 import type { useWorkoutLogs } from '@/hooks/useWorkoutLogs';
 
-const FEELINGS = [
-  { value: 1, emoji: '😣', label: 'Muy mal' },
-  { value: 2, emoji: '😕', label: 'Mal' },
-  { value: 3, emoji: '😐', label: 'Normal' },
-  { value: 4, emoji: '🙂', label: 'Bien' },
-  { value: 5, emoji: '🤩', label: 'Genial' },
+export const FEELINGS = [
+  { value: 1, icon: 'sentiment_very_dissatisfied', label: 'Muy mal' },
+  { value: 2, icon: 'sentiment_dissatisfied', label: 'Mal' },
+  { value: 3, icon: 'sentiment_neutral', label: 'Normal' },
+  { value: 4, icon: 'sentiment_satisfied', label: 'Bien' },
+  { value: 5, icon: 'sentiment_very_satisfied', label: 'Genial' },
 ];
 
 const PHASE_LABELS: Record<string, string> = {
@@ -99,7 +99,7 @@ const WorkoutLogSection: React.FC<Props> = ({ phaseKey, state }) => {
             <input className={inputClass} inputMode="numeric" value={duration} onChange={(e) => setDuration(e.target.value)} placeholder="30" />
           </label>
         </div>
-        <p className="text-[11px] text-muted-foreground -mt-1.5">Completa el peso o la duración (o ambos).</p>
+        <p className="text-xs text-muted-foreground -mt-1.5">Completa el peso o la duración (o ambos).</p>
 
         <div className="flex flex-col gap-1.5">
           <span className="text-xs font-semibold text-muted-foreground">¿Cómo te sentiste?</span>
@@ -113,11 +113,11 @@ const WorkoutLogSection: React.FC<Props> = ({ phaseKey, state }) => {
                 aria-label={f.label}
                 title={f.label}
                 onClick={() => setFeeling(f.value)}
-                className={`flex-1 py-2 rounded-xl text-xl transition-all cursor-pointer border ${
-                  feeling === f.value ? 'bg-primary/15 border-primary/40 scale-105' : 'bg-secondary/50 border-transparent hover:bg-secondary'
+                className={`flex-1 min-h-11 flex items-center justify-center rounded-xl transition-all cursor-pointer border ${
+                  feeling === f.value ? 'bg-primary/15 border-primary/40 text-primary' : 'bg-secondary/50 border-transparent text-muted-foreground hover:bg-secondary'
                 }`}
               >
-                {f.emoji}
+                <span aria-hidden className="material-symbols-outlined text-2xl">{f.icon}</span>
               </button>
             ))}
           </div>
@@ -156,7 +156,7 @@ const WorkoutLogSection: React.FC<Props> = ({ phaseKey, state }) => {
             ].filter(Boolean).join(' · ');
             return (
               <div key={log.id} className="flex items-center gap-3 bg-card rounded-xl border border-border p-3.5">
-                <span className="text-2xl shrink-0" title={f?.label}>{f?.emoji}</span>
+                <span className="material-symbols-outlined text-2xl text-primary shrink-0" title={f?.label} aria-label={f?.label}>{f?.icon}</span>
                 <div className="min-w-0 flex-1">
                   <p className="font-semibold text-sm text-foreground truncate">{log.exercise}</p>
                   <p className="text-xs text-muted-foreground">{details}</p>
@@ -164,7 +164,7 @@ const WorkoutLogSection: React.FC<Props> = ({ phaseKey, state }) => {
                 </div>
                 <div className="text-right shrink-0">
                   <p className="text-xs font-semibold text-foreground">{formatDate(log.date)}</p>
-                  <p className="text-[11px] text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     {log.phase ? PHASE_LABELS[log.phase] ?? log.phase : ''}{log.pending ? ' · sin sincronizar' : ''}
                   </p>
                 </div>

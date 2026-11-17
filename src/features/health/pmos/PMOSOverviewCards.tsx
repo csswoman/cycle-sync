@@ -81,11 +81,11 @@ const OV_STYLE: Record<OvulationStatus, { cls: string; es: string; en: string }>
 };
 
 export const CycleStatusCard: React.FC<{ lang: Lang; data: PMOSOverviewData }> = ({ lang, data }) => {
-  const gap = periodGap(data.periodStarts, data.today);
+  const gap = periodGap(data.periodStarts, data.today, data.pregnancies);
   const history = useMemo(() => ovulationHistory(data.periodStarts, data.signs, data.today), [data]);
   const es = lang === 'es';
   const bleedingFlags = useMemo(
-    () => cycleHealthFlags(data.periodRuns, parseLocalDate(data.today), data.signs).filter((f) => f === 'heavyBleeding' || f === 'heavyAfterGap'),
+    () => cycleHealthFlags(data.periodRuns, parseLocalDate(data.today), data.signs, data.pregnancies).filter((f) => f === 'heavyBleeding' || f === 'heavyAfterGap'),
     [data],
   );
   const confirmed = history.filter((h) => h.end && h.status === 'confirmed').length;

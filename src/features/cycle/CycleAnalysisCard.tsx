@@ -1,3 +1,4 @@
+import type { Pregnancy } from '@/lib/cycle/pregnancy';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { daysBetween, type PeriodInput } from '@/lib/cycle/cycleEngine';
@@ -114,11 +115,13 @@ interface Props {
     periods: PeriodInput[];
     /** Per-day flow log, used for the heavy-bleeding flags. */
     signs?: BleedingSign[];
+    /** Pregnancy intervals, left out of the cycle statistics. */
+    pregnancies?: Pregnancy[];
     /** Expected start of the next period (same date as the forecast card). */
     expectedNext?: Date;
 }
 
-export const CycleAnalysisCard: React.FC<Props> = ({ periods, signs = [], expectedNext }) => {
+export const CycleAnalysisCard: React.FC<Props> = ({ periods, signs = [], pregnancies = [], expectedNext }) => {
     const { language } = useLanguage();
     const c = copy[language === 'es' ? 'es' : 'en'];
     // Re-render every minute so the countdown drops by one when the day changes.
@@ -127,8 +130,8 @@ export const CycleAnalysisCard: React.FC<Props> = ({ periods, signs = [], expect
         const id = setInterval(() => setNow(new Date()), 60_000);
         return () => clearInterval(id);
     }, []);
-    const a = useMemo(() => analyzeCycles(periods, now), [periods, now]);
-    const flags = useMemo(() => cycleHealthFlags(periods, now, signs), [periods, now, signs]);
+    const a = useMemo(() => analyzeCycles(periods, now, pregnancies), [periods, now, pregnancies]);
+    const flags = useMemo(() => cycleHealthFlags(periods, now, signs, pregnancies), [periods, now, signs, pregnancies]);
     const [modal, setModal] = useState<'cycle' | 'period' | null>(null);
 
     return (

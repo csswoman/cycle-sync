@@ -13,6 +13,8 @@ import HirsutismTracker from './HirsutismTracker';
 import ProgressPhotos from './ProgressPhotos';
 import DoctorQuestions from './DoctorQuestions';
 import DiagnosisCard from './DiagnosisCard';
+import { InductionCycleCard, PregnancyGlucoseCard, PregnancyMedicationCard, PreconceptionCard } from '@/features/pregnancy/PregnancyCards';
+import { activePregnancy, predictionsPaused } from '@/lib/cycle/pregnancy';
 
 type Tab = 'summary' | 'labs' | 'skin' | 'wellbeing' | 'visit';
 const TABS: { id: Tab; icon: string; es: string; en: string }[] = [
@@ -39,6 +41,8 @@ const MemberContent: React.FC<{ lang: 'es' | 'en' }> = ({ lang }) => {
     window.history.replaceState(null, '', url);
   };
 
+  const pregnancy = data ? activePregnancy(data.pregnancies, data.today) : null;
+  const paused = data ? predictionsPaused(data.periodStarts.at(-1) ?? null, data.pregnancies, data.today) : false;
   return (
     <div className="flex flex-col gap-6">
       <div role="tablist" className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
@@ -54,14 +58,18 @@ const MemberContent: React.FC<{ lang: 'es' | 'en' }> = ({ lang }) => {
         loading || !data ? <p className="text-sm text-muted-foreground">{lang === 'es' ? 'Cargando…' : 'Loading…'}</p> : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
             <div className="flex flex-col gap-6">
+              {activePregnancy(data.pregnancies, data.today) && <PregnancyMedicationCard lang={lang} />}
               <DiagnosisCard lang={lang} />
               <InsightsCard lang={lang} data={data} />
               <MealGlucoseCard lang={lang} data={data} />
               <ScreeningCard lang={lang} data={data} onOpenLabs={() => go('labs')} />
             </div>
             <div className="flex flex-col gap-6">
-              <CycleStatusCard lang={lang} data={data} />
-              <PeriodForecastCard lang={lang} />
+              {pregnancy && <PregnancyGlucoseCard lang={lang} data={data} pregnancy={pregnancy} />}
+              {!paused && <PreconceptionCard lang={lang} data={data} />}
+              <InductionCycleCard lang={lang} data={data} />
+              {!paused && <CycleStatusCard lang={lang} data={data} />}
+              {!paused && <PeriodForecastCard lang={lang} />}
             </div>
           </div>
         )

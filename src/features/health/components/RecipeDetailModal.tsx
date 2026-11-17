@@ -8,8 +8,9 @@ import { useDisplayPrefs } from '@/hooks/useDisplayPrefs';
 interface RecipeDetailModalProps {
   recipe: LibraryRecipe;
   onClose: () => void;
-  onToggleFavorite: (recipe: LibraryRecipe) => void;
-  onSetTags: (recipe: LibraryRecipe, tags: string[]) => void;
+  /** Favorite and tag actions are left out in read-only (guest) mode. */
+  onToggleFavorite?: (recipe: LibraryRecipe) => void;
+  onSetTags?: (recipe: LibraryRecipe, tags: string[]) => void;
   /** Only passed for recipes the user created. */
   onDelete?: (recipe: LibraryRecipe) => Promise<void>;
   suggestions: string[];
@@ -43,20 +44,22 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
           <div className="flex items-start justify-between gap-3">
             <h2 className="text-2xl font-black text-foreground leading-tight">{recipe.title}</h2>
             <div className="flex gap-2 shrink-0">
-              <button
-                type="button"
-                onClick={() => onToggleFavorite(recipe)}
-                className={`p-2 rounded-full border border-border transition-colors ${recipe.isFavorite ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-primary'}`}
-                aria-label={recipe.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-                aria-pressed={recipe.isFavorite}
-              >
-                <span
-                  className="material-symbols-outlined text-[20px] block"
-                  style={{ fontVariationSettings: `'FILL' ${recipe.isFavorite ? 1 : 0}` }}
+              {onToggleFavorite && (
+                <button
+                  type="button"
+                  onClick={() => onToggleFavorite(recipe)}
+                  className={`p-2 rounded-full border border-border transition-colors ${recipe.isFavorite ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-primary'}`}
+                  aria-label={recipe.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                  aria-pressed={recipe.isFavorite}
                 >
-                  favorite
-                </span>
-              </button>
+                  <span
+                    className="material-symbols-outlined text-[20px] block"
+                    style={{ fontVariationSettings: `'FILL' ${recipe.isFavorite ? 1 : 0}` }}
+                  >
+                    favorite
+                  </span>
+                </button>
+              )}
               <button
                 type="button"
                 onClick={onClose}
@@ -74,6 +77,7 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
           </div>
           {recipe.description && <p className="text-sm text-muted-foreground">{recipe.description}</p>}
 
+          {(onSetTags || recipe.tags.length > 0) && (
           <div>
             <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Tags</h3>
             {recipe.tags.length > 0 && (
@@ -83,8 +87,9 @@ export const RecipeDetailModal: React.FC<RecipeDetailModalProps> = ({
                 ))}
               </div>
             )}
-            <TagEditor tags={recipe.myTags} onChange={(tags) => onSetTags(recipe, tags)} suggestions={suggestions} />
+            {onSetTags && <TagEditor tags={recipe.myTags} onChange={(tags) => onSetTags(recipe, tags)} suggestions={suggestions} />}
           </div>
+          )}
 
           {recipe.ingredients.length > 0 && (
             <div>

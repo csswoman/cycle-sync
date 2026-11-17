@@ -4,6 +4,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useHabits } from '@/hooks/useHabits';
 import { Icon } from '@/components/ui/Icon';
+import { Bloom } from '@/components/ui/Bloom';
 import { useLanguage } from '@/i18n/LanguageContext';
 import type { Habit } from '@/types';
 
@@ -15,10 +16,10 @@ const HABIT_ICONS: Record<string, string> = {
 };
 
 const HABIT_COLORS: Record<string, string> = {
-  water: 'text-blue-400',
-  sleep: 'text-indigo-400',
-  mindfulness: 'text-emerald-400',
-  custom: 'text-amber-400',
+  water: 'text-sage',
+  sleep: 'text-blossom',
+  mindfulness: 'text-leaf',
+  custom: 'text-sun',
 };
 
 /** Amount added per tap in the quick view. Custom habits are toggled instead. */
@@ -62,21 +63,39 @@ export const HabitsProgress: React.FC = () => {
     logHabit(habit.id, next, next >= goal);
   };
 
+  const quickDecrement = (habit: Habit) => {
+    const log = getLogForHabit(habit.id);
+    const goal = habit.goal ?? 1;
+    const step = STEP[habit.type];
+    if (!step) {
+      logHabit(habit.id, 0, false);
+      return;
+    }
+    const current = log?.value ?? 0;
+    const next = Math.max(0, current - step);
+    logHabit(habit.id, next, next >= goal);
+  };
+
   if (loading) {
     return <div className="bg-card rounded-3xl border border-border p-5 animate-pulse h-32" />;
   }
 
   return (
     <div className="bg-card rounded-3xl border border-border overflow-hidden shadow-sm">
-      <div className="p-4 sm:p-5 border-b border-border/60 flex justify-between items-center bg-card/60">
-        <h3 className="text-foreground text-sm font-semibold flex items-center gap-2">
-          <Icon name="check_circle" size={18} weight="duotone" className="text-blossom" />
-          {copy.title}
-          <span className="text-xs text-muted-foreground font-medium tabular-nums">{dailyProgress}%</span>
+      <div className="p-4 sm:p-5 border-b border-border/60 flex justify-between items-center gap-2 bg-card/60">
+        <h3 className="text-foreground text-sm font-semibold flex items-center gap-1.5 sm:gap-2 truncate">
+          {/* The plant grows as today's habits get done. */}
+          <Bloom
+            growth={0.08 + (dailyProgress / 100) * 0.92}
+            tone={dailyProgress >= 100 ? 'ovulation' : 'follicular'}
+            className="h-8 sm:h-9 w-auto -my-2 shrink-0"
+          />
+          <span className="truncate">{copy.title}</span>
+          <span className="text-xs text-muted-foreground font-medium tabular-nums shrink-0">{dailyProgress}%</span>
         </h3>
         <button
           onClick={() => router.push('/habits')}
-          className="text-blossom text-xs font-semibold hover:text-blossom/80 transition-colors flex items-center gap-1"
+          className="text-blossom text-xs font-semibold hover:text-blossom/80 transition-colors flex items-center gap-1 shrink-0"
         >
           {copy.all}
           <Icon name="arrow_forward" size={14} />
@@ -113,18 +132,33 @@ export const HabitsProgress: React.FC = () => {
                 </div>
                 <div className="mt-1 h-1.5 bg-secondary rounded-full overflow-hidden">
                   <div
-                    className={`h-full rounded-full transition-all duration-500 ${isComplete ? 'bg-leaf' : 'bg-blossom'}`}
+                    className={`h-full rounded-full transition-all duration-500 ${isComplete ? 'bg-leafy' : 'bg-garden'}`}
                     style={{ width: `${pct}%` }}
                   />
                 </div>
               </div>
-              <button
-                onClick={() => quickLog(habit)}
-                aria-label={`${step ? copy.add : copy.toggle} ${copy.names[habit.type] ?? habit.name}`}
-                className="shrink-0 h-8 min-w-8 px-2 rounded-full bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold flex items-center justify-center gap-0.5 transition-colors"
-              >
-                {step ? <>+{step}</> : <Icon name="check_circle" size={16} />}
-              </button>
+              <div className="flex items-center gap-1 shrink-0">
+                {step && currentVal > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => quickDecrement(habit)}
+                    aria-label={`-${step} ${copy.names[habit.type] ?? habit.name}`}
+                    title={`-${step}`}
+                    className="size-7 rounded-full bg-secondary hover:bg-secondary/80 text-muted-foreground hover:text-foreground text-xs font-bold flex items-center justify-center transition-colors"
+                  >
+                    -{step}
+                  </button>
+                )}
+                <button
+                  type="button"
+                  onClick={() => quickLog(habit)}
+                  aria-label={`${step ? copy.add : copy.toggle} ${copy.names[habit.type] ?? habit.name}`}
+                  title={step ? `+${step}` : copy.toggle}
+                  className="h-7 min-w-7 px-2 rounded-full bg-primary/10 hover:bg-primary/20 text-primary text-xs font-bold flex items-center justify-center gap-0.5 transition-colors"
+                >
+                  {step ? <>+{step}</> : <Icon name="check_circle" size={16} />}
+                </button>
+              </div>
             </div>
           );
         })}

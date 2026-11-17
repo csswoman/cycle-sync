@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { SettingsSection, FormField } from './components/SettingsComponents';
 import HealthWebhookSettings from './HealthWebhookSettings';
 import PrivacySettings from './PrivacySettings';
+import GoalSettings from './GoalSettings';
 import { useDisplayPrefs } from '@/hooks/useDisplayPrefs';
 
 const Settings: React.FC = () => {
@@ -65,7 +66,7 @@ const Settings: React.FC = () => {
             if (updateError) throw updateError;
 
             setAvatarUrl(publicUrl);
-            setMessage({ type: 'success', text: 'Profile picture updated!' });
+            setMessage({ type: 'success', text: es ? '¡Foto de perfil actualizada!' : 'Profile picture updated!' });
         } catch (err: any) {
             setMessage({ type: 'error', text: err.message });
         } finally {
@@ -103,7 +104,7 @@ const Settings: React.FC = () => {
                 password: newPassword
             });
             if (error) throw error;
-            setMessage({ type: 'success', text: 'Password updated successfully!' });
+            setMessage({ type: 'success', text: es ? '¡Contraseña actualizada con éxito!' : 'Password updated successfully!' });
             setNewPassword('');
             setConfirmPassword('');
         } catch (err: any) {
@@ -155,7 +156,7 @@ const Settings: React.FC = () => {
                                     )}
                                 </div>
                                 <p className="text-xs text-muted-foreground max-w-[200px]">
-                                    Click here or drag and drop to upload a new profile picture.
+                                    {es ? 'Haz clic aquí para subir una nueva foto de perfil.' : 'Click here or drag and drop to upload a new profile picture.'}
                                 </p>
                             </div>
                         </FormField>
@@ -170,6 +171,9 @@ const Settings: React.FC = () => {
                     </form>
                 </SettingsSection>
 
+                <SettingsSection title={es ? 'Mi objetivo' : 'My goal'} icon="flag">
+                    <GoalSettings language={language} />
+                </SettingsSection>
                 {/* Display: hide calories, macros, weight and waist */}
                 <SettingsSection title={es ? 'Cómo ver tus datos' : 'How you see your data'} icon="visibility_off">
                     <label className="flex items-start gap-4 cursor-pointer">

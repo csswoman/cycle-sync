@@ -71,12 +71,20 @@ export default function AppLayoutClient({ children }: { children: React.ReactNod
     return 'CycleSync';
   };
 
-  const bottomNavItems = [
-    { href: '/dashboard', label: t.overview, icon: 'dashboard' },
-    { href: '/log', label: t.dailyLog, icon: 'edit_calendar' },
-    { href: '/habits', label: t.habits, icon: 'check_circle' },
-    { href: '/nutrition', label: t.mealIdeas, icon: 'restaurant' },
-  ];
+  // Guests get the pages they can open, so the bar shows content instead of locks.
+  const bottomNavItems = isGuest
+    ? [
+        { href: '/dashboard', label: t.overview, icon: 'dashboard' },
+        { href: '/routines', label: t.routines, icon: 'fitness_center' },
+        { href: '/nutrition', label: t.mealIdeas, icon: 'restaurant' },
+        { href: '/articles', label: t.articles, icon: 'menu_book' },
+      ]
+    : [
+        { href: '/dashboard', label: t.overview, icon: 'dashboard' },
+        { href: '/log', label: t.dailyLog, icon: 'edit_calendar' },
+        { href: '/habits', label: t.habits, icon: 'check_circle' },
+        { href: '/nutrition', label: t.mealIdeas, icon: 'restaurant' },
+      ];
 
   const currentTitle = getPageTitle(pathname);
 
@@ -88,14 +96,14 @@ export default function AppLayoutClient({ children }: { children: React.ReactNod
         center="var(--blossom-soft)"
         petals={5}
         rotate={12}
-        className="absolute -left-24 top-1/3 size-[420px] opacity-60 dark:opacity-20 pointer-events-none"
+        className="absolute -left-24 top-1/3 size-[420px] opacity-60 dark:opacity-[0.14] pointer-events-none"
       />
       <Flower
         petal="var(--blossom-soft)"
         center="var(--sun)"
         petals={7}
         rotate={-20}
-        className="absolute -right-20 -bottom-24 size-[360px] opacity-70 dark:opacity-20 pointer-events-none"
+        className="absolute -right-20 -bottom-24 size-[360px] opacity-70 dark:opacity-[0.16] pointer-events-none"
       />
 
       {/* Mobile Sidebar Overlay Drawer */}

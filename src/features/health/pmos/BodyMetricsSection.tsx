@@ -78,7 +78,7 @@ const ChartCard: React.FC<{ title: string; unit: string; points: LinePoint[]; no
   </div>
 );
 
-const BodyMetricsSection: React.FC<{ lang?: Lang }> = ({ lang = 'en' }) => {
+const BodyMetricsSection: React.FC<{ lang?: Lang }> = ({ lang = 'es' }) => {
   const t = T[lang];
   const { hideNumbers } = useDisplayPrefs();
   const { entries, loading, saving, error, mealColumns, add, remove } = usePMOSMetrics();

@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { onboardingText } from '@/i18n/onboardingText';
+import { Bloom } from '@/components/ui/Bloom';
+import { Flower } from '@/components/ui/Flower';
+import { GardenCorner } from '@/components/ui/Botanical';
 import {
   ONBOARDING_QUESTIONS, isQuestionAnswered, usesHormonalContraception,
   type OnboardingAnswers,
@@ -10,12 +13,11 @@ interface ArchetypeSelectionProps {
   onComplete: (answers: OnboardingAnswers) => void | Promise<void>;
   initialAnswers?: OnboardingAnswers;
   saving?: boolean;
-  isDarkMode: boolean;
-  toggleDarkMode: () => void;
 }
 
-const ArchetypeSelection: React.FC<ArchetypeSelectionProps> = ({ onComplete, initialAnswers, saving = false, isDarkMode, toggleDarkMode }) => {
-  const { language, setLanguage } = useLanguage();
+/** Language and theme toggles live in the app top bar, so this page has no header of its own. */
+const ArchetypeSelection: React.FC<ArchetypeSelectionProps> = ({ onComplete, initialAnswers, saving = false }) => {
+  const { language } = useLanguage();
   const text = onboardingText[language].archetype;
   const [answers, setAnswers] = useState<OnboardingAnswers>(initialAnswers ?? {});
   const [index, setIndex] = useState(0);
@@ -41,112 +43,118 @@ const ArchetypeSelection: React.FC<ArchetypeSelectionProps> = ({ onComplete, ini
     else setIndex(index + 1);
   };
 
-  const toggleLanguage = () => {
-    setLanguage(language === 'en' ? 'es' : 'en');
-  };
+  const total = ONBOARDING_QUESTIONS.length;
+  // The plant grows with each question: a seed at the start, in bloom at the end.
+  const growth = 0.1 + (index / Math.max(1, total - 1)) * 0.9;
 
   return (
-    <div className="bg-background text-foreground font-display min-h-screen flex flex-col w-full overflow-y-auto transition-colors duration-300">
-      <header className="w-full border-b border-border bg-background z-10 sticky top-0">
-        <div className="px-4 md:px-10 py-3 flex items-center justify-between max-w-7xl mx-auto">
-          <div className="flex items-center gap-3">
-            <div className="size-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
-              <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>local_florist</span>
-            </div>
-            <h2 className="text-lg font-bold leading-tight tracking-tight">CycleSync</h2>
-          </div>
-          <div className="flex gap-2">
-            <button
-              onClick={toggleLanguage}
-              className="flex items-center gap-2 bg-secondary hover:bg-surface-hover transition-all rounded-lg px-3 py-1.5 text-sm font-semibold text-foreground border border-border/50"
-            >
-              <span className="material-symbols-outlined text-[18px]">language</span>
-              <span className="font-bold">{language.toUpperCase()}</span>
-            </button>
-
-            <button
-              onClick={toggleDarkMode}
-              className="flex items-center gap-2 bg-secondary hover:bg-surface-hover transition-all rounded-lg px-3 py-1.5 text-sm font-semibold text-foreground border border-border/50"
-            >
-              <span className="material-symbols-outlined text-[18px]">
-                {isDarkMode ? 'light_mode' : 'dark_mode'}
-              </span>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      <div className="flex-1 w-full max-w-[760px] mx-auto flex flex-col gap-8 py-10 px-6">
+    <div className="flex-1 h-full overflow-y-auto relative scrollbar-hide">
+      <div className="w-full max-w-[760px] mx-auto flex flex-col gap-6 py-6 sm:py-10 px-4 sm:px-6 pb-32">
         {index === 0 && (
-          <div className="flex flex-col gap-3 text-center items-center animate-in fade-in slide-in-from-bottom-4 duration-700">
-            <h1 className="text-3xl md:text-4xl font-black leading-tight tracking-tight max-w-2xl text-foreground">{text.title}</h1>
-            <p className="text-muted-foreground text-base leading-relaxed max-w-xl">{text.subtitle}</p>
-          </div>
-        )}
-        <div className="flex flex-col gap-2">
-          <div className="flex justify-between text-sm font-medium text-muted-foreground">
-            <span>{text.questionOf(index + 1, ONBOARDING_QUESTIONS.length)}</span>
-            <span>{question.multi ? text.chooseAny : text.chooseOne}</span>
-          </div>
-          <div className="h-2 w-full rounded-full bg-secondary overflow-hidden">
-            <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${((index + 1) / ONBOARDING_QUESTIONS.length) * 100}%` }} />
-          </div>
-        </div>
-        <div key={question.id} className="flex flex-col gap-6 animate-in fade-in slide-in-from-right-4 duration-500">
-          <div className="flex flex-col gap-1">
-            <h2 className="text-2xl md:text-3xl font-black text-foreground">{copy.title}</h2>
-            <p className="text-muted-foreground">{copy.hint}</p>
-          </div>
-          <div className={`grid gap-3 ${question.multi ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-1'}`}>
-            {question.options.map((opt) => {
-              const o = text.options[`${question.prefix}_${opt.id}`];
-              const selected = isSelected(opt.id);
-              return (
-                <button
-                  key={opt.id}
-                  type="button"
-                  onClick={() => choose(opt.id)}
-                  aria-pressed={selected}
-                  className={`flex items-center gap-4 text-left rounded-xl border-2 p-4 transition-all ${selected ? 'border-primary bg-card shadow-lg shadow-primary/5' : 'border-border bg-card/50 hover:border-primary/60'}`}
-                >
-                  <span className={`size-11 shrink-0 rounded-full flex items-center justify-center ${selected ? 'bg-primary text-primary-foreground' : 'bg-primary/10 text-primary'}`}>
-                    <span className="material-symbols-outlined text-[24px]">{opt.icon}</span>
-                  </span>
-                  <span className="flex flex-col gap-0.5">
-                    <span className="font-bold text-foreground">{o.label}</span>
-                    {o.description && <span className="text-sm text-muted-foreground leading-snug">{o.description}</span>}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-          {note && (
-            <div className="flex gap-3 rounded-xl bg-amber-500/10 text-foreground p-4 text-sm">
-              <span className="material-symbols-outlined text-amber-500">info</span>
-              <p>{note}</p>
+          <section className="relative overflow-hidden rounded-3xl garden-wash border border-border/80 shadow-sm p-6 sm:p-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <GardenCorner variant="blossom" className="size-32 sm:size-48 opacity-70" />
+            <div className="relative flex flex-col gap-2 pr-16 sm:pr-28">
+              <span className="inline-flex w-fit items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-leaf bg-leaf-soft px-3 py-1 rounded-full">
+                <span className="material-symbols-outlined text-[15px]">local_florist</span>
+                {language === 'es' ? 'Tu experiencia' : 'Your experience'}
+              </span>
+              <h1 className="text-3xl md:text-4xl font-semibold leading-tight tracking-tight text-foreground">{text.title}</h1>
+              <p className="text-muted-foreground text-base leading-relaxed max-w-xl">{text.subtitle}</p>
             </div>
-          )}
-        </div>
-        <div className="flex items-center justify-between gap-4">
-          <button
-            type="button"
-            onClick={() => setIndex(Math.max(0, index - 1))}
-            disabled={index === 0 || saving}
-            className="px-6 py-3 rounded-lg text-sm font-bold text-muted-foreground hover:bg-secondary transition-colors disabled:opacity-0"
-          >
-            {text.back}
-          </button>
-          <button
-            type="button"
-            onClick={handleNext}
-            disabled={!isQuestionAnswered(question, answers) || saving}
-            className="px-8 h-12 rounded-xl bg-primary text-primary-foreground font-bold shadow-lg hover:bg-primary/90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {saving ? text.saving : isLast ? text.finish : text.next}
-          </button>
-        </div>
+          </section>
+        )}
+
+        <section className="relative overflow-hidden rounded-3xl bg-card/85 backdrop-blur-sm border border-border/80 shadow-sm p-5 sm:p-7 flex flex-col gap-6">
+          {/* Progress: one dot per question plus the growing plant. */}
+          <div className="flex items-center gap-4">
+            <div className="flex-1 flex flex-col gap-2.5">
+              <div className="flex justify-between text-xs font-semibold text-muted-foreground">
+                <span>{text.questionOf(index + 1, total)}</span>
+                <span>{question.multi ? text.chooseAny : text.chooseOne}</span>
+              </div>
+              <div className="flex items-center gap-1.5" aria-hidden="true">
+                {ONBOARDING_QUESTIONS.map((q, i) => (
+                  <span
+                    key={q.id}
+                    className={`h-2 rounded-full transition-all duration-500 ${
+                      i < index ? 'flex-1 bg-leafy' : i === index ? 'flex-[2] bg-bloom' : 'flex-1 bg-secondary'
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+            <Bloom growth={growth} tone={isLast ? 'ovulation' : 'follicular'} className="h-16 sm:h-20 w-auto shrink-0 -my-2" />
+          </div>
+
+          <div key={question.id} className="flex flex-col gap-5 animate-in fade-in slide-in-from-right-4 duration-500">
+            <div className="flex flex-col gap-1">
+              <h2 className="text-2xl md:text-3xl font-semibold text-foreground">{copy.title}</h2>
+              <p className="text-muted-foreground">{copy.hint}</p>
+            </div>
+            <div className={`grid gap-3 ${question.multi ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-1'}`}>
+              {question.options.map((opt) => {
+                const o = text.options[`${question.prefix}_${opt.id}`];
+                const selected = isSelected(opt.id);
+                return (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => choose(opt.id)}
+                    aria-pressed={selected}
+                    className={`relative flex items-center gap-4 text-left rounded-2xl border p-4 transition-all ${
+                      selected
+                        ? 'garden-wash border-blossom/50 shadow-md shadow-blossom/10'
+                        : 'border-border bg-card/60 hover:border-leaf/50 hover:bg-leaf-soft/40'
+                    }`}
+                  >
+                    <span
+                      className={`size-11 shrink-0 rounded-full flex items-center justify-center transition-colors ${
+                        selected ? 'bg-bloom text-primary-foreground shadow-sm' : 'bg-leaf-soft text-leaf'
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-[24px]">{opt.icon}</span>
+                    </span>
+                    <span className="flex flex-col gap-0.5 min-w-0">
+                      <span className="font-bold text-foreground">{o.label}</span>
+                      {o.description && <span className="text-sm text-muted-foreground leading-snug">{o.description}</span>}
+                    </span>
+                    {selected && (
+                      <Flower petal="var(--petal)" center="var(--sun)" petals={5} rotate={18} className="absolute top-2 right-2 size-5" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+            {note && (
+              <div className="flex gap-3 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-foreground p-4 text-sm">
+                <span className="material-symbols-outlined text-amber-500">info</span>
+                <p>{note}</p>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between gap-4 pt-2 border-t border-border/50">
+            <button
+              type="button"
+              onClick={() => setIndex(Math.max(0, index - 1))}
+              disabled={index === 0 || saving}
+              className="px-5 h-11 rounded-full text-sm font-bold text-muted-foreground hover:text-foreground hover:bg-leaf-soft/60 transition-colors disabled:opacity-0"
+            >
+              {text.back}
+            </button>
+            <button
+              type="button"
+              onClick={handleNext}
+              disabled={!isQuestionAnswered(question, answers) || saving}
+              className="cta-bloom px-8 h-12 rounded-full font-bold transition-transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            >
+              {saving ? text.saving : isLast ? text.finish : text.next}
+            </button>
+          </div>
+        </section>
+
         <div className="flex justify-center">
-          <div className="flex items-center gap-2 text-muted-foreground text-xs font-medium bg-secondary px-3 py-1.5 rounded-full">
+          <div className="flex items-center gap-2 text-leaf text-xs font-semibold bg-leaf-soft px-3.5 py-1.5 rounded-full">
             <span className="material-symbols-outlined text-[16px]">lock</span>
             <span>{text.privacy}</span>
           </div>

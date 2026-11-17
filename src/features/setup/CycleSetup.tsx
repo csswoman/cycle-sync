@@ -179,7 +179,7 @@ const CycleSetup: React.FC<CycleSetupProps> = ({ onNavigate }) => {
                                 <span className="text-primary text-sm font-bold">{text.percentComplete(progressPercentage)}</span>
                             </div>
                             <div className="h-2 w-full rounded-full bg-secondary overflow-hidden">
-                                <div className="h-full rounded-full bg-primary transition-all duration-500" style={{ width: `${progressPercentage}%` }}></div>
+                                <div className="h-full rounded-full bg-garden transition-all duration-500" style={{ width: `${progressPercentage}%` }}></div>
                             </div>
                         </div>
 
@@ -218,7 +218,7 @@ const CycleSetup: React.FC<CycleSetupProps> = ({ onNavigate }) => {
                             <button onClick={handleBack} className="px-6 py-3 rounded-lg text-sm font-bold text-muted-foreground hover:bg-secondary transition-colors">
                                 {text.back}
                             </button>
-                            <button onClick={handleNext} disabled={saving || !canAdvance} className="px-8 py-3 rounded-lg bg-primary text-primary-foreground text-sm font-bold shadow-lg shadow-primary/30 hover:bg-primary/90 transition-colors flex items-center gap-2 disabled:opacity-50">
+                            <button onClick={handleNext} disabled={saving || !canAdvance} className="cta-bloom px-8 py-3 rounded-full text-sm font-bold transition-transform hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 disabled:opacity-50">
                                 <span>{saving ? text.saving : step === 4 ? text.complete : text.next}</span>
                                 {!saving && (step < 4 ? <span className="material-symbols-outlined text-sm">arrow_forward</span> : <span className="material-symbols-outlined text-sm">check</span>)}
                             </button>

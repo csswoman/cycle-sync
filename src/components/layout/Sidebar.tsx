@@ -37,29 +37,32 @@ const NavItem: React.FC<NavItemProps> = ({ href, label, icon, locked, onClose })
   };
 
   return (
-    <div
+    <button
+      type="button"
       onClick={handleClick}
-      className={`flex items-center gap-3 px-4 py-2.5 rounded-full transition-all cursor-pointer group ${
-        isActive
-          ? 'bg-blossom-soft text-foreground'
-          : 'hover:bg-card text-muted-foreground hover:text-foreground'
+      className={`nav-item w-full text-left flex items-center gap-3 px-4 py-2.5 rounded-full cursor-pointer group ${
+        isActive ? '' : 'text-muted-foreground hover:text-foreground'
       } ${locked ? 'opacity-60' : ''}`}
+      aria-current={isActive ? 'page' : undefined}
       aria-disabled={locked || undefined}
     >
       <Icon
         name={icon}
         size={20}
         weight={isActive ? 'duotone' : 'regular'}
-        className={isActive ? 'text-blossom' : 'text-muted-foreground group-hover:text-foreground'}
+        className={isActive ? 'text-blossom' : 'text-muted-foreground group-hover:text-leaf transition-colors'}
       />
-      <p className={`text-sm flex-1 ${isActive ? 'font-bold' : 'font-medium'}`}>{label}</p>
+      <span className={`text-sm flex-1 ${isActive ? 'font-bold' : 'font-medium'}`}>{label}</span>
       {locked && <Icon name="lock" size={16} className="text-muted-foreground" />}
-    </div>
+      {isActive && !locked && (
+        <Flower petal="var(--petal)" center="var(--sun)" petals={5} rotate={18} className="size-4 shrink-0" />
+      )}
+    </button>
   );
 };
 
 const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const router = useRouter();
   const { user, authReady, setSignupPromptOpen } = useAppStore();
   const isGuest = authReady && !user;
@@ -150,9 +153,25 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
             }
             onClose?.();
           }}
-          className="w-full bg-gradient-to-r from-blossom via-blossom to-coral text-primary-foreground text-sm font-bold py-2.5 rounded-full shadow-md shadow-blossom/20 mb-1 transition-all transform hover:scale-[1.02] hover:brightness-105 active:scale-95"
+          className="cta-bloom w-full rounded-2xl px-3.5 py-3 mb-1 flex items-center gap-3 text-left transition-transform hover:scale-[1.02] active:scale-95"
         >
-          {t.personalizeExperience}
+          <Flower
+            petal="#ffffff"
+            center="var(--sun)"
+            outline="#ffffff"
+            petals={6}
+            rotate={10}
+            className="absolute -right-4 -bottom-5 size-16 opacity-25"
+          />
+          <span className="relative size-8 rounded-full bg-white/25 flex items-center justify-center shrink-0">
+            <Icon name="sparkle" size={18} weight="fill" />
+          </span>
+          <span className="relative flex-1 min-w-0">
+            <span className="block text-sm font-bold leading-tight">{t.personalizeExperience}</span>
+            <span className="block text-[11px] font-medium opacity-85 leading-tight mt-0.5">
+              {language === 'es' ? 'Tu arquetipo, metas y ritmo' : 'Your archetype, goals and rhythm'}
+            </span>
+          </span>
         </button>
 
         <NavItem href="/settings" label={t.settings} icon="settings" locked={isGuest} onClose={onClose} />

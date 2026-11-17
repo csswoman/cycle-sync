@@ -18,6 +18,9 @@ import BodySignsPanel from './components/BodySignsPanel';
 import { usesHormonalContraception } from '@/features/setup/onboarding';
 import { useOnboardingAnswers } from '@/hooks/useOnboardingAnswers';
 import { addDays, toISODate } from '@/lib/cycle/cycleEngine';
+import { Bloom } from '@/components/ui/Bloom';
+import { TitleSprig } from '@/components/ui/Botanical';
+import { bloomGrowth, bloomTone } from '@/lib/cycle/bloom';
 
 type Tab = 'today' | 'body' | 'symptoms' | 'meds';
 
@@ -169,7 +172,7 @@ const DailyLog: React.FC = () => {
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-8 pb-32">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="flex flex-col gap-2">
-            <h1 className="text-3xl md:text-4xl font-semibold text-foreground tracking-tight">{lang === 'es' ? 'Registro diario' : 'Daily Log'}</h1>
+            <h1 className="text-3xl md:text-4xl font-semibold text-foreground tracking-tight"><TitleSprig bud={null} />{lang === 'es' ? 'Registro diario' : 'Daily Log'}</h1>
             <div className="flex items-center gap-2 text-muted-foreground">
               <span className="material-symbols-outlined text-primary text-[20px]">calendar_today</span>
               <p className="text-sm font-medium">
@@ -238,12 +241,14 @@ const DailyLog: React.FC = () => {
 
           {/* Sidebar Context */}
           <div className="lg:col-span-4 flex flex-col gap-6">
-            <div className="bg-gradient-to-br from-card via-card to-blossom-soft/40 border border-border rounded-2xl p-6 relative overflow-hidden shadow-sm">
-              <div className="absolute top-0 right-0 p-3 opacity-10">
-                <span className="material-symbols-outlined text-9xl text-foreground">water_drop</span>
-              </div>
+            <div data-phase={bloomTone(phase)} className="phase-wash border border-border rounded-2xl p-6 relative overflow-hidden shadow-sm">
+              <Bloom
+                growth={bloomGrowth(cycleDay, cycleInfo?.ovulationDay ?? Math.max(1, cycleLength - 14))}
+                tone={bloomTone(phase)}
+                className="absolute -top-1 right-1 h-28 w-auto opacity-90"
+              />
               <h3 className="text-foreground font-bold text-lg mb-1 relative z-10">{lang === 'es' ? 'Fase del ciclo' : 'Cycle phase'}</h3>
-              <p className="text-primary font-bold text-2xl mb-4 relative z-10">
+              <p className="text-phase font-bold text-2xl mb-4 relative z-10 pr-16">
                 {insight.name}
                 {irregular && <span className="text-sm font-semibold text-muted-foreground"> · {lang === 'es' ? 'estimada' : 'estimated'}</span>}
               </p>
@@ -254,7 +259,7 @@ const DailyLog: React.FC = () => {
               </div>
               <div className="w-full h-3 bg-secondary rounded-full overflow-hidden relative z-10">
                 <div
-                  className="h-full bg-gradient-to-r from-blossom to-coral rounded-full transition-all"
+                  className="h-full bg-phase rounded-full transition-all"
                   style={{ width: `${progressPct}%` }}
                 />
               </div>

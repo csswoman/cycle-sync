@@ -40,11 +40,34 @@
 
   /* Garden accents for illustrations and highlights. */
   --blossom: light-dark(#c2306a, #ff8fb8);
-  --blossom-soft: light-dark(#f8c9da, #4a2233);
+  --blossom-soft: light-dark(#f8c9da, #3f1b30);
   --leaf: light-dark(#356d22, #9bcc78);
-  --leaf-soft: light-dark(#e3ecc9, #2a3322);
+  --leaf-soft: light-dark(#e3ecc9, #1b2b20);
   --coral: light-dark(#d4482c, #ff8a6e);
   --sun: light-dark(#f2a93b, #f2b65a);
+
+  /* Extended garden scale. Decorative tones (petal, blush, peach, leaf-fresh,
+     sage) are for fills and gradients, not for text. */
+  --bud: light-dark(#a3224a, #ff8fa8);
+  --petal: light-dark(#f08bb0, #e07aa4);
+  --blush: light-dark(#fde6ee, #33182a);
+  /* Pale petal that stays luminous at night (illustrations only). */
+  --petal-light: light-dark(#fde6ee, #f6d3e1);
+  --peach: light-dark(#fbd2bd, #4a2a24);
+  --leaf-fresh: light-dark(#7cb356, #a9d987);
+  --sage: light-dark(#b9d0ae, #3f5a46);
+  --moss: light-dark(#24491a, #cfe6b8);
+
+  /* Named gradients. bloom/leaf carry white text; garden is decorative. */
+  --grad-bloom: linear-gradient(120deg, var(--blossom) 0%, color-mix(in srgb, var(--blossom) 55%, var(--coral)) 60%, var(--coral) 100%);
+  --grad-leaf: linear-gradient(120deg, var(--leaf) 0%, color-mix(in srgb, var(--leaf) 60%, var(--leaf-fresh)) 100%);
+  --grad-garden: linear-gradient(90deg, var(--leaf-fresh) 0%, var(--petal) 55%, var(--blossom) 100%);
+  --grad-dawn: linear-gradient(90deg, var(--blossom) 0%, var(--coral) 60%, var(--sun) 100%);
+
+  /* Phase defaults (follicular); [data-phase] overrides below. */
+  --phase: var(--leaf);
+  --phase-soft: var(--leaf-soft);
+  --phase-grad: linear-gradient(90deg, var(--leaf) 0%, var(--leaf-fresh) 55%, var(--petal) 100%);
 
   --font-family-body: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-family-heading: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -55,23 +78,24 @@
  * leaf green. Values are light-dark(light, dark).
  * Text pairs meet WCAG AA: body text 13.6:1, secondary 5.1:1+,
  * pink accent 4.9:1+, leaf on leaf-soft 5.1:1; dark mode 6.6:1+.
+ * Dark mode is a "night garden": plum-black body, deep green and plum glows.
  */
 [data-astryx-theme='neutral'] {
-  --color-background-body: light-dark(#fbf3ea, #1b1714);
-  --color-background-card: light-dark(#fffbf4, #25201b);
-  --color-background-surface: light-dark(#fffbf4, #25201b);
-  --color-background-popover: light-dark(#fffbf4, #2e2822);
-  --color-background-muted: light-dark(#f1eedf, #2e2822);
-  --color-border: light-dark(#ebe2d3, #3a332b);
-  --color-border-emphasized: light-dark(#8f8169, #7a6f60);
-  --color-text-primary: light-dark(#2b2620, #f6eee3);
-  --color-text-secondary: light-dark(#6b6357, #b9ad9c);
+  --color-background-body: light-dark(#fbf3ea, #141117);
+  --color-background-card: light-dark(#fffbf4, #1d1920);
+  --color-background-surface: light-dark(#fffbf4, #1d1920);
+  --color-background-popover: light-dark(#fffbf4, #26212a);
+  --color-background-muted: light-dark(#f1eedf, #27212b);
+  --color-border: light-dark(#ebe2d3, #352c39);
+  --color-border-emphasized: light-dark(#8f8169, #7d6f80);
+  --color-text-primary: light-dark(#2b2620, #f7eef2);
+  --color-text-secondary: light-dark(#6b6357, #bcaebd);
   --color-accent: light-dark(#c2306a, #ff8fb8);
   --color-on-accent: light-dark(#ffffff, #2b0f1c);
   --color-accent-muted: light-dark(#c2306a14, #ff8fb81f);
   --color-text-accent: light-dark(#c2306a, #ff8fb8);
   --color-icon-accent: light-dark(#c2306a, #ff8fb8);
-  --color-icon-primary: light-dark(#2b2620, #f6eee3);
+  --color-icon-primary: light-dark(#2b2620, #f7eef2);
   --color-success: light-dark(#356d22, #9bcc78);
   --color-text-success: light-dark(#356d22, #9bcc78);
 
@@ -127,9 +151,294 @@ p {
   background-color: var(--background);
   background-image:
     radial-gradient(60% 50% at 0% 0%, color-mix(in srgb, var(--leaf-soft) 90%, transparent), transparent 70%),
+    radial-gradient(35% 40% at 10% 85%, color-mix(in srgb, var(--sage) 35%, transparent), transparent 70%),
     radial-gradient(55% 55% at 100% 100%, color-mix(in srgb, var(--blossom-soft) 85%, transparent), transparent 70%),
     radial-gradient(40% 40% at 85% 10%, color-mix(in srgb, var(--blossom-soft) 45%, transparent), transparent 70%);
   background-attachment: fixed;
+}
+
+/* Night garden: deeper green and plum glows, plus faint "firefly" specks. */
+html[data-theme='dark'] .garden-canvas {
+  background-image:
+    radial-gradient(1.5px 1.5px at 18% 22%, #f2b65a99, transparent),
+    radial-gradient(1.5px 1.5px at 72% 14%, #a9d98780, transparent),
+    radial-gradient(1px 1px at 46% 64%, #ff8fb880, transparent),
+    radial-gradient(1.5px 1.5px at 88% 58%, #f2b65a66, transparent),
+    radial-gradient(1px 1px at 30% 86%, #a9d98766, transparent),
+    radial-gradient(60% 55% at 0% 0%, #1f3a2699, transparent 70%),
+    radial-gradient(40% 45% at 8% 90%, #1b2e2266, transparent 70%),
+    radial-gradient(55% 55% at 100% 100%, #4a1a3599, transparent 70%),
+    radial-gradient(40% 40% at 85% 8%, #3a173055, transparent 70%);
+}
+
+/* Cards get a faint top highlight at night so they lift off the canvas. */
+html[data-theme='dark'] .astryx-card,
+html[data-theme='dark'] .garden-wash,
+html[data-theme='dark'] .phase-wash {
+  box-shadow: inset 0 1px 0 #ffffff0d, var(--shadow-low);
+}
+
+/*
+ * Sidebar navigation. Active item: blossom-to-leaf wash, a soft border and a
+ * petal marker. Hover leans green so leaf tones show up in daily use.
+ */
+.nav-item {
+  position: relative;
+  border: 1px solid transparent;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+.nav-item:hover {
+  background-color: color-mix(in srgb, var(--leaf-soft) 70%, transparent);
+}
+.nav-item[aria-current='page'] {
+  background-image: linear-gradient(90deg,
+    color-mix(in srgb, var(--blossom) 18%, transparent) 0%,
+    color-mix(in srgb, var(--petal) 10%, transparent) 60%,
+    color-mix(in srgb, var(--leaf-fresh) 12%, transparent) 100%);
+  border-color: color-mix(in srgb, var(--blossom) 28%, transparent);
+  color: var(--foreground);
+}
+
+/* Call-to-action with a bloom gradient and a light sweep on hover. */
+.cta-bloom {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background-image: var(--grad-bloom);
+  color: var(--primary-foreground);
+  box-shadow: 0 8px 24px -8px color-mix(in srgb, var(--blossom) 60%, transparent);
+}
+.cta-bloom::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(110deg, transparent 30%, #ffffff40 50%, transparent 70%);
+  translate: -120% 0;
+  transition: translate 0.7s ease;
+}
+.cta-bloom:hover::after { translate: 120% 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cta-bloom::after { transition: none; }
+}
+
+/*
+ * Cycle phases as seasons of a flower:
+ * menstrual = resting bud (deep rose), follicular = sprouting (leaf green),
+ * ovulation = full bloom (blossom + sun), luteal = ripening (coral + gold).
+ * --phase is safe for text on cream/card backgrounds (AA).
+ */
+[data-phase='menstrual'] {
+  --phase: var(--bud);
+  --phase-soft: var(--blush);
+  --phase-grad: linear-gradient(90deg, var(--bud) 0%, var(--blossom) 60%, var(--petal) 100%);
+}
+[data-phase='follicular'] {
+  --phase: var(--leaf);
+  --phase-soft: var(--leaf-soft);
+  --phase-grad: linear-gradient(90deg, var(--leaf) 0%, var(--leaf-fresh) 55%, var(--petal) 100%);
+}
+[data-phase='ovulation'] {
+  --phase: var(--blossom);
+  --phase-soft: var(--blossom-soft);
+  --phase-grad: linear-gradient(90deg, var(--leaf-fresh) 0%, var(--blossom) 55%, var(--sun) 100%);
+}
+[data-phase='luteal'] {
+  --phase: light-dark(#a8461f, #ffa27f);
+  --phase-soft: var(--peach);
+  --phase-grad: linear-gradient(90deg, var(--blossom) 0%, var(--coral) 55%, var(--sun) 100%);
+}
+
+/* Gradient fills. */
+.bg-bloom { background-image: var(--grad-bloom); }
+.bg-leafy { background-image: var(--grad-leaf); }
+.bg-garden { background-image: var(--grad-garden); }
+.bg-dawn { background-image: var(--grad-dawn); }
+.bg-phase { background-image: var(--phase-grad); }
+
+/* Gradient text for large display type only; falls back to the solid color. */
+.text-gradient-bloom,
+.text-gradient-phase {
+  color: var(--blossom);
+  background-image: var(--grad-bloom);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.text-gradient-phase {
+  color: var(--phase);
+  background-image: var(--phase-grad);
+}
+
+/*
+ * Hero card wash: a tinted glow top-right and a second one bottom-left.
+ * .phase-wash follows [data-phase]; .garden-wash takes a fixed tint
+ * (.wash-blossom default, .wash-leaf, .wash-sun). Use one of these instead
+ * of ad-hoc `bg-gradient-to-br from-card via-card to-…` stacks.
+ */
+.phase-wash,
+.garden-wash {
+  background-color: var(--card);
+  background-image:
+    radial-gradient(70% 90% at 100% 0%, color-mix(in srgb, var(--wash, var(--phase-soft)) 85%, transparent), transparent 70%),
+    radial-gradient(50% 70% at 0% 100%, color-mix(in srgb, var(--wash-2, var(--leaf-soft)) 60%, transparent), transparent 70%);
+}
+.garden-wash,
+.wash-blossom { --wash: var(--blossom-soft); --wash-2: var(--leaf-soft); }
+.wash-leaf { --wash: var(--leaf-soft); --wash-2: var(--blush); }
+.wash-sun { --wash: var(--peach); --wash-2: var(--leaf-soft); }
+
+/*
+ * Tiny leaf-and-flower pattern for placeholders and empty areas. It is a mask,
+ * so its color comes from --pattern-color and follows the theme.
+ */
+.pattern-leaves {
+  position: relative;
+  isolation: isolate;
+}
+.pattern-leaves::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-color: var(--pattern-color, var(--leaf));
+  opacity: var(--pattern-opacity, 0.13);
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cpath d='M8 26c4-9 13-11 20-9-3 8-12 12-20 9z'/%3E%3Cpath d='M44 60c3-8 11-10 18-8-3 7-11 11-18 8z'/%3E%3Cg transform='translate(52 18)'%3E%3Ccircle r='2'/%3E%3Ccircle cx='0' cy='-4.5' r='2.4'/%3E%3Ccircle cx='4.3' cy='-1.4' r='2.4'/%3E%3Ccircle cx='2.6' cy='3.6' r='2.4'/%3E%3Ccircle cx='-2.6' cy='3.6' r='2.4'/%3E%3Ccircle cx='-4.3' cy='-1.4' r='2.4'/%3E%3C/g%3E%3Ccircle cx='20' cy='54' r='1.6'/%3E%3Ccircle cx='34' cy='38' r='1.2'/%3E%3C/svg%3E") 0 0 / 72px 72px repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cpath d='M8 26c4-9 13-11 20-9-3 8-12 12-20 9z'/%3E%3Cpath d='M44 60c3-8 11-10 18-8-3 7-11 11-18 8z'/%3E%3Cg transform='translate(52 18)'%3E%3Ccircle r='2'/%3E%3Ccircle cx='0' cy='-4.5' r='2.4'/%3E%3Ccircle cx='4.3' cy='-1.4' r='2.4'/%3E%3Ccircle cx='2.6' cy='3.6' r='2.4'/%3E%3Ccircle cx='-2.6' cy='3.6' r='2.4'/%3E%3Ccircle cx='-4.3' cy='-1.4' r='2.4'/%3E%3C/g%3E%3Ccircle cx='20' cy='54' r='1.6'/%3E%3Ccircle cx='34' cy='38' r='1.2'/%3E%3C/svg%3E") 0 0 / 72px 72px repeat;
+}
+.pattern-blossom { --pattern-color: var(--blossom); }
+
+/* Gentle sway for growing plants. */
+.bloom-sway {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: bloomSway 6s ease-in-out infinite;
+}
+
+@keyframes bloomSway {
+  0%, 100% { transform: rotate(-1.5deg); }
+  50% { transform: rotate(1.5deg); }
+}
+
+/*
+ * Botanical motion (Botanical.tsx). Timing comes from --dur / --delay set inline so
+ * no two stems, leaves or petals move in sync. Positioning lives on an outer <g>
+ * transform; these classes go on an inner <g>, because a CSS transform replaces the
+ * SVG transform attribute on the same element.
+ */
+.anim-sway {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: botSway var(--dur, 6s) ease-in-out var(--delay, 0s) infinite alternate;
+}
+.anim-flutter {
+  transform-box: fill-box;
+  transform-origin: 0% 60%;
+  animation: botFlutter var(--dur, 3s) ease-in-out var(--delay, 0s) infinite alternate;
+}
+.anim-breathe {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: botBreathe 4.6s ease-in-out var(--delay, 0s) infinite alternate;
+}
+.anim-float {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: botFloat 5s ease-in-out var(--delay, 0s) infinite alternate;
+}
+.anim-petal-fall {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  opacity: 0;
+  animation: botPetalFall var(--dur, 8s) linear var(--delay, 0s) infinite;
+}
+.anim-spin-slow {
+  animation: botSpin 80s linear infinite;
+}
+
+@keyframes botSway {
+  from { transform: rotate(-3deg); }
+  to { transform: rotate(3deg); }
+}
+@keyframes botFlutter {
+  from { transform: rotate(-8deg) scale(1); }
+  to { transform: rotate(6deg) scale(1.04); }
+}
+@keyframes botBreathe {
+  from { transform: scale(0.94) rotate(-5deg); }
+  to { transform: scale(1.05) rotate(5deg); }
+}
+@keyframes botFloat {
+  from { transform: translate(0, 0) rotate(-10deg); }
+  to { transform: translate(2px, -4px) rotate(12deg); }
+}
+@keyframes botPetalFall {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.9; }
+  50% { transform: translate(calc(var(--dx, 10px) * 0.5), 34px) rotate(160deg); }
+  85% { opacity: 0.75; }
+  100% { transform: translate(var(--dx, 10px), 70px) rotate(320deg); opacity: 0; }
+}
+@keyframes botSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* One-shot entrances: a line that draws itself, shapes that pop or fade in. */
+.anim-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: botDraw 1.6s cubic-bezier(0.65, 0, 0.35, 1) var(--delay, 0.1s) forwards;
+}
+.anim-pop {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  transform: scale(0);
+  animation: botPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) var(--delay, 0s) forwards;
+}
+.anim-fade-in {
+  opacity: 0;
+  animation: botFade 1s ease var(--delay, 0s) forwards;
+}
+.anim-ping {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: botPing 2.4s ease-out 1.8s infinite;
+  opacity: 0;
+}
+.anim-pulse-soft {
+  transform-box: fill-box;
+  transform-origin: 50% 50%;
+  animation: botPulse 3.6s ease-in-out infinite alternate;
+}
+
+@keyframes botDraw { to { stroke-dashoffset: 0; } }
+@keyframes botPop { to { transform: scale(1); } }
+@keyframes botFade { to { opacity: 1; } }
+@keyframes botPing {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(3); opacity: 0; }
+}
+@keyframes botPulse {
+  from { transform: scale(0.92); opacity: 0.14; }
+  to { transform: scale(1.08); opacity: 0.26; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bloom-sway,
+  .anim-sway,
+  .anim-flutter,
+  .anim-breathe,
+  .anim-float,
+  .anim-spin-slow { animation: none; }
+  .anim-petal-fall { animation: none; opacity: 0.8; }
+  .anim-ping,
+  .anim-pulse-soft { animation: none; }
+  /* Entrances jump straight to their final state. */
+  .anim-draw { animation: none; stroke-dashoffset: 0; }
+  .anim-pop { animation: none; transform: none; }
+  .anim-fade-in { animation: none; opacity: 1; }
 }
 
 body {

@@ -39,6 +39,9 @@ const T = {
     stockTitle: 'Inventario (opcional)', stock: 'Unidades que te quedan', perDose: 'Unidades por toma', alertDays: 'Avisarme cuando queden (días)',
     stockHelp: 'Se descuenta sola cada vez que marcas una toma. Te avisamos para que pidas receta o compres a tiempo.',
     errPack: 'Revisa los días del paquete y su fecha de inicio.',
+    induction: 'Es para inducir la ovulación (por ejemplo letrozol)', inductionFrom: 'Del día del ciclo', inductionTo: 'Al día del ciclo',
+    inductionHelp: 'Así podrás ver en ese ciclo la medicación, la temperatura, la LH y la prueba de embarazo juntas. La pauta la marca tu médica.',
+    errInduction: 'Escribe días del ciclo entre 1 y 15, con el primero antes del último.',
   },
   en: {
     titleNew: 'New medication', titleEdit: 'Edit medication', name: 'Name', namePh: 'e.g. Metformin',
@@ -54,6 +57,9 @@ const T = {
     stockTitle: 'Stock (optional)', stock: 'Units left', perDose: 'Units per dose', alertDays: 'Alert me when this many days remain',
     stockHelp: 'It goes down automatically each time you mark a dose. We warn you in time to get a refill.',
     errPack: 'Check the pack days and start date.',
+    induction: 'It is for inducing ovulation (for example letrozole)', inductionFrom: 'From cycle day', inductionTo: 'To cycle day',
+    inductionHelp: 'This lets you see medication, temperature, LH and pregnancy test together for that cycle. Your doctor sets the schedule.',
+    errInduction: 'Enter cycle days between 1 and 15, the first before the last.',
   },
 };
 
@@ -92,6 +98,10 @@ export const MedicationForm: React.FC<Props> = ({ lang, initial, onSave, onCance
   const [startDate, setStartDate] = useState(initial?.start_date ?? (initial ? '' : toLocalISO(new Date())));
   const [notes, setNotes] = useState(initial?.notes ?? '');
   const [reminders, setReminders] = useState(initial?.reminders ?? true);
+  const initialInduction = initial?.is_ovulation_induction && initial.induction_cycle_days?.length ? initial.induction_cycle_days : null;
+  const [induction, setInduction] = useState(!!initialInduction);
+  const [indFrom, setIndFrom] = useState(String(initialInduction ? Math.min(...initialInduction) : 3));
+  const [indTo, setIndTo] = useState(String(initialInduction ? Math.max(...initialInduction) : 7));
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -113,6 +123,8 @@ export const MedicationForm: React.FC<Props> = ({ lang, initial, onSave, onCance
     if (specific && days.length === 0) return setError(t.errDays);
     const active = Number(packActive), brk = Number(packBreak);
     if (mode === 'pack' && (!(active >= 1 && active <= 90) || !(brk >= 0 && brk <= 30) || !packStart)) return setError(t.errPack);
+    const from = Math.round(Number(indFrom)), to = Math.round(Number(indTo));
+    if (induction && !(from >= 1 && to <= 15 && from <= to)) return setError(t.errInduction);
     const stockNum = stock.trim() === '' ? null : Number(stock.replace(',', '.'));
     const perDoseNum = Number(perDose.replace(',', '.')) > 0 ? Number(perDose.replace(',', '.')) : 1;
     setError(null);
@@ -131,6 +143,7 @@ export const MedicationForm: React.FC<Props> = ({ lang, initial, onSave, onCance
         stock: stockNum != null && Number.isFinite(stockNum) && stockNum >= 0 ? stockNum : null,
         units_per_dose: perDoseNum,
         refill_alert_days: Math.min(60, Math.max(0, Math.round(Number(alertDays) || 0))),
+        induction: induction ? { from, to } : null,
       });
     } finally {
       setSaving(false);
@@ -282,6 +295,23 @@ export const MedicationForm: React.FC<Props> = ({ lang, initial, onSave, onCance
         <p className="text-xs text-muted-foreground">{t.stockHelp}</p>
       </fieldset>
 
+      <fieldset className="flex flex-col gap-2">
+        <label className="flex items-center gap-3 text-sm text-foreground cursor-pointer">
+          <input type="checkbox" checked={induction} onChange={(e) => setInduction(e.target.checked)} className="size-4 accent-primary" />
+          {t.induction}
+        </label>
+        {induction && (
+          <div className="grid grid-cols-2 gap-3 max-w-xs">
+            <label className="flex flex-col gap-1 text-xs text-muted-foreground">{t.inductionFrom}
+              <input inputMode="numeric" value={indFrom} onChange={(e) => setIndFrom(e.target.value)} className={inputCls} />
+            </label>
+            <label className="flex flex-col gap-1 text-xs text-muted-foreground">{t.inductionTo}
+              <input inputMode="numeric" value={indTo} onChange={(e) => setIndTo(e.target.value)} className={inputCls} />
+            </label>
+          </div>
+        )}
+        {induction && <p className="text-xs text-muted-foreground">{t.inductionHelp}</p>}
+      </fieldset>
       <label className="flex items-center gap-3 text-sm text-foreground cursor-pointer">
         <input type="checkbox" checked={reminders} onChange={(e) => setReminders(e.target.checked)} className="size-4 accent-primary" />
         {t.reminders}

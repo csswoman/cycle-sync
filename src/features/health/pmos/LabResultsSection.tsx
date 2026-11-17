@@ -45,7 +45,7 @@ const T = {
 
 const GROUPS: LabGroup[] = ['hormones', 'metabolic', 'lipids', 'other'];
 
-const LabResultsSection: React.FC<{ lang?: Lang }> = ({ lang = 'en' }) => {
+const LabResultsSection: React.FC<{ lang?: Lang }> = ({ lang = 'es' }) => {
   const t = T[lang];
   const { results, loading, saving, error, add, addMany, remove } = useLabResults();
   const [marker, setMarker] = useState<LabMarker>('testosterone');

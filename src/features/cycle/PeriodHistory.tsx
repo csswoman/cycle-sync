@@ -4,12 +4,15 @@ import { useLanguage } from '@/i18n/LanguageContext';
 import { usesHormonalContraception } from '@/features/setup/onboarding';
 import { useOnboardingAnswers } from '@/hooks/useOnboardingAnswers';
 import { CycleAnalysisCard } from './CycleAnalysisCard';
+import { GardenCorner, TitleSprig } from '@/components/ui/Botanical';
 import { PeriodDayCalendar, type CalendarMode } from '@/components/PeriodDayCalendar';
 import {
     addDays, daysBetween, estimateCycle, groupDaysIntoPeriods, parseLocalDate, projectCycles, toISODate,
 } from '@/lib/cycle/cycleEngine';
 import { detectTemperatureShift, readingsInCycle } from '@/lib/cycle/fertilitySigns';
 import { useCycleSigns } from '@/hooks/useCycleSigns';
+import { usePregnancies } from '@/hooks/usePregnancies';
+import { predictionsPaused } from '@/lib/cycle/pregnancy';
 import { FlowQuickEditor } from './components/FlowQuickEditor';
 import { periodBleedingDays } from '@/lib/cycle/bleeding';
 
@@ -74,7 +77,8 @@ const PeriodHistory: React.FC = () => {
         setConfigLength(configRes.data?.cycle_length ?? null);
     };
 
-    const estimate = useMemo(() => estimateCycle(periods, configLength), [periods, configLength]);
+    const { pregnancies } = usePregnancies();
+    const estimate = useMemo(() => estimateCycle(periods, configLength, pregnancies), [periods, configLength, pregnancies]);
     const regularity = estimate.lengths.length < 2 ? 'notEnoughData' : estimate.irregular ? 'irregular' : 'regular';
 
     const latestStart = useMemo(
@@ -82,8 +86,8 @@ const PeriodHistory: React.FC = () => {
         [periods],
     );
     const projections = useMemo(
-        () => (latestStart ? projectCycles(latestStart, estimate, 3) : []),
-        [latestStart, estimate],
+        () => (latestStart && !predictionsPaused(latestStart, pregnancies, toISODate(new Date())) ? projectCycles(latestStart, estimate, 3) : []),
+        [latestStart, estimate, pregnancies],
     );
 
     // Exact days from each period start to the next one (all of them, newest first).
@@ -222,7 +226,7 @@ const PeriodHistory: React.FC = () => {
                 {/* Header with inline regularity indicator */}
                 <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-2 border-b border-border/50">
                     <div className="flex flex-col gap-1.5">
-                        <h1 className="text-foreground text-3xl md:text-4xl font-semibold tracking-tight">{t.cycleHistoryTitle}</h1>
+                        <h1 className="text-foreground text-3xl md:text-4xl font-semibold tracking-tight"><TitleSprig />{t.cycleHistoryTitle}</h1>
                         <p className="text-muted-foreground text-sm max-w-xl">
                             {locale === 'es' ? 'Analiza la duración de tus ciclos y predice tus próximas fases.' : t.markDaysDescription}
                         </p>
@@ -254,8 +258,8 @@ const PeriodHistory: React.FC = () => {
 
                 {/* Forecast Hero: clean typographic metrics with rhythm instead of generic cards */}
                 {next && (
-                    <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-card via-card/90 to-secondary/30 border border-border/80 p-6 md:p-8 shadow-sm">
-                        <div className="absolute -right-16 -top-16 size-48 rounded-full bg-primary/10 blur-3xl pointer-events-none" />
+                    <section className="relative overflow-hidden rounded-3xl garden-wash border border-border/80 p-6 md:p-8 shadow-sm">
+                        <GardenCorner variant="blossom" className="size-32 sm:size-44 opacity-80" />
 
                         <div className="relative z-10 flex flex-col gap-6">
                             <div className="flex items-center justify-between gap-3">
@@ -475,7 +479,7 @@ const PeriodHistory: React.FC = () => {
                     {/* Column 2: Analysis & Connected Timeline (Desktop Right, Mobile when mobileTab === 'history') */}
                     <div className={`lg:col-span-7 xl:col-span-7 flex flex-col gap-8 ${mobileTab === 'history' ? 'block' : 'hidden lg:block'}`}>
                         {periods.length > 0 && (
-                            <CycleAnalysisCard periods={periods} signs={signs} expectedNext={projections[0]?.periodStart} />
+                            <CycleAnalysisCard periods={periods} signs={signs} pregnancies={pregnancies} expectedNext={projections[0]?.periodStart} />
                         )}
 
                         {/* Connected Timeline for Logged Periods */}

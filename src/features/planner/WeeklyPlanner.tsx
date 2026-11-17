@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Card } from '@/components/ui/Card';
 import { Button } from '@/components/ui/Button';
 import { Icon } from '@/components/ui/Icon';
+import { TitleSprig, WeekSprouts } from '@/components/ui/Botanical';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { useCycleInfo } from '@/hooks/useCycleInfo';
 import { useFoodPreferences } from '@/hooks/useFoodPreferences';
@@ -369,16 +370,16 @@ const WeeklyPlanner: React.FC = () => {
         <div className="flex-1 overflow-y-auto h-full scrollbar-hide">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 sm:gap-8 pb-36 md:pb-28">
                 {/* HERO HEADER */}
-                <header className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border/60 pb-5">
-                    <div className="flex flex-col gap-1.5">
+                <header className="relative overflow-hidden rounded-3xl garden-wash border border-border/80 shadow-sm p-6 sm:p-8 flex flex-col md:flex-row md:items-end justify-between gap-5">
+                    <div className="relative flex flex-col gap-1.5">
                         <div className="flex items-center gap-2.5 flex-wrap">
                             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground text-wrap-balance">
-                                {tx.title}
+                                <TitleSprig />{tx.title}
                             </h1>
                             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary border border-primary/20 text-xs font-semibold shrink-0">
                                 <Icon name="sparkles" size={13} weight="bold" />
-                                <span>{phaseLabel}</span>
-                                {cycleInfo?.cycleDay && <span className="opacity-75">• Día {cycleInfo.cycleDay}</span>}
+                                <span>{cycleInfo?.paused ? (isEs ? 'Modo embarazo' : 'Pregnancy mode') : phaseLabel}</span>
+                                {cycleInfo?.cycleDay && !cycleInfo.paused && <span className="opacity-75">• Día {cycleInfo.cycleDay}</span>}
                             </div>
                         </div>
                         <p className="text-muted-foreground text-sm sm:text-base leading-relaxed text-wrap-pretty max-w-2xl">
@@ -386,9 +387,15 @@ const WeeklyPlanner: React.FC = () => {
                         </p>
                     </div>
 
+                    {/* One sprout per day; they bloom as the planned items get done. */}
+                    <div className="relative flex flex-col items-start md:items-end gap-3 shrink-0">
+                    <WeekSprouts
+                        bloomed={planned > 0 ? Math.round((completed / planned) * 7) : 0}
+                        className="h-20 sm:h-24"
+                    />
                     {/* WEEKLY PROGRESS METRIC */}
                     {planned > 0 && (
-                        <div className="flex items-center gap-3.5 bg-card/80 border border-border/70 rounded-2xl p-3 sm:px-4 shadow-xs self-start md:self-auto shrink-0">
+                        <div className="flex items-center gap-3.5 bg-card/80 backdrop-blur-sm border border-border/70 rounded-2xl p-3 sm:px-4 shadow-xs shrink-0">
                             <div className="flex items-center justify-center size-9 rounded-xl bg-primary/10 text-primary shrink-0">
                                 <Icon name="task_alt" size={18} weight="bold" />
                             </div>
@@ -401,13 +408,14 @@ const WeeklyPlanner: React.FC = () => {
                                 </div>
                                 <div className="w-36 sm:w-44 bg-muted rounded-full h-1.5 overflow-hidden">
                                     <div
-                                        className="bg-primary h-full rounded-full transition-all duration-500"
+                                        className="bg-garden h-full rounded-full transition-all duration-500"
                                         style={{ width: `${progressPercent}%` }}
                                     />
                                 </div>
                             </div>
                         </div>
                     )}
+                    </div>
                 </header>
 
                 {/* CONTROLS & ACTION TOOLBAR */}

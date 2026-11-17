@@ -41,7 +41,7 @@ export async function buildPMOSReport(data: PMOSOverviewData, includeWellbeing: 
 
   const today = data.today;
   const from = new Date(); from.setDate(from.getDate() - 29);
-  const analysis = analyzeCycles(data.periodStarts.map((s) => ({ start_date: s })));
+  const analysis = analyzeCycles(data.periodStarts.map((s) => ({ start_date: s })), new Date(), data.pregnancies);
 
   const latestLab = new Map<string, { date: string; value: number }>();
   for (const l of [...data.labs].sort((a, b) => a.date.localeCompare(b.date))) latestLab.set(l.marker, { date: l.date, value: l.value });
@@ -65,7 +65,7 @@ export async function buildPMOSReport(data: PMOSOverviewData, includeWellbeing: 
       days: periodBleedingDays(data.signs, per).map((s) => ({ date: s.date, flow: s.flow ?? null, clots: !!s.clots, pain: s.pain ?? null })),
     }))
     .filter((per) => per.days.length > 0);
-  const bleedingFlags = cycleHealthFlags(data.periodRuns, parseLocalDate(today), data.signs).filter((f) => f === 'heavyBleeding' || f === 'heavyAfterGap');
+  const bleedingFlags = cycleHealthFlags(data.periodRuns, parseLocalDate(today), data.signs, data.pregnancies).filter((f) => f === 'heavyBleeding' || f === 'heavyAfterGap');
   const CRITERIA_EN: Record<keyof DiagnosisCriteria, string> = {
     irregular_cycles: 'irregular cycles or no ovulation', clinical_hyperandrogenism: 'clinical androgen excess',
     biochemical_hyperandrogenism: 'high androgens on labs', polycystic_ovaries: 'polycystic ovaries on ultrasound',
@@ -89,7 +89,7 @@ export async function buildPMOSReport(data: PMOSOverviewData, includeWellbeing: 
 
   return {
     cycleLengths: analysis.cycles,
-    daysSinceLastPeriod: periodGap(data.periodStarts, today)?.days ?? null,
+    daysSinceLastPeriod: periodGap(data.periodStarts, today, data.pregnancies)?.days ?? null,
     ovulation: data.hormonal ? [] : ovulationHistory(data.periodStarts, data.signs, today).map((o) => ({ start: o.start, length: o.length, status: o.status })),
     bleeding: bleedingPeriods.length ? { flags: bleedingFlags, periods: bleedingPeriods } : undefined,
     medications: data.medications.filter((m) => m.active).map((m) => {

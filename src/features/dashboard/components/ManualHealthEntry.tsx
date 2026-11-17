@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { useDisplayPrefs } from '@/hooks/useDisplayPrefs';
+import { Icon } from '@/components/ui/Icon';
 
 type EntryType = 'steps' | 'sleep' | 'activity';
 
@@ -27,7 +28,7 @@ function nowTime(): string {
 }
 
 const inputClass =
-  'h-10 px-3 rounded-xl bg-secondary border border-border text-sm text-foreground w-full min-w-0';
+  'h-10 px-3.5 rounded-xl bg-card border border-border focus:border-primary focus:ring-1 focus:ring-primary text-sm text-foreground placeholder:text-muted-foreground/60 w-full min-w-0 transition-colors shadow-2xs';
 
 interface Props {
   /** Opens the form on a given tab; change `n` to re-trigger. */
@@ -144,35 +145,63 @@ const ManualHealthEntry: React.FC<Props> = ({ onChanged, request }) => {
 
   return (
     <div className="flex flex-col gap-3">
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        aria-expanded={open}
-        className="self-start px-3 h-8 rounded-lg bg-primary/10 text-primary text-xs font-bold hover:bg-primary/20 transition-all"
-      >
-        {t.manualHealthToggle}
-      </button>
+      {!open && (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          aria-expanded={false}
+          className="self-start inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-primary/10 hover:bg-primary/15 text-primary text-xs font-semibold transition-all group"
+        >
+          <Icon name="edit_note" size={16} className="text-primary group-hover:scale-110 transition-transform" />
+          <span>{t.manualHealthToggle}</span>
+        </button>
+      )}
 
       {open && (
-        <div className="flex flex-col gap-3 p-3.5 rounded-2xl bg-secondary/40 border border-border/60">
-          <div className="flex gap-1.5" role="tablist">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                role="tab"
-                aria-selected={type === tab.id}
-                onClick={() => setType(tab.id)}
-                className={`px-3 h-8 rounded-lg text-xs font-bold transition-all ${
-                  type === tab.id ? 'bg-primary text-primary-foreground' : 'bg-card text-muted-foreground'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+        <div className="flex flex-col gap-4 p-4 sm:p-5 rounded-2xl bg-secondary/35 border border-border/80 shadow-xs animate-fade-in">
+          {/* Header */}
+          <div className="flex items-center justify-between gap-2 pb-1 border-b border-border/50">
+            <div className="flex items-center gap-2">
+              <Icon name="edit_note" size={18} className="text-primary" />
+              <h3 className="text-sm font-semibold text-foreground tracking-tight">{t.manualHealthTitle}</h3>
+            </div>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              aria-label="Cerrar"
+              title="Cerrar"
+              className="size-7 rounded-full bg-secondary/80 hover:bg-secondary text-muted-foreground hover:text-foreground flex items-center justify-center transition-colors"
+            >
+              <Icon name="close" size={15} />
+            </button>
           </div>
 
-          <form onSubmit={submit} className="grid grid-cols-2 gap-2">
+          {/* Segmented Tabs */}
+          <div className="flex p-1 bg-secondary/60 rounded-xl gap-1" role="tablist">
+            {tabs.map((tab) => {
+              const active = type === tab.id;
+              const iconName = tab.id === 'steps' ? 'directions_walk' : tab.id === 'sleep' ? 'bedtime' : 'fitness_center';
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setType(tab.id)}
+                  className={`flex-1 flex items-center justify-center gap-1.5 h-8 rounded-lg text-xs transition-all ${
+                    active
+                      ? 'bg-card text-foreground shadow-2xs font-bold'
+                      : 'text-muted-foreground hover:text-foreground font-medium'
+                  }`}
+                >
+                  <Icon name={iconName} size={15} weight={active ? 'fill' : 'regular'} />
+                  <span>{tab.label}</span>
+                </button>
+              );
+            })}
+          </div>
+
+          <form onSubmit={submit} className="grid grid-cols-2 gap-3">
             <label className="flex flex-col gap-1 text-[11px] font-bold text-muted-foreground uppercase tracking-wider col-span-2 sm:col-span-1">
               {t.manualHealthDate}
               <input
@@ -188,16 +217,22 @@ const ManualHealthEntry: React.FC<Props> = ({ onChanged, request }) => {
             {type === 'steps' && (
               <label className="flex flex-col gap-1 text-[11px] font-bold text-muted-foreground uppercase tracking-wider col-span-2 sm:col-span-1">
                 {t.manualHealthSteps}
-                <input
-                  type="number"
-                  inputMode="numeric"
-                  min={1}
-                  max={200000}
-                  required
-                  value={steps}
-                  onChange={(e) => setSteps(e.target.value)}
-                  className={inputClass}
-                />
+                <div className="relative">
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    min={1}
+                    max={200000}
+                    required
+                    placeholder="Ej. 8000"
+                    value={steps}
+                    onChange={(e) => setSteps(e.target.value)}
+                    className={`${inputClass} pr-14`}
+                  />
+                  <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+                    pasos
+                  </span>
+                </div>
               </label>
             )}
 
@@ -205,27 +240,39 @@ const ManualHealthEntry: React.FC<Props> = ({ onChanged, request }) => {
               <>
                 <label className="flex flex-col gap-1 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                   {t.manualHealthHours}
-                  <input
-                    type="number"
-                    inputMode="numeric"
-                    min={0}
-                    max={24}
-                    value={hours}
-                    onChange={(e) => setHours(e.target.value)}
-                    className={inputClass}
-                  />
+                  <div className="relative">
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      min={0}
+                      max={24}
+                      placeholder="7"
+                      value={hours}
+                      onChange={(e) => setHours(e.target.value)}
+                      className={`${inputClass} pr-12`}
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+                      horas
+                    </span>
+                  </div>
                 </label>
                 <label className="flex flex-col gap-1 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
                   {t.manualHealthMinutes}
-                  <input
-                    type="number"
-                    inputMode="numeric"
-                    min={0}
-                    max={59}
-                    value={minutes}
-                    onChange={(e) => setMinutes(e.target.value)}
-                    className={inputClass}
-                  />
+                  <div className="relative">
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      min={0}
+                      max={59}
+                      placeholder="30"
+                      value={minutes}
+                      onChange={(e) => setMinutes(e.target.value)}
+                      className={`${inputClass} pr-10`}
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+                      min
+                    </span>
+                  </div>
                 </label>
                 <p className="col-span-2 text-xs text-muted-foreground">{t.manualHealthSleepNote}</p>
               </>
@@ -239,25 +286,32 @@ const ManualHealthEntry: React.FC<Props> = ({ onChanged, request }) => {
                     type="text"
                     required
                     maxLength={60}
+                    placeholder="Ej. Yoga, Caminata, Fuerza"
                     value={activityType}
                     onChange={(e) => setActivityType(e.target.value)}
                     className={inputClass}
                   />
                 </label>
-                <label className="flex flex-col gap-1 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                <label className="flex flex-col gap-1 text-[11px] font-bold text-muted-foreground uppercase tracking-wider col-span-2 sm:col-span-1">
                   {t.manualHealthMinutes}
-                  <input
-                    type="number"
-                    inputMode="numeric"
-                    min={1}
-                    max={1440}
-                    required
-                    value={activityMinutes}
-                    onChange={(e) => setActivityMinutes(e.target.value)}
-                    className={inputClass}
-                  />
+                  <div className="relative">
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      min={1}
+                      max={1440}
+                      required
+                      placeholder="30"
+                      value={activityMinutes}
+                      onChange={(e) => setActivityMinutes(e.target.value)}
+                      className={`${inputClass} pr-10`}
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+                      min
+                    </span>
+                  </div>
                 </label>
-                <label className="flex flex-col gap-1 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                <label className="flex flex-col gap-1 text-[11px] font-bold text-muted-foreground uppercase tracking-wider col-span-2 sm:col-span-1">
                   {t.manualHealthStart}
                   <input
                     type="time"
@@ -266,65 +320,85 @@ const ManualHealthEntry: React.FC<Props> = ({ onChanged, request }) => {
                     className={inputClass}
                   />
                 </label>
-                {!hideNumbers && <label className="flex flex-col gap-1 text-[11px] font-bold text-muted-foreground uppercase tracking-wider col-span-2">
-                  {t.manualHealthKcal}
-                  <input
-                    type="number"
-                    inputMode="numeric"
-                    min={1}
-                    max={20000}
-                    value={kcal}
-                    onChange={(e) => setKcal(e.target.value)}
-                    className={inputClass}
-                  />
-                </label>}
+                {!hideNumbers && (
+                  <label className="flex flex-col gap-1 text-[11px] font-bold text-muted-foreground uppercase tracking-wider col-span-2 sm:col-span-1">
+                    {t.manualHealthKcal}
+                    <div className="relative">
+                      <input
+                        type="number"
+                        inputMode="numeric"
+                        min={1}
+                        max={20000}
+                        placeholder="Ej. 180"
+                        value={kcal}
+                        onChange={(e) => setKcal(e.target.value)}
+                        className={`${inputClass} pr-12`}
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">
+                        kcal
+                      </span>
+                    </div>
+                  </label>
+                )}
               </>
             )}
 
-            <div className="col-span-2 flex items-center gap-3">
-              <button
-                type="submit"
-                disabled={saving}
-                className="px-5 h-10 rounded-xl bg-primary text-primary-foreground text-sm font-bold disabled:opacity-50"
-              >
-                {t.manualHealthSave}
-              </button>
+            <div className="col-span-2 flex flex-wrap items-center justify-between gap-3 pt-2">
+              <div className="flex items-center gap-2">
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="px-5 h-9 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-bold transition-all shadow-xs disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  {saving && <Icon name="sync" size={14} className="animate-spin" />}
+                  {t.manualHealthSave}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOpen(false)}
+                  className="px-4 h-9 rounded-full border border-border/70 hover:bg-secondary text-muted-foreground hover:text-foreground text-xs font-semibold transition-colors"
+                >
+                  Cancelar
+                </button>
+              </div>
               {message && (
-                <span className={`text-xs ${message.ok ? 'text-green-600 dark:text-green-400' : 'text-destructive'}`}>
+                <span className={`text-xs font-medium flex items-center gap-1.5 ${message.ok ? 'text-leaf' : 'text-destructive'}`}>
+                  <Icon name={message.ok ? 'check_circle' : 'warning'} size={15} weight="fill" />
                   {message.text}
                 </span>
               )}
             </div>
           </form>
 
-          <div className="flex flex-col gap-1.5">
-            <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-              {t.manualHealthRecent}
-            </p>
-            {entries.length === 0 ? (
-              <p className="text-xs text-muted-foreground">{t.manualHealthEmpty}</p>
-            ) : (
-              <ul className="flex flex-col gap-1">
+          {entries.length > 0 && (
+            <div className="flex flex-col gap-2 pt-3 border-t border-border/50">
+              <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                {t.manualHealthRecent}
+              </p>
+              <ul className="flex flex-col gap-1.5 max-h-40 overflow-y-auto pr-1">
                 {entries.map((en) => (
                   <li
                     key={en.id}
-                    className="flex items-center justify-between gap-2 text-xs bg-card rounded-lg px-3 py-2"
+                    className="flex items-center justify-between gap-2 text-xs bg-card/80 border border-border/50 rounded-xl px-3 py-2 shadow-2xs"
                   >
-                    <span className="min-w-0 truncate">
-                      <span className="text-muted-foreground tabular-nums">{en.local_date}</span> · {describe(en)}
-                    </span>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <span className="text-muted-foreground tabular-nums text-[11px] shrink-0">{en.local_date}</span>
+                      <span className="font-medium text-foreground truncate">{describe(en)}</span>
+                    </div>
                     <button
                       type="button"
                       onClick={() => void remove(en.id)}
-                      className="shrink-0 text-destructive font-semibold hover:underline"
+                      title={t.manualHealthDelete}
+                      aria-label={t.manualHealthDelete}
+                      className="size-6 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 flex items-center justify-center transition-colors shrink-0"
                     >
-                      {t.manualHealthDelete}
+                      <Icon name="delete" size={14} />
                     </button>
                   </li>
                 ))}
               </ul>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       )}
     </div>

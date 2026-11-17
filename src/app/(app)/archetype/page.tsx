@@ -1,7 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useTheme } from '@/lib/theme';
 import { supabase } from '@/lib/supabase';
 import ArchetypeSelection from '@/features/setup/ArchetypeSelection';
 import {
@@ -10,8 +9,6 @@ import {
 
 export default function ArchetypePage() {
   const router = useRouter();
-  const { theme, setTheme } = useTheme();
-  const isDarkMode = theme === 'dark';
   const [initialAnswers, setInitialAnswers] = useState<OnboardingAnswers | null>(null);
   const [saving, setSaving] = useState(false);
 
@@ -49,8 +46,6 @@ export default function ArchetypePage() {
       onComplete={handleComplete}
       initialAnswers={initialAnswers}
       saving={saving}
-      isDarkMode={isDarkMode}
-      toggleDarkMode={() => setTheme(isDarkMode ? 'light' : 'dark')}
     />
   );
 }

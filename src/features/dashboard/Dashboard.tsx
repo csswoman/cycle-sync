@@ -11,6 +11,7 @@ import { HabitsProgress } from './components/HabitsProgress';
 import { WeeklySummaryCard } from './components/WeeklySummaryCard';
 import { AppointmentBanner } from './components/AppointmentBanner';
 import HealthConnectWidget from './components/HealthConnectWidget';
+import { FertilityWindowCard, PregnancyHero } from '@/features/pregnancy/PregnancyCards';
 import { dashboardText } from './dashboardText';
 
 interface DashboardProps {
@@ -34,18 +35,21 @@ const Dashboard: React.FC<DashboardProps> = ({ userName }) => {
                 </header>
 
                 <AppointmentBanner />
-                <CycleHero overview={overview} />
+                {overview.paused
+                    ? <PregnancyHero overview={overview} lang={language === 'es' ? 'es' : 'en'} />
+                    : <CycleHero overview={overview} />}
+                <FertilityWindowCard overview={overview} lang={language === 'es' ? 'es' : 'en'} />
 
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                     <div className="lg:col-span-8 flex flex-col gap-6">
                         <TodayChecklist />
                         <TodayPlanCard />
                         <HealthConnectWidget />
-                        {overview.info && <PhaseRecommendations phase={overview.info.phase} answers={overview.answers} />}
-                        <WeeklySummaryCard />
+                        {overview.info && !overview.paused && <PhaseRecommendations phase={overview.info.phase} answers={overview.answers} />}
                     </div>
                     <div className="lg:col-span-4 flex flex-col gap-6">
                         <HabitsProgress />
+                        <WeeklySummaryCard />
                     </div>
                 </div>
 

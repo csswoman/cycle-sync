@@ -16,8 +16,14 @@ import { PlateBuilder } from './components/PlateBuilder';
 import { MacroWaterCalculator } from './components/MacroWaterCalculator';
 import { FoodPreferencesPanel } from './components/FoodPreferencesPanel';
 import { Icon } from '@/components/ui/Icon';
+import { GardenCorner } from '@/components/ui/Botanical';
+import { useGuest } from '@/hooks/useGuest';
+import GuestPreviewBanner from '@/components/layout/GuestPreviewBanner';
 
 type ActiveTab = 'plate' | 'calculator' | 'tastes' | 'recipes' | 'analyze' | 'generate';
+
+// Guests can browse recipes and try the calculators; tabs that save data or call the AI are locked.
+const GUEST_TABS: ActiveTab[] = ['recipes', 'plate', 'calculator'];
 
 const Nutrition: React.FC = () => {
   const foodPrefs = useFoodPreferences();
@@ -25,8 +31,9 @@ const Nutrition: React.FC = () => {
   const { hideNumbers } = useDisplayPrefs();
   const { analysis, analyzePlate } = useNutritionAI(hideNumbers);
   const { cycleInfo } = useCycleInfo();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const isEs = language === 'es';
+  const { isGuest, promptSignup } = useGuest();
 
   const [openRecipeId, setOpenRecipeId] = useState<string | null>(null);
   const [showRecipeForm, setShowRecipeForm] = useState(false);
@@ -41,6 +48,10 @@ const Nutrition: React.FC = () => {
     const requested = new URLSearchParams(window.location.search).get('tab');
     if (requested && ['plate', 'calculator', 'tastes', 'recipes', 'analyze', 'generate'].includes(requested)) setActiveTab(requested as ActiveTab);
   }, []);
+  // Guests land on the recipe catalog, the part of this page they can fully use.
+  useEffect(() => {
+    if (isGuest && !new URLSearchParams(window.location.search).get('tab')) setActiveTab('recipes');
+  }, [isGuest]);
 
   // Weight state for macro & water calculation
   const [userWeightKg, setUserWeightKg] = useState<number>(65);
@@ -59,7 +70,8 @@ const Nutrition: React.FC = () => {
 
   const handleWeightChange = (newWeight: number) => {
     setUserWeightKg(newWeight);
-    if (typeof window !== 'undefined') {
+    // Guests can try the calculator, but nothing is stored for them.
+    if (typeof window !== 'undefined' && !isGuest) {
       localStorage.setItem('cycle_sync_user_weight_kg', newWeight.toString());
     }
   };
@@ -74,6 +86,8 @@ const Nutrition: React.FC = () => {
   const [dietaryPrefs, setDietaryPrefs] = useState<string[]>([]);
 
   const phase = cycleInfo?.phase ?? 'Follicular';
+  const phaseNameEs = ({ Menstrual: 'Menstrual', Follicular: 'Folicular', Ovulation: 'Ovulación', Luteal: 'Lútea' } as Record<string, string>)[phase] || phase;
+  const phaseDisplay = isEs ? phaseNameEs : phase;
   const { likes, avoid } = foodPrefs.prefs;
 
   const openRecipe = library.recipes.find((r) => r.id === openRecipeId) ?? null;
@@ -140,19 +154,28 @@ const Nutrition: React.FC = () => {
     { id: 'generate', label: isEs ? 'Recetas IA' : 'AI Recipes', icon: 'auto_awesome' },
   ];
   // The weight-based targets tab is all numbers: it is not shown in no-numbers mode.
-  const tabs = hideNumbers ? allTabs.filter((tab) => tab.id !== 'calculator') : allTabs;
-  const shownTab: ActiveTab = hideNumbers && activeTab === 'calculator' ? 'plate' : activeTab;
+  const visibleTabs = hideNumbers ? allTabs.filter((tab) => tab.id !== 'calculator') : allTabs;
+  // Guests see what they can open first; the locked tabs stay visible so they know they exist.
+  const tabs = isGuest
+    ? [...visibleTabs].sort((a, b) => Number(!GUEST_TABS.includes(a.id)) - Number(!GUEST_TABS.includes(b.id))
+        || GUEST_TABS.indexOf(a.id) - GUEST_TABS.indexOf(b.id))
+    : visibleTabs;
+  const isLocked = (tab: ActiveTab) => isGuest && !GUEST_TABS.includes(tab);
+  const shownTab: ActiveTab = isLocked(activeTab)
+    ? 'recipes'
+    : hideNumbers && activeTab === 'calculator' ? 'plate' : activeTab;
 
   return (
     <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide">
       <div className="flex flex-col items-center w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 gap-8 pb-32">
 
         {/* Hero */}
-        <section className="w-full rounded-3xl overflow-hidden relative bg-gradient-to-br from-card via-card to-blossom-soft/40 border border-border shadow-sm">
+        <section className="w-full rounded-3xl overflow-hidden relative garden-wash wash-sun border border-border shadow-sm">
+          <GardenCorner variant="sun" className="size-36 md:size-64 opacity-75" />
           <div className="flex flex-col gap-4 items-start justify-center px-6 py-8 md:px-10 relative z-20">
             <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blossom-soft text-blossom text-xs font-bold uppercase tracking-wider">
               <Icon name="drop" size={14} weight="bold" />
-              {phase} Phase {cycleInfo ? `• Day ${cycleInfo.cycleDay}` : ''}
+              {cycleInfo?.paused ? 'Pregnancy mode' : `${phase} Phase ${cycleInfo ? `• Day ${cycleInfo.cycleDay}` : ''}`}
             </div>
             <h1 className="text-3xl md:text-5xl font-semibold leading-tight tracking-tight text-foreground max-w-2xl">
               Nourish Your Body
@@ -165,13 +188,15 @@ const Nutrition: React.FC = () => {
           </div>
         </section>
 
+        <GuestPreviewBanner message={t.guestNutritionPreview} />
 
         {/* Tab Switcher */}
         <div className="w-full flex gap-1 sm:gap-1.5 bg-card/80 backdrop-blur p-1.5 rounded-2xl border border-border shadow-sm overflow-x-auto scrollbar-hide">
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => (isLocked(tab.id) ? promptSignup() : setActiveTab(tab.id))}
+              aria-disabled={isLocked(tab.id) || undefined}
               className={`flex-1 min-w-[100px] sm:min-w-0 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all whitespace-nowrap ${
                 shownTab === tab.id
                   ? 'bg-primary text-primary-foreground shadow-md shadow-blossom/20'
@@ -180,6 +205,7 @@ const Nutrition: React.FC = () => {
             >
               <Icon name={tab.icon} size={18} weight={shownTab === tab.id ? 'bold' : 'duotone'} />
               <span>{tab.label}</span>
+              {isLocked(tab.id) && <Icon name="lock" size={14} className="opacity-70" />}
             </button>
           ))}
         </div>
@@ -195,7 +221,7 @@ const Nutrition: React.FC = () => {
             <PlateBuilder
               weightKg={userWeightKg}
               language={language}
-              onSaveAsRecipe={async (recipe) => {
+              onSaveAsRecipe={isGuest ? undefined : async (recipe) => {
                 await library.addCustom(recipe);
               }}
             />
@@ -304,18 +330,19 @@ const Nutrition: React.FC = () => {
                     value={library.filters.text}
                     onChange={(e) => library.setFilters({ ...library.filters, text: e.target.value })}
                     className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="Search by title, tag or ingredient..."
+                    placeholder={isEs ? 'Buscar por título, etiqueta o ingrediente...' : 'Search by title, tag or ingredient...'}
                   />
                 </div>
-                <button
+                {!isGuest && <button
                   onClick={() => setShowRecipeForm(true)}
                   className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-5 py-3 rounded-xl transition-all flex items-center justify-center gap-2"
                 >
                   <span className="material-symbols-outlined">add</span>
-                  New recipe
-                </button>
+                  {isEs ? 'Nueva receta' : 'New recipe'}
+                </button>}
               </div>
               <div className="flex flex-wrap gap-2 items-center">
+                {!isGuest && <>
                 <button
                   onClick={() => library.setFilters({ ...library.filters, favoritesOnly: !library.filters.favoritesOnly })}
                   aria-pressed={library.filters.favoritesOnly}
@@ -323,7 +350,7 @@ const Nutrition: React.FC = () => {
                     library.filters.favoritesOnly ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:bg-accent'
                   }`}
                 >
-                  <span className="material-symbols-outlined text-[16px]">favorite</span> Favorites
+                  <span className="material-symbols-outlined text-[16px]">favorite</span> {isEs ? 'Favoritos' : 'Favorites'}
                 </button>
                 <button
                   onClick={() => library.setFilters({ ...library.filters, mineOnly: !library.filters.mineOnly })}
@@ -332,7 +359,7 @@ const Nutrition: React.FC = () => {
                     library.filters.mineOnly ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:bg-accent'
                   }`}
                 >
-                  <span className="material-symbols-outlined text-[16px]">person</span> My recipes
+                  <span className="material-symbols-outlined text-[16px]">person</span> {isEs ? 'Mis recetas' : 'My recipes'}
                 </button>
                 {avoid.length > 0 && (
                   <button
@@ -364,6 +391,7 @@ const Nutrition: React.FC = () => {
                     {isEs ? 'Elegir mis gustos' : 'Set my tastes'}
                   </button>
                 )}
+                </>}
                 {library.allTags.map((tag) => {
                   const active = library.filters.tags.includes(tag);
                   return (
@@ -389,7 +417,7 @@ const Nutrition: React.FC = () => {
                     onClick={() => library.setFilters(EMPTY_RECIPE_FILTERS)}
                     className="text-sm text-muted-foreground hover:text-foreground underline"
                   >
-                    Clear filters
+                    {isEs ? 'Limpiar filtros' : 'Clear filters'}
                   </button>
                 )}
               </div>
@@ -400,14 +428,14 @@ const Nutrition: React.FC = () => {
             )}
 
             {library.loading ? (
-              <p className="text-muted-foreground text-center py-12">Loading your recipes...</p>
+              <p className="text-muted-foreground text-center py-12">{isEs ? 'Cargando tus recetas...' : 'Loading your recipes...'}</p>
             ) : library.filtered.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {library.filtered.map((r) => (
                   <RecipeCard
                     key={r.id}
                     recipe={r}
-                    onToggleFavorite={library.toggleFavorite}
+                    onToggleFavorite={isGuest ? undefined : library.toggleFavorite}
                     onOpen={(rec) => setOpenRecipeId(rec.id)}
                   />
                 ))}
@@ -417,8 +445,8 @@ const Nutrition: React.FC = () => {
                 <span className="material-symbols-outlined text-6xl text-muted-foreground opacity-50">bookmark</span>
                 <p className="text-muted-foreground mt-4">
                   {library.recipes.length === 0
-                    ? 'No saved recipes yet. Recipes you search for are saved here, and you can add your own.'
-                    : 'No recipes match your filters.'}
+                    ? (isEs ? 'Aún no tienes recetas guardadas. Las recetas que busques se guardan aquí, y puedes añadir las tuyas.' : 'No saved recipes yet. Recipes you search for are saved here, and you can add your own.')
+                    : (isEs ? 'Ninguna receta coincide con tus filtros.' : 'No recipes match your filters.')}
                 </p>
               </div>
             )}
@@ -434,8 +462,8 @@ const Nutrition: React.FC = () => {
                   <span className="material-symbols-outlined text-primary text-2xl">photo_camera</span>
                 </div>
                 <div>
-                  <h3 className="text-foreground text-lg font-bold">Analyze Your Plate</h3>
-                  <p className="text-muted-foreground text-sm">Upload a photo of your meal for AI-powered nutritional analysis</p>
+                  <h3 className="text-foreground text-lg font-bold">{isEs ? 'Analizar Tu Plato' : 'Analyze Your Plate'}</h3>
+                  <p className="text-muted-foreground text-sm">{isEs ? 'Sube una foto de tu comida para obtener un análisis nutricional con IA' : 'Upload a photo of your meal for AI-powered nutritional analysis'}</p>
                 </div>
               </div>
 
@@ -463,8 +491,8 @@ const Nutrition: React.FC = () => {
                   className="border-2 border-dashed border-border rounded-xl p-12 flex flex-col items-center gap-4 hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-5xl text-muted-foreground">add_a_photo</span>
-                  <p className="text-muted-foreground font-medium">Click to upload a photo of your meal</p>
-                  <p className="text-muted-foreground text-xs">JPG, PNG up to 10MB</p>
+                  <p className="text-muted-foreground font-medium">{isEs ? 'Haz clic para subir una foto de tu comida' : 'Click to upload a photo of your meal'}</p>
+                  <p className="text-muted-foreground text-xs">{isEs ? 'JPG, PNG hasta 10MB' : 'JPG, PNG up to 10MB'}</p>
                 </button>
               )}
 
@@ -474,7 +502,7 @@ const Nutrition: React.FC = () => {
                 className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg shadow-primary/20"
               >
                 <span className="material-symbols-outlined">{analysis.loading ? 'hourglass_empty' : 'auto_awesome'}</span>
-                {analysis.loading ? 'Analyzing with AI...' : 'Analyze Nutrition'}
+                {analysis.loading ? (isEs ? 'Analizando con IA...' : 'Analyzing with AI...') : (isEs ? 'Analizar Nutrición' : 'Analyze Nutrition')}
               </button>
             </div>
 
@@ -488,7 +516,7 @@ const Nutrition: React.FC = () => {
               <div className="bg-card rounded-xl border border-border p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <span className="material-symbols-outlined text-primary">analytics</span>
-                  <h3 className="text-foreground text-lg font-bold">Analysis Results</h3>
+                  <h3 className="text-foreground text-lg font-bold">{isEs ? 'Resultados del Análisis' : 'Analysis Results'}</h3>
                 </div>
                 <div
                   className="prose prose-sm dark:prose-invert max-w-none text-foreground [&_h1]:text-xl [&_h1]:font-bold [&_h2]:text-lg [&_h2]:font-bold [&_h3]:text-base [&_h3]:font-bold [&_strong]:text-foreground [&_li]:text-muted-foreground [&_p]:text-muted-foreground"
@@ -517,23 +545,25 @@ const Nutrition: React.FC = () => {
                   <span className="material-symbols-outlined text-primary text-2xl">auto_awesome</span>
                 </div>
                 <div>
-                  <h3 className="text-foreground text-lg font-bold">AI Recipe Generator</h3>
+                  <h3 className="text-foreground text-lg font-bold">{isEs ? 'Generador de Recetas con IA' : 'AI Recipe Generator'}</h3>
                   <p className="text-muted-foreground text-sm">
-                    Enter your available ingredients and get anti-inflammatory recipes for your {phase} phase
+                    {isEs
+                      ? `Ingresa tus ingredientes disponibles y obtén recetas antiinflamatorias para tu fase ${phaseDisplay}`
+                      : `Enter your available ingredients and get anti-inflammatory recipes for your ${phase} phase`}
                   </p>
                 </div>
               </div>
 
               {/* Ingredient Input */}
               <div>
-                <label className="block text-sm font-bold mb-2 text-foreground">Your Ingredients</label>
+                <label className="block text-sm font-bold mb-2 text-foreground">{isEs ? 'Tus Ingredientes' : 'Your Ingredients'}</label>
                 <div className="flex gap-2">
                   <input
                     value={ingredientInput}
                     onChange={(e) => setIngredientInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && addIngredient()}
                     className="flex-1 px-4 py-3 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                    placeholder="Type an ingredient and press Enter..."
+                    placeholder={isEs ? 'Escribe un ingrediente y presiona Enter...' : 'Type an ingredient and press Enter...'}
                   />
                   <button
                     onClick={addIngredient}
@@ -586,19 +616,27 @@ const Nutrition: React.FC = () => {
 
               {/* Dietary Preferences */}
               <div>
-                <label className="block text-sm font-bold mb-2 text-foreground">Dietary Preferences</label>
+                <label className="block text-sm font-bold mb-2 text-foreground">{isEs ? 'Preferencias Dietarias' : 'Dietary Preferences'}</label>
                 <div className="flex flex-wrap gap-2">
-                  {['Low GI', 'Anti-inflammatory', 'Gluten Free', 'Dairy Free', 'Vegetarian', 'Vegan', 'High Protein'].map((pref) => (
+                  {[
+                    { id: 'Low GI', es: 'Bajo IG', en: 'Low GI' },
+                    { id: 'Anti-inflammatory', es: 'Antiinflamatorio', en: 'Anti-inflammatory' },
+                    { id: 'Gluten Free', es: 'Sin Gluten', en: 'Gluten Free' },
+                    { id: 'Dairy Free', es: 'Sin Lácteos', en: 'Dairy Free' },
+                    { id: 'Vegetarian', es: 'Vegetariano', en: 'Vegetarian' },
+                    { id: 'Vegan', es: 'Vegano', en: 'Vegan' },
+                    { id: 'High Protein', es: 'Alto en Proteína', en: 'High Protein' },
+                  ].map((pref) => (
                     <button
-                      key={pref}
-                      onClick={() => toggleDietary(pref)}
+                      key={pref.id}
+                      onClick={() => toggleDietary(pref.id)}
                       className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                        dietaryPrefs.includes(pref)
+                        dietaryPrefs.includes(pref.id)
                           ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20'
                           : 'bg-secondary text-muted-foreground hover:bg-accent'
                       }`}
                     >
-                      {pref}
+                      {isEs ? pref.es : pref.en}
                     </button>
                   ))}
                 </div>
@@ -607,10 +645,10 @@ const Nutrition: React.FC = () => {
               <button
                 onClick={handleGenerate}
                 disabled={(ingredients.length === 0 && likes.length === 0) || generation.loading}
-                className="w-full bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-700 text-primary-foreground font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg shadow-primary/20"
+                className="w-full bg-bloom hover:brightness-105 text-primary-foreground font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg shadow-primary/20"
               >
                 <span className="material-symbols-outlined">{generation.loading ? 'hourglass_empty' : 'auto_awesome'}</span>
-                {generation.loading ? 'Generating Recipes...' : `Generate ${phase}-Phase Recipes`}
+                {generation.loading ? (isEs ? 'Generando Recetas...' : 'Generating Recipes...') : (isEs ? `Generar Recetas para Fase ${phaseDisplay}` : `Generate ${phase}-Phase Recipes`)}
               </button>
             </div>
 
@@ -625,7 +663,9 @@ const Nutrition: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-primary">menu_book</span>
                   <h3 className="text-foreground text-lg font-bold">
-                    {generation.result.saved.length > 0 ? 'New recipes added to the catalog' : 'No new recipes this time'}
+                    {isEs
+                      ? (generation.result.saved.length > 0 ? 'Nuevas recetas añadidas al catálogo' : 'Sin recetas nuevas esta vez')
+                      : (generation.result.saved.length > 0 ? 'New recipes added to the catalog' : 'No new recipes this time')}
                   </h3>
                 </div>
                 {generation.result.saved.length > 0 && (
@@ -637,7 +677,7 @@ const Nutrition: React.FC = () => {
                         <RecipeCard
                           key={r.id}
                           recipe={r}
-                          onToggleFavorite={library.toggleFavorite}
+                          onToggleFavorite={isGuest ? undefined : library.toggleFavorite}
                           onOpen={(rec) => setOpenRecipeId(rec.id)}
                         />
                       ))}
@@ -645,7 +685,9 @@ const Nutrition: React.FC = () => {
                 )}
                 {generation.result.duplicates.length > 0 && (
                   <p className="text-sm text-muted-foreground">
-                    Already in the catalog, so not added again: {generation.result.duplicates.join(', ')}.
+                    {isEs
+                      ? `Ya estaban en el catálogo, por lo que no se agregaron de nuevo: ${generation.result.duplicates.join(', ')}.`
+                      : `Already in the catalog, so not added again: ${generation.result.duplicates.join(', ')}.`}
                   </p>
                 )}
               </div>
@@ -658,13 +700,13 @@ const Nutrition: React.FC = () => {
         <RecipeDetailModal
           recipe={openRecipe}
           onClose={() => setOpenRecipeId(null)}
-          onToggleFavorite={library.toggleFavorite}
-          onSetTags={library.setMyTags}
-          onDelete={openRecipe.ownerId ? library.removeOwn : undefined}
+          onToggleFavorite={isGuest ? undefined : library.toggleFavorite}
+          onSetTags={isGuest ? undefined : library.setMyTags}
+          onDelete={openRecipe.ownerId && !isGuest ? library.removeOwn : undefined}
           suggestions={suggestions}
         />
       )}
-      {showRecipeForm && (
+      {showRecipeForm && !isGuest && (
         <RecipeForm
           onSubmit={async (input) => {
             await library.addCustom(input);

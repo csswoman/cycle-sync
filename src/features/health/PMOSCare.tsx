@@ -7,6 +7,7 @@ import { Article } from '@/types/articles';
 import { usePMOSSymptoms } from '@/hooks/usePMOSSymptoms';
 import { useCycleInfo } from '@/hooks/useCycleInfo';
 import { useLanguage } from '@/i18n/LanguageContext';
+import { GardenCorner } from '@/components/ui/Botanical';
 import PMOSMemberTools from '@/features/health/pmos/PMOSMemberTools';
 import { useConfiguredSymptoms } from '@/features/health/pmos/useConfiguredSymptoms';
 import { PMOS_SYMPTOM_CONFIGS } from '@/features/health/pmos/symptomFaqData';
@@ -70,8 +71,9 @@ export const PMOSCare: React.FC = () => {
     <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide">
       <div className="flex flex-col w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 gap-8 pb-32">
         {/* Hero Header */}
-        <header className="rounded-3xl bg-gradient-to-br from-card via-card to-secondary/30 border border-border p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm">
-          <div className="flex flex-col gap-3 max-w-2xl">
+        <header className="relative overflow-hidden rounded-3xl garden-wash wash-leaf border border-border p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-sm">
+          <GardenCorner variant="leaf" className="size-40 sm:size-56 opacity-70" />
+          <div className="relative flex flex-col gap-3 max-w-2xl">
             <div className="flex items-center gap-2">
               <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold uppercase tracking-wider text-primary bg-primary/10 border border-primary/20 px-3.5 py-1 rounded-full">
                 <span className="material-symbols-outlined text-[17px]">spa</span>
@@ -80,7 +82,7 @@ export const PMOSCare: React.FC = () => {
               {cycleInfo && (
                 <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-muted-foreground bg-secondary/80 border border-border px-3.5 py-1 rounded-full">
                   <span className="w-2.5 h-2.5 rounded-full bg-primary animate-pulse" />
-                  {cycleInfo.phase} &bull; {lang === 'es' ? 'Día' : 'Day'} {cycleInfo.cycleDay}
+                  {cycleInfo.paused ? (lang === 'es' ? 'Modo embarazo' : 'Pregnancy mode') : <>{cycleInfo.phase} &bull; {lang === 'es' ? 'Día' : 'Day'} {cycleInfo.cycleDay}</>}
                 </span>
               )}
             </div>
@@ -97,7 +99,7 @@ export const PMOSCare: React.FC = () => {
           </div>
 
           {/* Quick status widget */}
-          <div className="shrink-0 flex flex-col items-center justify-center p-5 rounded-2xl bg-secondary/30 border border-border/80 min-w-[210px] text-center shadow-xs">
+          <div className="relative shrink-0 flex flex-col items-center justify-center p-5 rounded-2xl bg-card/75 backdrop-blur-sm border border-border/80 min-w-[210px] text-center shadow-xs">
             <span className="text-xs sm:text-sm text-muted-foreground font-semibold uppercase tracking-wider mb-1">
               {lang === 'es' ? 'Carga de síntomas' : 'Symptom load'}
             </span>

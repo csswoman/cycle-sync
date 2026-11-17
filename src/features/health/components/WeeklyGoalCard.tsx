@@ -6,7 +6,9 @@ import { STRENGTH_DAYS_GOAL, WEEKLY_MINUTES_GOAL, type WeeklyActivity } from '@/
 interface Props {
   week: WeeklyActivity;
   loading: boolean;
-  onLog: () => void;
+  onLog?: () => void;
+  /** Two thin bars with no card chrome, for tight spaces. */
+  compact?: boolean;
 }
 
 const Bar: React.FC<{ label: string; value: string; pct: number; done: boolean }> = ({ label, value, pct, done }) => (
@@ -32,17 +34,37 @@ function tip(week: WeeklyActivity): string {
 }
 
 /** Progress toward the weekly activity target recommended for PMOS, built from the workout log. */
-const WeeklyGoalCard: React.FC<Props> = ({ week, loading, onLog }) => (
+const WeeklyGoalCard: React.FC<Props> = ({ week, loading, onLog, compact }) => compact ? (
+  loading ? (
+    <div className="h-14 rounded-xl bg-secondary/50 animate-pulse" />
+  ) : (
+    <div className="flex flex-col gap-2.5">
+      <Bar
+        label="Minutos esta semana"
+        value={`${week.minutes} / ${WEEKLY_MINUTES_GOAL}`}
+        pct={Math.min(100, (week.minutes / WEEKLY_MINUTES_GOAL) * 100)}
+        done={week.minutesGoalMet}
+      />
+      <Bar
+        label="Días de fuerza"
+        value={`${week.strengthDays} / ${STRENGTH_DAYS_GOAL}`}
+        pct={Math.min(100, (week.strengthDays / STRENGTH_DAYS_GOAL) * 100)}
+        done={week.strengthGoalMet}
+      />
+    </div>
+  )
+) : (
   <div className="bg-card rounded-2xl border border-border p-5 sm:p-6 shadow-sm flex flex-col gap-4">
     <div className="flex items-start justify-between gap-3">
       <div>
-        <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Tu semana</span>
         <h2 className="text-lg font-bold text-foreground">Meta semanal para PMOS</h2>
       </div>
-      <button type="button" onClick={onLog} className="text-xs font-bold text-primary hover:underline flex items-center gap-1 cursor-pointer shrink-0">
-        <span className="material-symbols-outlined text-sm">add</span>
-        <span>Registrar</span>
-      </button>
+      {onLog && (
+        <button type="button" onClick={onLog} className="text-xs font-bold text-primary hover:underline flex items-center gap-1 cursor-pointer shrink-0">
+          <span className="material-symbols-outlined text-sm">add</span>
+          <span>Registrar</span>
+        </button>
+      )}
     </div>
 
     {loading ? (
@@ -67,7 +89,7 @@ const WeeklyGoalCard: React.FC<Props> = ({ week, loading, onLog }) => (
       </>
     )}
 
-    <p className="text-[11px] text-muted-foreground leading-relaxed">
+    <p className="text-xs text-muted-foreground leading-relaxed">
       Meta de la guía internacional de SOP/PMOS (2023): 150 min a la semana de actividad moderada, o 75 min intensos, más fuerza 2 días no
       consecutivos. Ningún tipo de ejercicio es claramente mejor que otro: el que mantienes es el que funciona. Se calcula con tu diario de
       entrenamiento, de lunes a domingo.

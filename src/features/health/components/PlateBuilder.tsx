@@ -192,7 +192,7 @@ export const PlateBuilder: React.FC<PlateBuilderProps> = ({
           carbohydrates: plateTotals.carbohydrates,
           fat: plateTotals.fat,
         },
-        tags: hideNumbers ? ['Plate Builder'] : ['Alto en Proteína', 'Plate Builder'],
+        tags: hideNumbers ? ['Constructor de Platos'] : ['Alto en Proteína', 'Constructor de Platos'],
       });
 
       setSaveSuccessMsg('¡Plato guardado con éxito en tus Recetas!');
@@ -333,7 +333,7 @@ export const PlateBuilder: React.FC<PlateBuilderProps> = ({
                 </div>
                 <div className="w-full h-2.5 bg-background rounded-full overflow-hidden border border-border/50">
                   <div
-                    className="h-full bg-gradient-to-r from-primary to-purple-600 transition-all duration-300 rounded-full"
+                    className="h-full bg-garden transition-all duration-300 rounded-full"
                     style={{
                       width: `${Math.min(100, plateTotals.proteinPercentOfDaily ?? 0)}%`,
                     }}

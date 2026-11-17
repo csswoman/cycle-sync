@@ -7,6 +7,7 @@ import { getInAppArticles, getInAppArticleById } from '@/services/articlesServic
 import { IN_APP_ARTICLES } from '@/data/articlesData';
 import { InAppArticle, ArticleCategory, ArticleAudience } from '@/types/articles';
 import { Flower } from '@/components/ui/Flower';
+import { Bouquet, PetalFall } from '@/components/ui/Botanical';
 
 export default function ArticlesCatalog() {
   const router = useRouter();
@@ -146,6 +147,10 @@ export default function ArticlesCatalog() {
               src={activeArticle.imageUrl}
               alt={activeArticle[language].title}
               className="w-full h-full object-cover"
+              onError={(e) => {
+                const img = e.currentTarget;
+                if (!img.src.endsWith('/exercise-fallback.png')) img.src = '/exercise-fallback.png';
+              }}
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
             <div className="absolute bottom-3 left-4 right-4 flex justify-between items-end text-white text-[11px] font-medium">
@@ -265,8 +270,10 @@ export default function ArticlesCatalog() {
         /* CATALOG LIST VIEW */
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-8 animate-fade-in">
           {/* Header Banner */}
-          <div className="bg-card/80 border border-border/60 rounded-3xl p-6 sm:p-8 backdrop-blur-md shadow-sm relative overflow-hidden">
-            <div className="max-w-2xl space-y-3">
+          <div className="garden-wash wash-leaf border border-border/60 rounded-3xl p-6 sm:p-8 shadow-sm relative overflow-hidden">
+            <Bouquet className="hidden lg:block absolute top-4 right-10 h-44 w-36" />
+            <PetalFall colors={['var(--petal)', 'var(--leaf-fresh)']} count={5} className="hidden lg:block absolute top-0 right-0 h-48 w-64" />
+            <div className="relative max-w-2xl space-y-3">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blossom-soft text-foreground text-xs font-semibold">
                 <span className="material-symbols-outlined text-sm text-blossom">menu_book</span>
                 <span>{t.healthLibrary}</span>
@@ -390,6 +397,10 @@ export default function ArticlesCatalog() {
                       alt={content.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       loading="lazy"
+                      onError={(e) => {
+                        const img = e.currentTarget;
+                        if (!img.src.endsWith('/exercise-fallback.png')) img.src = '/exercise-fallback.png';
+                      }}
                     />
                     <div className="absolute top-3 left-3 flex gap-2 flex-wrap">
                       <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-black/60 backdrop-blur-md text-white">

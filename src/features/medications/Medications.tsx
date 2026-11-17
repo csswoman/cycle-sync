@@ -1,6 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { Icon } from '@/components/ui/Icon';
+import { TitleSprig } from '@/components/ui/Botanical';
 import { useMedications, type Medication } from '@/hooks/useMedications';
 import { requestMedicationNotifications } from '@/hooks/useMedicationReminders';
 import { useLanguage } from '@/i18n/LanguageContext';
@@ -120,7 +121,7 @@ const Medications: React.FC<MedicationsProps> = ({ embedded = false, onSummary }
     <>
       {!embedded && (
         <div className="flex flex-col gap-2">
-          <h1 className="text-foreground text-3xl md:text-4xl font-semibold leading-tight tracking-tight">{t.pageTitle}</h1>
+          <h1 className="text-foreground text-3xl md:text-4xl font-semibold leading-tight tracking-tight"><TitleSprig bud="var(--peach)" />{t.pageTitle}</h1>
           <p className="text-muted-foreground text-base">{t.pageSub}</p>
         </div>
       )}
@@ -181,7 +182,7 @@ const Medications: React.FC<MedicationsProps> = ({ embedded = false, onSummary }
               </div>
               {todayDoses.length > 0 && (
                 <div className="h-2 bg-secondary rounded-full overflow-hidden" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
-                  <div className="h-full bg-gradient-to-r from-blossom to-coral rounded-full transition-all" style={{ width: `${pct}%` }} />
+                  <div className="h-full bg-bloom rounded-full transition-all" style={{ width: `${pct}%` }} />
                 </div>
               )}
               {todayDoses.length === 0 && <p className="text-sm text-muted-foreground">{t.noneToday}</p>}

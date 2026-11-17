@@ -5,7 +5,8 @@ import type { LibraryRecipe } from '@/types/recipes';
 
 interface RecipeCardProps {
   recipe: LibraryRecipe;
-  onToggleFavorite: (recipe: LibraryRecipe) => void;
+  /** Left out in read-only (guest) mode, which hides the favorite button. */
+  onToggleFavorite?: (recipe: LibraryRecipe) => void;
   onOpen: (recipe: LibraryRecipe) => void;
 }
 
@@ -16,7 +17,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe: r, onToggleFavor
       onClick={() => onOpen(r)}
       className="group bg-card rounded-xl overflow-hidden border border-border hover:border-primary/50 transition-all shadow-md hover:shadow-xl flex flex-col h-full cursor-pointer"
     >
-      <div className="relative h-40 w-full overflow-hidden bg-gradient-to-br from-blossom-soft/60 to-secondary">
+      <div className="relative h-40 w-full overflow-hidden garden-wash wash-leaf pattern-leaves">
         {r.readyInMinutes ? (
           <div className="absolute top-3 right-3 z-10 bg-black/60 backdrop-blur-sm text-white text-xs font-bold px-2 py-1 rounded flex items-center gap-1">
             <span className="material-symbols-outlined text-[14px]">schedule</span> {r.readyInMinutes}m
@@ -25,23 +26,25 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe: r, onToggleFavor
         {r.ownerId && (
           <div className="absolute top-3 left-3 z-10 bg-primary text-primary-foreground text-xs font-bold px-2 py-1 rounded shadow-lg">Mine</div>
         )}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleFavorite(r);
-          }}
-          className={`absolute bottom-3 right-3 z-10 p-2 rounded-full backdrop-blur-sm transition-colors ${r.isFavorite ? 'bg-primary text-primary-foreground' : 'bg-black/60 text-white hover:bg-black/80'}`}
-          aria-label={r.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
-          aria-pressed={r.isFavorite}
-        >
-          <span
-            className="material-symbols-outlined text-[18px] block"
-            style={{ fontVariationSettings: `'FILL' ${r.isFavorite ? 1 : 0}` }}
+        {onToggleFavorite && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleFavorite(r);
+            }}
+            className={`absolute bottom-3 right-3 z-10 p-2 rounded-full backdrop-blur-sm transition-colors ${r.isFavorite ? 'bg-primary text-primary-foreground' : 'bg-black/60 text-white hover:bg-black/80'}`}
+            aria-label={r.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+            aria-pressed={r.isFavorite}
           >
-            favorite
-          </span>
-        </button>
+            <span
+              className="material-symbols-outlined text-[18px] block"
+              style={{ fontVariationSettings: `'FILL' ${r.isFavorite ? 1 : 0}` }}
+            >
+              favorite
+            </span>
+          </button>
+        )}
         {r.imageUrl ? (
           <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={r.imageUrl} alt={r.title} />
         ) : (

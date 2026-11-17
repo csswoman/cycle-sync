@@ -1,6 +1,34 @@
 import React from 'react';
 import { Exercise, Routine, WorkoutVideo } from '@/types/exercises';
 import { youtubeEmbedUrl, youtubeThumbnailUrl } from '@/lib/youtube';
+import { BODY_PART_LABELS_ES, EQUIPMENT_LABELS_ES } from '@/services/exercisesService';
+
+export const TARGET_LABELS_ES: Record<string, string> = {
+    abs: 'Abdominales',
+    abductors: 'Abductores',
+    adductors: 'Aductores',
+    biceps: 'Bíceps',
+    calves: 'Pantorrillas',
+    cardiovascular: 'Cardiovascular',
+    'cardiovascular system': 'Cardiovascular',
+    delts: 'Deltoides',
+    forearms: 'Antebrazos',
+    glutes: 'Glúteos',
+    hamstrings: 'Isquiotibiales',
+    lats: 'Dorsales',
+    'levator scapulae': 'Elevador de la escápula',
+    pectorals: 'Pectorales',
+    quads: 'Cuádriceps',
+    'serratus anterior': 'Serrato anterior',
+    spine: 'Columna',
+    traps: 'Trapecios',
+    triceps: 'Tríceps',
+    'upper back': 'Espalda alta',
+};
+
+const formatBodyPart = (bp: string): string => BODY_PART_LABELS_ES[bp] || bp;
+const formatEquipment = (eq: string): string => EQUIPMENT_LABELS_ES[eq] || eq;
+const formatTarget = (t: string): string => TARGET_LABELS_ES[t.toLowerCase()] || t;
 
 interface ExerciseCardProps {
     exercise: Exercise;
@@ -10,6 +38,10 @@ interface ExerciseCardProps {
 }
 
 export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, onSave, saving, variant = 'default' }) => {
+    const bodyPartEs = formatBodyPart(exercise.bodyPart);
+    const equipmentEs = formatEquipment(exercise.equipment);
+    const targetEs = formatTarget(exercise.target);
+
     if (variant === 'horizontal') {
         return (
             <div className="flex flex-col md:flex-row items-stretch rounded-2xl shadow-sm bg-card overflow-hidden hover:shadow-md transition-all border border-border group h-full">
@@ -25,20 +57,22 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, onSave, sa
                     <div>
                         <div className="flex justify-between items-start mb-2">
                             <h3 className="text-foreground text-xl font-bold leading-tight capitalize line-clamp-1">{exercise.name}</h3>
-                            <button 
-                                disabled={saving}
-                                onClick={() => onSave?.()}
-                                className="text-muted-foreground hover:text-primary transition-colors disabled:opacity-50"
-                            >
-                                <span className="material-symbols-outlined font-variation-icon-fill">bookmark_add</span>
-                            </button>
+                            {onSave && (
+                                <button
+                                    disabled={saving}
+                                    onClick={() => onSave()}
+                                    className="text-muted-foreground hover:text-primary transition-colors disabled:opacity-50"
+                                >
+                                    <span className="material-symbols-outlined font-variation-icon-fill">bookmark_add</span>
+                                </button>
+                            )}
                         </div>
                         <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
-                            {exercise.instructions[0] || `Enfócate en tu ${exercise.target} usando ${exercise.equipment}.`}
+                            {exercise.instructions[0] || `Enfócate en tu ${targetEs} usando ${equipmentEs}.`}
                         </p>
                         <div className="flex flex-wrap gap-2">
-                            <span className="px-2 py-1 rounded-lg bg-secondary text-[10px] text-muted-foreground font-bold uppercase tracking-wider">{exercise.bodyPart}</span>
-                            <span className="px-2 py-1 rounded-lg bg-secondary text-[10px] text-muted-foreground font-bold uppercase tracking-wider">{exercise.equipment}</span>
+                            <span className="px-2 py-1 rounded-lg bg-secondary text-xs text-muted-foreground font-bold">{bodyPartEs}</span>
+                            <span className="px-2 py-1 rounded-lg bg-secondary text-xs text-muted-foreground font-bold">{equipmentEs}</span>
                         </div>
                     </div>
                     <div className="flex items-end justify-between mt-2">
@@ -64,23 +98,25 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, onSave, sa
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
                 <div className="absolute top-3 right-3 flex gap-2">
-                    <button 
-                        onClick={(e) => { e.stopPropagation(); onSave?.(); }}
-                        disabled={saving}
-                        className="size-10 rounded-full bg-background/80 backdrop-blur-sm border border-border flex items-center justify-center text-foreground hover:bg-primary hover:text-white hover:border-primary transition-all shadow-lg active:scale-95 disabled:opacity-50"
-                    >
-                        <span className="material-symbols-outlined text-[20px]">{saving ? 'sync' : 'bookmark'}</span>
-                    </button>
+                    {onSave && (
+                        <button
+                            onClick={(e) => { e.stopPropagation(); onSave(); }}
+                            disabled={saving}
+                            className="size-10 rounded-full bg-background/80 backdrop-blur-sm border border-border flex items-center justify-center text-foreground hover:bg-primary hover:text-white hover:border-primary transition-all shadow-lg active:scale-95 disabled:opacity-50"
+                        >
+                            <span className="material-symbols-outlined text-[20px]">{saving ? 'sync' : 'bookmark'}</span>
+                        </button>
+                    )}
                     <div className="size-10 rounded-full bg-background/80 backdrop-blur-sm border border-border flex items-center justify-center text-foreground">
                         <span className="material-symbols-outlined text-[20px]">play_circle</span>
                     </div>
                 </div>
                 <div className="absolute bottom-3 left-3 flex gap-1.5">
-                    <span className="px-2.5 py-1 rounded-full bg-primary/90 backdrop-blur-sm text-[10px] font-black uppercase tracking-widest text-white shadow-lg">
-                        {exercise.target}
+                    <span className="px-2.5 py-1 rounded-full bg-primary/90 backdrop-blur-sm text-xs font-black text-white shadow-lg">
+                        {targetEs}
                     </span>
-                    <span className="px-2.5 py-1 rounded-full bg-background/90 backdrop-blur-sm text-[10px] font-black uppercase tracking-widest text-foreground shadow-lg">
-                        {exercise.equipment}
+                    <span className="px-2.5 py-1 rounded-full bg-background/90 backdrop-blur-sm text-xs font-black text-foreground shadow-lg">
+                        {equipmentEs}
                     </span>
                 </div>
             </div>
@@ -94,7 +130,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, onSave, sa
                 <div className="mt-2 flex items-center gap-4">
                     <div className="flex items-center gap-1.5 pt-2 border-t border-border w-full">
                         <span className="material-symbols-outlined text-primary text-[16px]">fitness_center</span>
-                        <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">{exercise.bodyPart}</span>
+                        <span className="text-xs font-bold text-muted-foreground">{bodyPartEs}</span>
                     </div>
                 </div>
             </div>
@@ -143,8 +179,8 @@ export const SavedRoutineCard: React.FC<{ routine: Routine }> = ({ routine }) =>
                 <div className="flex flex-col gap-1">
                     <h3 className="text-foreground font-bold text-lg group-hover:text-primary transition-colors">{routine.name}</h3>
                     <div className="flex flex-wrap gap-1">
-                        {day && <span className="px-2 py-0.5 rounded-lg bg-primary text-white text-[10px] font-bold uppercase w-fit">{day}</span>}
-                        <span className="px-2 py-0.5 rounded-lg bg-primary/10 text-primary text-[10px] font-bold uppercase w-fit">{routine.phase}</span>
+                        {day && <span className="px-2 py-0.5 rounded-lg bg-primary text-white text-xs font-bold w-fit">{day}</span>}
+                        <span className="px-2 py-0.5 rounded-lg bg-primary/10 text-primary text-xs font-bold w-fit">{routine.phase}</span>
                     </div>
                 </div>
                 <div className="size-8 rounded-full bg-secondary flex items-center justify-center text-muted-foreground">
@@ -237,7 +273,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video, isPhaseRecommended,
                         {/* Phase recommendation badge */}
                         {isPhaseRecommended && (
                             <div className="absolute top-2.5 left-2.5 z-10">
-                                <span className="inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full bg-primary/90 text-primary-foreground backdrop-blur-md shadow-md border border-white/20">
+                                <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/90 text-primary-foreground backdrop-blur-md shadow-md border border-white/20">
                                     <span className="material-symbols-outlined text-[13px]">auto_awesome</span>
                                     Tu fase
                                 </span>
@@ -252,7 +288,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video, isPhaseRecommended,
                         </div>
 
                         {/* Duration and intensity pill */}
-                        <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between text-white text-[11px]">
+                        <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between text-white text-xs">
                             <span className={`px-2 py-0.5 rounded-md font-semibold backdrop-blur-sm ${
                                 video.intensity === 'low'
                                     ? 'bg-emerald-600/90'
@@ -281,7 +317,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video, isPhaseRecommended,
                 </h4>
                 <div className="flex items-center justify-between text-xs text-muted-foreground mt-0.5">
                     <span className="truncate max-w-[65%]" title={video.channelName}>{video.channelName}</span>
-                    <span className="px-2 py-0.5 rounded-md bg-secondary text-[11px] font-medium text-foreground/80">
+                    <span className="px-2 py-0.5 rounded-md bg-secondary text-xs font-medium text-foreground/80">
                         {CATEGORY_LABEL[video.category] || video.category}
                     </span>
                 </div>

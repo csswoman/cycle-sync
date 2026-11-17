@@ -68,11 +68,13 @@ export const TodayPlanCard: React.FC = () => {
     const copy = COPY[language === 'es' ? 'es' : 'en'];
     const [meals, setMeals] = useState<MealEntry[]>([]);
     const [workout, setWorkout] = useState<WorkoutEntry | null>(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         loadDay(toISODate(new Date()))
             .then((day) => { setMeals(day.meals); setWorkout(day.workout); })
-            .catch(() => { /* signed out or offline: no plan card */ });
+            .catch(() => { /* signed out or offline: no plan card */ })
+            .finally(() => { setLoading(false); });
     }, []);
 
     const toggleWorkout = async () => {
@@ -89,6 +91,33 @@ export const TodayPlanCard: React.FC = () => {
             setMeals((list) => list.map((m) => (m.id === meal.id ? meal : m)));
         }
     };
+
+    if (loading) {
+        return (
+            <div className="bg-card rounded-3xl border border-border/80 shadow-sm p-5 sm:p-6 animate-pulse">
+                <div className="flex items-center justify-between mb-3">
+                    <div className="h-5 w-32 bg-secondary/80 rounded" />
+                    <div className="h-4 w-20 bg-secondary/60 rounded" />
+                </div>
+                <div className="divide-y divide-border/40">
+                    <div className="flex items-center gap-3 py-3">
+                        <div className="size-9 rounded-full bg-secondary/80 shrink-0" />
+                        <div className="flex-1 flex flex-col gap-1.5">
+                            <div className="h-3 w-16 bg-secondary/60 rounded" />
+                            <div className="h-4 w-40 bg-secondary/80 rounded" />
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-3 py-3">
+                        <div className="size-9 rounded-full bg-secondary/80 shrink-0" />
+                        <div className="flex-1 flex flex-col gap-1.5">
+                            <div className="h-3 w-20 bg-secondary/60 rounded" />
+                            <div className="h-4 w-48 bg-secondary/80 rounded" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 
     if (!workout && meals.length === 0) return null;
 

@@ -2,7 +2,8 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/i18n/LanguageContext';
-import { Flower } from '@/components/ui/Flower';
+import { Bloom } from '@/components/ui/Bloom';
+import { bloomGrowth, bloomTone } from '@/lib/cycle/bloom';
 import { usesHormonalContraception } from '@/features/setup/onboarding';
 import type { CycleOverview } from '@/hooks/useCycleOverview';
 import { dashboardText, phaseKey } from '../dashboardText';
@@ -17,12 +18,13 @@ export const CycleHero: React.FC<{ overview: CycleOverview }> = ({ overview }) =
 
     if (!hasHistory || !info || !estimate) {
         return (
-            <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-gradient-to-br from-card via-card to-blossom-soft/40 shadow-sm p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
+            <div data-phase="follicular" className="phase-wash relative overflow-hidden rounded-3xl border border-border/80 shadow-sm p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <Bloom growth={0.08} className="absolute bottom-0 right-2 h-24 w-auto opacity-80 sm:static sm:order-last sm:h-28" />
+                <div className="relative">
                     <h2 className="text-foreground text-xl sm:text-2xl font-semibold">{text.noDataTitle}</h2>
                     <p className="text-muted-foreground text-sm mt-1 max-w-xl">{text.noDataBody}</p>
                 </div>
-                <button onClick={() => router.push('/period-history')} className="shrink-0 px-6 h-11 rounded-xl bg-primary text-primary-foreground font-bold">
+                <button onClick={() => router.push('/period-history')} className="relative shrink-0 self-start sm:self-auto px-6 h-11 rounded-full bg-bloom text-primary-foreground font-bold shadow-md shadow-blossom/20 transition-transform hover:scale-[1.02] active:scale-95">
                     {text.noDataCta}
                 </button>
             </div>
@@ -46,18 +48,33 @@ export const CycleHero: React.FC<{ overview: CycleOverview }> = ({ overview }) =
         : daysToOvulation > 0 ? text.ovulationIn(daysToOvulation) : daysToOvulation === 0 ? text.ovulationToday : text.ovulationPassed;
     const fmt = (d: Date) => new Intl.DateTimeFormat(language === 'es' ? 'es' : 'en', { day: 'numeric', month: 'short' }).format(d);
 
+    const tone = bloomTone(info.phase);
+    const growth = bloomGrowth(info.cycleDay, estimate.ovulationDay, overdue);
+
     return (
-        <div className="relative overflow-hidden rounded-3xl border border-border/80 bg-gradient-to-br from-card via-card to-blossom-soft/40 shadow-sm p-6 sm:p-7 flex flex-col gap-5">
-            <Flower petal="var(--blossom-soft)" center="var(--sun)" rotate={12} className="absolute -top-8 -right-8 size-36 opacity-60 pointer-events-none" />
-            <div className="relative flex flex-col gap-1">
-                <p className="text-xs font-bold uppercase tracking-wider text-primary">
+        <div data-phase={tone} className="phase-wash relative overflow-hidden rounded-3xl border border-border/80 shadow-sm p-6 sm:p-7 flex flex-col gap-5">
+            <Bloom growth={growth} tone={tone} className="absolute -top-2 right-0 h-32 sm:h-44 w-auto opacity-90" />
+            <div className="relative flex flex-col gap-1 pr-20 sm:pr-32">
+                <p className="text-xs font-bold uppercase tracking-wider text-phase">
                     {overdue ? text.overdueDay(info.cycleDay) : `${phase.name} · ${text.dayOf(info.cycleDay, info.cycleLength)}`}
                 </p>
                 <h2 className="text-foreground text-2xl sm:text-3xl font-semibold tracking-tight">{late ? text.lateTitle : phase.focus}</h2>
                 <p className="text-sm text-muted-foreground max-w-2xl">{late ? text.lateBody : phase.hormones}</p>
             </div>
-            <div className="relative h-2.5 w-full bg-secondary rounded-full overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-blossom to-coral rounded-full transition-all" style={{ width: `${progress}%` }} />
+            <div
+                role="progressbar"
+                aria-valuenow={progress}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label={overdue ? text.overdueDay(info.cycleDay) : `${phase.name} · ${text.dayOf(info.cycleDay, info.cycleLength)}`}
+                className="relative h-2.5 w-full bg-secondary/70 rounded-full"
+            >
+                <div className="h-full bg-phase rounded-full transition-all duration-700" style={{ width: `${progress}%` }} />
+                <span
+                    className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 size-4 rounded-full bg-card border-2 shadow-sm transition-all duration-700"
+                    style={{ left: `${progress}%`, borderColor: 'var(--phase)' }}
+                    aria-hidden="true"
+                />
             </div>
             <div className="relative grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="bg-secondary/40 rounded-2xl p-4">

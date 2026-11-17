@@ -7,6 +7,7 @@ import {
   type CervicalMucus, type CycleSign,
 } from '@/lib/cycle/fertilitySigns';
 import { useCycleSigns } from '@/hooks/useCycleSigns';
+import { usePregnancies } from '@/hooks/usePregnancies';
 import { FlowFields } from './FlowFields';
 
 type Lang = 'es' | 'en';
@@ -29,6 +30,11 @@ const copy = {
     lhTitle: 'Prueba de ovulación (LH)',
     lhHelp: 'Si usas tiras de LH, anota el resultado. Con PMOS pueden dar positivos falsos porque la LH suele estar alta; la temperatura confirma si de verdad ovulaste.',
     lh: { negative: 'Negativa', positive: 'Positiva' },
+    pregTitle: 'Prueba de embarazo',
+    pregHelp: 'Anota el resultado si te hiciste una prueba. Con un positivo, confírmalo con tu médica.',
+    preg: { negative: 'Negativa', positive: 'Positiva' },
+    pregOffer: 'Puedes activar el modo embarazo: se pausan la predicción de regla, la ventana fértil y las alertas de retraso.',
+    pregActivate: 'Activar modo embarazo', pregActive: 'Modo embarazo activado. Puedes salir desde el Inicio.', pregError: 'No se pudo activar. Inténtalo de nuevo.',
     sexTitle: 'Relaciones sexuales',
     sexCount: 'Veces', protection: 'Protección',
     protected: 'Con protección', unprotected: 'Sin protección',
@@ -72,6 +78,11 @@ const copy = {
     lhTitle: 'Ovulation test (LH)',
     lhHelp: 'If you use LH strips, log the result. With PMOS they can give false positives because LH is often high; temperature confirms whether you really ovulated.',
     lh: { negative: 'Negative', positive: 'Positive' },
+    pregTitle: 'Pregnancy test',
+    pregHelp: 'Log the result if you took a test. If it is positive, confirm it with your doctor.',
+    preg: { negative: 'Negative', positive: 'Positive' },
+    pregOffer: 'You can turn on pregnancy mode: period prediction, fertile window and late-period alerts are paused.',
+    pregActivate: 'Turn on pregnancy mode', pregActive: 'Pregnancy mode is on. You can leave it from Home.', pregError: 'Could not turn it on. Try again.',
     sexTitle: 'Sexual activity',
     sexCount: 'Times', protection: 'Protection',
     protected: 'Protected', unprotected: 'Unprotected',
@@ -170,6 +181,8 @@ const BodySignsPanel: React.FC<Props> = ({ lang, cycleStart, hormonal, initialDa
   const [tempText, setTempText] = useState('');
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [showInfo, setShowInfo] = useState(false);
+  const { active: activePreg, start: startPregnancy } = usePregnancies();
+  const [pregState, setPregState] = useState<'idle' | 'error'>('idle');
 
   // Reload the form when the day changes or the saved data arrives.
   useEffect(() => {
@@ -257,6 +270,30 @@ const BodySignsPanel: React.FC<Props> = ({ lang, cycleStart, hormonal, initialDa
           </Section>
         )}
 
+        <Section icon="pregnant_woman" title={c.pregTitle} help={c.pregHelp}>
+          <div className="flex flex-wrap gap-2">
+            {(['negative', 'positive'] as const).map((v) => (
+              <button key={v} type="button" aria-pressed={draft.pregnancyTest === v} className={chip(draft.pregnancyTest === v)}
+                onClick={() => update({ pregnancyTest: draft.pregnancyTest === v ? null : v })}>
+                {c.preg[v]}
+              </button>
+            ))}
+          </div>
+          {draft.pregnancyTest === 'positive' && (
+            activePreg ? (
+              <p className="text-xs font-semibold text-sky-600 dark:text-sky-400">{c.pregActive}</p>
+            ) : (
+              <div className="flex flex-col gap-2 rounded-xl bg-secondary/40 p-3">
+                <p className="text-sm text-foreground">{c.pregOffer}</p>
+                <button type="button" className="self-start px-4 h-9 rounded-xl bg-primary text-primary-foreground text-sm font-bold"
+                  onClick={async () => { setPregState((await startPregnancy(cycleStart ?? date, date)) ? 'idle' : 'error'); }}>
+                  {c.pregActivate}
+                </button>
+                {pregState === 'error' && <p role="alert" className="text-xs text-destructive">{c.pregError}</p>}
+              </div>
+            )
+          )}
+        </Section>
         <Section icon="favorite" title={c.sexTitle} help={c.sexPrivate}>
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-2">

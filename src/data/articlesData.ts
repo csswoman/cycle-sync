@@ -320,7 +320,7 @@ export const IN_APP_ARTICLES: InAppArticle[] = [
     category: 'recovery',
     targetAudience: 'all',
     readTimeMinutes: 4,
-    imageUrl: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800&auto=format&fit=crop&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&auto=format&fit=crop&q=80',
     tags: ['spm', 'estado-de-animo', 'hinchazon', 'autocuidado'],
     es: {
       title: 'Síndrome premenstrual: cómo navegar los días difíciles',
@@ -388,7 +388,7 @@ export const IN_APP_ARTICLES: InAppArticle[] = [
     category: 'recovery',
     targetAudience: 'all',
     readTimeMinutes: 4,
-    imageUrl: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800&auto=format&fit=crop&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&auto=format&fit=crop&q=80',
     tags: ['estres', 'cortisol', 'sobreentrenamiento', 'eje-hpo'],
     es: {
       title: 'Estrés, entrenamiento y ciclo menstrual: la carga alostática total',
@@ -456,7 +456,7 @@ export const IN_APP_ARTICLES: InAppArticle[] = [
     category: 'training',
     targetAudience: 'all',
     readTimeMinutes: 3,
-    imageUrl: 'https://images.unsplash.com/photo-1552196563-55222c216425?w=800&auto=format&fit=crop&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&auto=format&fit=crop&q=80',
     tags: ['movilidad', 'flexibilidad', 'estiramientos', 'fascia'],
     es: {
       title: 'Flexibilidad y movilidad a lo largo del ciclo',
@@ -730,7 +730,7 @@ export const IN_APP_ARTICLES: InAppArticle[] = [
     category: 'pmos',
     targetAudience: 'pmos',
     readTimeMinutes: 3,
-    imageUrl: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=800&auto=format&fit=crop&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?w=800&auto=format&fit=crop&q=80',
     tags: ['composicion-corporal', 'pmos', 'peso', 'musculo', 'progreso'],
     es: {
       title: 'Composición corporal: mucho más que tu peso',
@@ -766,7 +766,7 @@ export const IN_APP_ARTICLES: InAppArticle[] = [
     category: 'pmos',
     targetAudience: 'pmos',
     readTimeMinutes: 3,
-    imageUrl: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800&auto=format&fit=crop&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1506629082955-511b1aa562c8?w=800&auto=format&fit=crop&q=80',
     tags: ['pmos', 'metas', 'fuerza', 'autoestima', 'salud'],
     es: {
       title: 'PMOS y objetivos de composición corporal: define tu propia meta',
@@ -802,7 +802,7 @@ export const IN_APP_ARTICLES: InAppArticle[] = [
     category: 'nutrition',
     targetAudience: 'pmos',
     readTimeMinutes: 3,
-    imageUrl: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&auto=format&fit=crop&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1540206395-68808572332f?w=800&auto=format&fit=crop&q=80',
     tags: ['grasa-vs-peso', 'pmos', 'musculo', 'nutricion', 'bascula'],
     es: {
       title: 'Perder grasa no es lo mismo que perder peso',
@@ -838,7 +838,7 @@ export const IN_APP_ARTICLES: InAppArticle[] = [
     category: 'training',
     targetAudience: 'pmos',
     readTimeMinutes: 4,
-    imageUrl: 'https://images.unsplash.com/photo-1518611012118-696072aa579a?w=800&auto=format&fit=crop&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1520206183501-b80df61043c2?w=800&auto=format&fit=crop&q=80',
     tags: ['masa-muscular', 'fuerza', 'pmos', 'metabolismo', 'glut4'],
     es: {
       title: 'La masa muscular importa: el pilar de tu salud metabólica',
@@ -910,7 +910,7 @@ export const IN_APP_ARTICLES: InAppArticle[] = [
     category: 'nutrition',
     targetAudience: 'pmos',
     readTimeMinutes: 4,
-    imageUrl: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&auto=format&fit=crop&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1493770348161-369560ae357d?w=800&auto=format&fit=crop&q=80',
     tags: ['alimentacion', 'nutricion', 'pmos', 'proteina', 'adherencia'],
     es: {
       title: 'Alimentación y composición corporal: sostenibilidad sobre restricción',
@@ -946,7 +946,7 @@ export const IN_APP_ARTICLES: InAppArticle[] = [
     category: 'tracking',
     targetAudience: 'pmos',
     readTimeMinutes: 3,
-    imageUrl: 'https://images.unsplash.com/photo-1541781774459-bb2af2f05b55?w=800&auto=format&fit=crop&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1490474418585-ba9bad8fd0ea?w=800&auto=format&fit=crop&q=80',
     tags: ['fluctuaciones', 'peso', 'inflamacion', 'sodio', 'pmos'],
     es: {
       title: '¿Por qué mi peso cambia aunque esté haciendo todo bien?',
@@ -980,7 +980,7 @@ export const IN_APP_ARTICLES: InAppArticle[] = [
     category: 'tracking',
     targetAudience: 'pmos',
     readTimeMinutes: 4,
-    imageUrl: 'https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?w=800&auto=format&fit=crop&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1547592180-85f173990554?w=800&auto=format&fit=crop&q=80',
     tags: ['medir-progreso', 'cinta-metrica', 'fuerza', 'fotos', 'pmos'],
     es: {
       title: 'Cómo medir tu progreso de forma saludable y objetiva',
@@ -1020,7 +1020,7 @@ export const IN_APP_ARTICLES: InAppArticle[] = [
     category: 'recovery',
     targetAudience: 'pmos',
     readTimeMinutes: 4,
-    imageUrl: 'https://images.unsplash.com/photo-1455390582262-044cdead277a?w=800&auto=format&fit=crop&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1511690743698-d9d85f2fbf38?w=800&auto=format&fit=crop&q=80',
     tags: ['estancamiento', 'adherencia', 'paciencia', 'pmos', 'metabolismo'],
     es: {
       title: 'Cuando el peso se estanca: auditoría de adherencia y paciencia',
@@ -1056,7 +1056,7 @@ export const IN_APP_ARTICLES: InAppArticle[] = [
     category: 'pmos',
     targetAudience: 'pmos',
     readTimeMinutes: 3,
-    imageUrl: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=800&auto=format&fit=crop&q=80',
+    imageUrl: 'https://images.unsplash.com/photo-1505576399279-565b52d4ac71?w=800&auto=format&fit=crop&q=80',
     tags: ['progreso-real', 'autoestima', 'pmos', 'bienestar', 'habitos'],
     es: {
       title: 'El progreso real no siempre se ve en el espejo',

@@ -143,8 +143,9 @@ const RoutineBuilder: React.FC<Props> = ({ phaseKey, onSaved }) => {
                   <span className="text-xs text-muted-foreground">
                     {bodyPartLabel(ex.bodyPart)} · {equipmentLabel(ex.equipment)}
                   </span>
-                  <span className={`text-xs font-bold ${added ? 'text-primary' : 'text-muted-foreground'}`}>
-                    {added ? '✓ Añadido' : '+ Añadir'}
+                  <span className={`inline-flex items-center gap-1 text-xs font-bold ${added ? 'text-primary' : 'text-muted-foreground'}`}>
+                    <span aria-hidden className="material-symbols-outlined text-base">{added ? 'check' : 'add'}</span>
+                    {added ? 'Añadido' : 'Añadir'}
                   </span>
                 </div>
               </button>
@@ -167,7 +168,7 @@ const RoutineBuilder: React.FC<Props> = ({ phaseKey, onSaved }) => {
         <h3 className="text-foreground font-bold text-lg">Tu rutina</h3>
 
         <div className="flex flex-col gap-2">
-          <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Día de entrenamiento</span>
+          <span className="text-sm font-semibold text-foreground">Día de entrenamiento</span>
           <div className="flex flex-wrap gap-2">
             {WEEKDAYS_ES.map((d, i) => (
               <button key={d} className={chip(weekday === i)} onClick={() => setWeekday(i)}>
@@ -190,16 +191,16 @@ const RoutineBuilder: React.FC<Props> = ({ phaseKey, onSaved }) => {
           <div className="flex flex-col gap-3">
             {groups.map((g) => (
               <div key={g} className="flex flex-col gap-1">
-                <span className="text-xs font-bold uppercase text-primary">{bodyPartLabel(g)}</span>
+                <span className="text-xs font-bold text-primary">{bodyPartLabel(g)}</span>
                 {selected.filter((e) => e.bodyPart === g).map((e) => (
                   <div key={e.id} className="flex items-center justify-between gap-2 text-sm text-foreground">
                     <span className="capitalize truncate">{e.name}</span>
                     <button
                       onClick={() => toggle(e)}
                       aria-label={`Quitar ${e.name}`}
-                      className="text-muted-foreground hover:text-destructive shrink-0"
+                      className="text-muted-foreground hover:text-destructive shrink-0 size-10 -my-2 flex items-center justify-center rounded-lg cursor-pointer"
                     >
-                      ✕
+                      <span aria-hidden className="material-symbols-outlined text-lg">close</span>
                     </button>
                   </div>
                 ))}

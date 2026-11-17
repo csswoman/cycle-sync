@@ -70,7 +70,7 @@ const PhasePlaylists: React.FC<Props> = ({ videos, currentPhaseKey, onPlay }) =>
             <div className="flex items-center justify-between gap-2 mb-3">
               <h3 className="font-bold text-sm text-foreground">
                 {playlist.title}
-                {phase === currentPhaseKey && <span className="ml-2 text-[11px] font-bold text-primary">Tu fase</span>}
+                {phase === currentPhaseKey && <span className="ml-2 text-xs font-bold text-primary">Tu fase</span>}
               </h3>
               <span className="text-xs text-muted-foreground shrink-0">
                 {playlist.videos.length} videos · {Math.round(totalMin / 60 * 10) / 10} h
@@ -92,12 +92,12 @@ const PhasePlaylists: React.FC<Props> = ({ videos, currentPhaseKey, onPlay }) =>
                       loading="lazy"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform"
                     />
-                    <span className="absolute bottom-1 right-1 text-[10px] font-bold bg-black/75 text-white px-1.5 py-0.5 rounded">
+                    <span className="absolute bottom-1 right-1 text-xs font-bold bg-black/75 text-white px-1.5 py-0.5 rounded">
                       {v.durationMinutes} min
                     </span>
                   </div>
                   <p className="text-xs font-semibold text-foreground mt-1.5 line-clamp-2">{v.title}</p>
-                  <p className="text-[11px] text-muted-foreground truncate">{v.channelName}</p>
+                  <p className="text-xs text-muted-foreground truncate">{v.channelName}</p>
                 </button>
               ))}
             </div>
