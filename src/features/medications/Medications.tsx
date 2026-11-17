@@ -61,9 +61,9 @@ const T = {
 };
 
 const STATUS_STYLE: Record<DoseStatus, string> = {
-  taken: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
+  taken: 'bg-leaf/10 text-leaf',
   due: 'bg-primary/10 text-primary',
-  late: 'bg-amber-500/15 text-amber-600 dark:text-amber-400',
+  late: 'bg-sun/15 text-sun-ink',
   missed: 'bg-destructive/10 text-destructive',
   upcoming: 'bg-secondary text-muted-foreground',
 };
@@ -121,19 +121,19 @@ const Medications: React.FC<MedicationsProps> = ({ embedded = false, onSummary }
     <>
       {!embedded && (
         <div className="flex flex-col gap-2">
-          <h1 className="text-foreground text-3xl md:text-4xl font-semibold leading-tight tracking-tight"><TitleSprig bud="var(--peach)" />{t.pageTitle}</h1>
+          <h1 className="text-foreground text-3xl md:text-4xl font-semibold leading-tight tracking-tight text-balance"><TitleSprig bud="var(--peach)" />{t.pageTitle}</h1>
           <p className="text-muted-foreground text-base">{t.pageSub}</p>
         </div>
       )}
 
       {perm === 'denied' && medications.some((m) => m.reminders) && (
-        <p className="flex items-start gap-2 text-sm text-amber-600 dark:text-amber-400 bg-amber-500/10 rounded-xl px-4 py-3">
+        <p className="flex items-start gap-2 text-sm text-sun-ink bg-sun/10 rounded-2xl px-4 py-3">
           <Icon name="warning" size={18} className="mt-0.5" /> {t.notifBlocked}
         </p>
       )}
       {perm === 'default' && medications.some((m) => m.reminders) && (
         <button onClick={async () => setPerm(await requestMedicationNotifications())}
-          className="self-start flex items-center gap-2 text-sm font-bold text-primary bg-primary/10 rounded-full px-4 py-2">
+          className="self-start flex items-center gap-2 min-h-10 text-sm font-semibold text-primary bg-primary/10 rounded-full px-5">
           <Icon name="mark_email_unread" size={16} /> {t.notifEnable}
         </button>
       )}
@@ -170,14 +170,14 @@ const Medications: React.FC<MedicationsProps> = ({ embedded = false, onSummary }
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           <div className="lg:col-span-7 flex flex-col gap-6">
             {/* Today */}
-            <section className="bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-6 flex flex-col gap-4" aria-labelledby="med-today-title">
+            <section className="bg-card rounded-3xl border border-border shadow-[var(--shadow-low)] p-5 sm:p-6 flex flex-col gap-4" aria-labelledby="med-today-title">
               <div className="flex items-end justify-between gap-3">
                 <div>
-                  <h2 id="med-today-title" className="text-foreground font-bold text-lg">{t.today}</h2>
+                  <h2 id="med-today-title" className="text-foreground font-semibold text-xl">{t.today}</h2>
                   <p className="text-sm text-muted-foreground capitalize">{todayLabel}</p>
                 </div>
                 {todayDoses.length > 0 && (
-                  <p className="text-sm font-bold text-foreground">{t.progress(takenCount, todayDoses.length)}</p>
+                  <p className="text-sm font-semibold text-foreground tabular-nums">{t.progress(takenCount, todayDoses.length)}</p>
                 )}
               </div>
               {todayDoses.length > 0 && (
@@ -187,7 +187,7 @@ const Medications: React.FC<MedicationsProps> = ({ embedded = false, onSummary }
               )}
               {todayDoses.length === 0 && <p className="text-sm text-muted-foreground">{t.noneToday}</p>}
               {todayDoses.length > 0 && takenCount === todayDoses.length && (
-                <p className="flex items-center gap-2 text-sm font-semibold text-emerald-600 dark:text-emerald-400">
+                <p className="flex items-center gap-2 text-sm font-semibold text-leaf">
                   <Icon name="check_circle" size={18} weight="fill" /> {t.allDone}
                 </p>
               )}
@@ -199,29 +199,29 @@ const Medications: React.FC<MedicationsProps> = ({ embedded = false, onSummary }
                   const instruction = instructionLabel(med.time_instructions?.[time], lang);
                   return (
                     <li key={`${med.id}-${time}`}
-                      className={`rounded-xl border p-3 sm:p-4 flex items-center gap-3 sm:gap-4 transition-colors ${taken ? 'border-emerald-500/30 bg-emerald-500/5' : status === 'due' || status === 'late' ? 'border-primary/40 bg-primary/5' : 'border-border'}`}>
+                      className={`rounded-2xl border p-3 sm:p-4 flex flex-wrap sm:flex-nowrap items-center gap-x-3 gap-y-3 sm:gap-4 transition-colors ${taken ? 'border-leaf/30 bg-leaf/5' : status === 'due' || status === 'late' ? 'border-primary/40 bg-primary/5' : 'border-border'}`}>
                       <div className="w-14 shrink-0 text-center">
-                        <p className={`text-lg font-bold tabular-nums ${taken ? 'text-muted-foreground line-through decoration-1' : 'text-foreground'}`}>{time}</p>
+                        <p className={`text-xl font-semibold tabular-nums ${taken ? 'text-muted-foreground line-through decoration-1' : 'text-foreground'}`}>{time}</p>
                       </div>
-                      <div className="flex-1 min-w-0 flex flex-col gap-1">
-                        <p className="font-bold text-foreground leading-tight">
+                      <div className="flex-1 min-w-[10rem] flex flex-col gap-1.5">
+                        <p className="font-semibold text-foreground leading-tight">
                           {med.name}{med.dose && <span className="font-normal text-muted-foreground"> · {med.dose}</span>}
                         </p>
                         <div className="flex flex-wrap items-center gap-1.5">
                           {instruction && (
-                            <span className="inline-flex items-center gap-1 text-xs font-semibold text-foreground bg-secondary rounded-full px-2 py-0.5">
+                            <span className="inline-flex items-center gap-1 text-xs font-semibold text-foreground bg-secondary rounded-full px-2.5 py-1">
                               <Icon name="restaurant" size={12} /> {instruction}
                             </span>
                           )}
-                          <span className={`text-xs font-semibold rounded-full px-2 py-0.5 ${STATUS_STYLE[status]}`}>
+                          <span className={`text-xs font-semibold rounded-full px-2.5 py-1 ${STATUS_STYLE[status]}`}>
                             {taken && at ? t.takenAt(fmtTime(at)) : t.status[status]}
                           </span>
                         </div>
-                        {med.notes && <p className="text-xs text-muted-foreground line-clamp-2">{med.notes}</p>}
+                        {med.notes && <p className="text-sm text-muted-foreground line-clamp-2">{med.notes}</p>}
                       </div>
                       <button onClick={() => setTaken(med.id, time, !taken)} aria-pressed={taken}
                         aria-label={`${taken ? t.undo : t.take} ${med.name} ${time}`}
-                        className={`shrink-0 min-w-[5.5rem] flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-full text-sm font-bold border transition-all ${taken ? 'bg-emerald-500 text-white border-emerald-500' : 'bg-primary text-primary-foreground border-primary hover:bg-primary/90'}`}>
+                        className={`shrink-0 w-full sm:w-auto sm:min-w-[6.5rem] min-h-11 flex items-center justify-center gap-1.5 px-4 rounded-full text-sm font-semibold border transition-colors ${taken ? 'bg-leaf text-card border-leaf' : 'bg-primary text-primary-foreground border-primary hover:bg-primary/90'}`}>
                         <Icon name={taken ? 'check' : 'medication'} size={16} weight="bold" />
                         {taken ? t.taken : t.take}
                       </button>
@@ -234,18 +234,18 @@ const Medications: React.FC<MedicationsProps> = ({ embedded = false, onSummary }
             {/* My medications */}
             <section className="flex flex-col gap-3" aria-labelledby="med-list-title">
               <div className="flex items-center justify-between gap-2">
-                <h2 id="med-list-title" className="text-foreground font-bold text-lg">{t.mine}</h2>
+                <h2 id="med-list-title" className="text-foreground font-semibold text-xl">{t.mine}</h2>
                 {editing === null && (
-                  <button onClick={() => setEditing('new')} className="flex items-center gap-1 text-sm font-bold text-primary px-3 py-1.5 rounded-full hover:bg-primary/10">
+                  <button onClick={() => setEditing('new')} className="flex items-center gap-1 min-h-10 text-sm font-semibold text-primary px-4 rounded-full hover:bg-primary/10">
                     <Icon name="add" size={16} /> {t.add}
                   </button>
                 )}
               </div>
               {medications.map((med) => (
-                <article key={med.id} className="bg-card rounded-2xl border border-border p-4 sm:p-5 flex flex-col gap-3">
+                <article key={med.id} className="bg-card rounded-3xl border border-border p-4 sm:p-5 flex flex-col gap-3">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <h3 className="text-foreground font-bold">{med.name}</h3>
+                      <h3 className="text-foreground text-lg font-semibold">{med.name}</h3>
                       <p className="text-muted-foreground text-sm">
                         {[med.dose, daysLabel(med.days_of_week, lang, t.everyDay)].filter(Boolean).join(' · ')}
                         {med.start_date && ` · ${t.since(parseLocalDate(med.start_date).toLocaleDateString(locale(lang), { day: 'numeric', month: 'short' }))}`}
@@ -253,11 +253,11 @@ const Medications: React.FC<MedicationsProps> = ({ embedded = false, onSummary }
                     </div>
                     <div className="flex shrink-0">
                       <button onClick={() => { setConfirmId(null); setEditing(med); }} aria-label={`${t.edit} ${med.name}`}
-                        className="p-2 rounded-full text-muted-foreground hover:text-foreground hover:bg-secondary">
+                        className="size-10 flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-secondary">
                         <Icon name="edit_note" size={20} />
                       </button>
                       <button onClick={() => setConfirmId(med.id)} aria-label={`${t.remove} ${med.name}`}
-                        className="p-2 rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10">
+                        className="size-10 flex items-center justify-center rounded-full text-muted-foreground hover:text-destructive hover:bg-destructive/10">
                         <Icon name="delete" size={20} />
                       </button>
                     </div>
@@ -266,7 +266,7 @@ const Medications: React.FC<MedicationsProps> = ({ embedded = false, onSummary }
                     {med.times.map((time) => {
                       const instruction = instructionLabel(med.time_instructions?.[time], lang);
                       return (
-                        <li key={time} className="flex items-center gap-1.5 text-sm bg-secondary rounded-xl px-3 py-1.5">
+                        <li key={time} className="flex items-center gap-1.5 text-sm bg-secondary rounded-full px-3 py-1.5">
                           <Icon name="schedule" size={14} className="text-primary" />
                           <span className="font-bold tabular-nums text-foreground">{time}</span>
                           {instruction && <span className="text-muted-foreground">· {instruction}</span>}
@@ -277,25 +277,25 @@ const Medications: React.FC<MedicationsProps> = ({ embedded = false, onSummary }
                       const pack = packPosition(med, today);
                       if (!pack) return null;
                       return (
-                        <li className={`text-xs font-semibold self-center rounded-full px-2.5 py-1 ${pack.onBreak ? 'bg-secondary text-muted-foreground' : 'bg-primary/10 text-primary'}`}>
+                        <li className={`text-sm font-semibold self-center rounded-full px-3 py-1 ${pack.onBreak ? 'bg-secondary text-muted-foreground' : 'bg-primary/10 text-primary'}`}>
                           {pack.onBreak ? t.packBreak(pack.daysToNextPack) : t.packDay(pack.day, pack.length)}
                         </li>
                       );
                     })()}
                     {med.stock != null && (
-                      <li className="text-xs text-muted-foreground self-center">
+                      <li className="text-sm text-muted-foreground self-center">
                         {t.stockLeft(Number(med.stock), daysOfStockLeft(med, today, todayDoses.filter((d) => d.med.id === med.id && isTaken(med.id, d.time)).length))}
                       </li>
                     )}
                     {!med.reminders && (
-                      <li className="text-xs text-muted-foreground self-center">{t.notifOff}</li>
+                      <li className="text-sm text-muted-foreground self-center">{t.notifOff}</li>
                     )}
                   </ul>
                   {med.notes && (
-                    <div className="flex gap-2 bg-blossom-soft/50 rounded-xl px-3 py-2.5">
+                    <div className="flex gap-2 bg-blossom-soft/50 rounded-2xl px-4 py-3">
                       <Icon name="stethoscope" size={16} className="text-primary mt-0.5" />
                       <div className="min-w-0">
-                        <p className="text-xs font-bold text-foreground">{t.doctor}</p>
+                        <p className="text-sm font-semibold text-foreground">{t.doctor}</p>
                         <p className="text-sm text-foreground/90 whitespace-pre-line break-words">{med.notes}</p>
                       </div>
                     </div>
@@ -304,8 +304,8 @@ const Medications: React.FC<MedicationsProps> = ({ embedded = false, onSummary }
                     <div role="alertdialog" className="flex flex-wrap items-center gap-3 border-t border-border pt-3">
                       <p className="text-sm text-foreground flex-1 min-w-[12rem]">{t.confirmRemove}</p>
                       <button onClick={async () => { await removeMedication(med.id); setConfirmId(null); }}
-                        className="text-sm font-bold text-destructive-foreground bg-destructive px-4 py-2 rounded-full">{t.yes}</button>
-                      <button onClick={() => setConfirmId(null)} className="text-sm font-bold text-muted-foreground px-3 py-2">{t.no}</button>
+                        className="min-h-10 text-sm font-semibold text-destructive-foreground bg-destructive px-5 rounded-full">{t.yes}</button>
+                      <button onClick={() => setConfirmId(null)} className="min-h-10 text-sm font-semibold text-muted-foreground px-4 rounded-full hover:bg-secondary">{t.no}</button>
                     </div>
                   )}
                 </article>
@@ -320,7 +320,7 @@ const Medications: React.FC<MedicationsProps> = ({ embedded = false, onSummary }
         </div>
       )}
 
-      <p className="flex items-start gap-2 text-xs text-muted-foreground leading-relaxed">
+      <p className="flex items-start gap-2 text-sm text-muted-foreground leading-relaxed max-w-[75ch]">
         <Icon name="info" size={14} className="mt-0.5 shrink-0" /> {t.disclaimer}
       </p>
     </>

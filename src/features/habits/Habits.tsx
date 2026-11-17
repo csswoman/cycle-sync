@@ -6,6 +6,13 @@ import { useLanguage } from '@/i18n/LanguageContext';
 import type { Habit } from '@/types';
 import { PetalFall, TitleSprig } from '@/components/ui/Botanical';
 import { Bloom } from '@/components/ui/Bloom';
+import { useCycleInfo } from '@/hooks/useCycleInfo';
+import { toPhaseKey, pendingPhaseHabits, PHASE_HABITS, normalize } from '@/lib/cycle/phaseSuggestions';
+
+const ALL_PHASE_HABITS = Object.values(PHASE_HABITS).flat();
+/** Icon for a habit added from a phase suggestion, matched by its name. */
+const phaseHabitIcon = (name: string) =>
+  ALL_PHASE_HABITS.find((s) => normalize(s.name.es) === normalize(name) || normalize(s.name.en) === normalize(name))?.icon;
 
 const HABIT_ICONS: Record<string, string> = {
   water: 'water_drop',
@@ -15,17 +22,17 @@ const HABIT_ICONS: Record<string, string> = {
 };
 
 const HABIT_COLORS: Record<string, string> = {
-  water: 'text-blue-400',
-  sleep: 'text-indigo-400',
-  mindfulness: 'text-emerald-400',
-  custom: 'text-amber-400',
+  water: 'text-leaf',
+  sleep: 'text-blossom',
+  mindfulness: 'text-coral',
+  custom: 'text-sun-ink',
 };
 
 const HABIT_BG: Record<string, string> = {
-  water: 'bg-blue-400/10',
-  sleep: 'bg-indigo-400/10',
-  mindfulness: 'bg-emerald-400/10',
-  custom: 'bg-amber-400/10',
+  water: 'bg-leaf-fresh/15',
+  sleep: 'bg-petal/15',
+  mindfulness: 'bg-coral/10',
+  custom: 'bg-sun/10',
 };
 
 const TEXT = {
@@ -48,6 +55,11 @@ const TEXT = {
     unit: 'Unidad',
     unitPlaceholder: 'ej., minutos, páginas, veces',
     cancel: 'Cancelar',
+    phaseTitle: (p: string) => `Sugeridos para tu fase ${p}`,
+    phaseSubtitle: 'Hábitos que encajan con lo que tu cuerpo vive en estos días. Añádelos y quítalos cuando cambie la fase.',
+    phaseAdd: 'Añadir',
+    phaseAllAdded: 'Ya tienes todos los hábitos sugeridos para esta fase.',
+    phaseNames: { menstrual: 'menstrual', follicular: 'folicular', ovulation: 'ovulatoria', luteal: 'lútea' } as Record<string, string>,
     defaultUnits: 'veces',
     standardNames: {
       water: 'Agua',
@@ -80,6 +92,11 @@ const TEXT = {
     unit: 'Unit',
     unitPlaceholder: 'e.g., minutes, pages',
     cancel: 'Cancel',
+    phaseTitle: (p: string) => `Suggested for your ${p} phase`,
+    phaseSubtitle: 'Habits that fit what your body is going through these days. Add them and drop them when the phase changes.',
+    phaseAdd: 'Add',
+    phaseAllAdded: 'You already have every habit suggested for this phase.',
+    phaseNames: { menstrual: 'menstrual', follicular: 'follicular', ovulation: 'ovulatory', luteal: 'luteal' } as Record<string, string>,
     defaultUnits: 'times',
     standardNames: {
       water: 'Water',
@@ -104,6 +121,11 @@ const Habits: React.FC = () => {
   const [newName, setNewName] = useState('');
   const [newGoal, setNewGoal] = useState('1');
   const [newUnit, setNewUnit] = useState(tx.defaultUnits);
+  const { cycleInfo } = useCycleInfo();
+  const lang = isEs ? 'es' : 'en';
+  const phaseKey = cycleInfo && !cycleInfo.paused ? toPhaseKey(cycleInfo.phase) : null;
+  const phaseSuggestions = phaseKey ? pendingPhaseHabits(phaseKey, habits.map((h) => h.name)) : [];
+  const [adding, setAdding] = useState<string | null>(null);
 
   const handleIncrement = (habit: Habit) => {
     const log = getLogForHabit(habit.id);
@@ -203,13 +225,55 @@ const Habits: React.FC = () => {
                 : tx.startLogging}
             </p>
             {dailyProgress === 100 && (
-              <div className="flex items-center gap-1 mt-1 text-yellow-400">
+              <div className="flex items-center gap-1 mt-1 text-sun-ink">
                 <span className="material-symbols-outlined text-sm">star</span>
                 <span className="text-xs font-bold">{tx.perfectDay}</span>
               </div>
             )}
           </div>
         </div>
+
+        {/* Phase suggestions */}
+        {phaseKey && !loading && (
+          <section data-phase={phaseKey} className="bg-card rounded-2xl border border-border p-5 sm:p-6 flex flex-col gap-4">
+            <div className="flex flex-col gap-1">
+              <h3 className="text-foreground text-lg font-semibold flex items-center gap-2">
+                <span className="material-symbols-outlined text-phase">auto_awesome</span>
+                {tx.phaseTitle(tx.phaseNames[phaseKey])}
+              </h3>
+              <p className="text-muted-foreground text-sm">{tx.phaseSubtitle}</p>
+            </div>
+            {phaseSuggestions.length === 0 ? (
+              <p className="text-sm text-muted-foreground">{tx.phaseAllAdded}</p>
+            ) : (
+              <ul className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                {phaseSuggestions.map((s) => (
+                  <li key={s.id} className="rounded-xl bg-phase-soft/60 p-4 flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-phase">{s.icon}</span>
+                      <p className="text-foreground font-semibold text-sm">{s.name[lang]}</p>
+                    </div>
+                    <p className="text-muted-foreground text-xs leading-relaxed flex-1">{s.why[lang]}</p>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-xs text-muted-foreground">{tx.goalPrefix} {s.goal} {s.unit[lang]}</span>
+                      <button
+                        type="button"
+                        disabled={adding === s.id}
+                        onClick={async () => {
+                          setAdding(s.id);
+                          try { await addCustomHabit(s.name[lang], s.goal, s.unit[lang]); } finally { setAdding(null); }
+                        }}
+                        className="flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full bg-primary text-primary-foreground disabled:opacity-60"
+                      >
+                        <span className="material-symbols-outlined text-[16px]">add</span>{tx.phaseAdd}
+                      </button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        )}
 
         {/* Habit Cards */}
         {loading ? (
@@ -227,7 +291,7 @@ const Habits: React.FC = () => {
               const pct = Math.min(Math.round((currentVal / goal) * 100), 100);
               const isComplete = log?.completed ?? false;
               const streak = getStreak(habit.id);
-              const icon = HABIT_ICONS[habit.type] || 'star';
+              const icon = (habit.type === 'custom' && phaseHabitIcon(habit.name)) || HABIT_ICONS[habit.type] || 'star';
               const color = HABIT_COLORS[habit.type] || 'text-primary';
               const bg = HABIT_BG[habit.type] || 'bg-primary/10';
 
@@ -235,7 +299,7 @@ const Habits: React.FC = () => {
                 <div
                   key={habit.id}
                   className={`bg-card rounded-xl border transition-all p-5 flex flex-col gap-4 ${
-                    isComplete ? 'border-green-500/30 bg-green-500/5' : 'border-border'
+                    isComplete ? 'border-leaf/30 bg-leaf/5' : 'border-border'
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -251,7 +315,7 @@ const Habits: React.FC = () => {
                       </div>
                     </div>
                     {streak > 0 && (
-                      <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-orange-500/10 text-orange-400">
+                      <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-coral/10 text-sun-ink">
                         <span className="material-symbols-outlined text-sm">local_fire_department</span>
                         <span className="text-xs font-bold">{streak}d</span>
                       </div>
@@ -262,7 +326,7 @@ const Habits: React.FC = () => {
                   <div className="flex items-center gap-3">
                     <div className="flex-1 h-3 bg-secondary rounded-full overflow-hidden">
                       <div
-                        className={`h-full rounded-full transition-all ${isComplete ? 'bg-green-500' : 'bg-primary'}`}
+                        className={`h-full rounded-full transition-all ${isComplete ? 'bg-leaf' : 'bg-primary'}`}
                         style={{ width: `${pct}%` }}
                       />
                     </div>
@@ -293,7 +357,7 @@ const Habits: React.FC = () => {
                       onClick={() => handleToggle(habit)}
                       className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
                         isComplete
-                          ? 'bg-green-500 text-white'
+                          ? 'bg-leaf text-card'
                           : 'bg-secondary hover:bg-accent text-muted-foreground border border-border'
                       }`}
                     >

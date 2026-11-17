@@ -2,6 +2,7 @@
 import React, { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { Icon } from '@/components/ui/Icon';
+import { CardFlowers } from '@/components/ui/CardFlowers';
 import { useCycleSigns } from '@/hooks/useCycleSigns';
 import { addDays, parseLocalDate, toISODate } from '@/lib/cycle/cycleEngine';
 import { gestationalAge, type Pregnancy } from '@/lib/cycle/pregnancy';
@@ -11,8 +12,8 @@ import { gestationalGlucosePlan } from '@/lib/pmos/screening';
 import type { CycleOverview } from '@/hooks/useCycleOverview';
 import type { PMOSOverviewData } from '@/hooks/usePMOSOverview';
 type Lang = 'es' | 'en';
-const shell = 'relative overflow-hidden rounded-3xl border border-border/80 garden-wash shadow-sm p-6 sm:p-7 flex flex-col gap-4';
-const panel = 'bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-6 flex flex-col gap-4';
+const shell = 'relative isolate overflow-hidden rounded-3xl border border-border/80 garden-wash shadow-sm p-6 sm:p-7 flex flex-col gap-4';
+const panel = 'relative isolate overflow-hidden bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-6 flex flex-col gap-4';
 const fmt = (iso: string, lang: Lang) =>
   new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'short' }).format(parseLocalDate(iso));
 
@@ -20,8 +21,8 @@ const fmt = (iso: string, lang: Lang) =>
 export const PregnancyMedicationCard: React.FC<{ lang: Lang }> = ({ lang }) => {
   const es = lang === 'es';
   return (
-    <div className="rounded-2xl border border-amber-500/40 bg-amber-500/10 p-4 flex gap-3">
-      <Icon name="medication" size={20} className="text-amber-700 dark:text-amber-400 shrink-0 mt-0.5" />
+    <div className="rounded-2xl border border-sun/40 bg-sun/10 p-4 flex gap-3">
+      <Icon name="medication" size={20} className="text-sun-ink shrink-0 mt-0.5" />
       <div>
         <p className="text-sm font-bold text-foreground">{es ? 'Revisa tu medicación con tu médica' : 'Review your medication with your doctor'}</p>
         <p className="text-sm text-muted-foreground">
@@ -52,6 +53,7 @@ export const PregnancyHero: React.FC<{ overview: CycleOverview; lang: Lang }> = 
   if (!pregnancy) {
     return (
       <div className={shell}>
+        <CardFlowers variant="pregnancy" />
         <h2 className="text-foreground text-xl sm:text-2xl font-semibold">{es ? 'Predicciones en pausa' : 'Predictions paused'}</h2>
         <p className="text-sm text-muted-foreground max-w-xl">
           {es ? 'Volverán cuando registres tu siguiente regla. Hasta entonces no se muestran fechas de regla, ovulación ni alertas de retraso.'
@@ -65,6 +67,7 @@ export const PregnancyHero: React.FC<{ overview: CycleOverview; lang: Lang }> = 
   }
   return (
     <div className={shell}>
+      <CardFlowers variant="pregnancy" />
       <div className="flex flex-col gap-1">
         <p className="text-xs font-bold uppercase tracking-wider text-primary">
           {es ? 'Modo embarazo' : 'Pregnancy mode'}
@@ -122,6 +125,7 @@ export const FertilityWindowCard: React.FC<{ overview: CycleOverview; lang: Lang
   }[state.level];
   return (
     <section className={panel}>
+      <CardFlowers variant="fertility" />
       <div className="flex items-start gap-3">
         <div className="size-10 shrink-0 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary"><Icon name="child_care" size={20} /></div>
         <div>
@@ -181,7 +185,7 @@ export const PreconceptionCard: React.FC<{ lang: Lang; data: PMOSOverviewData }>
         {items.map((it) => (
           <li key={it.en} className="flex items-start gap-2.5 rounded-xl border border-border p-3 text-sm text-foreground">
             <Icon name={it.done === null ? 'radio_button_unchecked' : it.done ? 'check_circle' : 'schedule'} size={18}
-              className={it.done ? 'text-emerald-600 shrink-0 mt-0.5' : 'text-muted-foreground shrink-0 mt-0.5'} />
+              className={it.done ? 'text-leaf shrink-0 mt-0.5' : 'text-muted-foreground shrink-0 mt-0.5'} />
             <span>{es ? it.es : it.en}</span>
           </li>
         ))}
@@ -211,7 +215,7 @@ export const PregnancyGlucoseCard: React.FC<{ lang: Lang; data: PMOSOverviewData
         {items.map((it) => (
           <li key={it.key} className="flex items-center justify-between gap-3 rounded-xl border border-border p-3 text-sm text-foreground">
             <span>{label[it.key][lang]}</span>
-            <span className={`shrink-0 text-xs font-semibold rounded-full px-2.5 py-1 ${it.done ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400' : 'bg-secondary text-muted-foreground'}`}>
+            <span className={`shrink-0 text-xs font-semibold rounded-full px-2.5 py-1 ${it.done ? 'bg-leaf/15 text-leaf' : 'bg-secondary text-muted-foreground'}`}>
               {it.done ? (es ? 'Con registro' : 'Logged') : (es ? 'Pendiente de registrar' : 'Not logged')}
             </span>
           </li>

@@ -50,8 +50,8 @@ interface Props {
 }
 
 const Card: React.FC<{ tone: 'warn' | 'info'; icon: string; title: string; children: React.ReactNode }> = ({ tone, icon, title, children }) => (
-  <div className={`rounded-2xl border p-4 flex gap-3 ${tone === 'warn' ? 'border-amber-500/40 bg-amber-500/10' : 'border-primary/30 bg-primary/5'}`}>
-    <Icon name={icon} size={22} className={tone === 'warn' ? 'text-amber-600 dark:text-amber-400 mt-0.5' : 'text-primary mt-0.5'} />
+  <div className={`rounded-2xl border p-4 flex gap-3 ${tone === 'warn' ? 'border-sun/40 bg-sun/10' : 'border-primary/30 bg-primary/5'}`}>
+    <Icon name={icon} size={22} className={tone === 'warn' ? 'text-sun-ink mt-0.5' : 'text-primary mt-0.5'} />
     <div className="flex-1 min-w-0 flex flex-col gap-2">
       <p className="font-bold text-foreground">{title}</p>
       {children}
@@ -103,7 +103,7 @@ export const MedicationCareTips: React.FC<Props> = ({ lang, medications, today, 
             <button type="submit" className="px-4 py-2 rounded-full text-sm font-bold bg-primary text-primary-foreground">{t.refillSave}</button>
           </form>
         ) : (
-          <button onClick={() => setRefillFor(med.id)} className="self-start px-4 py-2 rounded-full text-sm font-bold border border-amber-500/50 text-foreground hover:bg-amber-500/10">
+          <button onClick={() => setRefillFor(med.id)} className="self-start px-4 py-2 rounded-full text-sm font-bold border border-sun/50 text-foreground hover:bg-sun/10">
             {t.refillAdd}
           </button>
         )}

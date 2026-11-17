@@ -27,8 +27,8 @@ const T = {
 };
 
 const CELL: Record<DayStatus, string> = {
-  full: 'bg-emerald-500 text-white',
-  partial: 'bg-amber-400/80 text-foreground',
+  full: 'bg-leaf text-card',
+  partial: 'bg-sun/80 text-foreground',
   missed: 'bg-destructive/15 text-destructive',
   pending: 'bg-secondary text-foreground',
   future: 'bg-transparent text-foreground',
@@ -153,7 +153,7 @@ export const MedicationCalendar: React.FC<Props> = ({ lang, medications, logs, t
           return (
             <div key={`${med.id}-${time}`} className="flex items-center gap-3 py-1">
               <Icon name={taken ? 'check_circle' : 'radio_button_unchecked'} size={20} weight={taken ? 'fill' : 'regular'}
-                className={taken ? 'text-emerald-500' : 'text-muted-foreground'} />
+                className={taken ? 'text-leaf' : 'text-muted-foreground'} />
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-foreground truncate">{time} · {med.name}</p>
                 <p className="text-xs text-muted-foreground truncate">

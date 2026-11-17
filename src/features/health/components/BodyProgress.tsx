@@ -1,0 +1,331 @@
+'use client';
+
+import React, { useMemo, useState } from 'react';
+import type { PMOSMetricEntry } from '@/lib/pmos/metrics';
+import type { NewMetricEntry } from '@/hooks/usePMOSMetrics';
+import type { BodyProfile } from '@/hooks/useBodyProfile';
+import { MEASURES, measureSeries, progressSummary, weightRate, type MeasureKey } from '@/lib/body/progress';
+import { LineChart } from '@/components/ui/LineChart';
+import { Icon } from '@/components/ui/Icon';
+import { parseNum, todayLocal } from '@/features/health/pmos/shared';
+
+interface BodyProgressProps {
+  entries: PMOSMetricEntry[];
+  loading: boolean;
+  saving: boolean;
+  error: string | null;
+  add: (entry: NewMetricEntry) => Promise<boolean>;
+  remove: (id: string) => Promise<void> | void;
+  profile: BodyProfile;
+  saveProfile: (patch: Partial<BodyProfile>) => Promise<boolean>;
+  profileAvailable: boolean;
+}
+
+const BODY_KEYS = MEASURES.map((m) => m.key);
+
+const fmtDate = (iso: string) => {
+  const [y, m, d] = iso.split('-').map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString('es', { day: 'numeric', month: 'short', year: 'numeric' });
+};
+
+const signed = (n: number) => (n > 0 ? `+${n}` : `${n}`);
+
+const fieldClass =
+  'w-full min-h-11 bg-background border border-border rounded-xl px-3 text-base text-foreground tabular-nums focus:outline-none focus:ring-2 focus:ring-primary';
+
+export const BodyProgress: React.FC<BodyProgressProps> = ({
+  entries, loading, saving, error, add, remove, profile, saveProfile, profileAvailable,
+}) => {
+  const [date, setDate] = useState(todayLocal());
+  const [values, setValues] = useState<Record<MeasureKey, string>>(
+    () => Object.fromEntries(BODY_KEYS.map((k) => [k, ''])) as Record<MeasureKey, string>
+  );
+  const [formMsg, setFormMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [selected, setSelected] = useState<MeasureKey>('weight_kg');
+  const [editStart, setEditStart] = useState(false);
+  const [startDraft, setStartDraft] = useState({ kg: '', date: '' });
+
+  const series = useMemo(
+    () => Object.fromEntries(BODY_KEYS.map((k) => [k, measureSeries(entries, k)])) as Record<MeasureKey, ReturnType<typeof measureSeries>>,
+    [entries]
+  );
+  const profileStart = profile.startWeightKg && profile.startDate ? { date: profile.startDate, value: profile.startWeightKg } : null;
+  const weightSummary = progressSummary(series.weight_kg, profileStart);
+  const rate = weightRate(series.weight_kg);
+  const measuresWithData = MEASURES.filter((m) => series[m.key].length > 0);
+  const selectedInfo = MEASURES.find((m) => m.key === selected)!;
+  const selectedSummary = progressSummary(series[selected], selected === 'weight_kg' ? profileStart : null);
+  const bodyEntries = entries.filter((e) => BODY_KEYS.some((k) => e[k] != null));
+
+  const handleSubmit = async (ev: React.FormEvent) => {
+    ev.preventDefault();
+    const parsed = Object.fromEntries(BODY_KEYS.map((k) => [k, parseNum(values[k])])) as Record<MeasureKey, number | null>;
+    if (BODY_KEYS.every((k) => parsed[k] == null)) {
+      setFormMsg({ ok: false, text: 'Escribe al menos una medida.' });
+      return;
+    }
+    setFormMsg(null);
+    const ok = await add({ date, ...parsed });
+    if (!ok) return;
+    // The first weight ever logged becomes the starting point.
+    if (parsed.weight_kg != null && !profile.startWeightKg && series.weight_kg.length === 0) {
+      await saveProfile({ startWeightKg: parsed.weight_kg, startDate: date });
+    }
+    setValues(Object.fromEntries(BODY_KEYS.map((k) => [k, ''])) as Record<MeasureKey, string>);
+    setFormMsg({ ok: true, text: 'Guardado. Tu progreso se actualizó.' });
+    if (parsed[selected] == null) {
+      const firstLogged = BODY_KEYS.find((k) => parsed[k] != null);
+      if (firstLogged && series[selected].length === 0) setSelected(firstLogged);
+    }
+  };
+
+  const handleSaveStart = async () => {
+    const kg = parseNum(startDraft.kg);
+    if (kg == null || !startDraft.date) return;
+    await saveProfile({ startWeightKg: kg, startDate: startDraft.date });
+    setEditStart(false);
+  };
+
+  const paceText = rate && {
+    gain: `Subiendo unos ${Math.abs(rate.kgPerWeek)} kg por semana en el último mes.`,
+    stable: 'Tu peso está estable en el último mes. Si tus medidas bajan, estás cambiando grasa por músculo, y eso también es progreso.',
+    steady: `Bajando unos ${Math.abs(rate.kgPerWeek)} kg por semana: un ritmo que cuida tu músculo.`,
+    fast: `Bajando unos ${Math.abs(rate.kgPerWeek)} kg por semana, más de 1% de tu peso. A ese ritmo es fácil perder músculo: revisa que llegues a tu proteína y que no comas demasiado poco.`,
+  }[rate.pace];
+
+  return (
+    <div className="w-full flex flex-col gap-6">
+      {/* Summary */}
+      <section aria-labelledby="progress-title" className="bg-card rounded-3xl border border-border p-5 sm:p-6 shadow-sm flex flex-col gap-5">
+        <div>
+          <h3 id="progress-title" className="text-foreground text-lg font-semibold text-balance">Mi progreso</h3>
+          <p className="text-sm text-muted-foreground text-pretty max-w-prose">
+            Tu peso y tus medidas en el tiempo. Las medidas suelen contar mejor la historia que la báscula: con PMOS, la grasa abdominal es la que más se relaciona con la glucosa y la insulina.
+          </p>
+        </div>
+
+        {loading ? (
+          <p className="text-sm text-muted-foreground">Cargando…</p>
+        ) : (
+          <dl className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="rounded-2xl bg-secondary/60 px-4 py-3 flex flex-col gap-0.5">
+              <dt className="text-sm text-muted-foreground">Peso inicial</dt>
+              <dd className="text-2xl font-semibold text-foreground tabular-nums">
+                {weightSummary ? `${weightSummary.start.value} kg` : profile.startWeightKg ? `${profile.startWeightKg} kg` : '—'}
+              </dd>
+              <dd className="text-sm text-muted-foreground">
+                {weightSummary ? fmtDate(weightSummary.start.date) : profile.startDate ? fmtDate(profile.startDate) : 'Aún sin registro'}
+              </dd>
+            </div>
+            <div className="rounded-2xl bg-secondary/60 px-4 py-3 flex flex-col gap-0.5">
+              <dt className="text-sm text-muted-foreground">Peso actual</dt>
+              <dd className="text-2xl font-semibold text-foreground tabular-nums">{weightSummary ? `${weightSummary.latest.value} kg` : '—'}</dd>
+              <dd className="text-sm text-muted-foreground">{weightSummary ? fmtDate(weightSummary.latest.date) : 'Aún sin registro'}</dd>
+            </div>
+            <div className="rounded-2xl bg-secondary/60 px-4 py-3 flex flex-col gap-0.5">
+              <dt className="text-sm text-muted-foreground">Cambio de peso</dt>
+              <dd className={`text-2xl font-semibold tabular-nums ${weightSummary && weightSummary.change < 0 ? 'text-leaf' : 'text-foreground'}`}>
+                {weightSummary && weightSummary.days > 0 ? `${signed(weightSummary.change)} kg` : '—'}
+              </dd>
+              <dd className="text-sm text-muted-foreground">
+                {weightSummary && weightSummary.days > 0 ? `${signed(weightSummary.changePercent)}% en ${weightSummary.days} días` : 'Necesitas dos registros'}
+              </dd>
+            </div>
+            {(() => {
+              const key: MeasureKey = series.abdomen_cm.length ? 'abdomen_cm' : 'waist_cm';
+              const s = progressSummary(series[key]);
+              return (
+                <div className="rounded-2xl bg-secondary/60 px-4 py-3 flex flex-col gap-0.5">
+                  <dt className="text-sm text-muted-foreground">{key === 'abdomen_cm' ? 'Abdomen' : 'Cintura'}</dt>
+                  <dd className={`text-2xl font-semibold tabular-nums ${s && s.change < 0 ? 'text-leaf' : 'text-foreground'}`}>
+                    {s && s.days > 0 ? `${signed(s.change)} cm` : s ? `${s.latest.value} cm` : '—'}
+                  </dd>
+                  <dd className="text-sm text-muted-foreground">{s && s.days > 0 ? `desde ${fmtDate(s.start.date)}` : s ? 'Primer registro' : 'Aún sin registro'}</dd>
+                </div>
+              );
+            })()}
+          </dl>
+        )}
+
+        {paceText && (
+          <p className={`rounded-2xl px-4 py-3 text-sm text-pretty ${rate?.pace === 'fast' ? 'bg-sun/15 text-foreground' : 'bg-leaf-soft/60 text-foreground'}`}>
+            <Icon name={rate?.pace === 'fast' ? 'warning' : 'info'} size={16} weight="bold" className={`inline -mt-0.5 mr-1.5 ${rate?.pace === 'fast' ? 'text-sun' : 'text-leaf'}`} />
+            {paceText}
+          </p>
+        )}
+
+        {profileAvailable && (
+          editStart ? (
+            <div className="flex flex-wrap items-end gap-3">
+              <label className="flex flex-col gap-1 text-sm text-muted-foreground">
+                Peso inicial (kg)
+                <input inputMode="decimal" value={startDraft.kg} onChange={(e) => setStartDraft((d) => ({ ...d, kg: e.target.value }))} className={`${fieldClass} w-32`} />
+              </label>
+              <label className="flex flex-col gap-1 text-sm text-muted-foreground">
+                Fecha
+                <input type="date" max={todayLocal()} value={startDraft.date} onChange={(e) => setStartDraft((d) => ({ ...d, date: e.target.value }))} className={`${fieldClass} w-44`} />
+              </label>
+              <button type="button" onClick={handleSaveStart} className="min-h-11 px-5 rounded-full bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90">Guardar inicio</button>
+              <button type="button" onClick={() => setEditStart(false)} className="min-h-11 px-3 text-sm text-muted-foreground hover:text-foreground">Cancelar</button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                setStartDraft({ kg: String(profile.startWeightKg ?? weightSummary?.start.value ?? ''), date: profile.startDate ?? weightSummary?.start.date ?? todayLocal() });
+                setEditStart(true);
+              }}
+              className="self-start min-h-10 text-sm font-medium text-foreground underline underline-offset-4 hover:text-primary"
+            >
+              {profile.startWeightKg ? 'Cambiar mi peso inicial' : 'Indicar un peso inicial anterior'}
+            </button>
+          )
+        )}
+      </section>
+
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Log form */}
+        <section aria-labelledby="progress-log" className="lg:col-span-5 bg-card rounded-3xl border border-border p-5 sm:p-6 shadow-sm flex flex-col gap-4">
+          <h3 id="progress-log" className="text-foreground text-lg font-semibold">Registrar medidas</h3>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <label className="flex flex-col gap-1 text-sm text-muted-foreground">
+              Fecha
+              <input type="date" value={date} max={todayLocal()} onChange={(e) => setDate(e.target.value)} className={fieldClass} required />
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              {MEASURES.map((m) => (
+                <label key={m.key} className="flex flex-col gap-1 text-sm text-muted-foreground">
+                  {m.label} ({m.unit})
+                  <input
+                    inputMode="decimal"
+                    value={values[m.key]}
+                    onChange={(e) => setValues((v) => ({ ...v, [m.key]: e.target.value }))}
+                    placeholder={series[m.key].length ? String(series[m.key][series[m.key].length - 1].value) : ''}
+                    className={fieldClass}
+                  />
+                </label>
+              ))}
+            </div>
+            <p className="text-sm text-muted-foreground">Solo llena lo que midas hoy; lo demás puede quedar vacío.</p>
+            <button type="submit" disabled={saving} className="min-h-11 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold disabled:opacity-60">
+              {saving ? 'Guardando…' : 'Guardar'}
+            </button>
+            {(formMsg || error) && (
+              <p role="status" className={`text-sm ${formMsg?.ok ? 'text-leaf font-medium' : 'text-destructive'}`}>
+                {formMsg?.text ?? error}
+              </p>
+            )}
+          </form>
+          <details className="group border-t border-border pt-3">
+            <summary className="flex items-center gap-2 min-h-10 cursor-pointer list-none [&::-webkit-details-marker]:hidden text-sm font-medium text-foreground">
+              <Icon name="chevron_right" size={16} weight="bold" className="text-muted-foreground transition-transform group-open:rotate-90" />
+              Cómo medirte para que los números sean comparables
+            </summary>
+            <ul className="flex flex-col gap-2 pt-2 pl-6">
+              {MEASURES.map((m) => (
+                <li key={m.key} className="text-sm text-muted-foreground text-pretty"><strong className="text-foreground">{m.label}:</strong> {m.how}</li>
+              ))}
+              <li className="text-sm text-muted-foreground text-pretty">Usa una cinta flexible sin apretar la piel. Mídete cada 2 a 4 semanas, el mismo día de tu ciclo si puedes: antes de la regla es normal retener líquido.</li>
+            </ul>
+          </details>
+        </section>
+
+        {/* Charts */}
+        <section aria-labelledby="progress-chart" className="lg:col-span-7 bg-card rounded-3xl border border-border p-5 sm:p-6 shadow-sm flex flex-col gap-4">
+          <h3 id="progress-chart" className="text-foreground text-lg font-semibold">Evolución</h3>
+          {measuresWithData.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-8 text-center">Cuando registres tu peso o tus medidas, verás aquí cómo cambian.</p>
+          ) : (
+            <>
+              <div role="group" aria-label="Medida" className="flex gap-2 overflow-x-auto scrollbar-hide -mx-1 px-1">
+                {measuresWithData.map((m) => (
+                  <button
+                    key={m.key}
+                    type="button"
+                    aria-pressed={selected === m.key}
+                    onClick={() => setSelected(m.key)}
+                    className={`shrink-0 min-h-10 px-4 rounded-full text-sm font-medium transition-colors ${
+                      selected === m.key ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground hover:bg-accent'
+                    }`}
+                  >
+                    {m.label}
+                  </button>
+                ))}
+              </div>
+              {series[selected].length > 0 ? (
+                <>
+                  <LineChart points={series[selected]} unit={selectedInfo.unit} height={180} />
+                  {selectedSummary && (
+                    <p className="text-sm text-muted-foreground tabular-nums">
+                      {selectedSummary.days > 0
+                        ? `${selectedInfo.label}: de ${selectedSummary.start.value} a ${selectedSummary.latest.value} ${selectedInfo.unit} (${signed(selectedSummary.change)} ${selectedInfo.unit}) en ${selectedSummary.days} días.`
+                        : `${selectedInfo.label}: ${selectedSummary.latest.value} ${selectedInfo.unit}. Con un segundo registro verás el cambio.`}
+                    </p>
+                  )}
+                </>
+              ) : (
+                <p className="text-sm text-muted-foreground">Elige una medida.</p>
+              )}
+
+              {measuresWithData.length > 1 && (
+                <table className="w-full text-sm">
+                  <caption className="sr-only">Cambio de cada medida desde el primer registro</caption>
+                  <thead>
+                    <tr className="text-muted-foreground text-left">
+                      <th className="font-medium py-2">Medida</th>
+                      <th className="font-medium py-2 text-right">Inicio</th>
+                      <th className="font-medium py-2 text-right">Ahora</th>
+                      <th className="font-medium py-2 text-right">Cambio</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border border-t border-border tabular-nums">
+                    {measuresWithData.map((m) => {
+                      const s = progressSummary(series[m.key], m.key === 'weight_kg' ? profileStart : null)!;
+                      return (
+                        <tr key={m.key}>
+                          <th scope="row" className="py-2 text-left font-medium text-foreground">{m.label}</th>
+                          <td className="py-2 text-right text-muted-foreground">{s.start.value}</td>
+                          <td className="py-2 text-right text-foreground">{s.latest.value}</td>
+                          <td className={`py-2 text-right font-semibold ${s.change < 0 ? 'text-leaf' : 'text-foreground'}`}>
+                            {s.days > 0 ? `${signed(s.change)} ${m.unit}` : '—'}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </>
+          )}
+
+          {bodyEntries.length > 0 && (
+            <details className="border-t border-border pt-3">
+              <summary className="cursor-pointer min-h-10 flex items-center text-sm font-semibold text-foreground">Registros ({bodyEntries.length})</summary>
+              <ul className="mt-2 flex flex-col divide-y divide-border max-h-64 overflow-y-auto">
+                {[...bodyEntries].reverse().map((e) => (
+                  <li key={e.id} className="py-2 flex items-center justify-between gap-3 text-sm text-muted-foreground">
+                    <span className="text-pretty">
+                      <strong className="text-foreground">{fmtDate(e.date)}</strong>
+                      {MEASURES.filter((m) => e[m.key] != null).map((m) => ` · ${m.label.toLowerCase()} ${e[m.key]} ${m.unit}`).join('')}
+                    </span>
+                    {e.glucose_mg_dl != null || e.insulin_uiu_ml != null || e.systolic != null ? (
+                      // The same row holds glucose or blood pressure: delete it from PMOS care, not here.
+                      <span className="shrink-0 text-xs text-muted-foreground">Con glucosa o presión</span>
+                    ) : (
+                      <button type="button" onClick={() => remove(e.id)} className="shrink-0 min-h-10 px-3 rounded-full text-destructive hover:bg-secondary" aria-label={`Eliminar registro del ${fmtDate(e.date)}`}>
+                        Eliminar
+                      </button>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
+          <p className="text-sm text-muted-foreground text-pretty">
+            Estos datos se comparten con la sección de medidas de Cuidado PMOS. Tu energía, tu ciclo y tu glucosa dicen tanto como la báscula.
+          </p>
+        </section>
+      </div>
+    </div>
+  );
+};

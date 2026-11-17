@@ -14,11 +14,15 @@ import WeeklyGoalCard from './components/WeeklyGoalCard';
 import PhasePlaylists from './components/PhasePlaylists';
 import RoutineBuilder from './components/RoutineBuilder';
 import { ProgramsExplorer } from './components/ProgramsExplorer';
-import { GardenCorner, SunGlow, TitleSprig } from '@/components/ui/Botanical';
+import { TitleSprig } from '@/components/ui/Botanical';
 import { ExerciseCard, RoutineSection, SavedRoutineCard, VideoCard, VideoModal } from './components/RoutinesComponents';
 import { useGuest } from '@/hooks/useGuest';
 import { useLanguage } from '@/i18n/LanguageContext';
 import GuestPreviewBanner from '@/components/layout/GuestPreviewBanner';
+import AddToRoutineDialog, { type AddToRoutineRequest } from './components/AddToRoutineDialog';
+import TodayHistory from './components/TodayHistory';
+import { usePmosToolsVisible } from '@/hooks/useOnboardingAnswers';
+import { OneRepMaxCalculator } from './components/OneRepMaxCalculator';
 
 const VIDEOS_PAGE = 9;
 
@@ -106,32 +110,29 @@ type RoutineTab = 'programs' | 'phase' | 'videos' | 'builder' | 'log';
 // Tabs that hold the user's own data: guests see them locked.
 const MEMBER_TABS: RoutineTab[] = ['builder', 'log'];
 
-const PHASE_CHIPS: { key: string; es: string; en: string; icon: string }[] = [
-  { key: 'menstrual', es: 'Menstrual', en: 'Menstrual', icon: 'water_drop' },
-  { key: 'follicular', es: 'Folicular', en: 'Follicular', icon: 'fitness_center' },
-  { key: 'ovulation', es: 'Ovulatoria', en: 'Ovulation', icon: 'bolt' },
-  { key: 'luteal', es: 'Lútea', en: 'Luteal', icon: 'self_improvement' },
-];
-
-const TABS: { id: RoutineTab; label: string; icon: string; description: string }[] = [
-  { id: 'programs', label: 'Casa & Gym', icon: 'fitness_center', description: '29 programas completos con demostraciones en video HD integradas' },
-  { id: 'phase', label: 'Para tu Fase', icon: 'auto_awesome', description: 'Recomendaciones y playlists adaptadas a tu momento hormonal' },
-  { id: 'videos', label: 'Videos Guiados', icon: 'videocam', description: 'Catálogo de sesiones en video con filtros por disciplina' },
-  { id: 'builder', label: 'Mis Rutinas', icon: 'calendar_month', description: 'Rutinas guardadas y creador semanal de ejercicios' },
-  { id: 'log', label: 'Diario y Registro', icon: 'edit_note', description: 'Anota tus sesiones y analiza cómo responde tu cuerpo' },
+const TABS: { id: RoutineTab; label: string; icon: string }[] = [
+  { id: 'programs', label: 'Programas', icon: 'fitness_center' },
+  { id: 'phase', label: 'Para tu fase', icon: 'auto_awesome' },
+  { id: 'videos', label: 'Videos', icon: 'videocam' },
+  { id: 'builder', label: 'Mis rutinas', icon: 'calendar_month' },
+  { id: 'log', label: 'Diario', icon: 'edit_note' },
 ];
 
 const Routines: React.FC = () => {
   const { cycleInfo, loading: cycleLoading } = useCycleInfo();
   const { isGuest, promptSignup } = useGuest();
-  const { t, language } = useLanguage();
-  // Guests have no cycle, so they pick a phase to browse its exercises and playlists.
-  const [guestPhase, setGuestPhase] = useState('follicular');
+  const { t } = useLanguage();
+  const showPmos = usePmosToolsVisible();
   const { streak, completeWorkout } = useRoutineStore();
   const workoutLogs = useWorkoutLogs();
   const [energyToday, setEnergyToday] = useState<number | null>(null);
 
   const [activeTab, setActiveTab] = useState<RoutineTab>('programs');
+  // Deep link such as /routines?tab=phase (used by the home page phase card).
+  useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get('tab') as RoutineTab | null;
+    if (requested && TABS.some((tab) => tab.id === requested)) setActiveTab(requested);
+  }, []);
   const [recommendedExercises, setRecommendedExercises] = useState<Exercise[]>([]);
   const [workoutVideos, setWorkoutVideos] = useState<WorkoutVideo[]>([]);
   const [videoCategory, setVideoCategory] = useState<VideoCategory | 'all'>('all');
@@ -142,13 +143,13 @@ const Routines: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
   const [userRoutines, setUserRoutines] = useState<Routine[]>([]);
-  const [saving, setSaving] = useState(false);
-  const [saveError, setSaveError] = useState<string | null>(null);
+  const [addRequest, setAddRequest] = useState<AddToRoutineRequest | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
   const [activeVideo, setActiveVideo] = useState<WorkoutVideo | null>(null);
 
-  const phaseKey = isGuest
-    ? guestPhase
-    : cycleInfo ? PHASE_KEY_MAP[cycleInfo.phase] || 'follicular' : 'follicular';
+  // The phase comes from the cycle and is never picked by hand. Guests have no cycle, so they see
+  // the follicular phase as an example.
+  const phaseKey = !isGuest && cycleInfo ? PHASE_KEY_MAP[cycleInfo.phase] || 'follicular' : 'follicular';
   const phaseNameEs = PHASE_NAMES_ES[phaseKey] || 'Fase Folicular';
   const guidance = PHASE_GUIDANCE[phaseKey] || PHASE_GUIDANCE.follicular;
 
@@ -228,29 +229,20 @@ const Routines: React.FC = () => {
     }
   };
 
-  const onSaveExercise = async (ex: Exercise) => {
-    try {
-      setSaving(true);
-      setSaveError(null);
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { error } = await supabase.from('routines').insert([{
-        user_id: user.id,
-        name: `Rutina de ${ex.name}`,
-        description: `Enfocada en ${ex.target} para ${phaseNameEs}.`,
-        exercises: [ex],
-        phase: phaseKey,
-      }]);
-
-      if (error) throw error;
-      fetchUserRoutines();
-    } catch (err: any) {
-      setSaveError('No se pudo guardar la rutina: ' + (err?.message ?? 'inténtalo de nuevo.'));
-    } finally {
-      setSaving(false);
-    }
+  // Guests get the sign-up prompt: routines are saved to the account.
+  const openAddToRoutine = (request: AddToRoutineRequest) => (isGuest ? promptSignup() : setAddRequest(request));
+  const closeAddToRoutine = React.useCallback(() => setAddRequest(null), []);
+  const onRoutineSaved = (message: string) => {
+    setAddRequest(null);
+    setToast(message);
+    setTimeout(() => setToast(null), 4000);
+    void fetchUserRoutines();
   };
+  // A video counts once per day: the button turns into "saved" when it is already in today's history.
+  const videoLogName = (v: WorkoutVideo) => `${v.category === 'gym' ? 'Fuerza: ' : ''}${v.title}`.slice(0, 80);
+  const activeVideoLogged = !!activeVideo && workoutLogs.logs.some(
+    (l) => l.date === today && l.notes === 'Video guiado' && l.exercise === videoLogName(activeVideo),
+  );
 
   // Reads the sets of the last log of an exercise back from its note ("10 × 20 kg · 8 × 22.5 kg — Programa, Día").
   const lastSetsFor = (exerciseName: string) => {
@@ -290,7 +282,7 @@ const Routines: React.FC = () => {
     // A finished video also goes to the workout log so its minutes count toward the weekly goal.
     if (activeVideo) {
       void workoutLogs.addLog({
-        exercise: `${activeVideo.category === 'gym' ? 'Fuerza: ' : ''}${activeVideo.title}`.slice(0, 80),
+        exercise: videoLogName(activeVideo),
         sets: null,
         weightKg: null,
         durationMinutes: activeVideo.durationMinutes > 0 ? Math.round(activeVideo.durationMinutes) : null,
@@ -307,99 +299,53 @@ const Routines: React.FC = () => {
 
         {/* Hero Section */}
         <section className="flex flex-col gap-4">
-          <div className="relative overflow-hidden rounded-3xl garden-wash wash-sun border border-border/80 shadow-sm px-5 py-4 sm:px-8 sm:py-5">
-            <SunGlow className="absolute -top-6 right-[18%] size-16 sm:size-24 opacity-90" />
-            <GardenCorner variant="sun" className="size-24 sm:size-36 opacity-80" />
-            <div className="relative flex flex-col gap-1.5 max-w-2xl pr-16 sm:pr-40">
+          {/* Compact header: the routines are the content, the header only orients */}
+          <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
+            <div className="flex flex-col gap-1 min-w-0">
               <h1 className="text-foreground text-2xl md:text-3xl font-bold tracking-tight text-balance">
                 <TitleSprig />Rutinas y Entrenamiento
               </h1>
-              <p className="text-muted-foreground text-sm md:text-base leading-relaxed text-pretty">
-                Tu fase es el punto de partida y tu energía de hoy decide. Con PMOS lo que más cuenta es el total de la semana: 150 minutos de actividad y 2 días de fuerza.
+              <p className="text-muted-foreground text-sm leading-relaxed text-pretty max-w-2xl">
+                Tu fase orienta y tu energía de hoy decide. La meta semanal{showPmos ? ' con PMOS' : ''}: 150 min de actividad y 2 días de fuerza.
               </p>
             </div>
-          </div>
+            {!isGuest && !cycleLoading && !paused && (
+              <span data-phase={phaseKey} className="self-start sm:self-auto inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full bg-phase-soft text-phase shrink-0">
+                <span aria-hidden className="material-symbols-outlined text-base">{guidance.icon}</span>
+                {periodLate ? 'Regla con retraso' : phaseNameEs}{cycleInfo?.cycleDay ? ` · Día ${cycleInfo.cycleDay}` : ''}
+              </span>
+            )}
+          </header>
 
-          {isGuest ? (
-            <>
-              {/* Guest phase explorer: the same guidance, picked by hand */}
-              <div data-phase={phaseKey} className="bg-card rounded-2xl border border-border px-4 py-3.5 sm:px-5 shadow-sm flex flex-col gap-3">
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <div className="size-11 rounded-xl bg-phase-soft flex items-center justify-center text-phase shrink-0">
-                      <span className="material-symbols-outlined text-2xl">{guidance.icon}</span>
-                    </div>
-                    <div>
-                      <h2 className="text-xl font-bold text-foreground text-balance">{phaseNameEs}</h2>
-                      <p className="text-sm text-muted-foreground">{t.guestExplorePhase}</p>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-1 rounded-xl bg-secondary/50 border border-border">
-                    {PHASE_CHIPS.map((chip) => {
-                      const active = guestPhase === chip.key;
-                      return (
-                        <button
-                          key={chip.key}
-                          type="button"
-                          onClick={() => setGuestPhase(chip.key)}
-                          aria-pressed={active}
-                          className={`flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                            active ? 'bg-phase-soft text-phase shadow-sm border border-phase/30' : 'text-muted-foreground hover:text-foreground border border-transparent'
-                          }`}
-                        >
-                          <span className="material-symbols-outlined text-[15px]">{chip.icon}</span>
-                          {language === 'es' ? chip.es : chip.en}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-                {activeTab === 'phase' && (
-                  <>
-                    <p className="text-muted-foreground text-sm leading-relaxed">{guidance.desc}</p>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="text-xs font-bold px-3 py-1 rounded-full bg-phase-soft text-phase">Intensidad: {guidance.intensity}</span>
-                      <span className="text-xs font-semibold px-3 py-1 rounded-full bg-secondary text-foreground">{guidance.focus}</span>
-                    </div>
-                  </>
-                )}
-              </div>
-            </>
-          ) : (
+          {!isGuest && (
           <>
           {/* Status & Daily Activity Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Phase Status Card */}
-            <div data-phase={phaseKey} className="md:col-span-2 bg-card rounded-2xl border border-border p-5 sm:p-6 shadow-sm flex flex-col justify-between gap-4">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <div className="size-11 rounded-xl bg-phase-soft flex items-center justify-center text-phase shrink-0">
-                    <span className="material-symbols-outlined text-2xl">{guidance.icon}</span>
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-bold text-foreground text-balance">
-                      {cycleLoading ? 'Cargando...' : paused ? 'Modo embarazo' : periodLate ? `Día ${cycleInfo?.cycleDay ?? '?'} • Regla con retraso` : `${phaseNameEs} • Día ${cycleInfo?.cycleDay ?? '?'}`}
-                    </h2>
-                  </div>
+            <div data-phase={phaseKey} className="md:col-span-2 bg-card rounded-2xl border border-border p-4 sm:p-5 shadow-sm flex flex-col justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <div className="size-11 rounded-xl bg-phase-soft flex items-center justify-center text-phase shrink-0">
+                  <span aria-hidden className="material-symbols-outlined text-2xl">{paused ? 'pregnant_woman' : guidance.icon}</span>
                 </div>
-                {!paused && <span className="text-xs font-bold px-3 py-1 rounded-full bg-phase-soft text-phase shrink-0">
-                  {effort.label}
-                </span>}
-              </div>
-
-              <div className={paused ? 'hidden' : 'text-sm'}>
-                <p className="font-semibold text-foreground">{effort.examples}</p>
-                <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">{effortReason(suggestion.reason, energyToday)}</p>
-              </div>
-
-              {(activeTab === 'phase' || paused) && (
-                <div className="bg-secondary/40 rounded-xl p-3.5 border border-border/50 text-sm">
-                  <div className="flex items-center justify-between gap-2 mb-0.5">
-                    {paused && <p className="font-semibold text-foreground">Ejercicio y embarazo</p>}
-                  </div>
-                  <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">{paused ? 'Consulta con tu médica qué tipo de ejercicio te conviene. Las recomendaciones por fase del ciclo están en pausa.' : guidance.desc}</p>
+                <div className="min-w-0 text-sm">
+                  <h2 className="text-lg font-bold text-foreground text-balance">
+                    {cycleLoading ? 'Cargando…' : paused ? 'Modo embarazo' : effort.label}
+                  </h2>
+                  {paused ? (
+                    <p className="text-muted-foreground leading-relaxed">Consulta con tu médica qué tipo de ejercicio te conviene. Las recomendaciones por fase del ciclo están en pausa.</p>
+                  ) : (
+                    <>
+                      <p className="font-semibold text-foreground">{effort.examples}</p>
+                      <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">
+                        {periodLate ? `Día ${cycleInfo?.cycleDay ?? '?'}. ` : ''}{effortReason(suggestion.reason, energyToday)}
+                      </p>
+                    </>
+                  )}
                 </div>
-              )}
+              </div>
+              <div className="border-t border-border pt-3">
+                <TodayHistory compact logs={workoutLogs.logs} loading={workoutLogs.loading} onSeeAll={() => setActiveTab('log')} />
+              </div>
               {!paused && activeTab !== mainCtaTab && (
                 <button
                   type="button"
@@ -413,7 +359,7 @@ const Routines: React.FC = () => {
             </div>
 
             {/* Daily Movement Check-in (secondary) */}
-            <div className="bg-card rounded-2xl border border-border p-5 sm:p-6 shadow-sm flex flex-col justify-between gap-4">
+            <div className="bg-card rounded-2xl border border-border p-4 sm:p-5 shadow-sm flex flex-col justify-between gap-3">
               <div>
                 <h3 className="text-base font-bold text-foreground">Registro de hoy</h3>
                 <div className="flex items-baseline gap-2 mt-2">
@@ -421,9 +367,9 @@ const Routines: React.FC = () => {
                   <span className="text-xs text-muted-foreground font-medium">días activos seguidos</span>
                 </div>
               </div>
-              <WeeklyGoalCard compact week={week} loading={workoutLogs.loading} />
+              <WeeklyGoalCard compact pmos={showPmos} week={week} loading={workoutLogs.loading} />
               {isCompletedToday ? (
-                <div className="w-full py-2.5 px-4 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 bg-emerald-500/10 text-emerald-700 border border-emerald-500/20">
+                <div className="w-full py-2.5 px-4 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 bg-leaf/10 text-leaf border border-leaf/20">
                   <span aria-hidden className="material-symbols-outlined text-lg">check_circle</span>
                   <span>Entrenamiento de hoy listo</span>
                 </div>
@@ -497,21 +443,18 @@ const Routines: React.FC = () => {
           </div>
         )}
 
-        {saveError && (
-          <div role="alert" className="flex items-start justify-between gap-3 p-4 bg-destructive/10 text-foreground rounded-xl border border-destructive/20 text-sm">
-            <p className="flex items-start gap-2">
-              <span aria-hidden className="material-symbols-outlined text-lg text-destructive shrink-0">error</span>
-              <span>{saveError}</span>
-            </p>
-            <button type="button" onClick={() => setSaveError(null)} className="min-h-10 px-3 rounded-xl text-sm font-semibold border border-border bg-card hover:border-primary/50 cursor-pointer shrink-0">Cerrar</button>
+        {toast && (
+          <div role="status" className="fixed bottom-24 sm:bottom-6 left-1/2 -translate-x-1/2 z-[56] max-w-[calc(100vw-2rem)] px-4 py-3 rounded-xl bg-foreground text-background text-sm font-semibold shadow-lg flex items-center gap-2">
+            <span aria-hidden className="material-symbols-outlined text-lg text-leaf">check_circle</span>
+            {toast}
           </div>
         )}
         {/* Sticky Tab Navigation */}
-        <div data-phase={phaseKey} className="sticky top-0 z-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-2.5 bg-background/85 backdrop-blur-md border-y border-border/50">
+        <div data-phase={phaseKey} className="sticky top-0 z-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 bg-background/90 backdrop-blur-md border-b border-border">
           <div
             role="tablist"
             aria-label="Secciones de rutinas"
-            className="flex lg:grid lg:grid-cols-5 overflow-x-auto scrollbar-hide p-1.5 rounded-2xl bg-secondary/50 border border-border gap-1.5"
+            className="flex overflow-x-auto scrollbar-hide gap-1 -mb-px"
           >
             {TABS.map((tab) => {
               const isActive = activeTab === tab.id;
@@ -525,13 +468,13 @@ const Routines: React.FC = () => {
                   aria-selected={isActive}
                   aria-controls={`routines-panel-${tab.id}`}
                   onClick={() => (locked ? promptSignup() : setActiveTab(tab.id))}
-                  className={`flex items-center justify-center gap-2 px-3.5 py-2.5 min-h-11 shrink-0 lg:shrink rounded-xl text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${
+                  className={`flex items-center justify-center gap-1.5 px-3 sm:px-4 min-h-12 shrink-0 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors cursor-pointer ${
                     isActive
-                      ? 'bg-card text-foreground shadow-sm border border-border/80 font-bold'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-card/40 border border-transparent'
+                      ? 'border-primary text-foreground'
+                      : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
                   }`}
                 >
-                  <span aria-hidden className={`material-symbols-outlined text-xl shrink-0 ${isActive ? 'text-phase' : 'text-muted-foreground'}`}>
+                  <span aria-hidden className={`material-symbols-outlined text-lg shrink-0 ${isActive ? 'text-primary' : 'text-muted-foreground'}`}>
                     {tab.icon}
                   </span>
                   <span>{tab.label}</span>
@@ -556,6 +499,7 @@ const Routines: React.FC = () => {
         {/* Tab 0: Programas Casa & Gym */}
         <div role="tabpanel" id="routines-panel-programs" aria-labelledby="routines-tab-programs" className={activeTab === 'programs' ? 'flex flex-col gap-6' : 'hidden'}>
           <ProgramsExplorer
+            onAddToRoutine={openAddToRoutine}
             phaseKey={phaseKey}
             getLastSets={isGuest ? undefined : lastSetsFor}
             onLogWorkout={isGuest ? undefined : (entry) => workoutLogs.addLogWithId({ ...entry, feeling: 3, phase: phaseKey })}
@@ -577,6 +521,27 @@ const Routines: React.FC = () => {
 
         {/* Tab 1: Para tu Fase */}
         <div role="tabpanel" id="routines-panel-phase" aria-labelledby="routines-tab-phase" className={activeTab === 'phase' ? 'flex flex-col gap-10' : 'hidden'}>
+          {/* Phase guidance (read-only: the phase comes from the cycle) */}
+          {!paused && (
+            <div data-phase={phaseKey} className="bg-card rounded-2xl border border-border p-4 sm:p-5 shadow-sm flex items-start gap-3">
+              <div className="size-11 rounded-xl bg-phase-soft flex items-center justify-center text-phase shrink-0">
+                <span aria-hidden className="material-symbols-outlined text-2xl">{guidance.icon}</span>
+              </div>
+              <div className="min-w-0 flex flex-col gap-2">
+                <div>
+                  <h2 className="text-lg font-bold text-foreground text-balance">{guidance.title}</h2>
+                  <p className="text-xs font-semibold text-muted-foreground">
+                    {isGuest ? `Ejemplo: ${phaseNameEs}. Con una cuenta se adapta a tu ciclo.` : phaseNameEs}
+                  </p>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed text-pretty">{guidance.desc}</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs font-bold px-3 py-1 rounded-full bg-phase-soft text-phase">Intensidad: {guidance.intensity}</span>
+                  <span className="text-xs font-semibold px-3 py-1 rounded-full bg-secondary text-foreground">{guidance.focus}</span>
+                </div>
+              </div>
+            </div>
+          )}
           {/* Recommended Movements for Current Phase */}
           <RoutineSection
             title={`Ejercicios Recomendados para ${phaseNameEs}`}
@@ -596,8 +561,7 @@ const Routines: React.FC = () => {
                     key={ex.id}
                     exercise={ex}
                     variant="horizontal"
-                    onSave={isGuest ? undefined : () => onSaveExercise(ex)}
-                    saving={saving}
+                    onSave={() => openAddToRoutine({ label: ex.name, suggestedName: `Rutina ${phaseNameEs}`, exercises: [ex] })}
                   />
                 ))
               )}
@@ -612,6 +576,9 @@ const Routines: React.FC = () => {
           >
             <PhasePlaylists videos={workoutVideos} currentPhaseKey={phaseKey} onPlay={(v) => setActiveVideo(v)} />
           </RoutineSection>
+
+          {/* 1RM & Load Calculator for Female Strength */}
+          <OneRepMaxCalculator currentPhaseKey={phaseKey} />
         </div>
 
         {/* Tab 2: Videos Guiados */}
@@ -764,7 +731,10 @@ const Routines: React.FC = () => {
             icon="edit_note"
           >
             <div className="flex flex-col gap-5">
-              <WeeklyGoalCard week={week} loading={workoutLogs.loading} />
+              <WeeklyGoalCard pmos={showPmos} week={week} loading={workoutLogs.loading} />
+              <div className="bg-card rounded-2xl border border-border p-4 sm:p-5 shadow-sm">
+                <TodayHistory logs={workoutLogs.logs} loading={workoutLogs.loading} />
+              </div>
               <WorkoutLogSection phaseKey={phaseKey} state={workoutLogs} />
             </div>
           </RoutineSection>
@@ -776,7 +746,14 @@ const Routines: React.FC = () => {
           video={activeVideo}
           onClose={() => setActiveVideo(null)}
           onCompleteWorkout={isGuest ? undefined : handleCompleteWorkout}
-          isCompletedToday={isCompletedToday}
+          isLogged={activeVideoLogged}
+        />
+        <AddToRoutineDialog
+          request={addRequest}
+          routines={userRoutines}
+          phaseKey={phaseKey}
+          onClose={closeAddToRoutine}
+          onSaved={onRoutineSaved}
         />
 
       </div>

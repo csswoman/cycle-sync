@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { WorkoutVideo, VideoCategory } from '@/types/exercises';
 
 const CATEGORY_LABELS: Record<VideoCategory, string> = {
@@ -51,7 +51,32 @@ interface Props {
   onPlay: (video: WorkoutVideo) => void;
 }
 
+const ROW = 12;
+const GRID_PAGE = 24;
+
+const VideoTile: React.FC<{ v: WorkoutVideo; onPlay: (v: WorkoutVideo) => void; className?: string }> = ({ v, onPlay, className = '' }) => (
+  <button type="button" onClick={() => onPlay(v)} className={`text-left cursor-pointer group ${className}`}>
+    <div className="relative aspect-video rounded-lg overflow-hidden bg-secondary">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={`https://i.ytimg.com/vi/${v.videoId}/mqdefault.jpg`}
+        alt=""
+        loading="lazy"
+        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+      />
+      <span className="absolute bottom-1 right-1 text-xs font-bold bg-black/75 text-white px-1.5 py-0.5 rounded">
+        {v.durationMinutes} min
+      </span>
+    </div>
+    <p className="text-xs font-semibold text-foreground mt-1.5 line-clamp-2">{v.title}</p>
+    <p className="text-xs text-muted-foreground truncate">{v.channelName}</p>
+  </button>
+);
+
 const PhasePlaylists: React.FC<Props> = ({ videos, currentPhaseKey, onPlay }) => {
+  // One playlist at a time can be opened as a full grid; the rest stay as rows.
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const [gridShown, setGridShown] = useState(GRID_PAGE);
   const playlists = useMemo(
     () =>
       PHASES.map((p) => ({ phase: p.key, playlist: buildPhasePlaylist(videos, p.key, p.label) }))
@@ -67,40 +92,61 @@ const PhasePlaylists: React.FC<Props> = ({ videos, currentPhaseKey, onPlay }) =>
         const totalMin = playlist.videos.reduce((s, v) => s + v.durationMinutes, 0);
         return (
           <div key={phase} className={`rounded-2xl border p-4 ${phase === currentPhaseKey ? 'border-primary/40 bg-primary/5' : 'border-border bg-card'}`}>
-            <div className="flex items-center justify-between gap-2 mb-3">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
               <h3 className="font-bold text-sm text-foreground">
                 {playlist.title}
                 {phase === currentPhaseKey && <span className="ml-2 text-xs font-bold text-primary">Tu fase</span>}
               </h3>
-              <span className="text-xs text-muted-foreground shrink-0">
-                {playlist.videos.length} videos · {Math.round(totalMin / 60 * 10) / 10} h
+              <span className="flex items-center gap-3 shrink-0">
+                <span className="text-xs text-muted-foreground tabular-nums">
+                  {playlist.videos.length} videos · {Math.round(totalMin / 60 * 10) / 10} h
+                </span>
+                {playlist.videos.length > ROW && (
+                  <button
+                    type="button"
+                    aria-expanded={expanded === phase}
+                    onClick={() => { setExpanded(expanded === phase ? null : phase); setGridShown(GRID_PAGE); }}
+                    className="min-h-9 px-3 rounded-lg text-sm font-semibold text-primary hover:bg-primary/10 cursor-pointer"
+                  >
+                    {expanded === phase ? 'Ver menos' : 'Ver todos'}
+                  </button>
+                )}
               </span>
             </div>
-            <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
-              {playlist.videos.slice(0, 12).map((v) => (
-                <button
-                  key={v.id}
-                  type="button"
-                  onClick={() => onPlay(v)}
-                  className="w-44 shrink-0 text-left cursor-pointer group"
-                >
-                  <div className="relative aspect-video rounded-lg overflow-hidden bg-secondary">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={`https://i.ytimg.com/vi/${v.videoId}/mqdefault.jpg`}
-                      alt=""
-                      loading="lazy"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                    />
-                    <span className="absolute bottom-1 right-1 text-xs font-bold bg-black/75 text-white px-1.5 py-0.5 rounded">
-                      {v.durationMinutes} min
-                    </span>
-                  </div>
-                  <p className="text-xs font-semibold text-foreground mt-1.5 line-clamp-2">{v.title}</p>
-                  <p className="text-xs text-muted-foreground truncate">{v.channelName}</p>
-                </button>
-              ))}
-            </div>
+            {expanded === phase ? (
+              <div className="flex flex-col gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                  {playlist.videos.slice(0, gridShown).map((v) => <VideoTile key={v.id} v={v} onPlay={onPlay} />)}
+                </div>
+                {playlist.videos.length > gridShown && (
+                  <button
+                    type="button"
+                    onClick={() => setGridShown((n) => n + GRID_PAGE)}
+                    className="self-center min-h-11 px-5 rounded-xl border border-border bg-card text-sm font-semibold hover:border-primary/50 cursor-pointer tabular-nums"
+                  >
+                    Cargar más ({playlist.videos.length - gridShown} restantes)
+                  </button>
+                )}
+              </div>
+            ) : (
+              <ol className="flex gap-3 overflow-x-auto pb-3 scroll-rail snap-x">
+                {playlist.videos.slice(0, ROW).map((v) => (
+                  <li key={v.id} className="w-44 sm:w-52 shrink-0 snap-start"><VideoTile v={v} onPlay={onPlay} className="w-full" /></li>
+                ))}
+                {playlist.videos.length > ROW && (
+                  <li className="w-36 shrink-0 snap-start">
+                    <button
+                      type="button"
+                      onClick={() => { setExpanded(phase); setGridShown(GRID_PAGE); }}
+                      className="w-full aspect-video rounded-lg border border-dashed border-border bg-secondary/50 hover:border-primary/50 flex flex-col items-center justify-center gap-1 text-sm font-semibold text-foreground cursor-pointer"
+                    >
+                      <span aria-hidden className="material-symbols-outlined text-2xl text-primary">grid_view</span>
+                      Ver los {playlist.videos.length}
+                    </button>
+                  </li>
+                )}
+              </ol>
+            )}
           </div>
         );
       })}

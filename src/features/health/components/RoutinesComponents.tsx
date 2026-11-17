@@ -55,18 +55,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, onSave, sa
                 </div>
                 <div className="flex flex-1 flex-col justify-between p-5 gap-4">
                     <div>
-                        <div className="flex justify-between items-start mb-2">
-                            <h3 className="text-foreground text-xl font-bold leading-tight capitalize line-clamp-1">{exercise.name}</h3>
-                            {onSave && (
-                                <button
-                                    disabled={saving}
-                                    onClick={() => onSave()}
-                                    className="text-muted-foreground hover:text-primary transition-colors disabled:opacity-50"
-                                >
-                                    <span className="material-symbols-outlined font-variation-icon-fill">bookmark_add</span>
-                                </button>
-                            )}
-                        </div>
+                        <h3 className="text-foreground text-xl font-bold leading-tight capitalize line-clamp-1 mb-2">{exercise.name}</h3>
                         <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
                             {exercise.instructions[0] || `Enfócate en tu ${targetEs} usando ${equipmentEs}.`}
                         </p>
@@ -75,14 +64,22 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, onSave, sa
                             <span className="px-2 py-1 rounded-lg bg-secondary text-xs text-muted-foreground font-bold">{equipmentEs}</span>
                         </div>
                     </div>
-                    <div className="flex items-end justify-between mt-2">
-                        <div className="flex items-center gap-1 text-primary text-xs font-semibold">
-                            <span className="material-symbols-outlined text-[16px]">monitor_heart</span>
-                            <span>Salud Hormonal</span>
+                    <div className="flex flex-wrap items-center justify-between gap-2 mt-2">
+                        <div className="flex items-center gap-1 text-muted-foreground text-xs font-semibold">
+                            <span aria-hidden className="material-symbols-outlined text-[16px]">target</span>
+                            <span>{targetEs}</span>
                         </div>
-                        <button className="cursor-pointer flex items-center justify-center rounded-xl h-9 px-6 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-bold transition-all shadow-sm hover:shadow-md">
-                            Empezar
-                        </button>
+                        {onSave && (
+                            <button
+                                type="button"
+                                disabled={saving}
+                                onClick={() => onSave()}
+                                className="cursor-pointer flex items-center justify-center gap-1.5 rounded-xl min-h-11 px-4 bg-secondary hover:bg-accent text-foreground border border-border text-sm font-semibold transition-colors disabled:opacity-50"
+                            >
+                                <span aria-hidden className="material-symbols-outlined text-lg">playlist_add</span>
+                                Agregar a mi rutina
+                            </button>
+                        )}
                     </div>
                 </div>
             </div>
@@ -202,8 +199,19 @@ export const SavedRoutineCard: React.FC<{ routine: Routine }> = ({ routine }) =>
                 <ul className="mt-4 flex flex-col gap-3 border-t border-border pt-4">
                     {routine.exercises.map((ex) => (
                         <li key={ex.id} className="flex items-center gap-3">
-                            <img src={ex.gifUrl} alt={ex.name} loading="lazy" className="size-14 rounded-lg object-cover bg-muted shrink-0" />
-                            <span className="text-sm text-foreground capitalize">{ex.name}</span>
+                            {ex.gifUrl ? (
+                                <img src={ex.gifUrl} alt="" loading="lazy" className="size-14 rounded-lg object-cover bg-muted shrink-0" />
+                            ) : ex.videoUrl ? (
+                                <video src={`${ex.videoUrl}#t=0.1`} muted playsInline preload="metadata" aria-hidden className="size-14 rounded-lg object-cover bg-black shrink-0" />
+                            ) : (
+                                <span aria-hidden className="size-14 rounded-lg bg-secondary text-primary flex items-center justify-center shrink-0">
+                                    <span className="material-symbols-outlined">fitness_center</span>
+                                </span>
+                            )}
+                            <span className="min-w-0">
+                                <span className="block text-sm text-foreground capitalize">{ex.name}</span>
+                                {ex.sets ? <span className="block text-xs font-semibold text-primary tabular-nums">{ex.sets} × {ex.reps}</span> : null}
+                            </span>
                         </li>
                     ))}
                 </ul>
@@ -291,10 +299,10 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video, isPhaseRecommended,
                         <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between text-white text-xs">
                             <span className={`px-2 py-0.5 rounded-md font-semibold backdrop-blur-sm ${
                                 video.intensity === 'low'
-                                    ? 'bg-emerald-600/90'
+                                    ? 'bg-leaf/90'
                                     : video.intensity === 'medium'
-                                    ? 'bg-amber-600/90'
-                                    : 'bg-rose-600/90'
+                                    ? 'bg-sun/90'
+                                    : 'bg-bud/90'
                             }`}>
                                 {INTENSITY_LABEL[video.intensity]}
                             </span>
@@ -330,8 +338,9 @@ export const VideoModal: React.FC<{
     video: WorkoutVideo | null;
     onClose: () => void;
     onCompleteWorkout?: () => void;
-    isCompletedToday?: boolean;
-}> = ({ video, onClose, onCompleteWorkout, isCompletedToday }) => {
+    /** This video is already in today's history. */
+    isLogged?: boolean;
+}> = ({ video, onClose, onCompleteWorkout, isLogged }) => {
     React.useEffect(() => {
         if (!video) return;
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -401,17 +410,17 @@ export const VideoModal: React.FC<{
                             onClick={() => {
                                 onCompleteWorkout();
                             }}
-                            disabled={isCompletedToday}
-                            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-sm ${
-                                isCompletedToday
-                                    ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 cursor-default'
+                            disabled={isLogged}
+                            className={`flex items-center gap-2 px-4 min-h-11 rounded-xl text-sm font-bold transition-all shadow-sm ${
+                                isLogged
+                                    ? 'bg-leaf/10 text-leaf border border-leaf/20 cursor-default'
                                     : 'bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer'
                             }`}
                         >
                             <span className="material-symbols-outlined text-base">
-                                {isCompletedToday ? 'check_circle' : 'task_alt'}
+                                {isLogged ? 'check_circle' : 'task_alt'}
                             </span>
-                            {isCompletedToday ? 'Entrenamiento completado hoy' : 'Marcar como completado'}
+                            {isLogged ? 'Guardado en tu historial de hoy' : 'Marcar como completado'}
                         </button>
                     )}
                 </div>

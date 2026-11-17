@@ -7,6 +7,15 @@ import { Icon } from '@/components/ui/Icon';
 import { TitleSprig, WeekSprouts } from '@/components/ui/Botanical';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { useCycleInfo } from '@/hooks/useCycleInfo';
+import { listLibrary } from '@/services/recipesService';
+import { CATALOG_RECIPES } from '@/data/seedRecipes';
+import { foodImageFor } from '@/lib/planner/foodImage';
+import WorkoutPicker from './WorkoutPicker';
+import MealPicker from './MealPicker';
+import { ingredientName } from '@/lib/planner/fromRecipes';
+import type { LibraryRecipe } from '@/types/recipes';
+import type { VideoPhase } from '@/types/exercises';
+import { titleKey, isSimilarTitle } from '@/lib/recipes/normalize';
 import { useFoodPreferences } from '@/hooks/useFoodPreferences';
 import { entriesToNames } from '@/lib/nutrition/foodPreferences';
 import { fetchWorkoutVideos } from '@/services/exercisesService';
@@ -73,6 +82,9 @@ const TEXT = {
         grocery: 'Lista del súper',
         groceryEmpty: 'Agrega comidas con ingredientes a tu semana para consolidar tu lista de compras automáticamente.',
         groceryCompleted: 'comprados',
+        groceryCopy: 'Copiar lista',
+        groceryCopied: '¡Copiada!',
+        groceryMealsCount: (n: number) => `${n} ${n === 1 ? 'comida' : 'comidas'}`,
         pantry: 'Mi despensa',
         pantryHint: 'Ingredientes que ya tienes en casa. La IA los prioriza y se omiten de tu lista del súper.',
         pantryAdd: 'Agregar',
@@ -120,6 +132,9 @@ const TEXT = {
         grocery: 'Grocery list',
         groceryEmpty: 'Add meals with ingredients to your week to consolidate your grocery list automatically.',
         groceryCompleted: 'purchased',
+        groceryCopy: 'Copy list',
+        groceryCopied: 'Copied!',
+        groceryMealsCount: (n: number) => `${n} ${n === 1 ? 'meal' : 'meals'}`,
         pantry: 'My pantry',
         pantryHint: 'Ingredients already in your kitchen. AI prioritizes them and leaves them off your shopping list.',
         pantryAdd: 'Add',
@@ -141,8 +156,32 @@ const PHASE_NAMES: Record<string, { es: string; en: string }> = {
 
 const QUICK_PANTRY_SUGGESTIONS = ['Avena', 'Huevos', 'Arroz integral', 'Espinacas', 'Semillas de chía', 'Aceite de oliva'];
 
+// Day label | workout | 4 meal slots. Only applies from lg up; below that each day stacks.
+const ROW_COLS = 'lg:grid-cols-[7.5rem_minmax(0,0.9fr)_repeat(4,minmax(0,1fr))]';
+
+const collectPhotos = (recipes: { title: string; imageUrl?: string | null }[]) =>
+    recipes.filter((r) => r.imageUrl).map((r) => ({ title: r.title, key: titleKey(r.title), url: r.imageUrl as string }));
+
 const inputClass =
     'w-full rounded-lg border border-border bg-background px-2.5 py-1.5 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 transition-colors placeholder:text-muted-foreground/60';
+
+/** Round photo of a pantry ingredient from the food catalog; a leaf icon when there is none. */
+const FoodThumb: React.FC<{ name: string }> = ({ name }) => {
+    const url = foodImageFor(name);
+    return url ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+            src={url}
+            alt=""
+            loading="lazy"
+            className="size-8 rounded-full object-cover shrink-0 bg-muted ring-1 ring-border/60 shadow-2xs"
+        />
+    ) : (
+        <span className="size-8 rounded-full shrink-0 bg-leaf-soft text-leaf flex items-center justify-center ring-1 ring-border/40 shadow-2xs">
+            <Icon name="plant" size={16} />
+        </span>
+    );
+};
 
 const WeeklyPlanner: React.FC = () => {
     const { language } = useLanguage();
@@ -168,9 +207,13 @@ const WeeklyPlanner: React.FC = () => {
     const [gaps, setGaps] = useState<{ day: number; slot: MealSlot }[]>([]);
     const foodPrefs = useFoodPreferences();
     const [mealCols, setMealCols] = useState(false);
+    const [library, setLibrary] = useState<LibraryRecipe[]>([]);
+    const [picking, setPicking] = useState<{ date: string; slot: MealSlot } | null>(null);
+    const [recipePhotos, setRecipePhotos] = useState<{ title: string; key: string; url: string }[]>([]);
     const [glucoseFor, setGlucoseFor] = useState<string | null>(null);
     const [glucoseDraft, setGlucoseDraft] = useState<{ value: string; interval: 1 | 2 | null }>({ value: '', interval: null });
     const [glucoseError, setGlucoseError] = useState<string | null>(null);
+    const [copied, setCopied] = useState(false);
 
     const days = useMemo(() => weekDays(weekStart), [weekStart]);
     const todayISO = toISODate(new Date());
@@ -206,6 +249,12 @@ const WeeklyPlanner: React.FC = () => {
         listPantry().then(setPantry).catch(fail);
         fetchWorkoutVideos().then(setVideos).catch(() => undefined);
         mealColumnsAvailable().then(setMealCols);
+        listLibrary()
+            .then((lib) => {
+                setLibrary(lib);
+                setRecipePhotos(collectPhotos([...lib, ...CATALOG_RECIPES]));
+            })
+            .catch(() => setRecipePhotos(collectPhotos(CATALOG_RECIPES)));
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
@@ -231,6 +280,13 @@ const WeeklyPlanner: React.FC = () => {
         setGlucoseError(null);
         setGlucoseDraft({ value: '', interval: null });
     };
+    /** Photo of the library recipe a planned meal came from (planner entries only store the title). */
+    const imageFor = (title: string): string | null => {
+        const key = titleKey(title);
+        const exact = recipePhotos.find((r) => r.key === key);
+        if (exact) return exact.url;
+        return recipePhotos.find((r) => isSimilarTitle(r.title, title))?.url ?? null;
+    };
     const workoutAt = (date: string) => workouts.find((w) => w.date === date);
 
     const grocery = useMemo(
@@ -242,6 +298,20 @@ const WeeklyPlanner: React.FC = () => {
         () => grocery.filter((g) => checked.has(g.key)).length,
         [grocery, checked],
     );
+
+    const copyGroceryList = useCallback(() => {
+        if (grocery.length === 0) return;
+        const text = grocery
+            .map((item) => {
+                const mark = checked.has(item.key) ? '✓ ' : '• ';
+                const countStr = item.count > 1 ? ` (${tx.groceryMealsCount(item.count)})` : '';
+                return `${mark}${item.label}${countStr}`;
+            })
+            .join('\n');
+        navigator.clipboard?.writeText(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    }, [grocery, checked, tx]);
 
     const planned = meals.length + workouts.filter((w) => w.kind !== 'rest').length;
     const completed = meals.filter((m) => m.done).length + workouts.filter((w) => w.kind !== 'rest' && w.done).length;
@@ -294,6 +364,20 @@ const WeeklyPlanner: React.FC = () => {
         const current = mealAt(date, slot);
         setDraft({ title: current?.title ?? '', ingredients: current?.ingredients.join(', ') ?? '' });
         setEditing({ date, slot });
+    };
+
+    const pickRecipe = (recipe: LibraryRecipe) => {
+        const target = picking;
+        setPicking(null);
+        if (!target) return;
+        run(async () => {
+            await saveMeal({
+                date: target.date,
+                slot: target.slot,
+                title: recipe.title,
+                ingredients: recipe.ingredients.map(ingredientName),
+            });
+        });
     };
 
     const submitMeal = () => {
@@ -503,7 +587,7 @@ const WeeklyPlanner: React.FC = () => {
                             icon="delete"
                             disabled={busy || planned === 0}
                             onClick={() => window.confirm(tx.confirmClear) && run(() => clearWeek(weekStart))}
-                            className="text-muted-foreground hover:text-red-500 text-xs"
+                            className="text-muted-foreground hover:text-destructive text-xs"
                         >
                             {tx.clear}
                         </Button>
@@ -523,14 +607,25 @@ const WeeklyPlanner: React.FC = () => {
                 )}
 
                 {error && (
-                    <div role="alert" className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 text-sm flex items-center gap-2">
+                    <div role="alert" className="p-3 rounded-xl bg-destructive/10 border border-destructive/30 text-destructive text-sm flex items-center gap-2">
                         <Icon name="close" size={16} />
                         <span>{error}</span>
                     </div>
                 )}
 
-                {/* 7-DAY WEEKLY GRID */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-7 gap-4 items-start">
+                {/* WEEK AGENDA: one row per day on wide screens, one block per day on small ones */}
+                <div className="flex flex-col gap-3">
+                    <div className={`hidden lg:grid ${ROW_COLS} gap-3 px-4 text-xs font-semibold text-muted-foreground`} aria-hidden="true">
+                        <span />
+                        <span>{tx.workout}</span>
+                        {MEAL_SLOTS.map((slot) => (
+                            <span key={slot} className="flex items-center gap-1.5">
+                                <Icon name={tx.slotIcons[slot]} size={13} className="opacity-70" />
+                                {tx.slots[slot]}
+                            </span>
+                        ))}
+                    </div>
+
                     {days.map((date) => {
                         const w = workoutAt(date);
                         const isToday = date === todayISO;
@@ -539,53 +634,43 @@ const WeeklyPlanner: React.FC = () => {
                         const dayDone = dayMeals.filter((m) => m?.done).length + (w && w.kind !== 'rest' && w.done ? 1 : 0);
 
                         return (
-                            <div
+                            <section
                                 key={date}
-                                className={`rounded-2xl border transition-all duration-200 bg-card p-4 flex flex-col gap-3.5 shadow-xs ${
-                                    isToday
-                                        ? 'ring-2 ring-primary/60 border-primary/40 bg-gradient-to-b from-primary/5 via-card to-card'
-                                        : 'border-border/80 hover:border-border'
+                                aria-label={dayNameShort(date)}
+                                className={`rounded-2xl border bg-card p-3.5 sm:p-4 grid grid-cols-1 sm:grid-cols-2 ${ROW_COLS} gap-x-3 gap-y-3 items-start shadow-xs ${
+                                    isToday ? 'ring-2 ring-primary/60 border-primary/40' : 'border-border/80'
                                 }`}
                             >
-                                {/* DAY CARD HEADER */}
-                                <div className="flex items-center justify-between pb-2 border-b border-border/50">
-                                    <div className="flex flex-col">
-                                        <span className="text-sm font-bold text-foreground capitalize leading-snug">
+                                {/* DAY LABEL */}
+                                <div className="sm:col-span-2 lg:col-span-1 flex lg:flex-col items-center lg:items-start justify-between lg:justify-start gap-1 lg:pt-2">
+                                    <div className="flex lg:flex-col items-baseline lg:items-start gap-2 lg:gap-0">
+                                        <span className="text-base font-semibold text-foreground capitalize leading-tight">
                                             {dayNameShort(date)}
                                         </span>
-                                        <span className="text-xs text-muted-foreground capitalize">
-                                            {dayDateNum(date)}
-                                        </span>
+                                        <span className="text-sm text-muted-foreground capitalize">{dayDateNum(date)}</span>
                                     </div>
-                                    <div className="flex items-center gap-1.5">
-                                        {dayPlanned > 0 && (
-                                            <span className="text-[11px] font-semibold tabular-nums text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-                                                {dayDone}/{dayPlanned}
+                                    <div className="flex items-center gap-1.5 lg:mt-1.5">
+                                        {isToday && (
+                                            <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-primary text-primary-foreground">
+                                                {tx.today}
                                             </span>
                                         )}
-                                        {isToday && (
-                                            <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-primary text-primary-foreground tracking-wide uppercase">
-                                                {tx.today}
+                                        {dayPlanned > 0 && (
+                                            <span className="text-xs font-semibold tabular-nums text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                                                {dayDone}/{dayPlanned}
                                             </span>
                                         )}
                                     </div>
                                 </div>
 
-                                {/* WORKOUT SECTION */}
-                                <div className="rounded-xl bg-secondary/35 border border-border/60 p-2.5 flex flex-col gap-1.5 transition-colors">
-                                    <div className="flex items-center justify-between text-xs font-semibold text-muted-foreground">
-                                        <div className="flex items-center gap-1.5">
-                                            <Icon name="fitness_center" size={14} className="text-primary" />
-                                            <span>{tx.workout}</span>
-                                        </div>
-                                        {w && w.durationMinutes && (
-                                            <span className="text-[11px] font-medium text-muted-foreground tabular-nums">
-                                                {w.durationMinutes}′
-                                            </span>
-                                        )}
-                                    </div>
-
-                                    <div className="flex items-center gap-2">
+                                {/* WORKOUT */}
+                                <div className="flex flex-col gap-1.5 min-w-0">
+                                    <span className="lg:hidden flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+                                        <Icon name="fitness_center" size={13} className="text-primary" />
+                                        {tx.workout}
+                                        {w && w.durationMinutes ? <span className="font-normal tabular-nums">· {w.durationMinutes}′</span> : null}
+                                    </span>
+                                    <div className="flex items-center gap-2 min-h-10">
                                         {w && w.kind !== 'rest' && (
                                             <input
                                                 type="checkbox"
@@ -595,131 +680,131 @@ const WeeklyPlanner: React.FC = () => {
                                                 className="size-4 rounded border-border text-primary focus:ring-primary/40 cursor-pointer accent-primary shrink-0"
                                             />
                                         )}
-                                        <select
-                                            className={`${inputClass} text-xs py-1.5 ${w?.done ? 'line-through opacity-70' : ''}`}
-                                            aria-label={tx.workout}
-                                            value={w ? (w.kind === 'video' ? w.videoId ?? '' : w.kind) : ''}
-                                            onChange={(e) => changeWorkout(date, e.target.value)}
+                                        <WorkoutPicker
+                                            videos={videos}
+                                            entry={w}
+                                            phase={phase.toLowerCase() as VideoPhase}
                                             disabled={busy}
-                                        >
-                                            <option value="">{tx.none}</option>
-                                            <option value="rest">☕ {tx.rest}</option>
-                                            <option value="gym">🏋️ {tx.gym}</option>
-                                            {videos.map((v) => (
-                                                <option key={v.id} value={v.id}>
-                                                    ▶ {v.title} ({v.durationMinutes}′)
-                                                </option>
-                                            ))}
-                                        </select>
+                                            onChange={(value) => changeWorkout(date, value)}
+                                        />
                                     </div>
                                 </div>
 
                                 {/* MEAL SLOTS */}
-                                <div className="flex flex-col gap-2.5 pt-1">
-                                    {MEAL_SLOTS.map((slot) => {
-                                        const m = mealAt(date, slot);
-                                        const isEditing = editing?.date === date && editing.slot === slot;
-                                        const slotIcon = tx.slotIcons[slot];
+                                {MEAL_SLOTS.map((slot) => {
+                                    const m = mealAt(date, slot);
+                                    const isEditing = editing?.date === date && editing.slot === slot;
+                                    const image = m ? imageFor(m.title) : null;
 
-                                        return (
-                                            <div key={slot} className="flex flex-col gap-1">
-                                                <div className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80">
-                                                    <Icon name={slotIcon} size={12} className="opacity-70" />
-                                                    <span>{tx.slots[slot]}</span>
-                                                </div>
+                                    return (
+                                        <div key={slot} className="flex flex-col gap-1.5 min-w-0">
+                                            <span className="lg:hidden flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+                                                <Icon name={tx.slotIcons[slot]} size={13} className="opacity-70" />
+                                                {tx.slots[slot]}
+                                            </span>
 
-                                                {isEditing ? (
-                                                    <div className="flex flex-col gap-1.5 p-2 rounded-xl bg-background border border-primary/50 shadow-xs">
-                                                        <input
-                                                            className={inputClass}
-                                                            autoFocus
-                                                            placeholder={tx.mealTitle}
-                                                            value={draft.title}
-                                                            onChange={(e) => setDraft({ ...draft, title: e.target.value })}
-                                                            onKeyDown={(e) => {
-                                                                if (e.key === 'Enter') submitMeal();
-                                                                else if (e.key === 'Escape') setEditing(null);
-                                                            }}
-                                                        />
-                                                        <input
-                                                            className={inputClass}
-                                                            placeholder={tx.mealIngredients}
-                                                            value={draft.ingredients}
-                                                            onChange={(e) => setDraft({ ...draft, ingredients: e.target.value })}
-                                                            onKeyDown={(e) => {
-                                                                if (e.key === 'Enter') submitMeal();
-                                                                else if (e.key === 'Escape') setEditing(null);
-                                                            }}
-                                                        />
-                                                        <div className="flex items-center justify-end gap-1.5 pt-1">
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => setEditing(null)}
-                                                                className="px-2 py-1 text-xs font-medium text-muted-foreground hover:text-foreground rounded-lg transition-colors cursor-pointer"
-                                                            >
-                                                                {tx.cancel}
-                                                            </button>
-                                                            <button
-                                                                type="button"
-                                                                onClick={submitMeal}
-                                                                className="px-2.5 py-1 text-xs font-semibold bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
-                                                            >
-                                                                {tx.save}
-                                                            </button>
-                                                        </div>
+                                            {isEditing ? (
+                                                <div className="flex flex-col gap-1.5 p-2 rounded-xl bg-background border border-primary/50 shadow-xs">
+                                                    <input
+                                                        className={inputClass}
+                                                        autoFocus
+                                                        placeholder={tx.mealTitle}
+                                                        value={draft.title}
+                                                        onChange={(e) => setDraft({ ...draft, title: e.target.value })}
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === 'Enter') submitMeal();
+                                                            else if (e.key === 'Escape') setEditing(null);
+                                                        }}
+                                                    />
+                                                    <input
+                                                        className={inputClass}
+                                                        placeholder={tx.mealIngredients}
+                                                        value={draft.ingredients}
+                                                        onChange={(e) => setDraft({ ...draft, ingredients: e.target.value })}
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === 'Enter') submitMeal();
+                                                            else if (e.key === 'Escape') setEditing(null);
+                                                        }}
+                                                    />
+                                                    <div className="flex items-center justify-end gap-1.5 pt-1">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setEditing(null)}
+                                                            className="px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground rounded-lg transition-colors cursor-pointer"
+                                                        >
+                                                            {tx.cancel}
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={submitMeal}
+                                                            className="px-3 py-1.5 text-xs font-semibold bg-primary text-primary-foreground rounded-lg hover:opacity-90 transition-opacity cursor-pointer shadow-xs"
+                                                        >
+                                                            {tx.save}
+                                                        </button>
                                                     </div>
-                                                ) : m ? (
-                                                    <>
-                                                    <div className="group flex items-start gap-2 p-1.5 rounded-xl hover:bg-muted/40 transition-colors">
+                                                </div>
+                                            ) : m ? (
+                                                <>
+                                                    <div className="group flex items-center gap-2 p-1.5 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors min-h-[4.5rem]">
                                                         <input
                                                             type="checkbox"
                                                             checked={m.done}
                                                             onChange={() => toggle('meal', m)}
                                                             aria-label={m.title}
-                                                            className="mt-0.5 size-4 rounded border-border text-primary focus:ring-primary/40 cursor-pointer accent-primary shrink-0"
+                                                            className="size-4 rounded border-border text-primary focus:ring-primary/40 cursor-pointer accent-primary shrink-0"
                                                         />
                                                         <div
-                                                            className="flex-1 min-w-0 cursor-pointer"
-                                                            onClick={() => startEdit(date, slot)}
+                                                            className="flex-1 min-w-0 flex items-center gap-2 cursor-pointer"
+                                                            onClick={() => setPicking({ date, slot })}
                                                             role="button"
                                                             tabIndex={0}
-                                                            onKeyDown={(e) => e.key === 'Enter' && startEdit(date, slot)}
+                                                            title={m.ingredients.length > 0 ? m.ingredients.join(', ') : undefined}
+                                                            onKeyDown={(e) => e.key === 'Enter' && setPicking({ date, slot })}
                                                         >
+                                                            {image ? (
+                                                                // eslint-disable-next-line @next/next/no-img-element
+                                                                <img
+                                                                    src={image}
+                                                                    alt=""
+                                                                    loading="lazy"
+                                                                    className={`size-14 rounded-xl object-cover shrink-0 bg-muted ${m.done ? 'opacity-60' : ''}`}
+                                                                    onError={(e) => { e.currentTarget.style.visibility = 'hidden'; }}
+                                                                />
+                                                            ) : (
+                                                                <span className="size-14 rounded-xl shrink-0 bg-muted flex items-center justify-center text-muted-foreground/70">
+                                                                    <Icon name={tx.slotIcons[slot]} size={22} />
+                                                                </span>
+                                                            )}
                                                             <p
-                                                                className={`text-xs font-medium leading-snug break-words transition-colors hover:text-primary ${
+                                                                className={`text-sm font-medium leading-snug line-clamp-2 break-words transition-colors group-hover:text-primary ${
                                                                     m.done ? 'line-through text-muted-foreground' : 'text-foreground'
                                                                 }`}
                                                             >
                                                                 {m.title}
                                                             </p>
-                                                            {m.ingredients && m.ingredients.length > 0 && (
-                                                                <p className="text-[11px] text-muted-foreground/80 line-clamp-1 truncate mt-0.5">
-                                                                    {m.ingredients.join(', ')}
-                                                                </p>
-                                                            )}
                                                         </div>
                                                         {canAddGlucoseFromMeal(m.done, mealCols) && (
                                                             <button
                                                                 type="button"
                                                                 aria-label={tx.addGlucose}
                                                                 title={tx.addGlucose}
-                                                                className="text-muted-foreground hover:text-primary transition-colors p-0.5 cursor-pointer shrink-0"
+                                                                className="text-muted-foreground hover:text-primary transition-colors p-1 cursor-pointer shrink-0"
                                                                 onClick={() => {
                                                                     setGlucoseFor(glucoseFor === m.id ? null : m.id);
                                                                     setGlucoseError(null);
                                                                     setGlucoseDraft({ value: '', interval: null });
                                                                 }}
                                                             >
-                                                                <Icon name="glucose" size={13} />
+                                                                <Icon name="glucose" size={14} />
                                                             </button>
                                                         )}
                                                         <button
                                                             type="button"
                                                             aria-label="Eliminar comida"
-                                                            className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-red-500 transition-opacity p-0.5 cursor-pointer shrink-0"
+                                                            className="lg:opacity-0 group-hover:opacity-100 focus-visible:opacity-100 text-muted-foreground hover:text-destructive transition-opacity p-1 cursor-pointer shrink-0"
                                                             onClick={() => remove('meal', m.id)}
                                                         >
-                                                            <Icon name="close" size={13} />
+                                                            <Icon name="close" size={14} />
                                                         </button>
                                                     </div>
                                                     {glucoseFor === m.id && canAddGlucoseFromMeal(m.done, mealCols) && (
@@ -741,54 +826,113 @@ const WeeklyPlanner: React.FC = () => {
                                                                 <option value="1">{tx.oneHour}</option>
                                                                 <option value="2">{tx.twoHours}</option>
                                                             </select>
-                                                            {glucoseError && <p className="text-[11px] text-destructive">{glucoseError}</p>}
+                                                            {glucoseError && <p className="text-xs text-destructive">{glucoseError}</p>}
                                                             <div className="flex justify-end gap-1.5">
-                                                                <button type="button" onClick={() => setGlucoseFor(null)} className="px-2.5 py-1 text-xs text-muted-foreground cursor-pointer">
+                                                                <button type="button" onClick={() => setGlucoseFor(null)} className="px-2.5 py-1.5 text-xs text-muted-foreground cursor-pointer">
                                                                     {tx.cancel}
                                                                 </button>
-                                                                <button type="button" onClick={() => saveGlucose(m)} className="px-2.5 py-1 text-xs font-semibold bg-primary text-primary-foreground rounded-lg hover:opacity-90 cursor-pointer">
+                                                                <button type="button" onClick={() => saveGlucose(m)} className="px-3 py-1.5 text-xs font-semibold bg-primary text-primary-foreground rounded-lg hover:opacity-90 cursor-pointer">
                                                                     {tx.save}
                                                                 </button>
                                                             </div>
                                                         </div>
                                                     )}
-                                                    </>
-                                                ) : (
-                                                    <button
-                                                        type="button"
-                                                        className="w-full py-1 px-2 rounded-lg border border-dashed border-border/70 hover:border-primary/50 hover:bg-primary/5 text-muted-foreground hover:text-primary text-xs font-medium flex items-center justify-center gap-1.5 transition-all cursor-pointer group"
-                                                        onClick={() => startEdit(date, slot)}
-                                                    >
-                                                        <Icon name="plus" size={12} className="opacity-70 group-hover:opacity-100 transition-opacity" />
-                                                        <span>{tx.addMealPrompt}</span>
-                                                    </button>
-                                                )}
-                                            </div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
+                                                </>
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    className="w-full min-h-14 px-2 rounded-xl border border-dashed border-border/70 hover:border-primary/50 hover:bg-primary/5 text-muted-foreground hover:text-primary text-xs font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer group"
+                                                    onClick={() => setPicking({ date, slot })}
+                                                >
+                                                    <Icon name="plus" size={12} className="opacity-70 group-hover:opacity-100 transition-opacity" />
+                                                    <span>{tx.addMealPrompt}</span>
+                                                </button>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </section>
                         );
                     })}
                 </div>
+
+                <MealPicker
+                    target={
+                        picking
+                            ? {
+                                  slot: picking.slot,
+                                  slotLabel: tx.slots[picking.slot],
+                                  dayLabel: dayLabel(picking.date),
+                                  currentTitle: mealAt(picking.date, picking.slot)?.title,
+                              }
+                            : null
+                    }
+                    recipes={library.filter((r) => r.language === lang)}
+                    onPick={pickRecipe}
+                    onCustom={() => {
+                        if (picking) startEdit(picking.date, picking.slot);
+                        setPicking(null);
+                    }}
+                    onRemove={
+                        picking && mealAt(picking.date, picking.slot)
+                            ? () => {
+                                  const m = mealAt(picking.date, picking.slot);
+                                  setPicking(null);
+                                  if (m) remove('meal', m.id);
+                              }
+                            : undefined
+                    }
+                    onClose={() => setPicking(null)}
+                />
 
                 {/* BOTTOM SECTION: GROCERY & PANTRY */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-2">
                     {/* GROCERY LIST CARD */}
                     <Card hoverable={false} className="p-5 flex flex-col gap-4 border border-border/70 shadow-xs">
-                        <div className="flex items-center justify-between pb-2 border-b border-border/60">
+                        <div className="flex items-center justify-between pb-3 border-b border-border/60">
                             <div className="flex items-center gap-2.5">
                                 <div className="flex items-center justify-center size-8 rounded-xl bg-primary/10 text-primary">
                                     <Icon name="task_alt" size={17} weight="bold" />
                                 </div>
-                                <h2 className="text-base font-bold text-foreground">{tx.grocery}</h2>
+                                <div>
+                                    <h2 className="text-base font-bold text-foreground leading-tight">{tx.grocery}</h2>
+                                    {grocery.length > 0 && (
+                                        <p className="text-xs text-muted-foreground mt-0.5">
+                                            {groceryCheckedCount === grocery.length
+                                                ? '¡Todo listo para cocinar!'
+                                                : `${grocery.length - groceryCheckedCount} pendientes por comprar`}
+                                        </p>
+                                    )}
+                                </div>
                             </div>
-                            {grocery.length > 0 && (
-                                <span className="text-xs font-semibold tabular-nums text-muted-foreground bg-muted px-2.5 py-1 rounded-full">
-                                    {groceryCheckedCount} / {grocery.length} {tx.groceryCompleted}
-                                </span>
-                            )}
+                            <div className="flex items-center gap-2">
+                                {grocery.length > 0 && (
+                                    <>
+                                        <button
+                                            type="button"
+                                            onClick={copyGroceryList}
+                                            className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted/80 rounded-lg transition-colors cursor-pointer border border-border/60"
+                                            title={tx.groceryCopy}
+                                        >
+                                            <Icon name={copied ? 'check' : 'content_copy'} size={14} />
+                                            <span>{copied ? tx.groceryCopied : tx.groceryCopy}</span>
+                                        </button>
+                                        <span className="text-xs font-semibold tabular-nums text-muted-foreground bg-muted px-2.5 py-1 rounded-full">
+                                            {groceryCheckedCount} / {grocery.length}
+                                        </span>
+                                    </>
+                                )}
+                            </div>
                         </div>
+
+                        {grocery.length > 0 && (
+                            <div className="w-full bg-muted/60 h-1.5 rounded-full overflow-hidden -mt-1">
+                                <div
+                                    className="bg-primary h-full transition-all duration-300 rounded-full"
+                                    style={{ width: `${(groceryCheckedCount / grocery.length) * 100}%` }}
+                                />
+                            </div>
+                        )}
 
                         {loading ? (
                             <p className="text-sm text-muted-foreground py-4 text-center">Cargando lista…</p>
@@ -802,30 +946,48 @@ const WeeklyPlanner: React.FC = () => {
                                 </p>
                             </div>
                         ) : (
-                            <ul className="flex flex-col gap-2 max-h-80 overflow-y-auto pr-1">
+                            <ul className="flex flex-col gap-1.5 max-h-80 overflow-y-auto pr-1">
                                 {grocery.map((item) => {
                                     const isItemChecked = checked.has(item.key);
                                     return (
                                         <li
                                             key={item.key}
-                                            className={`flex items-center justify-between gap-2.5 p-2 rounded-xl transition-colors ${
-                                                isItemChecked ? 'bg-muted/30 opacity-60' : 'hover:bg-muted/40'
+                                            className={`flex items-center justify-between gap-3 px-3 py-2 rounded-xl transition-all ${
+                                                isItemChecked
+                                                    ? 'bg-muted/25 opacity-60'
+                                                    : 'hover:bg-muted/40 bg-card border border-border/40'
                                             }`}
                                         >
-                                            <label className="flex items-center gap-2.5 text-sm cursor-pointer flex-1 select-none">
+                                            <label className="flex items-center gap-3 text-sm cursor-pointer flex-1 min-h-9 select-none">
                                                 <input
                                                     type="checkbox"
                                                     checked={isItemChecked}
                                                     onChange={() => toggleGrocery(item.key)}
-                                                    className="size-4 rounded border-border text-primary focus:ring-primary/40 cursor-pointer accent-primary"
+                                                    className="size-4 rounded border-border text-primary focus:ring-primary/40 cursor-pointer accent-primary shrink-0"
                                                 />
-                                                <span className={`font-medium ${isItemChecked ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+                                                <span className={isItemChecked ? 'opacity-60' : ''}>
+                                                    <FoodThumb name={item.label} />
+                                                </span>
+                                                <span
+                                                    className={`font-medium transition-all ${
+                                                        isItemChecked
+                                                            ? 'line-through decoration-muted-foreground/50 text-muted-foreground'
+                                                            : 'text-foreground'
+                                                    }`}
+                                                >
                                                     {item.label}
                                                 </span>
                                             </label>
                                             {item.count > 1 && (
-                                                <span className="text-[11px] font-bold text-muted-foreground bg-muted px-2 py-0.5 rounded-full tabular-nums shrink-0">
-                                                    ×{item.count}
+                                                <span
+                                                    className={`text-[11px] font-semibold tabular-nums px-2 py-0.5 rounded-full shrink-0 ${
+                                                        isItemChecked
+                                                            ? 'bg-muted/60 text-muted-foreground/70'
+                                                            : 'bg-primary/10 text-primary'
+                                                    }`}
+                                                    title={tx.groceryMealsCount(item.count)}
+                                                >
+                                                    {tx.groceryMealsCount(item.count)}
                                                 </span>
                                             )}
                                         </li>
@@ -882,10 +1044,11 @@ const WeeklyPlanner: React.FC = () => {
                                         key={sug}
                                         type="button"
                                         onClick={() => addPantry(sug)}
-                                        className="inline-flex items-center gap-1 rounded-lg border border-dashed border-border/80 px-2 py-0.5 text-xs text-muted-foreground hover:text-primary hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer"
+                                        className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-border/80 pl-1 pr-2.5 min-h-10 text-sm text-muted-foreground hover:text-primary hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer"
                                     >
-                                        <Icon name="plus" size={10} />
+                                        <FoodThumb name={sug} />
                                         <span>{sug}</span>
+                                        <Icon name="plus" size={10} />
                                     </button>
                                 ))}
                             </div>
@@ -901,20 +1064,21 @@ const WeeklyPlanner: React.FC = () => {
                                 pantry.map((p) => (
                                     <span
                                         key={p.id}
-                                        className="inline-flex items-center gap-1.5 rounded-full bg-secondary/60 border border-border/70 px-3 py-1 text-xs font-medium text-foreground transition-colors group"
+                                        className="inline-flex items-center gap-2 rounded-full bg-secondary/60 border border-border/70 pl-1 pr-3 min-h-10 text-sm font-medium text-foreground transition-colors group"
                                     >
+                                        <FoodThumb name={p.name} />
                                         <span>{p.name}</span>
                                         <button
                                             type="button"
                                             aria-label={`Quitar ${p.name}`}
-                                            className="text-muted-foreground hover:text-red-500 transition-colors cursor-pointer"
+                                            className="text-muted-foreground hover:text-destructive transition-colors cursor-pointer p-1 -mr-1"
                                             onClick={() =>
                                                 removePantryItem(p.id)
                                                     .then(() => setPantry((prev) => prev.filter((x) => x.id !== p.id)))
                                                     .catch(fail)
                                             }
                                         >
-                                            <Icon name="close" size={11} />
+                                            <Icon name="close" size={13} />
                                         </button>
                                     </span>
                                 ))
