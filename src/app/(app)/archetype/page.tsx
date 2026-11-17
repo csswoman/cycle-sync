@@ -1,11 +1,9 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
 import ArchetypeSelection from '@/features/setup/ArchetypeSelection';
-import {
-  deriveArchetype, loadOnboardingAnswers, saveOnboardingAnswers, type OnboardingAnswers,
-} from '@/features/setup/onboarding';
+import { loadOnboardingAnswers, pruneAnswers, type OnboardingAnswers } from '@/features/setup/onboarding';
+import { persistOnboardingAnswers } from '@/stores/profileStore';
 
 export default function ArchetypePage() {
   const router = useRouter();
@@ -18,22 +16,10 @@ export default function ArchetypePage() {
 
   const handleComplete = async (answers: OnboardingAnswers) => {
     setSaving(true);
-    saveOnboardingAnswers(answers);
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const user = session?.user;
-      if (user) {
-        const now = new Date().toISOString();
-        await supabase.from('cycle_config').upsert(
-          { user_id: user.id, archetype: deriveArchetype(answers), updated_at: now },
-          { onConflict: 'user_id' },
-        );
-        // Needs the onboarding_answers column (migration 20260501000000); answers also live in localStorage.
-        const { error } = await supabase.from('cycle_config').update({ onboarding_answers: answers }).eq('user_id', user.id);
-        if (error) console.warn('onboarding_answers not saved remotely:', error.message);
-      }
-    } catch (err) {
-      console.error('Error saving archetype:', err);
+      // Answers also live in localStorage, so a failed remote save is not fatal.
+      const ok = await persistOnboardingAnswers({ ...pruneAnswers(answers), answeredAt: new Date().toISOString() });
+      if (!ok) console.warn('onboarding answers not saved remotely');
     } finally {
       setSaving(false);
     }

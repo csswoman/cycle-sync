@@ -82,7 +82,7 @@ export default function HealthWebhookSettings() {
         <div
           className={`p-3 rounded-xl text-sm border ${
             message.type === 'success'
-              ? 'bg-green-500/10 border-green-500/20 text-green-600 dark:text-green-400'
+              ? 'bg-leaf/10 border-leaf/20 text-leaf'
               : 'bg-destructive/10 border-destructive/20 text-destructive'
           }`}
         >

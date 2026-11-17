@@ -148,9 +148,9 @@ export const PeriodDayCalendar: React.FC<PeriodDayCalendarProps> = ({
           let cls = 'hover:bg-secondary';
           if (isSaved) cls = `bg-primary/40 text-foreground ${mode === 'period' ? 'cursor-default' : ''}`;
           else if (isSelected) cls = 'bg-primary text-primary-foreground shadow-lg shadow-primary/40 font-bold';
-          else if (isConfirmed) cls = 'bg-sky-500/30 text-foreground font-bold ring-2 ring-sky-500';
-          else if (isOvulation) cls = 'bg-sky-500/30 text-foreground font-bold';
-          else if (isFertile) cls = 'bg-sky-500/10 text-foreground';
+          else if (isConfirmed) cls = 'bg-sun/30 text-foreground font-bold ring-2 ring-sun';
+          else if (isOvulation) cls = 'bg-sun/30 text-foreground font-bold';
+          else if (isFertile) cls = 'bg-sun/10 text-foreground';
           return (
             <button
               key={iso}
@@ -166,9 +166,9 @@ export const PeriodDayCalendar: React.FC<PeriodDayCalendarProps> = ({
               className={`relative h-10 w-10 mx-auto flex items-center justify-center rounded-full text-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${cls} ${anchor === iso ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''}`}
             >
               {Number(iso.slice(8))}
-              {flow && <span className={`absolute bottom-0.5 left-1/2 -translate-x-1/2 rounded-full bg-red-600 ${flow === 'very_heavy' ? 'w-4 h-1.5' : flow === 'heavy' ? 'w-3 h-1.5' : flow === 'medium' ? 'size-1.5' : 'size-1 opacity-60'}`} />}
-              {hasSpotting && <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 size-1.5 rounded-full bg-rose-500" />}
-              {hasSex && <span className="material-symbols-outlined absolute -top-0.5 -right-0.5 text-[13px] text-fuchsia-500" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>}
+              {flow && <span className={`absolute bottom-0.5 left-1/2 -translate-x-1/2 rounded-full bg-bud ${flow === 'very_heavy' ? 'w-4 h-1.5' : flow === 'heavy' ? 'w-3 h-1.5' : flow === 'medium' ? 'size-1.5' : 'size-1 opacity-60'}`} />}
+              {hasSpotting && <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 size-1.5 rounded-full bg-petal" />}
+              {hasSex && <span className="material-symbols-outlined absolute -top-0.5 -right-0.5 text-[13px] text-blossom" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>}
             </button>
           );
         })}
@@ -176,11 +176,11 @@ export const PeriodDayCalendar: React.FC<PeriodDayCalendarProps> = ({
       <div className="flex flex-wrap gap-x-4 gap-y-1 mt-4 text-xs text-muted-foreground">
         <span className="flex items-center gap-1.5"><span className="size-3 rounded-full bg-primary" />{t.legendNewDays}</span>
         {saved.length > 0 && <span className="flex items-center gap-1.5"><span className="size-3 rounded-full bg-primary/40" />{t.legendSavedDays}</span>}
-        {fertileDays.length > 0 && <span className="flex items-center gap-1.5"><span className="size-3 rounded-full bg-sky-500/30" />{t.legendFertile}</span>}
-        {confirmedOvulationDays.length > 0 && <span className="flex items-center gap-1.5"><span className="size-3 rounded-full ring-2 ring-sky-500" />{es ? 'Ovulación confirmada (temperatura)' : 'Confirmed ovulation (temperature)'}</span>}
-        {Object.keys(flowByDay).length > 0 && <span className="flex items-center gap-1.5"><span className="h-1.5 w-3 rounded-full bg-red-600" />{es ? 'Intensidad del sangrado' : 'Bleeding intensity'}</span>}
-        {spottingDays.length > 0 && <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-rose-500" />{es ? 'Manchado' : 'Spotting'}</span>}
-        {sexDays.length > 0 && <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[13px] text-fuchsia-500" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>{es ? 'Relación sexual' : 'Sexual activity'}</span>}
+        {fertileDays.length > 0 && <span className="flex items-center gap-1.5"><span className="size-3 rounded-full bg-sun/30" />{t.legendFertile}</span>}
+        {confirmedOvulationDays.length > 0 && <span className="flex items-center gap-1.5"><span className="size-3 rounded-full ring-2 ring-sun" />{es ? 'Ovulación confirmada (temperatura)' : 'Confirmed ovulation (temperature)'}</span>}
+        {Object.keys(flowByDay).length > 0 && <span className="flex items-center gap-1.5"><span className="h-1.5 w-3 rounded-full bg-bud" />{es ? 'Intensidad del sangrado' : 'Bleeding intensity'}</span>}
+        {spottingDays.length > 0 && <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-petal" />{es ? 'Manchado' : 'Spotting'}</span>}
+        {sexDays.length > 0 && <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[13px] text-blossom" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>{es ? 'Relación sexual' : 'Sexual activity'}</span>}
       </div>
     </div>
   );

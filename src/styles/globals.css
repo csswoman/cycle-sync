@@ -40,22 +40,26 @@
 
   /* Garden accents for illustrations and highlights. */
   --blossom: light-dark(#c2306a, #ff8fb8);
-  --blossom-soft: light-dark(#f8c9da, #3f1b30);
-  --leaf: light-dark(#356d22, #9bcc78);
-  --leaf-soft: light-dark(#e3ecc9, #1b2b20);
+  --blossom-soft: light-dark(#f8c9da, #3d2131);
+  --leaf: light-dark(#356d22, #a9dc84);
+  --leaf-soft: light-dark(#e3ecc9, #24402a);
   --coral: light-dark(#d4482c, #ff8a6e);
   --sun: light-dark(#f2a93b, #f2b65a);
+  /* Sun as text (warnings, intermediate level): AA on cream and on night cards. */
+  --sun-ink: light-dark(#8a5300, #f2c27a);
+  /* Text on a solid sun fill: sun stays light in both themes, so the ink stays dark. */
+  --sun-on: #2b1d08;
 
   /* Extended garden scale. Decorative tones (petal, blush, peach, leaf-fresh,
      sage) are for fills and gradients, not for text. */
   --bud: light-dark(#a3224a, #ff8fa8);
   --petal: light-dark(#f08bb0, #e07aa4);
-  --blush: light-dark(#fde6ee, #33182a);
+  --blush: light-dark(#fde6ee, #33202a);
   /* Pale petal that stays luminous at night (illustrations only). */
   --petal-light: light-dark(#fde6ee, #f6d3e1);
-  --peach: light-dark(#fbd2bd, #4a2a24);
+  --peach: light-dark(#fbd2bd, #45302a);
   --leaf-fresh: light-dark(#7cb356, #a9d987);
-  --sage: light-dark(#b9d0ae, #3f5a46);
+  --sage: light-dark(#b9d0ae, #3a5640);
   --moss: light-dark(#24491a, #cfe6b8);
 
   /* Named gradients. bloom/leaf carry white text; garden is decorative. */
@@ -78,26 +82,27 @@
  * leaf green. Values are light-dark(light, dark).
  * Text pairs meet WCAG AA: body text 13.6:1, secondary 5.1:1+,
  * pink accent 4.9:1+, leaf on leaf-soft 5.1:1; dark mode 6.6:1+.
- * Dark mode is a "night garden": plum-black body, deep green and plum glows.
+ * Dark mode is a "night garden": deep forest neutrals (low chroma, so it never
+ * reads as a terminal), blossom pink as the flower that glows against them.
  */
 [data-astryx-theme='neutral'] {
-  --color-background-body: light-dark(#fbf3ea, #141117);
-  --color-background-card: light-dark(#fffbf4, #1d1920);
-  --color-background-surface: light-dark(#fffbf4, #1d1920);
-  --color-background-popover: light-dark(#fffbf4, #26212a);
-  --color-background-muted: light-dark(#f1eedf, #27212b);
-  --color-border: light-dark(#ebe2d3, #352c39);
-  --color-border-emphasized: light-dark(#8f8169, #7d6f80);
-  --color-text-primary: light-dark(#2b2620, #f7eef2);
-  --color-text-secondary: light-dark(#6b6357, #bcaebd);
+  --color-background-body: light-dark(#fbf3ea, #101612);
+  --color-background-card: light-dark(#fffbf4, #18201b);
+  --color-background-surface: light-dark(#fffbf4, #18201b);
+  --color-background-popover: light-dark(#fffbf4, #1f2922);
+  --color-background-muted: light-dark(#f1eedf, #232d26);
+  --color-border: light-dark(#ebe2d3, #2f3b32);
+  --color-border-emphasized: light-dark(#8f8169, #71806f);
+  --color-text-primary: light-dark(#2b2620, #f3efe6);
+  --color-text-secondary: light-dark(#6b6357, #b5bfb0);
   --color-accent: light-dark(#c2306a, #ff8fb8);
   --color-on-accent: light-dark(#ffffff, #2b0f1c);
   --color-accent-muted: light-dark(#c2306a14, #ff8fb81f);
   --color-text-accent: light-dark(#c2306a, #ff8fb8);
   --color-icon-accent: light-dark(#c2306a, #ff8fb8);
-  --color-icon-primary: light-dark(#2b2620, #f7eef2);
-  --color-success: light-dark(#356d22, #9bcc78);
-  --color-text-success: light-dark(#356d22, #9bcc78);
+  --color-icon-primary: light-dark(#2b2620, #f3efe6);
+  --color-success: light-dark(#356d22, #a9dc84);
+  --color-text-success: light-dark(#356d22, #a9dc84);
 
   --font-family-body: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-family-heading: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -109,9 +114,9 @@
   --radius-page: 2rem;
 
   /* Warm, diffuse shadows instead of grey ones. */
-  --shadow-low: 0 1px 2px light-dark(#5a3a2a0d, #0000004d), 0 6px 16px light-dark(#5a3a2a0f, #00000059);
-  --shadow-med: 0 2px 4px light-dark(#5a3a2a0f, #00000059), 0 12px 28px light-dark(#5a3a2a14, #00000066);
-  --shadow-high: 0 4px 8px light-dark(#5a3a2a14, #00000066), 0 24px 48px light-dark(#5a3a2a1f, #00000080);
+  --shadow-low: 0 1px 2px light-dark(#5a3a2a0d, #050a0773), 0 6px 16px light-dark(#5a3a2a0f, #050a0780);
+  --shadow-med: 0 2px 4px light-dark(#5a3a2a0f, #050a0780), 0 12px 28px light-dark(#5a3a2a14, #050a078c);
+  --shadow-high: 0 4px 8px light-dark(#5a3a2a14, #050a078c), 0 24px 48px light-dark(#5a3a2a1f, #050a07a6);
 }
 
 /* Pill buttons, like the reference. Unlayered, so it beats the theme layer. */
@@ -157,25 +162,26 @@ p {
   background-attachment: fixed;
 }
 
-/* Night garden: deeper green and plum glows, plus faint "firefly" specks. */
+/* Night garden: the forest base carries the green, so glows stay subtle:
+   a moonlit canopy top-left, one blossom glowing bottom-right, amber fireflies. */
 html[data-theme='dark'] .garden-canvas {
   background-image:
-    radial-gradient(1.5px 1.5px at 18% 22%, #f2b65a99, transparent),
-    radial-gradient(1.5px 1.5px at 72% 14%, #a9d98780, transparent),
-    radial-gradient(1px 1px at 46% 64%, #ff8fb880, transparent),
-    radial-gradient(1.5px 1.5px at 88% 58%, #f2b65a66, transparent),
-    radial-gradient(1px 1px at 30% 86%, #a9d98766, transparent),
-    radial-gradient(60% 55% at 0% 0%, #1f3a2699, transparent 70%),
-    radial-gradient(40% 45% at 8% 90%, #1b2e2266, transparent 70%),
-    radial-gradient(55% 55% at 100% 100%, #4a1a3599, transparent 70%),
-    radial-gradient(40% 40% at 85% 8%, #3a173055, transparent 70%);
+    radial-gradient(1.5px 1.5px at 18% 22%, #f2b65aa6, transparent),
+    radial-gradient(1.5px 1.5px at 72% 14%, #f2c27a80, transparent),
+    radial-gradient(1px 1px at 46% 64%, #c8f0a066, transparent),
+    radial-gradient(1.5px 1.5px at 88% 58%, #f2b65a73, transparent),
+    radial-gradient(1px 1px at 30% 86%, #f2b65a66, transparent),
+    radial-gradient(1px 1px at 60% 38%, #ff8fb859, transparent),
+    radial-gradient(60% 55% at 0% 0%, #2a4a3266, transparent 70%),
+    radial-gradient(40% 45% at 8% 90%, #1d352455, transparent 70%),
+    radial-gradient(50% 50% at 100% 100%, #4a1f3866, transparent 70%);
 }
 
 /* Cards get a faint top highlight at night so they lift off the canvas. */
 html[data-theme='dark'] .astryx-card,
 html[data-theme='dark'] .garden-wash,
 html[data-theme='dark'] .phase-wash {
-  box-shadow: inset 0 1px 0 #ffffff0d, var(--shadow-low);
+  box-shadow: inset 0 1px 0 #f3efe60f, var(--shadow-low);
 }
 
 /*
@@ -189,6 +195,10 @@ html[data-theme='dark'] .phase-wash {
 }
 .nav-item:hover {
   background-color: color-mix(in srgb, var(--leaf-soft) 70%, transparent);
+}
+/* On the forest canvas a green hover disappears; use a faint cream wash. */
+html[data-theme='dark'] .nav-item:hover {
+  background-color: color-mix(in srgb, var(--foreground) 7%, transparent);
 }
 .nav-item[aria-current='page'] {
   background-image: linear-gradient(90deg,
@@ -314,12 +324,12 @@ html[data-theme='dark'] .phase-wash {
 .bloom-sway {
   transform-box: fill-box;
   transform-origin: 50% 100%;
-  animation: bloomSway 6s ease-in-out infinite;
+  animation: bloomSway var(--sway-dur, 6s) ease-in-out infinite;
 }
 
 @keyframes bloomSway {
-  0%, 100% { transform: rotate(-1.5deg); }
-  50% { transform: rotate(1.5deg); }
+  0%, 100% { transform: rotate(calc(var(--sway, 1.5deg) * -1)); }
+  50% { transform: rotate(var(--sway, 1.5deg)); }
 }
 
 /*
@@ -505,6 +515,67 @@ input[type='range']:focus {
   background: var(--primary);
 }
 
+/* Horizontal strips (programs, playlists): a rail that is visible in both themes, so it is
+   clear there is more content to the side. */
+/* Chrome ignores the ::-webkit-scrollbar styles (and draws the native bar with arrows) as soon as
+   scrollbar-color is set, so the standard properties are only for browsers without the pseudo-elements. */
+.scroll-rail::-webkit-scrollbar {
+  height: 6px;
+}
+.scroll-rail::-webkit-scrollbar-button {
+  display: none;
+}
+.scroll-rail::-webkit-scrollbar-track {
+  background: color-mix(in oklab, var(--primary) 12%, transparent);
+  border-radius: 999px;
+}
+.scroll-rail::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--primary) 70%, transparent);
+  border-radius: 999px;
+}
+.scroll-rail::-webkit-scrollbar-thumb:hover {
+  background: var(--primary);
+}
+@supports not selector(::-webkit-scrollbar) {
+  .scroll-rail {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, var(--primary) 70%, transparent) color-mix(in oklab, var(--primary) 12%, transparent);
+  }
+}
+
+/* Vertical scroll areas inside cards and dialogs: a slim bar that only shows while the pointer is over it. */
+.scroll-hover::-webkit-scrollbar {
+  width: 10px;
+}
+.scroll-hover::-webkit-scrollbar-button {
+  display: none;
+}
+.scroll-hover::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scroll-hover::-webkit-scrollbar-thumb {
+  background: transparent;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  border-radius: 999px;
+}
+.scroll-hover:hover::-webkit-scrollbar-thumb {
+  background: color-mix(in oklab, var(--foreground) 28%, transparent);
+  background-clip: padding-box;
+}
+.scroll-hover:hover::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in oklab, var(--foreground) 45%, transparent);
+  background-clip: padding-box;
+}
+@supports not selector(::-webkit-scrollbar) {
+  .scroll-hover {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+  .scroll-hover:hover {
+    scrollbar-color: color-mix(in oklab, var(--foreground) 35%, transparent) transparent;
+  }
+}
 /* animate-in utilities used across components */
 .animate-in {
   animation-duration: 300ms;

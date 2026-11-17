@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { useAppStore } from '@/stores/appStore';
 import { isGuestRoute } from '@/lib/guestAccess';
+import { usePmosToolsVisible, useProfileLoaded } from '@/hooks/useOnboardingAnswers';
 import { Icon } from '@/components/ui/Icon';
 import { Flower } from '@/components/ui/Flower';
 
@@ -66,6 +67,9 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
   const router = useRouter();
   const { user, authReady, setSignupPromptOpen } = useAppStore();
   const isGuest = authReady && !user;
+  // Wait for the stored profile so the PMOS link does not flash in and out.
+  const pmosVisible = usePmosToolsVisible();
+  const showPmos = useProfileLoaded() && pmosVisible;
 
   const navGroups = [
     {
@@ -93,7 +97,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
     {
       label: t.navHealth,
       items: [
-        { href: '/pmos', label: t.pmosToolkit, icon: 'spa' },
+        ...(showPmos ? [{ href: '/pmos', label: t.pmosToolkit, icon: 'spa' }] : []),
         { href: '/habits', label: t.habits, icon: 'check_circle' },
         { href: '/articles', label: t.articles, icon: 'menu_book' },
         { href: '/export', label: t.exportReport, icon: 'download' },

@@ -5,7 +5,7 @@ import { Bloom } from '@/components/ui/Bloom';
 import { Flower } from '@/components/ui/Flower';
 import { GardenCorner } from '@/components/ui/Botanical';
 import {
-  ONBOARDING_QUESTIONS, isQuestionAnswered, usesHormonalContraception,
+  activeQuestions, isQuestionAnswered, usesHormonalContraception,
   type OnboardingAnswers,
 } from './onboarding';
 
@@ -21,8 +21,10 @@ const ArchetypeSelection: React.FC<ArchetypeSelectionProps> = ({ onComplete, ini
   const text = onboardingText[language].archetype;
   const [answers, setAnswers] = useState<OnboardingAnswers>(initialAnswers ?? {});
   const [index, setIndex] = useState(0);
-  const question = ONBOARDING_QUESTIONS[index];
-  const isLast = index === ONBOARDING_QUESTIONS.length - 1;
+  // Conditional questions (e.g. why there is no period) appear only when they apply.
+  const questions = activeQuestions(answers);
+  const question = questions[Math.min(index, questions.length - 1)];
+  const isLast = index >= questions.length - 1;
   const copy = text.questions[question.id];
   const current = answers[question.id];
   const isSelected = (id: string) => (Array.isArray(current) ? current.includes(id) : current === id);
@@ -37,13 +39,15 @@ const ArchetypeSelection: React.FC<ArchetypeSelectionProps> = ({ onComplete, ini
   const note =
     question.id === 'contraception' && usesHormonalContraception(answers) ? text.notes.hormonalContraception
     : question.id === 'regularity' && answers.regularity === 'irregular' ? text.notes.irregular
+    : question.id === 'diagnosis' && answers.diagnosis === 'suspect' ? text.notes.suspect
+    : question.id === 'noPeriodReason' && answers.noPeriodReason === 'unknown' ? text.notes.noPeriodUnknown
     : null;
   const handleNext = () => {
     if (isLast) void onComplete(answers);
     else setIndex(index + 1);
   };
 
-  const total = ONBOARDING_QUESTIONS.length;
+  const total = questions.length;
   // The plant grows with each question: a seed at the start, in bloom at the end.
   const growth = 0.1 + (index / Math.max(1, total - 1)) * 0.9;
 
@@ -73,7 +77,7 @@ const ArchetypeSelection: React.FC<ArchetypeSelectionProps> = ({ onComplete, ini
                 <span>{question.multi ? text.chooseAny : text.chooseOne}</span>
               </div>
               <div className="flex items-center gap-1.5" aria-hidden="true">
-                {ONBOARDING_QUESTIONS.map((q, i) => (
+                {questions.map((q, i) => (
                   <span
                     key={q.id}
                     className={`h-2 rounded-full transition-all duration-500 ${
@@ -126,8 +130,8 @@ const ArchetypeSelection: React.FC<ArchetypeSelectionProps> = ({ onComplete, ini
               })}
             </div>
             {note && (
-              <div className="flex gap-3 rounded-2xl bg-amber-500/10 border border-amber-500/25 text-foreground p-4 text-sm">
-                <span className="material-symbols-outlined text-amber-500">info</span>
+              <div className="flex gap-3 rounded-2xl bg-sun/10 border border-sun/25 text-foreground p-4 text-sm">
+                <span className="material-symbols-outlined text-sun-ink">info</span>
                 <p>{note}</p>
               </div>
             )}

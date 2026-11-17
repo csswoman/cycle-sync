@@ -60,7 +60,7 @@ const config: Config = {
         blossom: { DEFAULT: c('blossom'), soft: c('blossom-soft') },
         leaf: { DEFAULT: c('leaf'), soft: c('leaf-soft'), fresh: c('leaf-fresh') },
         coral: c('coral'),
-        sun: c('sun'),
+        sun: { DEFAULT: c('sun'), ink: c('sun-ink'), on: c('sun-on') },
         bud: c('bud'),
         petal: c('petal'),
         blush: c('blush'),

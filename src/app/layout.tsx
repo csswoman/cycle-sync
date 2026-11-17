@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     default: 'CycleSync - Holistic Health',
     template: '%s | CycleSync',
   },
-  description: 'Track your cycle, sync your life. Holistic health for women with PMOS.',
+  description: 'Track your cycle, sync your life. Holistic health for regular cycles, irregular cycles and PMOS.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
@@ -26,7 +26,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#fbf3ea',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#fbf3ea' },
+    { media: '(prefers-color-scheme: dark)', color: '#101612' },
+  ],
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,

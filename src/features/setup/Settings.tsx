@@ -120,7 +120,7 @@ const Settings: React.FC = () => {
                 <h1 className="text-foreground text-3xl md:text-4xl font-semibold tracking-tight">{t.settingsTitle}</h1>
 
                 {message && (
-                    <div className={`p-4 rounded-xl border ${message.type === 'success' ? 'bg-green-500/10 border-green-500/20 text-green-500' : 'bg-destructive/10 border-destructive/20 text-destructive'}`}>
+                    <div className={`p-4 rounded-xl border ${message.type === 'success' ? 'bg-leaf/10 border-leaf/20 text-leaf' : 'bg-destructive/10 border-destructive/20 text-destructive'}`}>
                         {message.text}
                     </div>
                 )}
@@ -171,7 +171,7 @@ const Settings: React.FC = () => {
                     </form>
                 </SettingsSection>
 
-                <SettingsSection title={es ? 'Mi objetivo' : 'My goal'} icon="flag">
+                <SettingsSection title={es ? 'Mi objetivo y perfil' : 'My goal and profile'} icon="flag">
                     <GoalSettings language={language} />
                 </SettingsSection>
                 {/* Display: hide calories, macros, weight and waist */}

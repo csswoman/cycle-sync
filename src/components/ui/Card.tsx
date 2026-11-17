@@ -26,7 +26,7 @@ export const Card: React.FC<CardProps> = ({ children, className = '', onClick, h
 export const CardHeader: React.FC<{ children?: React.ReactNode, icon?: string, title: string }> = ({ icon, title, children }) => {
     return (
         <div className="flex items-center justify-between mb-2">
-            <p className="relative text-muted-foreground text-xs font-semibold uppercase tracking-wider">{title}</p>
+            <p className="relative text-foreground text-sm font-semibold">{title}</p>
             {icon && (
                 <Icon
                     name={icon}

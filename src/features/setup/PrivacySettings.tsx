@@ -99,7 +99,7 @@ const PrivacySettings: React.FC = () => {
     <SettingsSection title={es ? 'Privacidad y datos' : 'Privacy and data'} icon="lock">
       <div className="flex flex-col gap-8">
         {msg && (
-          <div role="status" className={`p-3 rounded-xl border text-sm ${msg.ok ? 'bg-green-500/10 border-green-500/20 text-green-500' : 'bg-destructive/10 border-destructive/20 text-destructive'}`}>{msg.text}</div>
+          <div role="status" className={`p-3 rounded-xl border text-sm ${msg.ok ? 'bg-leaf/10 border-leaf/20 text-leaf' : 'bg-destructive/10 border-destructive/20 text-destructive'}`}>{msg.text}</div>
         )}
 
         <div className="flex flex-col gap-3">
@@ -150,7 +150,7 @@ const PrivacySettings: React.FC = () => {
             <input className={inputCls} value={word} onChange={(e) => setWord(e.target.value)} autoComplete="off" />
           </label>
           <button type="button" onClick={() => void deleteAccount()} disabled={deleting || word.trim() !== confirmWord}
-            className="w-fit px-6 h-11 rounded-xl bg-destructive text-white font-bold disabled:opacity-50">
+            className="w-fit px-6 h-11 rounded-xl bg-destructive text-destructive-foreground font-bold disabled:opacity-50">
             {deleting ? '...' : (es ? 'Borrar cuenta definitivamente' : 'Delete account permanently')}
           </button>
         </div>

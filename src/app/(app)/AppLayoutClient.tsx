@@ -7,6 +7,7 @@ import Sidebar from '@/components/layout/Sidebar';
 import SmartAssistant from '@/features/assistant/SmartAssistant';
 import { useAppStore } from '@/stores/appStore';
 import { supabase } from '@/lib/supabase';
+import { ensureProfileLoaded, resetProfile } from '@/stores/profileStore';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { useOfflineSync } from '@/hooks/useOfflineSync';
 import { useMedicationReminders } from '@/hooks/useMedicationReminders';
@@ -46,7 +47,11 @@ export default function AppLayoutClient({ children }: { children: React.ReactNod
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
-      if (_event === 'SIGNED_OUT') router.push('/login');
+      if (_event === 'SIGNED_IN') void ensureProfileLoaded();
+      if (_event === 'SIGNED_OUT') {
+        resetProfile();
+        router.push('/login');
+      }
     });
     return () => subscription.unsubscribe();
   }, []);

@@ -244,7 +244,7 @@ const CycleSetup: React.FC<CycleSetupProps> = ({ onNavigate }) => {
 
 
                         <div className="bg-card rounded-xl p-5 border border-border flex items-center gap-4">
-                            <div className="size-10 rounded-full bg-green-500/10 flex items-center justify-center text-green-500 shrink-0">
+                            <div className="size-10 rounded-full bg-leaf/10 flex items-center justify-center text-leaf shrink-0">
                                 <span className="material-symbols-outlined">lock</span>
                             </div>
                             <div>

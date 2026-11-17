@@ -53,14 +53,14 @@ export const LineChart: React.FC<LineChartProps> = ({ points, unit, refLow, refH
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label={`Trend${unit ? ` in ${unit}` : ''}`}>
       {(refLow != null || refHigh != null) && (
-        <rect x={PAD.l} y={bandTop} width={W - PAD.l - PAD.r} height={Math.max(0, bandBottom - bandTop)} className="fill-green-500/10" />
+        <rect x={PAD.l} y={bandTop} width={W - PAD.l - PAD.r} height={Math.max(0, bandBottom - bandTop)} className="fill-leaf/10" />
       )}
       <line x1={PAD.l} y1={H - PAD.b} x2={W - PAD.r} y2={H - PAD.b} className="stroke-border" />
-      <text x={PAD.l - 4} y={y(vMax - pad) + 3} textAnchor="end" className="fill-muted-foreground" fontSize="9">{fmtVal(vMax - pad)}</text>
-      <text x={PAD.l - 4} y={y(vMin + pad) + 3} textAnchor="end" className="fill-muted-foreground" fontSize="9">{fmtVal(vMin + pad)}</text>
-      <text x={PAD.l} y={H - 6} textAnchor="start" className="fill-muted-foreground" fontSize="9">{shortDate(points[0].date)}</text>
+      <text x={PAD.l - 4} y={y(vMax - pad) + 3} textAnchor="end" className="fill-muted-foreground" fontSize="10">{fmtVal(vMax - pad)}</text>
+      <text x={PAD.l - 4} y={y(vMin + pad) + 3} textAnchor="end" className="fill-muted-foreground" fontSize="10">{fmtVal(vMin + pad)}</text>
+      <text x={PAD.l} y={H - 6} textAnchor="start" className="fill-muted-foreground" fontSize="10">{shortDate(points[0].date)}</text>
       {points.length > 1 && (
-        <text x={W - PAD.r} y={H - 6} textAnchor="end" className="fill-muted-foreground" fontSize="9">{shortDate(points[points.length - 1].date)}</text>
+        <text x={W - PAD.r} y={H - 6} textAnchor="end" className="fill-muted-foreground" fontSize="10">{shortDate(points[points.length - 1].date)}</text>
       )}
       <path d={path} fill="none" className="stroke-primary" strokeWidth="2" strokeLinejoin="round" />
       {points.map((p) => (

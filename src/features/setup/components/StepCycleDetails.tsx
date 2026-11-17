@@ -34,7 +34,7 @@ export const StepCycleDetails: React.FC<StepCycleDetailsProps> = ({
                     <PeriodDayCalendar selected={selectedDays} onChange={onChangeDays} saved={savedDays} />
                     <p className="text-sm text-muted-foreground">{text.daysMarked(total)}</p>
                 </div>
-                {total === 0 && !unsure && <p className="text-sm text-amber-500 mt-4">{text.needData}</p>}
+                {total === 0 && !unsure && <p className="text-sm text-sun-ink mt-4">{text.needData}</p>}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-card rounded-xl p-6 border border-border shadow-sm flex flex-col justify-between">
