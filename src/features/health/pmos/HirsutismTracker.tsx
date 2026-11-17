@@ -65,50 +65,52 @@ export const HirsutismTracker: React.FC<{ lang: Lang }> = ({ lang }) => {
   };
 
   return (
-    <section className="bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-6 flex flex-col gap-4">
+    <section className="bg-card rounded-3xl border border-border shadow-[var(--shadow-low)] p-5 sm:p-6 flex flex-col gap-4">
       <div className="flex items-start gap-3">
         <div className="size-10 shrink-0 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
           <Icon name="spa" size={20} />
         </div>
         <div>
-          <h3 className="text-foreground text-lg font-bold">{t.title}</h3>
-          <p className="text-xs sm:text-sm text-muted-foreground">{t.sub}</p>
+          <h2 className="text-foreground text-lg font-semibold tracking-tight text-balance">{t.title}</h2>
+          <p className="text-sm text-muted-foreground text-pretty">{t.sub}</p>
         </div>
       </div>
 
       {rows.length > 0 && (
-        <div className="flex flex-col gap-2">
-          <div className="flex items-baseline justify-between">
-            <p className="text-sm text-muted-foreground">{t.last}: {fmt(last!.date)}</p>
-            <p className="text-lg font-black text-foreground">{last!.total}<span className="text-xs font-normal text-muted-foreground">/36</span></p>
+        <div className="flex flex-col gap-3 rounded-2xl border border-border p-4">
+          <div className="flex items-end justify-between gap-3">
+            <p className="text-sm text-muted-foreground">{t.last}<br /><span className="text-foreground font-medium">{fmt(last!.date)}</span></p>
+            <p className="text-3xl font-semibold tracking-tight text-foreground tabular-nums leading-none">{last!.total}<span className="text-base font-normal text-muted-foreground">/36</span></p>
           </div>
           {rows.length > 1 && <LineChart points={rows.map((r) => ({ date: r.date, value: r.total }))} unit="" refHigh={FG_THRESHOLD} />}
-          <p className="text-xs text-muted-foreground">{last!.total >= FG_THRESHOLD ? t.above : t.below}</p>
+          <p className={`text-sm text-pretty rounded-xl p-3 ${last!.total >= FG_THRESHOLD ? 'bg-sun/10 text-foreground' : 'bg-leaf/10 text-foreground'}`}>{last!.total >= FG_THRESHOLD ? t.above : t.below}</p>
         </div>
       )}
 
       {showForm ? (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-1">
+          <div className="flex flex-col divide-y divide-border/60">
           {FG_AREAS.map((a) => (
-            <label key={a.key} className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-3">
+            <label key={a.key} className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-3 py-3">
               <span className="text-sm text-foreground">{a[lang]}</span>
               <select value={scores[a.key] ?? 0} onChange={(e) => setScores({ ...scores, [a.key]: Number(e.target.value) })}
-                className="bg-secondary text-foreground rounded-lg px-3 py-2 text-sm border border-border sm:w-48">
+                className="bg-secondary text-foreground min-h-10 rounded-xl px-3 py-2 text-sm border border-border w-full sm:w-48">
                 {LEVELS[lang].map((l, v) => <option key={v} value={v}>{l}</option>)}
               </select>
             </label>
           ))}
-          <p className="text-sm font-bold text-foreground">{t.total}: {total}/36</p>
+          </div>
+          <p className="text-sm font-semibold text-foreground tabular-nums py-3 border-t border-border">{t.total}: {total}/36</p>
           {error && <p role="alert" className="text-sm text-destructive">{t.error}</p>}
-          <div className="flex gap-3">
-            <button onClick={save} disabled={saving} className="bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-full font-bold text-sm disabled:opacity-60">
+          <div className="flex flex-wrap gap-3">
+            <button onClick={save} disabled={saving} className="bg-primary hover:bg-primary/90 text-primary-foreground min-h-11 px-6 rounded-full font-semibold text-sm disabled:opacity-60">
               {saving ? t.saving : t.save}
             </button>
-            {last && <button onClick={() => setEditing(false)} className="px-4 py-3 text-sm font-bold text-muted-foreground">{t.cancel}</button>}
+            {last && <button onClick={() => setEditing(false)} className="min-h-11 px-4 rounded-full text-sm font-semibold text-muted-foreground hover:text-foreground">{t.cancel}</button>}
           </div>
         </div>
       ) : (
-        <button onClick={start} className="self-start text-sm font-bold text-primary hover:underline">{t.again}</button>
+        <button onClick={start} className="self-start inline-flex items-center min-h-10 text-sm font-semibold text-primary hover:underline">{t.again}</button>
       )}
     </section>
   );

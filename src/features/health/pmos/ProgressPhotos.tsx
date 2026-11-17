@@ -108,45 +108,48 @@ export const ProgressPhotos: React.FC<{ lang: Lang }> = ({ lang }) => {
       {p.url
         ? (
           <button type="button" onClick={() => toggle(p.id)} aria-label={revealed.has(p.id) ? t.hide : t.reveal}
-            className="relative block w-full aspect-[3/4] overflow-hidden rounded-xl border border-border bg-secondary">
+            className="relative block w-full aspect-[3/4] overflow-hidden rounded-2xl border border-border bg-secondary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
             <img src={p.url} alt={`${t.areas[p.area]} · ${fmt(p.date)}`}
               className={`w-full h-full object-cover transition-[filter] ${revealed.has(p.id) ? '' : 'blur-2xl scale-110'}`} />
-            {!revealed.has(p.id) && <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-foreground bg-background/30">{t.reveal}</span>}
+            {!revealed.has(p.id) && <span className="absolute inset-0 flex flex-col items-center justify-center gap-1 text-sm font-semibold text-foreground bg-background/40"><Icon name="visibility" size={22} />{t.reveal}</span>}
           </button>
         )
-        : <div className="w-full aspect-[3/4] rounded-xl bg-secondary" />}
-      <figcaption className="text-xs text-muted-foreground">
+        : <div className="w-full aspect-[3/4] rounded-2xl bg-secondary" />}
+      <figcaption className="text-sm text-muted-foreground text-pretty">
         {label && <strong className="text-foreground">{label} · </strong>}{fmt(p.date)}{p.note ? ` · ${p.note}` : ''}
       </figcaption>
-      <button onClick={() => remove(p)} aria-label={t.del} className="absolute top-2 right-2 p-1.5 rounded-full bg-black/50 text-white hover:bg-black/70">
-        <Icon name="delete" size={14} />
+      <button onClick={() => remove(p)} aria-label={t.del} className="absolute top-1.5 right-1.5 size-10 inline-flex items-center justify-center rounded-full bg-black/55 text-white hover:bg-black/75 focus-visible:outline-2 focus-visible:outline-white">
+        <Icon name="delete" size={18} />
       </button>
     </figure>
   );
 
   return (
-    <section className="bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-6 flex flex-col gap-4">
+    <section className="bg-card rounded-3xl border border-border shadow-[var(--shadow-low)] p-5 sm:p-6 flex flex-col gap-4">
       <div className="flex items-start gap-3">
         <div className="size-10 shrink-0 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
           <Icon name="photo_camera" size={20} />
         </div>
         <div>
-          <h3 className="text-foreground text-lg font-bold">{t.title}</h3>
-          <p className="text-xs sm:text-sm text-muted-foreground">{t.sub}</p>
+          <h2 className="text-foreground text-lg font-semibold tracking-tight text-balance">{t.title}</h2>
+          <p className="text-sm text-muted-foreground text-pretty">{t.sub}</p>
         </div>
       </div>
 
-      <div className="flex gap-2 overflow-x-auto pb-1">
+      <div role="radiogroup" aria-label={t.title} className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
         {(Object.keys(t.areas) as Area[]).map((a) => (
-          <button key={a} onClick={() => { setArea(a); setShowAll(false); }} aria-pressed={area === a}
-            className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap border ${area === a ? 'bg-primary text-primary-foreground border-primary' : 'bg-secondary text-foreground border-border'}`}>
+          <button key={a} type="button" role="radio" aria-checked={area === a} onClick={() => { setArea(a); setShowAll(false); }}
+            className={`inline-flex items-center min-h-10 px-4 rounded-full text-sm font-semibold whitespace-nowrap border transition-colors ${area === a ? 'bg-primary text-primary-foreground border-primary' : 'bg-secondary text-foreground border-border'}`}>
             {t.areas[a]}
           </button>
         ))}
       </div>
 
       {inArea.length === 0 ? (
-        <p className="text-sm text-muted-foreground">{t.none}</p>
+        <div className="flex flex-col items-center justify-center gap-2 text-center rounded-2xl border border-dashed border-border bg-secondary/30 aspect-[16/9] min-h-40 p-6 text-muted-foreground">
+          <Icon name="photo_camera" size={28} />
+          <p className="text-sm text-pretty max-w-[32ch]">{t.none}</p>
+        </div>
       ) : showAll ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">{inArea.map((p) => <Tile key={p.id} p={p} />)}</div>
       ) : (
@@ -156,16 +159,16 @@ export const ProgressPhotos: React.FC<{ lang: Lang }> = ({ lang }) => {
         </div>
       )}
       {inArea.length > 2 && !showAll && (
-        <button onClick={() => setShowAll(true)} className="self-start text-sm font-bold text-primary hover:underline">{t.all(inArea.length)}</button>
+        <button onClick={() => setShowAll(true)} className="self-start inline-flex items-center min-h-10 text-sm font-semibold text-primary hover:underline">{t.all(inArea.length)}</button>
       )}
 
-      <div className="flex flex-col sm:flex-row gap-2">
+      <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t border-border">
         <input value={note} onChange={(e) => setNote(e.target.value)} maxLength={200} placeholder={t.note}
-          className="flex-1 bg-secondary text-foreground rounded-full px-4 py-2.5 text-sm border border-border" />
+          className="flex-1 min-w-0 bg-secondary text-foreground rounded-full px-4 min-h-11 text-sm border border-border" />
         <input ref={input} type="file" accept="image/jpeg,image/png,image/webp" capture="environment" className="hidden"
           onChange={(e) => { const f = e.target.files?.[0]; if (f) upload(f); }} />
         <button onClick={() => input.current?.click()} disabled={busy}
-          className="flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground px-5 py-2.5 rounded-full font-bold text-sm disabled:opacity-60">
+          className="flex items-center justify-center gap-2 bg-primary hover:bg-primary/90 text-primary-foreground min-h-11 px-6 rounded-full font-semibold text-sm disabled:opacity-60">
           <Icon name="add_a_photo" size={16} /> {busy ? t.uploading : t.add}
         </button>
       </div>

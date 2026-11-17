@@ -16,14 +16,14 @@ type Lang = 'es' | 'en';
 const fmt = (iso: string, lang: Lang) => parseLocalDate(iso).toLocaleDateString(lang === 'es' ? 'es-MX' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' });
 
 const Card: React.FC<{ icon: string; title: string; subtitle?: string; children: React.ReactNode }> = ({ icon, title, subtitle, children }) => (
-  <section className="bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-6 flex flex-col gap-4">
+  <section className="bg-card rounded-3xl border border-border shadow-[var(--shadow-low)] p-5 sm:p-6 flex flex-col gap-4">
     <div className="flex items-start gap-3">
       <div className="size-10 shrink-0 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
         <Icon name={icon} size={20} />
       </div>
       <div>
-        <h3 className="text-foreground text-lg font-bold">{title}</h3>
-        {subtitle && <p className="text-xs sm:text-sm text-muted-foreground">{subtitle}</p>}
+        <h2 className="text-foreground text-lg font-semibold tracking-tight text-balance">{title}</h2>
+        {subtitle && <p className="text-sm text-muted-foreground text-pretty">{subtitle}</p>}
       </div>
     </div>
     {children}
@@ -31,9 +31,9 @@ const Card: React.FC<{ icon: string; title: string; subtitle?: string; children:
 );
 
 const TONE: Record<InsightTone, string> = {
-  positive: 'border-emerald-500/30 bg-emerald-500/5',
+  positive: 'border-leaf/30 bg-leaf/5',
   neutral: 'border-border bg-secondary/30',
-  attention: 'border-amber-500/40 bg-amber-500/10',
+  attention: 'border-sun/40 bg-sun/10',
 };
 
 /* ---------------- 1. What is working ---------------- */
@@ -55,13 +55,13 @@ export const InsightsCard: React.FC<{ lang: Lang; data: PMOSOverviewData }> = ({
         <ul className="flex flex-col gap-2.5">
           {insights.map((i) => (
             <li key={i.id} className={`flex gap-3 rounded-xl border p-3.5 ${TONE[i.tone]}`}>
-              <Icon name={i.icon} size={18} className={`mt-0.5 shrink-0 ${i.tone === 'positive' ? 'text-emerald-600' : i.tone === 'attention' ? 'text-amber-600' : 'text-primary'}`} />
+              <Icon name={i.icon} size={18} className={`mt-0.5 shrink-0 ${i.tone === 'positive' ? 'text-leaf' : i.tone === 'attention' ? 'text-sun-ink' : 'text-primary'}`} />
               <p className="text-sm text-foreground leading-relaxed">{i[lang]}</p>
             </li>
           ))}
         </ul>
       )}
-      <p className="text-xs text-muted-foreground">
+      <p className="text-sm text-muted-foreground">
         {lang === 'es'
           ? 'Son observaciones de tus propios datos, no prueban causa y efecto. Llévalas a tu consulta para decidir los siguientes pasos con tu médico.'
           : 'These are observations from your own data and do not prove cause and effect. Bring them to your appointment to decide next steps together.'}
@@ -73,9 +73,9 @@ export const InsightsCard: React.FC<{ lang: Lang; data: PMOSOverviewData }> = ({
 /* ---------------- 4. Cycle status and ovulation ---------------- */
 
 const OV_STYLE: Record<OvulationStatus, { cls: string; es: string; en: string }> = {
-  confirmed: { cls: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400', es: 'Ovulación confirmada', en: 'Ovulation confirmed' },
-  possible: { cls: 'bg-sky-500/15 text-sky-700 dark:text-sky-400', es: 'Posible (LH positiva)', en: 'Possible (positive LH)' },
-  not_detected: { cls: 'bg-amber-500/15 text-amber-700 dark:text-amber-400', es: 'Sin ovulación detectada', en: 'No ovulation detected' },
+  confirmed: { cls: 'bg-leaf/15 text-leaf', es: 'Ovulación confirmada', en: 'Ovulation confirmed' },
+  possible: { cls: 'bg-sun/15 text-sun-ink', es: 'Posible (LH positiva)', en: 'Possible (positive LH)' },
+  not_detected: { cls: 'bg-sun/15 text-sun-ink', es: 'Sin ovulación detectada', en: 'No ovulation detected' },
   in_progress: { cls: 'bg-secondary text-muted-foreground', es: 'En curso', en: 'In progress' },
   no_data: { cls: 'bg-secondary text-muted-foreground', es: 'Sin datos', en: 'No data' },
 };
@@ -100,7 +100,7 @@ export const CycleStatusCard: React.FC<{ lang: Lang; data: PMOSOverviewData }> =
       : 'More than 90 days without a period. With PMOS, long gaps without bleeding can thicken the uterine lining. Book an appointment: your doctor can induce a bleed or protect the lining.',
   }[gap.level];
 
-  const tone = gap?.level === 'alert' ? 'border-destructive/40 bg-destructive/10' : gap?.level === 'very_long' ? 'border-amber-500/40 bg-amber-500/10' : 'border-border bg-secondary/30';
+  const tone = gap?.level === 'alert' ? 'border-destructive/40 bg-destructive/10' : gap?.level === 'very_long' ? 'border-sun/40 bg-sun/10' : 'border-border bg-secondary/30';
 
   return (
     <Card icon="calendar_month" title={es ? 'Tu ciclo y la ovulación' : 'Your cycle and ovulation'}>
@@ -109,22 +109,22 @@ export const CycleStatusCard: React.FC<{ lang: Lang; data: PMOSOverviewData }> =
       ) : (
         <div className={`rounded-xl border p-4 flex items-start gap-4 ${tone}`}>
           <div className="text-center shrink-0">
-            <p className="text-3xl font-black text-foreground tabular-nums leading-none">{gap.days}</p>
-            <p className="text-[11px] text-muted-foreground mt-1">{es ? 'días' : 'days'}</p>
+            <p className="text-3xl font-semibold text-foreground tabular-nums leading-none">{gap.days}</p>
+            <p className="text-sm text-muted-foreground mt-1">{es ? 'días' : 'days'}</p>
           </div>
           <div className="flex flex-col gap-1">
-            <p className="text-sm font-bold text-foreground">{es ? `desde tu última regla (${fmt(gap.lastStart, lang)})` : `since your last period (${fmt(gap.lastStart, lang)})`}</p>
+            <p className="text-sm font-semibold text-foreground">{es ? `desde tu última regla (${fmt(gap.lastStart, lang)})` : `since your last period (${fmt(gap.lastStart, lang)})`}</p>
             <p className="text-sm text-foreground/90 leading-relaxed">{gapText}</p>
             {data.hormonal && (
-              <p className="text-xs text-muted-foreground">{es ? 'Con anticonceptivo hormonal, el sangrado de la semana de descanso no es una regla natural.' : 'On hormonal contraception, the break-week bleed is not a natural period.'}</p>
+              <p className="text-sm text-muted-foreground">{es ? 'Con anticonceptivo hormonal, el sangrado de la semana de descanso no es una regla natural.' : 'On hormonal contraception, the break-week bleed is not a natural period.'}</p>
             )}
           </div>
         </div>
       )}
 
       {bleedingFlags.length > 0 && (
-        <div className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-4 flex flex-col gap-1.5">
-          <h4 className="text-sm font-bold text-foreground">{es ? 'Sangrado abundante' : 'Heavy bleeding'}</h4>
+        <div className="rounded-xl border border-sun/40 bg-sun/10 p-4 flex flex-col gap-1.5">
+          <h3 className="text-sm font-semibold text-foreground">{es ? 'Sangrado abundante' : 'Heavy bleeding'}</h3>
           {bleedingFlags.includes('heavyBleeding') && (
             <p className="text-sm text-foreground/90 leading-relaxed">{es
               ? 'En una de tus últimas reglas anotaste 2 o más días de sangrado muy abundante (o abundante con coágulos). Conviene comentarlo y revisar tu hierro.'
@@ -140,8 +140,8 @@ export const CycleStatusCard: React.FC<{ lang: Lang; data: PMOSOverviewData }> =
       {!data.hormonal && history.length > 0 && (
         <div className="flex flex-col gap-2">
           <div className="flex items-baseline justify-between gap-2">
-            <h4 className="text-sm font-bold text-foreground">{es ? 'Ovulación por ciclo' : 'Ovulation per cycle'}</h4>
-            {finished > 0 && <span className="text-xs text-muted-foreground">{es ? `${confirmed} de ${finished} ciclos con ovulación confirmada` : `${confirmed} of ${finished} cycles with confirmed ovulation`}</span>}
+            <h3 className="text-sm font-semibold text-foreground">{es ? 'Ovulación por ciclo' : 'Ovulation per cycle'}</h3>
+            {finished > 0 && <span className="text-sm text-muted-foreground">{es ? `${confirmed} de ${finished} ciclos con ovulación confirmada` : `${confirmed} of ${finished} cycles with confirmed ovulation`}</span>}
           </div>
           <ul className="flex flex-col divide-y divide-border/60">
             {history.map((h) => (
@@ -156,11 +156,11 @@ export const CycleStatusCard: React.FC<{ lang: Lang; data: PMOSOverviewData }> =
               </li>
             ))}
           </ul>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             {es
               ? 'Se confirma con una subida sostenida de temperatura basal. Una LH positiva sola no confirma la ovulación con PMOS. Registra ambas en '
               : 'Confirmed by a sustained basal temperature rise. A positive LH alone does not confirm ovulation with PMOS. Log both in '}
-            <Link href="/log?tab=body" className="font-bold text-primary hover:underline">{es ? 'Cuerpo y fertilidad' : 'Body & fertility'}</Link>.
+            <Link href="/log?tab=body" className="font-semibold text-primary hover:underline">{es ? 'Cuerpo y fertilidad' : 'Body & fertility'}</Link>.
           </p>
         </div>
       )}
@@ -197,23 +197,23 @@ export const ScreeningCard: React.FC<{ lang: Lang; data: PMOSOverviewData; onOpe
         {plan.map((p) => {
           const txt = SCREEN_TEXT[p.key];
           const badge = p.status === 'ok'
-            ? { cls: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400', label: es ? `Al día · próximo ${fmt(p.due!, lang)}` : `Up to date · next ${fmt(p.due!, lang)}` }
+            ? { cls: 'bg-leaf/15 text-leaf', label: es ? `Al día · próximo ${fmt(p.due!, lang)}` : `Up to date · next ${fmt(p.due!, lang)}` }
             : p.status === 'due'
-              ? { cls: 'bg-amber-500/15 text-amber-700 dark:text-amber-400', label: es ? `Toca revisar (último ${fmt(p.last!, lang)})` : `Due (last ${fmt(p.last!, lang)})` }
+              ? { cls: 'bg-sun/15 text-sun-ink', label: es ? `Toca revisar (último ${fmt(p.last!, lang)})` : `Due (last ${fmt(p.last!, lang)})` }
               : { cls: 'bg-secondary text-muted-foreground', label: es ? 'Sin registro' : 'Not logged' };
           return (
             <li key={p.key} className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-3 rounded-xl border border-border p-3">
               <div>
-                <p className="text-sm font-bold text-foreground">{txt[lang]}</p>
-                <p className="text-xs text-muted-foreground">{es ? txt.whyEs : txt.whyEn}</p>
+                <p className="text-sm font-semibold text-foreground">{txt[lang]}</p>
+                <p className="text-sm text-muted-foreground">{es ? txt.whyEs : txt.whyEn}</p>
               </div>
               <span className={`self-start sm:self-center shrink-0 text-xs font-semibold rounded-full px-2.5 py-1 ${badge.cls}`}>{badge.label}</span>
             </li>
           );
         })}
       </ul>
-      <button onClick={onOpenLabs} className="self-start text-sm font-bold text-primary hover:underline">
-        {es ? 'Registrar un resultado →' : 'Log a result →'}
+      <button onClick={onOpenLabs} className="self-start inline-flex items-center min-h-10 text-sm font-semibold text-primary hover:underline">
+        {es ? 'Registrar un resultado' : 'Log a result'}
       </button>
     </Card>
   );
@@ -234,10 +234,10 @@ export const MealGlucoseCard: React.FC<{ lang: Lang; data: PMOSOverviewData }> =
               <span className="text-sm font-semibold text-foreground">{g.label}</span>
               <span className="text-sm text-foreground">{Math.round(g.averageMgDl)} mg/dL</span>
             </div>
-            <div className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+            <div className="flex items-center justify-between gap-3 text-sm text-muted-foreground">
               <span>{es ? `${g.count} lecturas` : `${g.count} readings`}</span>
               {g.aboveThreshold && (
-                <span className="font-semibold rounded-full px-2.5 py-1 border border-amber-500/40 bg-amber-500/10 text-foreground">
+                <span className="font-semibold rounded-full px-2.5 py-1 border border-sun/40 bg-sun/10 text-foreground">
                   {es ? `Promedio a las 2 h por encima de ${SPIKE_THRESHOLD_MG_DL} mg/dL` : `2 h average above ${SPIKE_THRESHOLD_MG_DL} mg/dL`}
                 </span>
               )}
@@ -245,7 +245,7 @@ export const MealGlucoseCard: React.FC<{ lang: Lang; data: PMOSOverviewData }> =
           </li>
         ))}
       </ul>
-      <p className="text-xs text-muted-foreground">
+      <p className="text-sm text-muted-foreground">
         {es
           ? 'Es una observación de tus propios datos, no un diagnóstico. Manda el rango de referencia de tu laboratorio.'
           : 'This is an observation from your own data, not a diagnosis. Your laboratory\'s reference range prevails.'}

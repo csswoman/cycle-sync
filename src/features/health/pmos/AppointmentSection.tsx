@@ -34,10 +34,10 @@ const T = {
     saveAfter: 'Save notes', error: 'Could not save. Check the data.',
   },
 };
-const inputCls = 'bg-secondary text-foreground rounded-lg px-3 py-2 text-sm border border-border min-w-0';
+const inputCls = 'bg-secondary text-foreground min-h-10 rounded-xl px-3 py-2 text-sm border border-border min-w-0';
 const Block: React.FC<{ icon: string; title: string; children: React.ReactNode }> = ({ icon, title, children }) => (
-  <section className="bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-6 flex flex-col gap-3">
-    <h3 className="text-foreground text-lg font-bold flex items-center gap-2"><Icon name={icon} size={20} className="text-primary" /> {title}</h3>
+  <section className="bg-card rounded-3xl border border-border shadow-[var(--shadow-low)] p-5 sm:p-6 flex flex-col gap-3">
+    <h2 className="text-foreground text-lg font-semibold tracking-tight text-balance flex items-center gap-2"><Icon name={icon} size={20} className="text-primary" /> {title}</h2>
     {children}
   </section>
 );
@@ -55,17 +55,17 @@ const AppointmentForm: React.FC<{ lang: Lang; initial?: Appointment; onSave: (f:
       if (ok) onCancel();
     }}>
       <div className="grid grid-cols-2 gap-2">
-        <label className="flex flex-col gap-1 text-xs font-bold text-muted-foreground">{t.date}<input type="date" required value={f.date} onChange={set('date')} className={inputCls} /></label>
-        <label className="flex flex-col gap-1 text-xs font-bold text-muted-foreground">{t.time}<input type="time" value={f.time} onChange={set('time')} className={inputCls} /></label>
-        <label className="flex flex-col gap-1 text-xs font-bold text-muted-foreground">{t.specialty}<input value={f.specialty} maxLength={100} onChange={set('specialty')} className={inputCls} /></label>
-        <label className="flex flex-col gap-1 text-xs font-bold text-muted-foreground">{t.doctor}<input value={f.doctor} maxLength={150} onChange={set('doctor')} className={inputCls} /></label>
+        <label className="flex flex-col gap-1 text-sm font-medium text-muted-foreground">{t.date}<input type="date" required value={f.date} onChange={set('date')} className={inputCls} /></label>
+        <label className="flex flex-col gap-1 text-sm font-medium text-muted-foreground">{t.time}<input type="time" value={f.time} onChange={set('time')} className={inputCls} /></label>
+        <label className="flex flex-col gap-1 text-sm font-medium text-muted-foreground">{t.specialty}<input value={f.specialty} maxLength={100} onChange={set('specialty')} className={inputCls} /></label>
+        <label className="flex flex-col gap-1 text-sm font-medium text-muted-foreground">{t.doctor}<input value={f.doctor} maxLength={150} onChange={set('doctor')} className={inputCls} /></label>
       </div>
-      <label className="flex flex-col gap-1 text-xs font-bold text-muted-foreground">{t.place}<input value={f.place} maxLength={200} onChange={set('place')} className={inputCls} /></label>
-      <label className="flex flex-col gap-1 text-xs font-bold text-muted-foreground">{t.notes}<textarea value={f.notes} maxLength={2000} rows={2} onChange={set('notes')} className={inputCls} /></label>
+      <label className="flex flex-col gap-1 text-sm font-medium text-muted-foreground">{t.place}<input value={f.place} maxLength={200} onChange={set('place')} className={inputCls} /></label>
+      <label className="flex flex-col gap-1 text-sm font-medium text-muted-foreground">{t.notes}<textarea value={f.notes} maxLength={2000} rows={2} onChange={set('notes')} className={inputCls} /></label>
       {error && <p role="alert" className="text-sm text-destructive">{t.error}</p>}
       <div className="flex gap-2">
-        <button type="submit" className="bg-primary text-primary-foreground px-5 py-2 rounded-full font-bold text-sm">{t.save}</button>
-        <button type="button" onClick={onCancel} className="px-5 py-2 rounded-full font-bold text-sm border border-border text-foreground">{t.cancel}</button>
+        <button type="submit" className="bg-primary text-primary-foreground min-h-11 px-6 rounded-full font-semibold text-sm">{t.save}</button>
+        <button type="button" onClick={onCancel} className="min-h-11 px-6 rounded-full font-semibold text-sm border border-border text-foreground">{t.cancel}</button>
       </div>
     </form>
   );
@@ -101,19 +101,19 @@ export const AppointmentSection: React.FC<{
             onSave={(f) => save(f, editing === 'new' ? undefined : (editing as string))} onCancel={() => setEditing(null)} />
         ) : next ? (
           <div className="rounded-xl border border-border p-4 flex flex-col gap-1">
-            <p className="text-xs font-bold text-primary uppercase tracking-wide">{count === 0 ? t.today : count === 1 ? t.tomorrow : t.inDays(count)}</p>
-            <p className="text-foreground font-bold capitalize">{fmt(next.date)}{next.time ? ` · ${next.time}` : ''}</p>
+            <p className="text-sm font-semibold text-primary">{count === 0 ? t.today : count === 1 ? t.tomorrow : t.inDays(count)}</p>
+            <p className="text-foreground font-semibold capitalize">{fmt(next.date)}{next.time ? ` · ${next.time}` : ''}</p>
             <p className="text-sm text-muted-foreground">{[next.specialty, next.doctor, next.place].filter(Boolean).join(' · ')}</p>
             {next.notes && <p className="text-sm text-foreground">{next.notes}</p>}
             <div className="flex gap-3 pt-1">
-              <button onClick={() => setEditing(next.id)} className="text-xs font-bold text-primary">{t.edit}</button>
-              <button onClick={() => remove(next.id)} className="text-xs font-bold text-destructive">{t.del}</button>
+              <button onClick={() => setEditing(next.id)} className="inline-flex items-center min-h-10 text-sm font-semibold text-primary">{t.edit}</button>
+              <button onClick={() => remove(next.id)} className="inline-flex items-center min-h-10 text-sm font-semibold text-destructive">{t.del}</button>
             </div>
           </div>
         ) : (
           <>
             <p className="text-sm text-muted-foreground">{t.none}</p>
-            <button onClick={() => setEditing('new')} className="self-start bg-primary text-primary-foreground px-5 py-2 rounded-full font-bold text-sm">{t.schedule}</button>
+            <button onClick={() => setEditing('new')} className="self-start bg-primary text-primary-foreground min-h-11 px-6 rounded-full font-semibold text-sm">{t.schedule}</button>
           </>
         )}
       </Block>
@@ -121,30 +121,30 @@ export const AppointmentSection: React.FC<{
         {bring.screenings.length === 0 && bring.questions.length === 0 && <p className="text-sm text-muted-foreground">{t.bringNone}</p>}
         {bring.screenings.length > 0 && (
           <div className="flex flex-col gap-1">
-            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">{t.screenings}</p>
+            <p className="text-sm font-semibold text-muted-foreground">{t.screenings}</p>
             <ul className="list-disc pl-5 text-sm text-foreground">{bring.screenings.map((k) => <li key={k}>{SCREEN_LABEL[k][lang]}</li>)}</ul>
-            {onOpenLabs && <button onClick={onOpenLabs} className="self-start text-xs font-bold text-primary">{t.openLabs} →</button>}
+            {onOpenLabs && <button onClick={onOpenLabs} className="self-start inline-flex items-center min-h-10 text-sm font-semibold text-primary">{t.openLabs}</button>}
           </div>
         )}
         {bring.questions.length > 0 && (
           <div className="flex flex-col gap-1">
-            <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">{t.questions} ({bring.questions.length})</p>
+            <p className="text-sm font-semibold text-muted-foreground">{t.questions} ({bring.questions.length})</p>
             <ul className="list-disc pl-5 text-sm text-foreground">{bring.questions.slice(0, 5).map((q) => <li key={q}>{q}</li>)}</ul>
           </div>
         )}
-        <Link href="/export" className="self-start flex items-center gap-2 text-sm font-bold text-primary hover:underline"><Icon name="download" size={16} /> {t.report}</Link>
+        <Link href="/export" className="self-start flex items-center gap-2 text-sm font-semibold text-primary hover:underline"><Icon name="download" size={16} /> {t.report}</Link>
       </Block>
       {showAfter && last && (
         <Block icon="edit_note" title={`${t.after} · ${fmt(last.date)}`}>
           <textarea value={summary[last.id] ?? last.summary ?? ''} onChange={(e) => setSummary({ ...summary, [last.id]: e.target.value })}
             placeholder={t.afterPh} maxLength={2000} rows={3} aria-label={t.after} className={inputCls} />
-          <label className="flex flex-col gap-1 text-xs font-bold text-muted-foreground">{t.nextDate}
+          <label className="flex flex-col gap-1 text-sm font-medium text-muted-foreground">{t.nextDate}
             <input type="date" min={today} value={followUp} onChange={(e) => setFollowUp(e.target.value)} className={`${inputCls} max-w-48`} />
           </label>
           <button onClick={async () => {
             await save({ ...last, summary: summary[last.id] ?? last.summary }, last.id);
             if (followUp) { await save({ date: followUp, specialty: last.specialty, doctor: last.doctor, place: last.place }); setFollowUp(''); }
-          }} className="self-start bg-primary text-primary-foreground px-5 py-2 rounded-full font-bold text-sm">{t.saveAfter}</button>
+          }} className="self-start bg-primary text-primary-foreground min-h-11 px-6 rounded-full font-semibold text-sm">{t.saveAfter}</button>
         </Block>
       )}
     </>

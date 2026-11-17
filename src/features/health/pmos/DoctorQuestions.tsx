@@ -97,31 +97,31 @@ export const DoctorQuestions: React.FC<{ lang: Lang; data?: PMOSOverviewData | n
   return (
     <div className="flex flex-col gap-6">
     <AppointmentSection lang={lang} data={data} questions={items} onOpenLabs={onOpenLabs} />
-    <section className="bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-6 flex flex-col gap-4">
+    <section className="bg-card rounded-3xl border border-border shadow-[var(--shadow-low)] p-5 sm:p-6 flex flex-col gap-4">
       <div className="flex items-start gap-3">
         <div className="size-10 shrink-0 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
           <Icon name="stethoscope" size={20} />
         </div>
         <div>
-          <h3 className="text-foreground text-lg font-bold">{t.title}</h3>
-          <p className="text-xs sm:text-sm text-muted-foreground">{t.sub}</p>
+          <h2 className="text-foreground text-lg font-semibold tracking-tight text-balance">{t.title}</h2>
+          <p className="text-sm text-muted-foreground text-pretty">{t.sub}</p>
         </div>
       </div>
 
       <form onSubmit={(e) => { e.preventDefault(); add(text); }} className="flex gap-2">
         <input value={text} onChange={(e) => setText(e.target.value)} maxLength={500} placeholder={t.ph} aria-label={t.ph}
-          className="flex-1 min-w-0 bg-secondary text-foreground rounded-full px-4 py-2.5 text-sm border border-border" />
-        <button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground px-5 py-2.5 rounded-full font-bold text-sm">{t.add}</button>
+          className="flex-1 min-w-0 bg-secondary text-foreground rounded-full px-4 min-h-11 text-sm border border-border" />
+        <button type="submit" className="bg-primary hover:bg-primary/90 text-primary-foreground min-h-11 px-6 rounded-full font-semibold text-sm">{t.add}</button>
       </form>
       {error && <p role="alert" className="text-sm text-destructive">{t.error}</p>}
 
       {fromData.length > 0 && (
         <div className="flex flex-col gap-2">
-          <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">{t.fromData}</p>
+          <p className="text-sm font-semibold text-muted-foreground">{t.fromData}</p>
           <div className="flex flex-col gap-2">
             {fromData.map((s) => (
-              <button key={s} onClick={() => add(s)} className="text-left px-3 py-2 rounded-xl text-xs font-semibold bg-primary/5 text-foreground border border-primary/30 hover:border-primary/60">
-                + {s}
+              <button key={s} onClick={() => add(s)} className="text-left flex items-center gap-2 min-h-10 px-3 py-2 rounded-xl text-sm font-semibold bg-primary/5 text-foreground border border-primary/30 hover:border-primary/60">
+                <Icon name="add" size={16} /> {s}
               </button>
             ))}
           </div>
@@ -129,11 +129,11 @@ export const DoctorQuestions: React.FC<{ lang: Lang; data?: PMOSOverviewData | n
       )}
       {unused.length > 0 && (
         <div className="flex flex-col gap-2">
-          <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">{t.ideas}</p>
+          <p className="text-sm font-semibold text-muted-foreground">{t.ideas}</p>
           <div className="flex flex-wrap gap-2">
             {unused.map((s) => (
-              <button key={s} onClick={() => add(s)} className="text-left px-3 py-1.5 rounded-full text-xs font-semibold bg-secondary text-foreground border border-border hover:border-primary/50">
-                + {s}
+              <button key={s} onClick={() => add(s)} className="text-left inline-flex items-center min-h-10 px-4 rounded-full text-sm font-semibold bg-secondary text-foreground border border-border hover:border-primary/50">
+                <Icon name="add" size={16} /> {s}
               </button>
             ))}
           </div>
@@ -141,19 +141,19 @@ export const DoctorQuestions: React.FC<{ lang: Lang; data?: PMOSOverviewData | n
       )}
 
       <div className="flex flex-col gap-2">
-        <p className="text-xs font-bold text-muted-foreground uppercase tracking-wide">{t.pending} ({pending.length})</p>
+        <p className="text-sm font-semibold text-muted-foreground">{t.pending} ({pending.length})</p>
         {pending.length === 0 && <p className="text-sm text-muted-foreground">{t.none}</p>}
         {pending.map((q) => (
           <div key={q.id} className="rounded-xl border border-border p-3 flex flex-col gap-2">
             <div className="flex items-start justify-between gap-2">
               <p className="text-sm text-foreground font-semibold">{q.question}</p>
-              <button onClick={() => remove(q.id)} aria-label={t.del} className="p-1 text-muted-foreground hover:text-destructive shrink-0"><Icon name="close" size={16} /></button>
+              <button onClick={() => remove(q.id)} aria-label={t.del} className="size-10 -mt-1.5 -mr-1.5 inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-destructive hover:bg-secondary shrink-0"><Icon name="close" size={16} /></button>
             </div>
             <div className="flex gap-2">
               <input value={answers[q.id] ?? q.answer ?? ''} onChange={(e) => setAnswers({ ...answers, [q.id]: e.target.value })} placeholder={t.answerPh}
-                className="flex-1 min-w-0 bg-secondary/50 text-foreground rounded-lg px-3 py-1.5 text-xs border border-border" />
+                className="flex-1 min-w-0 bg-secondary/50 text-foreground min-h-10 rounded-xl px-3 py-1.5 text-sm border border-border" />
               <button onClick={() => update(q.id, { done: true, answer: (answers[q.id] ?? q.answer ?? '').trim() || null })}
-                className="text-xs font-bold px-3 py-1.5 rounded-full border border-emerald-500/50 text-emerald-700 dark:text-emerald-400 shrink-0">✓ {t.markDone}</button>
+                className="inline-flex items-center min-h-10 text-sm font-semibold px-4 rounded-full border border-leaf/50 text-leaf shrink-0"><Icon name="check" size={16} /> {t.markDone}</button>
             </div>
           </div>
         ))}
@@ -161,19 +161,19 @@ export const DoctorQuestions: React.FC<{ lang: Lang; data?: PMOSOverviewData | n
 
       {done.length > 0 && (
         <details>
-          <summary className="cursor-pointer text-xs font-bold text-muted-foreground uppercase tracking-wide">{t.done} ({done.length})</summary>
+          <summary className="cursor-pointer text-sm font-semibold text-muted-foreground">{t.done} ({done.length})</summary>
           <ul className="mt-2 flex flex-col gap-2">
             {done.map((q) => (
               <li key={q.id} className="text-sm flex items-start justify-between gap-2">
-                <span><span className="text-muted-foreground line-through">{q.question}</span>{q.answer && <span className="block text-foreground text-xs mt-0.5">→ {q.answer}</span>}</span>
-                <button onClick={() => update(q.id, { done: false })} className="text-xs font-bold text-primary shrink-0">{t.reopen}</button>
+                <span><span className="text-muted-foreground line-through">{q.question}</span>{q.answer && <span className="block text-foreground text-sm mt-0.5">{q.answer}</span>}</span>
+                <button onClick={() => update(q.id, { done: false })} className="inline-flex items-center min-h-10 text-sm font-semibold text-primary shrink-0">{t.reopen}</button>
               </li>
             ))}
           </ul>
         </details>
       )}
 
-      <Link href="/export" className="self-start flex items-center gap-2 text-sm font-bold text-primary hover:underline">
+      <Link href="/export" className="self-start inline-flex items-center gap-2 min-h-10 text-sm font-semibold text-primary hover:underline">
         <Icon name="download" size={16} /> {t.report}
       </Link>
     </section>

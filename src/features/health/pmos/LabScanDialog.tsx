@@ -118,21 +118,21 @@ const LabScanDialog: React.FC<Props> = ({ lang, saving, onSave }) => {
       <input ref={inputRef} type="file" accept="image/*,application/pdf" className="hidden"
         onChange={(e) => handleFile(e.target.files?.[0])} aria-label={t.choose} />
       <button type="button" onClick={() => inputRef.current?.click()}
-        className="inline-flex items-center gap-2 bg-secondary hover:bg-secondary/70 text-foreground font-bold text-sm px-4 py-2 rounded-lg border border-border">
+        className="inline-flex items-center gap-2 bg-secondary hover:bg-secondary/70 text-foreground font-semibold text-sm min-h-11 px-5 rounded-full border border-border">
         <span className="material-symbols-outlined text-base">upload_file</span>
         {t.upload}
       </button>
       {open && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={t.upload}>
-          <div className="bg-card border border-border rounded-xl w-full max-w-2xl max-h-[85vh] flex flex-col">
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-end sm:items-center justify-center sm:p-4" role="dialog" aria-modal="true" aria-label={t.upload}>
+          <div className="bg-card border border-border rounded-t-3xl sm:rounded-3xl w-full max-w-2xl max-h-[90dvh] sm:max-h-[85vh] flex flex-col">
             <div className="p-5 border-b border-border flex items-center justify-between gap-3">
-              <h4 className="font-bold text-foreground">{t.upload}</h4>
-              <button type="button" onClick={reset} className="text-muted-foreground hover:text-foreground" aria-label={t.close}>
+              <h2 className="text-lg font-semibold tracking-tight text-foreground text-balance">{t.upload}</h2>
+              <button type="button" onClick={reset} className="size-11 -mr-2 inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground hover:bg-secondary" aria-label={t.close}>
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
             <div className="p-5 overflow-y-auto flex flex-col gap-3">
-              <p className="text-xs text-muted-foreground">{t.note}</p>
+              <p className="text-sm text-muted-foreground text-pretty">{t.note}</p>
               {busy && <p className="text-sm text-muted-foreground">{t.reading}</p>}
               {error && <p className="text-sm text-destructive">{error}</p>}
               {rows && rows.length === 0 && <p className="text-sm text-muted-foreground">{t.empty}</p>}
@@ -142,27 +142,27 @@ const LabScanDialog: React.FC<Props> = ({ lang, saving, onSave }) => {
                     const info = markerInfo(r.marker);
                     const status = markerStatus(info, r.value);
                     return (
-                      <li key={`${r.marker}-${r.date}-${i}`} className="flex items-start gap-3 border border-border rounded-lg p-3">
-                        <input type="checkbox" checked={r.on} onChange={() => toggle(i)} className="mt-1"
+                      <li key={`${r.marker}-${r.date}-${i}`} className="flex items-start gap-3 border border-border rounded-2xl p-3 sm:p-4">
+                        <input type="checkbox" className="size-5 shrink-0 accent-primary" checked={r.on} onChange={() => toggle(i)}
                           aria-label={`${markerLabel(info, lang)} ${r.value} ${r.unit}`} />
-                        <div className="flex-1 text-xs text-muted-foreground">
-                          <p className="text-sm font-semibold text-foreground">{markerLabel(info, lang)} · {r.value} {r.unit}</p>
+                        <div className="flex-1 min-w-0 text-sm text-muted-foreground">
+                          <p className="font-semibold text-foreground">{markerLabel(info, lang)} · {r.value} {r.unit}</p>
                           <p>{t.original}: {r.rawLabel} · {r.date}</p>
                           <p>{t.status[status]}</p>
-                          {r.doubtful && <p className="text-amber-600">{t.doubtful}</p>}
+                          {r.doubtful && <p className="text-sun-ink">{t.doubtful}</p>}
                         </div>
                       </li>
                     );
                   })}
                 </ul>
               )}
-              {rows && rows.length > 0 && <p className="text-xs text-muted-foreground">{t.footer}</p>}
+              {rows && rows.length > 0 && <p className="text-sm text-muted-foreground text-pretty">{t.footer}</p>}
             </div>
-            <div className="p-5 border-t border-border flex justify-end gap-3">
-              <button type="button" onClick={reset} className="px-4 py-2 text-sm font-bold text-foreground">{t.cancel}</button>
+            <div className="p-4 sm:p-5 border-t border-border flex flex-col-reverse sm:flex-row sm:justify-end gap-2 sm:gap-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
+              <button type="button" onClick={reset} className="min-h-11 px-5 rounded-full text-sm font-semibold text-foreground border border-border hover:bg-secondary">{t.cancel}</button>
               {rows && rows.length > 0 && (
                 <button type="button" onClick={handleSave} disabled={saving || selected.length === 0}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-sm px-4 py-2 rounded-lg disabled:opacity-60">
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold text-sm min-h-11 px-6 rounded-full disabled:opacity-60">
                   {saving ? t.saving : `${t.save} (${selected.length})`}
                 </button>
               )}

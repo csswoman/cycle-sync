@@ -60,21 +60,21 @@ function series(entries: PMOSMetricEntry[], pick: (e: PMOSMetricEntry) => number
 }
 
 const ChartCard: React.FC<{ title: string; unit: string; points: LinePoint[]; note?: string; latestLabel: string; empty: string; badge?: string; refHigh?: number }> = ({ title, unit, points, note, latestLabel, empty, badge, refHigh }) => (
-  <div className="flex flex-col gap-2">
+  <div className="flex flex-col gap-2 rounded-2xl border border-border p-4">
     <div className="flex justify-between items-baseline gap-2">
-      <h4 className="text-sm font-semibold text-foreground">{title}</h4>
+      <h3 className="text-sm font-semibold text-foreground">{title}</h3>
       {points.length > 0 && (
-        <span className="text-xs text-muted-foreground text-right">
+        <span className="text-sm text-muted-foreground text-right">
           {badge ?? `${latestLabel}: ${Number(points[points.length - 1].value.toFixed(2))} ${unit}`}
         </span>
       )}
     </div>
     {points.length === 0 ? (
-      <p className="text-xs text-muted-foreground py-4">{empty}</p>
+      <p className="text-sm text-muted-foreground">{empty}</p>
     ) : (
       <LineChart points={points} unit={unit} refHigh={refHigh} />
     )}
-    {note && <p className="text-xs text-muted-foreground">{note}</p>}
+    {note && <p className="text-sm text-muted-foreground">{note}</p>}
   </div>
 );
 
@@ -175,28 +175,30 @@ const BodyMetricsSection: React.FC<{ lang?: Lang }> = ({ lang = 'es' }) => {
   };
 
   const field = (label: string, value: string, set: (v: string) => void) => (
-    <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+    <label className="flex flex-col gap-1.5 text-sm font-medium text-muted-foreground">
       {label}
       <input inputMode="decimal" value={value} onChange={(ev) => set(ev.target.value)} className={INPUT_CLASS} />
     </label>
   );
 
   return (
-    <section className="bg-card rounded-xl border border-border overflow-hidden">
-      <div className="p-5 border-b border-border bg-secondary/20">
-        <h3 className="text-foreground text-lg font-bold flex items-center gap-2">
-          <span className="material-symbols-outlined text-primary">glucose</span>
+    <section className="bg-card rounded-3xl border border-border overflow-hidden">
+      <div className="px-5 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-foreground text-lg font-semibold tracking-tight text-balance flex items-center gap-3">
+          <span className="size-10 shrink-0 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+            <span className="material-symbols-outlined text-[22px]" aria-hidden="true">glucose</span>
+          </span>
           {t.title}
-        </h3>
+        </h2>
       </div>
 
-      <form onSubmit={handleSubmit} className="p-6 grid grid-cols-2 md:grid-cols-4 gap-4 border-b border-border">
-        <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+      <form onSubmit={handleSubmit} className="px-5 sm:px-6 py-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-4 items-end bg-secondary/30 border-y border-border">
+        <label className="flex flex-col gap-1.5 text-sm font-medium text-muted-foreground">
           {t.date}
           <input type="date" value={date} max={todayLocal()} onChange={(ev) => setDate(ev.target.value)} className={INPUT_CLASS} required />
         </label>
         {field(t.glucose, glucose, setGlucose)}
-        <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+        <label className="flex flex-col gap-1.5 text-sm font-medium text-muted-foreground">
           {t.taken}
           <select value={context} onChange={(ev) => setContext(ev.target.value as GlucoseContext)} className={INPUT_CLASS}>
             {(Object.keys(t.ctx) as GlucoseContext[]).map((k) => <option key={k} value={k}>{t.ctx[k]}</option>)}
@@ -204,7 +206,7 @@ const BodyMetricsSection: React.FC<{ lang?: Lang }> = ({ lang = 'es' }) => {
         </label>
         {showMeal && (
           <>
-            <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+            <label className="flex flex-col gap-1.5 text-sm font-medium text-muted-foreground">
               {t.meal}
               <select value={mealChoice} onChange={(ev) => setMealChoice(ev.target.value)} className={INPUT_CLASS}>
                 <option value="">{t.mealNone}</option>
@@ -214,11 +216,11 @@ const BodyMetricsSection: React.FC<{ lang?: Lang }> = ({ lang = 'es' }) => {
             </label>
             {mealChoice === 'free' && (
               <>
-                <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+                <label className="flex flex-col gap-1.5 text-sm font-medium text-muted-foreground">
                   {t.mealText}
                   <input value={freeText} onChange={(ev) => setFreeText(ev.target.value)} className={INPUT_CLASS} />
                 </label>
-                <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+                <label className="flex flex-col gap-1.5 text-sm font-medium text-muted-foreground">
                   {t.mealSlot}
                   <select value={freeSlot} onChange={(ev) => setFreeSlot(ev.target.value as MealSlot | '')} className={INPUT_CLASS}>
                     <option value="">{t.mealNone}</option>
@@ -227,7 +229,7 @@ const BodyMetricsSection: React.FC<{ lang?: Lang }> = ({ lang = 'es' }) => {
                 </label>
               </>
             )}
-            <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+            <label className="flex flex-col gap-1.5 text-sm font-medium text-muted-foreground">
               {t.interval}
               <select value={interval ?? ''} onChange={(ev) => setIntervalChoice(ev.target.value === '' ? null : (Number(ev.target.value) as 1 | 2))} className={INPUT_CLASS}>
                 <option value="">{t.mealNone}</option>
@@ -243,16 +245,16 @@ const BodyMetricsSection: React.FC<{ lang?: Lang }> = ({ lang = 'es' }) => {
         {!hideNumbers && field(t.waist, waist, setWaist)}
         {!hideNumbers && field(t.hip, hip, setHip)}
         {!hideNumbers && field(t.weight, weight, setWeight)}
-        <div className="flex items-end col-span-1 md:col-start-4">
+        <div className="flex items-end sm:col-span-2 lg:col-span-1">
           <button type="submit" disabled={saving}
-            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 rounded-lg disabled:opacity-60">
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold min-h-11 rounded-full disabled:opacity-60">
             {saving ? t.saving : t.save}
           </button>
         </div>
         {(formError || error) && <p className="col-span-full text-sm text-destructive">{formError ?? error}</p>}
       </form>
 
-      <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="p-5 sm:p-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 items-start">
         {loading ? (
           <p className="text-muted-foreground text-sm">{t.loading}</p>
         ) : (
@@ -269,11 +271,11 @@ const BodyMetricsSection: React.FC<{ lang?: Lang }> = ({ lang = 'es' }) => {
       </div>
 
       {entries.length > 0 && (
-        <details className="border-t border-border px-6 py-4">
-          <summary className="cursor-pointer text-sm font-semibold text-foreground">{t.entries} ({entries.length})</summary>
-          <ul className="mt-3 flex flex-col gap-2 max-h-64 overflow-y-auto">
+        <details className="border-t border-border px-5 sm:px-6 py-3">
+          <summary className="cursor-pointer min-h-10 flex items-center text-sm font-semibold text-foreground">{t.entries} ({entries.length})</summary>
+          <ul className="mt-1 flex flex-col divide-y divide-border/60 max-h-64 overflow-y-auto">
             {[...entries].reverse().map((e) => (
-              <li key={e.id} className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+              <li key={e.id} className="flex items-center justify-between gap-3 py-2 text-sm text-muted-foreground">
                 <span>
                   <strong className="text-foreground">{e.date}</strong>
                   {e.glucose_mg_dl != null && ` · ${lang === 'es' ? 'glucosa' : 'glucose'} ${e.glucose_mg_dl} (${t.ctx[e.glucose_context!]})${e.meal_label ? ` · ${e.meal_label}` : ''}${e.minutes_after_meal ? ` · ${e.minutes_after_meal / 60} h` : ''}`}
@@ -283,7 +285,7 @@ const BodyMetricsSection: React.FC<{ lang?: Lang }> = ({ lang = 'es' }) => {
                   {!hideNumbers && e.hip_cm != null && ` · ${lang === 'es' ? 'cadera' : 'hip'} ${e.hip_cm}`}
                   {!hideNumbers && e.weight_kg != null && ` · ${e.weight_kg} kg`}
                 </span>
-                <button onClick={() => remove(e.id)} className="text-destructive hover:underline shrink-0" aria-label={`${t.del} ${e.date}`}>
+                <button onClick={() => remove(e.id)} className="inline-flex items-center min-h-10 px-2 text-sm font-semibold text-destructive hover:underline shrink-0" aria-label={`${t.del} ${e.date}`}>
                   {t.del}
                 </button>
               </li>

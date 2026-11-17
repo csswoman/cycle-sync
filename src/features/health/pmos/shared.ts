@@ -1,5 +1,5 @@
 export const INPUT_CLASS =
-  'w-full bg-secondary/40 border border-border rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40';
+  'w-full bg-secondary/40 border border-border min-h-11 rounded-xl px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40';
 
 export function todayLocal(): string {
   const d = new Date();

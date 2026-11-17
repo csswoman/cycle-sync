@@ -41,22 +41,41 @@ const MemberContent: React.FC<{ lang: 'es' | 'en' }> = ({ lang }) => {
     window.history.replaceState(null, '', url);
   };
 
+  const onTabKey = (e: React.KeyboardEvent) => {
+    const keys = ['ArrowRight', 'ArrowLeft', 'Home', 'End'];
+    if (!keys.includes(e.key)) return;
+    e.preventDefault();
+    const i = TABS.findIndex((t) => t.id === tab);
+    const next = e.key === 'Home' ? 0 : e.key === 'End' ? TABS.length - 1
+      : (i + (e.key === 'ArrowRight' ? 1 : -1) + TABS.length) % TABS.length;
+    go(TABS[next].id);
+    document.getElementById(`pmos-tab-${TABS[next].id}`)?.focus();
+  };
+
   const pregnancy = data ? activePregnancy(data.pregnancies, data.today) : null;
   const paused = data ? predictionsPaused(data.periodStarts.at(-1) ?? null, data.pregnancies, data.today) : false;
   return (
     <div className="flex flex-col gap-6">
-      <div role="tablist" className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
-        {TABS.map((t) => (
-          <button key={t.id} role="tab" aria-selected={tab === t.id} onClick={() => go(t.id)}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold whitespace-nowrap border transition-all ${tab === t.id ? 'bg-primary text-primary-foreground border-primary shadow-md' : 'bg-card text-foreground border-border hover:border-primary/50'}`}>
-            <Icon name={t.icon} size={16} /> {t[lang]}
-          </button>
-        ))}
+      <div className="relative -mx-4 sm:mx-0">
+        <div
+          role="tablist"
+          aria-label={lang === 'es' ? 'Secciones de PMOS' : 'PMOS sections'}
+          onKeyDown={onTabKey}
+          className="flex gap-2 overflow-x-auto px-4 sm:px-0 pb-1 snap-x scroll-px-4 scrollbar-hide"
+        >
+          {TABS.map((t) => (
+            <button key={t.id} id={`pmos-tab-${t.id}`} role="tab" type="button" aria-selected={tab === t.id}
+              aria-controls={`pmos-panel-${t.id}`} tabIndex={tab === t.id ? 0 : -1} onClick={() => go(t.id)}
+              className={`snap-start shrink-0 flex items-center gap-2 min-h-11 px-4 rounded-full text-sm font-semibold whitespace-nowrap border transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${tab === t.id ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-foreground border-border hover:border-primary/50'}`}>
+              <Icon name={t.icon} size={18} /> {t[lang]}
+            </button>
+          ))}
+        </div>
       </div>
-
+      <div role="tabpanel" id={`pmos-panel-${tab}`} aria-labelledby={`pmos-tab-${tab}`} className="flex flex-col gap-6">
       {tab === 'summary' && (
         loading || !data ? <p className="text-sm text-muted-foreground">{lang === 'es' ? 'Cargando…' : 'Loading…'}</p> : (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] gap-6 items-start">
             <div className="flex flex-col gap-6">
               {activePregnancy(data.pregnancies, data.today) && <PregnancyMedicationCard lang={lang} />}
               <DiagnosisCard lang={lang} />
@@ -81,13 +100,14 @@ const MemberContent: React.FC<{ lang: 'es' | 'en' }> = ({ lang }) => {
         </div>
       )}
       {tab === 'skin' && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] gap-6 items-start">
           <HirsutismTracker lang={lang} />
           <ProgressPhotos lang={lang} />
         </div>
       )}
       {tab === 'wellbeing' && <WellbeingCheck lang={lang} />}
       {tab === 'visit' && <DoctorQuestions lang={lang} data={data} onOpenLabs={() => go('labs')} />}
+      </div>
     </div>
   );
 };
@@ -104,20 +124,20 @@ const PMOSMemberTools: React.FC = () => {
 
   if (!user) {
     return (
-      <section className="bg-card rounded-xl border border-border p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <section className="bg-card rounded-2xl border border-border p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h3 className="text-foreground text-lg font-bold flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary">lock</span>
+          <h2 className="text-foreground text-lg font-semibold tracking-tight flex items-center gap-2 text-balance">
+            <span className="material-symbols-outlined text-primary" aria-hidden="true">lock</span>
             {lang === 'es' ? 'Sigue tu glucosa, análisis y ciclo' : 'Track glucose, labs and your cycle range'}
-          </h3>
-          <p className="text-muted-foreground text-sm">
+          </h2>
+          <p className="text-muted-foreground text-sm sm:text-base text-pretty max-w-[60ch]">
             {lang === 'es'
               ? 'Crea una cuenta gratis para registrar glucosa, insulina, presión, medidas y análisis, ver si tu tratamiento funciona y recibir una predicción basada en tus propios ciclos.'
               : 'Create a free account to log glucose, insulin, blood pressure, measurements and lab results, see whether your treatment is working and get a prediction based on your own cycles.'}
           </p>
         </div>
         <button onClick={() => setSignupPromptOpen(true)}
-          className="shrink-0 bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-5 py-2.5 rounded-xl">
+          className="shrink-0 min-h-11 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold px-6 rounded-full">
           {lang === 'es' ? 'Crear cuenta' : 'Create account'}
         </button>
       </section>

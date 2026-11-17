@@ -134,14 +134,14 @@ export const WellbeingCheck: React.FC<{ lang: Lang }> = ({ lang }) => {
   };
 
   return (
-    <section className="bg-card rounded-2xl border border-border shadow-sm p-5 sm:p-6 flex flex-col gap-5">
+    <section className="bg-card rounded-3xl border border-border shadow-[var(--shadow-low)] p-5 sm:p-6 flex flex-col gap-5">
       <div className="flex items-start gap-3">
         <div className="size-10 shrink-0 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
           <Icon name="favorite" size={20} />
         </div>
         <div>
-          <h3 className="text-foreground text-lg font-bold">{t.title}</h3>
-          <p className="text-xs sm:text-sm text-muted-foreground">{t.sub}</p>
+          <h2 className="text-foreground text-lg font-semibold tracking-tight text-balance">{t.title}</h2>
+          <p className="text-sm text-muted-foreground text-pretty">{t.sub}</p>
         </div>
       </div>
 
@@ -149,26 +149,26 @@ export const WellbeingCheck: React.FC<{ lang: Lang }> = ({ lang }) => {
         <div className="flex flex-col gap-2">
           <p className="text-sm text-muted-foreground">{t.notDue(fmt(last.date))}</p>
           {!result.moodFlag && !result.anxietyFlag && !result.sleepFlag && !scoffPositive && (
-            <p className="text-sm text-foreground bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3">{t.okMood}</p>
+            <p className="text-sm text-foreground bg-leaf/10 border border-leaf/30 rounded-xl p-3">{t.okMood}</p>
           )}
-          {result.moodFlag && <p className="text-sm text-foreground bg-amber-500/10 border border-amber-500/40 rounded-xl p-3">{t.moodFlag}</p>}
-          {result.anxietyFlag && <p className="text-sm text-foreground bg-amber-500/10 border border-amber-500/40 rounded-xl p-3">{t.anxFlag}</p>}
-          {result.sleepFlag && <p className="text-sm text-foreground bg-sky-500/10 border border-sky-500/30 rounded-xl p-3">{t.sleepFlag}</p>}
+          {result.moodFlag && <p className="text-sm text-foreground bg-sun/10 border border-sun/40 rounded-xl p-3">{t.moodFlag}</p>}
+          {result.anxietyFlag && <p className="text-sm text-foreground bg-sun/10 border border-sun/40 rounded-xl p-3">{t.anxFlag}</p>}
+          {result.sleepFlag && <p className="text-sm text-foreground bg-sage/10 border border-sage/30 rounded-xl p-3">{t.sleepFlag}</p>}
           {scoffPositive && (
-            <div className="text-sm text-foreground bg-sky-500/10 border border-sky-500/30 rounded-xl p-3 flex flex-col gap-2">
+            <div className="text-sm text-foreground bg-sage/10 border border-sage/30 rounded-xl p-3 flex flex-col gap-2">
               <p>{t.scoffFlag}</p>
               {hideNumbers
-                ? <p className="text-xs text-muted-foreground">{t.scoffHidden}</p>
-                : <button onClick={() => void updateDisplayPrefs({ hideNumbers: true })} className="self-start font-bold text-primary hover:underline">{t.scoffHide}</button>}
+                ? <p className="text-sm text-muted-foreground">{t.scoffHidden}</p>
+                : <button onClick={() => void updateDisplayPrefs({ hideNumbers: true })} className="self-start inline-flex items-center min-h-10 text-sm font-semibold text-primary hover:underline">{t.scoffHide}</button>}
             </div>
           )}
-          <button onClick={() => setEditing(true)} className="self-start text-sm font-bold text-primary hover:underline">{t.again}</button>
+          <button onClick={() => setEditing(true)} className="self-start inline-flex items-center min-h-10 text-sm font-semibold text-primary hover:underline">{t.again}</button>
         </div>
       )}
 
       {showForm && (
         <div className="flex flex-col gap-4">
-          {due && <p className="text-sm font-bold text-primary">{t.due}</p>}
+          {due && <p className="text-sm font-semibold text-primary">{t.due}</p>}
           <p className="text-sm font-semibold text-foreground">{t.lead}</p>
           {Q_KEYS.map((k) => (
             <fieldset key={k} className="flex flex-col gap-2">
@@ -176,7 +176,7 @@ export const WellbeingCheck: React.FC<{ lang: Lang }> = ({ lang }) => {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {t.opts.map((label, v) => (
                   <button key={v} type="button" aria-pressed={answers[k] === v} onClick={() => setAnswers({ ...answers, [k]: v })}
-                    className={`px-3 py-2 rounded-xl text-xs font-semibold border transition-colors ${answers[k] === v ? 'bg-primary text-primary-foreground border-primary' : 'bg-secondary/50 text-foreground border-transparent hover:bg-secondary'}`}>
+                    className={`min-h-10 px-3 py-2 rounded-xl text-sm font-semibold border transition-colors ${answers[k] === v ? 'bg-primary text-primary-foreground border-primary' : 'bg-secondary/50 text-foreground border-transparent hover:bg-secondary'}`}>
                     {label}
                   </button>
                 ))}
@@ -185,8 +185,8 @@ export const WellbeingCheck: React.FC<{ lang: Lang }> = ({ lang }) => {
           ))}
           <p className="text-sm font-semibold text-foreground pt-1">{t.sleepLead}</p>
           {SLEEP_KEYS.map((k) => (
-            <label key={k} className="flex items-start gap-3 text-sm text-foreground cursor-pointer">
-              <input type="checkbox" className="size-4 mt-0.5 accent-primary" checked={answers[k]} onChange={(e) => setAnswers({ ...answers, [k]: e.target.checked })} />
+            <label key={k} className="flex items-center gap-3 min-h-10 text-sm text-foreground cursor-pointer">
+              <input type="checkbox" className="size-5 shrink-0 accent-primary" checked={answers[k]} onChange={(e) => setAnswers({ ...answers, [k]: e.target.checked })} />
               {t[k]}
             </label>
           ))}
@@ -195,40 +195,40 @@ export const WellbeingCheck: React.FC<{ lang: Lang }> = ({ lang }) => {
               <p className="text-sm font-semibold text-foreground">{t.scoffTitle}</p>
               {scoffMode === 'ask' ? (
                 <>
-                  <p className="text-xs text-muted-foreground">{t.scoffIntro}</p>
+                  <p className="text-sm text-muted-foreground">{t.scoffIntro}</p>
                   <div className="flex gap-3">
-                    <button type="button" onClick={() => setScoffMode('answering')} className="px-4 py-2 rounded-full text-xs font-bold bg-secondary text-foreground hover:bg-secondary/70">{t.scoffAnswer}</button>
-                    <button type="button" onClick={skipScoff} className="px-4 py-2 rounded-full text-xs font-bold text-muted-foreground hover:text-foreground">{t.scoffSkip}</button>
+                    <button type="button" onClick={() => setScoffMode('answering')} className="inline-flex items-center min-h-10 px-4 rounded-full text-sm font-semibold bg-secondary text-foreground hover:bg-secondary/70">{t.scoffAnswer}</button>
+                    <button type="button" onClick={skipScoff} className="inline-flex items-center min-h-10 px-4 rounded-full text-sm font-semibold text-muted-foreground hover:text-foreground">{t.scoffSkip}</button>
                   </div>
                 </>
               ) : (
                 <>
                   {SCOFF_QUESTIONS.map((k) => (
-                    <label key={k} className="flex items-start gap-3 text-sm text-foreground cursor-pointer">
-                      <input type="checkbox" className="size-4 mt-0.5 accent-primary" checked={scoffAnswers[k] === true} onChange={(e) => setScoffAnswers({ ...scoffAnswers, [k]: e.target.checked })} />
+                    <label key={k} className="flex items-center gap-3 min-h-10 text-sm text-foreground cursor-pointer">
+                      <input type="checkbox" className="size-5 shrink-0 accent-primary" checked={scoffAnswers[k] === true} onChange={(e) => setScoffAnswers({ ...scoffAnswers, [k]: e.target.checked })} />
                       {t.scoffQ[k]}
                     </label>
                   ))}
-                  <button type="button" onClick={skipScoff} className="self-start text-xs font-bold text-muted-foreground hover:text-foreground">{t.scoffSkip}</button>
+                  <button type="button" onClick={skipScoff} className="self-start inline-flex items-center min-h-10 text-sm font-semibold text-muted-foreground hover:text-foreground">{t.scoffSkip}</button>
                 </>
               )}
             </div>
           )}
           {error && <p role="alert" className="text-sm text-destructive">{t.error}</p>}
-          <button onClick={save} disabled={saving} className="self-start bg-primary hover:bg-primary/90 text-primary-foreground px-6 py-3 rounded-full font-bold text-sm disabled:opacity-60">
+          <button onClick={save} disabled={saving} className="self-start bg-primary hover:bg-primary/90 text-primary-foreground min-h-11 px-6 rounded-full font-semibold text-sm disabled:opacity-60">
             {saving ? t.saving : t.save}
           </button>
         </div>
       )}
 
-      <p className="text-xs text-muted-foreground flex items-start gap-2">
+      <p className="text-sm text-muted-foreground flex items-start gap-2">
         <Icon name="info" size={14} className="mt-0.5 shrink-0" /> {t.crisis}
       </p>
 
       {rows.length > 1 && (
         <details>
           <summary className="cursor-pointer text-sm font-semibold text-foreground">{t.history}</summary>
-          <ul className="mt-2 flex flex-col gap-1 text-xs text-muted-foreground">
+          <ul className="mt-2 flex flex-col gap-1 text-sm text-muted-foreground">
             {rows.map((r) => { const s = scoreWellbeing(r); return <li key={r.id}><strong className="text-foreground">{fmt(r.date)}</strong> · {t.score(s.phq2, s.gad2)}</li>; })}
           </ul>
         </details>

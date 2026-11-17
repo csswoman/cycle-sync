@@ -13,9 +13,9 @@ import { INPUT_CLASS, parseNum, todayLocal } from './shared';
 type Lang = 'es' | 'en';
 
 const STATUS_STYLE = {
-  ok: 'bg-green-500/15 text-green-600',
-  low: 'bg-blue-500/15 text-blue-500',
-  high: 'bg-red-500/15 text-red-500',
+  ok: 'bg-leaf/15 text-leaf',
+  low: 'bg-sage/15 text-moss',
+  high: 'bg-destructive/15 text-destructive',
 } as const;
 
 const T = {
@@ -74,16 +74,19 @@ const LabResultsSection: React.FC<{ lang?: Lang }> = ({ lang = 'es' }) => {
   const label = (k: LabMarker) => markerLabel(markerInfo(k), lang);
 
   return (
-    <section className="bg-card rounded-xl border border-border overflow-hidden">
-      <div className="p-5 border-b border-border bg-secondary/20">
-        <h3 className="text-foreground text-lg font-bold flex items-center gap-2">
-          <span className="material-symbols-outlined text-primary">biotech</span>
+    <section className="bg-card rounded-3xl border border-border overflow-hidden">
+      <div className="px-5 sm:px-6 py-4 flex flex-wrap items-center justify-between gap-3">
+        <h2 className="text-foreground text-lg font-semibold tracking-tight text-balance flex items-center gap-3">
+          <span className="size-10 shrink-0 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
+            <span className="material-symbols-outlined text-[22px]" aria-hidden="true">biotech</span>
+          </span>
           {t.title}
-        </h3>
+        </h2>
+        <LabScanDialog lang={lang} saving={saving} onSave={addMany} />
       </div>
 
-      <form onSubmit={handleSubmit} className="p-6 grid grid-cols-2 md:grid-cols-4 gap-4 border-b border-border">
-        <label className="flex flex-col gap-1 text-xs text-muted-foreground col-span-2 md:col-span-1">
+      <form onSubmit={handleSubmit} className="px-5 sm:px-6 py-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-4 items-end bg-secondary/30 border-y border-border">
+        <label className="flex flex-col gap-1.5 text-sm font-medium text-muted-foreground sm:col-span-2 lg:col-span-1">
           {t.test}
           <select value={marker} onChange={(ev) => { setMarker(ev.target.value as LabMarker); setUnit(''); }} className={INPUT_CLASS}>
             {GROUPS.map((g) => (
@@ -93,7 +96,7 @@ const LabResultsSection: React.FC<{ lang?: Lang }> = ({ lang = 'es' }) => {
             ))}
           </select>
         </label>
-        <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+        <label className="flex flex-col gap-1.5 text-sm font-medium text-muted-foreground">
           {t.value}
           <div className="flex gap-2">
             <input inputMode="decimal" value={value} onChange={(ev) => setValue(ev.target.value)} className={INPUT_CLASS} />
@@ -102,39 +105,36 @@ const LabResultsSection: React.FC<{ lang?: Lang }> = ({ lang = 'es' }) => {
                 {units.map((u) => <option key={u.label} value={u.label}>{u.label}</option>)}
               </select>
             ) : (
-              selected.unit && <span className="self-center text-xs whitespace-nowrap">{selected.unit}</span>
+              selected.unit && <span className="self-center text-sm whitespace-nowrap">{selected.unit}</span>
             )}
           </div>
         </label>
-        <label className="flex flex-col gap-1 text-xs text-muted-foreground">
+        <label className="flex flex-col gap-1.5 text-sm font-medium text-muted-foreground">
           {t.date}
           <input type="date" value={date} max={todayLocal()} onChange={(ev) => setDate(ev.target.value)} className={INPUT_CLASS} required />
         </label>
-        <div className="flex items-end gap-2 col-span-2 md:col-span-1">
+        <div className="flex items-end gap-2 sm:col-span-2 lg:col-span-1">
           <button type="submit" disabled={saving}
-            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 rounded-lg disabled:opacity-60">
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold min-h-11 rounded-full disabled:opacity-60">
             {saving ? t.saving : t.add}
           </button>
         </div>
-        <div className="col-span-full">
-          <LabScanDialog lang={lang} saving={saving} onSave={addMany} />
-        </div>
         {(lang === 'es' ? selected.noteEs : selected.noteEn) && (
-          <p className="col-span-full text-xs text-muted-foreground">{lang === 'es' ? selected.noteEs : selected.noteEn}</p>
+          <p className="col-span-full text-sm text-muted-foreground">{lang === 'es' ? selected.noteEs : selected.noteEn}</p>
         )}
         {(formError || error) && <p className="col-span-full text-sm text-destructive">{formError ?? error}</p>}
       </form>
 
-      <div className="px-6 pt-5 flex gap-2 overflow-x-auto" role="tablist">
+      <div className="px-5 sm:px-6 pt-5 flex gap-2 overflow-x-auto scrollbar-hide" role="tablist">
         {GROUPS.map((g) => (
           <button key={g} role="tab" aria-selected={group === g} onClick={() => setGroup(g)}
-            className={`px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap border ${group === g ? 'bg-primary text-primary-foreground border-primary' : 'bg-secondary text-foreground border-border'}`}>
+            className={`inline-flex items-center min-h-10 px-4 rounded-full text-sm font-semibold whitespace-nowrap border ${group === g ? 'bg-primary text-primary-foreground border-primary' : 'bg-secondary text-foreground border-border'}`}>
             {t.groups[g]}
           </button>
         ))}
       </div>
 
-      <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="p-5 sm:p-6 grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
         {loading ? (
           <p className="text-muted-foreground text-sm">{t.loading}</p>
         ) : (
@@ -148,57 +148,57 @@ const LabResultsSection: React.FC<{ lang?: Lang }> = ({ lang = 'es' }) => {
               const latest = points[points.length - 1];
               const status = latest ? markerStatus(info, latest.value) : null;
               return (
-                <div key={info.key} className="flex flex-col gap-2">
+                <div key={info.key} className="flex flex-col gap-2 rounded-2xl border border-border p-4">
                   <div className="flex justify-between items-center gap-2">
-                    <h4 className="text-sm font-semibold text-foreground">{markerLabel(info, lang)}</h4>
+                    <h3 className="text-sm font-semibold text-foreground">{markerLabel(info, lang)}</h3>
                     {latest && status && status !== 'none' && (
-                      <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${STATUS_STYLE[status]}`}>
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${STATUS_STYLE[status]}`}>
                         {latest.value} {info.unit} · {t.status[status]}
                       </span>
                     )}
                   </div>
                   {latest && status === 'none' && (
-                    <p className="text-xs text-muted-foreground">{latest.value} {info.unit} · {t.noRange}</p>
+                    <p className="text-sm text-muted-foreground">{latest.value} {info.unit} · {t.noRange}</p>
                   )}
                   {points.length === 0 ? (
-                    <p className="text-xs text-muted-foreground py-4">{t.none}</p>
+                    <p className="text-sm text-muted-foreground">{t.none}</p>
                   ) : (
                     <LineChart points={points} unit={info.unit} refLow={info.low} refHigh={info.high} />
                   )}
-                  {info.key === 'homa_ir' && <p className="text-xs text-muted-foreground">{t.homaNote}</p>}
+                  {info.key === 'homa_ir' && <p className="text-sm text-muted-foreground">{t.homaNote}</p>}
                 </div>
               );
             })}
             {group === 'hormones' && (
-              <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-2 rounded-2xl border border-border p-4">
                 <div className="flex justify-between items-center gap-2">
-                  <h4 className="text-sm font-semibold text-foreground">{t.fai} <span className="text-xs font-normal text-muted-foreground">· {t.derived}</span></h4>
+                  <h3 className="text-sm font-semibold text-foreground">{t.fai} <span className="text-xs font-normal text-muted-foreground">· {t.derived}</span></h3>
                   {fai.length > 0 && (
-                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${fai[fai.length - 1].value >= FAI_HIGH ? STATUS_STYLE.high : STATUS_STYLE.ok}`}>
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${fai[fai.length - 1].value >= FAI_HIGH ? STATUS_STYLE.high : STATUS_STYLE.ok}`}>
                       {fai[fai.length - 1].value} · {fai[fai.length - 1].value >= FAI_HIGH ? t.status.high : t.status.ok}
                     </span>
                   )}
                 </div>
-                {fai.length === 0 ? <p className="text-xs text-muted-foreground py-4">{t.none}</p> : <LineChart points={fai} unit="" refLow={null} refHigh={FAI_HIGH} />}
-                <p className="text-xs text-muted-foreground">{t.faiNote}</p>
+                {fai.length === 0 ? <p className="text-sm text-muted-foreground">{t.none}</p> : <LineChart points={fai} unit="" refLow={null} refHigh={FAI_HIGH} />}
+                <p className="text-sm text-muted-foreground">{t.faiNote}</p>
               </div>
             )}
           </>
         )}
       </div>
 
-      <p className="px-6 pb-4 text-xs text-muted-foreground">{t.footer}</p>
+      <p className="px-5 sm:px-6 pb-5 text-sm text-muted-foreground text-pretty max-w-[70ch]">{t.footer}</p>
 
       {results.length > 0 && (
-        <details className="border-t border-border px-6 py-4">
-          <summary className="cursor-pointer text-sm font-semibold text-foreground">{t.results} ({results.length})</summary>
-          <ul className="mt-3 flex flex-col gap-2 max-h-64 overflow-y-auto">
+        <details className="border-t border-border px-5 sm:px-6 py-3">
+          <summary className="cursor-pointer min-h-10 flex items-center text-sm font-semibold text-foreground">{t.results} ({results.length})</summary>
+          <ul className="mt-1 flex flex-col divide-y divide-border/60 max-h-64 overflow-y-auto">
             {[...results].reverse().map((r) => (
-              <li key={r.id} className="flex items-center justify-between gap-3 text-xs text-muted-foreground">
+              <li key={r.id} className="flex items-center justify-between gap-3 py-2 text-sm text-muted-foreground">
                 <span>
                   <strong className="text-foreground">{r.date}</strong> · {label(r.marker)}: {r.value} {markerInfo(r.marker).unit}
                 </span>
-                <button onClick={() => remove(r.id)} className="text-destructive hover:underline shrink-0" aria-label={`${t.del} ${label(r.marker)} ${r.date}`}>
+                <button onClick={() => remove(r.id)} className="inline-flex items-center min-h-10 px-2 text-sm font-semibold text-destructive hover:underline shrink-0" aria-label={`${t.del} ${label(r.marker)} ${r.date}`}>
                   {t.del}
                 </button>
               </li>

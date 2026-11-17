@@ -13,7 +13,7 @@ interface SymptomCheckinProps {
   onSummary?: (summary: SymptomSummary) => void;
 }
 
-/** Daily PMOS symptom check-in (rate each symptom 0-3 and save for today). */
+/** Daily hormonal symptom check-in for every profile (rate each symptom 0-3 and save for today). */
 export const SymptomCheckin: React.FC<SymptomCheckinProps> = ({ lang, configured: configuredSymptoms, setConfigured: setConfiguredSymptoms, onSummary }) => {
   const { todayEntry, saving, saveToday, SYMPTOM_KEYS } = usePMOSSymptoms();
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
@@ -95,148 +95,96 @@ export const SymptomCheckin: React.FC<SymptomCheckinProps> = ({ lang, configured
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [total, max]);
 
+  const es = lang === 'es';
+  const withSymptoms = configuredSymptoms.filter((k) => (values[k] ?? 0) > 0).length;
+  const allExpanded = expandedSymptoms.length >= configuredSymptoms.length;
+  const quietBtn = 'min-h-10 px-3 rounded-full text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary inline-flex items-center gap-1.5 transition-colors';
   return (
     <>
-        {/* Daily Symptom Check-in Section with Expand-on-Click Layout */}
-        <section className="bg-card rounded-2xl border border-border shadow-sm">
-          {/* Header & Controls bar */}
-          <div className="p-5 sm:p-6 border-b border-border bg-secondary/15 flex flex-wrap items-center justify-between gap-4">
-            <div className="flex items-center gap-3.5">
-              <div className="w-11 h-11 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary">
-                <span className="material-symbols-outlined text-2xl">monitor_heart</span>
-              </div>
-              <div>
-                <div className="flex items-center gap-2.5">
-                  <h3 className="text-foreground text-lg sm:text-xl font-bold">
-                    {lang === 'es' ? 'Registro Diario de Síntomas' : 'Daily Symptom Check-in'}
-                  </h3>
-                  <span className="text-xs sm:text-sm font-semibold px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
-                    {configuredSymptoms.length} {lang === 'es' ? 'en tu rutina' : 'in routine'}
-                  </span>
-                </div>
-                <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
-                  {lang === 'es'
-                    ? 'Haz clic en cualquier síntoma para expandirlo y registrar tu nivel de hoy. Pasa el cursor por (?) para ver su FAQ.'
-                    : 'Click any symptom to expand and rate your intensity today. Hover (?) for quick FAQs.'}
-                </p>
-              </div>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-x-8 gap-y-6">
+        <section className="lg:col-span-8 flex flex-col gap-4" aria-labelledby="symptom-checkin-title">
+          <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-2">
+            <div>
+              <h2 id="symptom-checkin-title" className="text-xl sm:text-2xl font-semibold text-foreground tracking-tight text-balance">
+                {es ? 'Síntomas de hoy' : 'Today’s symptoms'}
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1 max-w-prose text-pretty">
+                {es
+                  ? 'Abre un síntoma para marcar cómo lo sientes hoy. El signo de interrogación explica qué lo causa y qué suele ayudar.'
+                  : 'Open a symptom to rate how it feels today. The question mark explains its causes and what often helps.'}
+              </p>
             </div>
-
-            {/* Actions: Customize routine, Expand all / Collapse, Reset */}
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={handleOpenConfigModal}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-primary/10 hover:bg-primary/20 text-primary border border-primary/30 transition-all shadow-2xs"
-                title={lang === 'es' ? 'Elegir qué síntomas deseo registrar' : 'Customize symptoms in routine'}
-              >
-                <span className="material-symbols-outlined text-[17px]">tune</span>
-                <span>{lang === 'es' ? 'Personalizar síntomas' : 'Customize symptoms'}</span>
+            <div className="flex items-center gap-1 -mr-3">
+              <button type="button" onClick={allExpanded ? handleCollapseAll : handleExpandAll} className={quietBtn}>
+                {allExpanded ? (es ? 'Contraer todos' : 'Collapse all') : (es ? 'Expandir todos' : 'Expand all')}
               </button>
-
-              {expandedSymptoms.length < configuredSymptoms.length ? (
-                <button
-                  type="button"
-                  onClick={handleExpandAll}
-                  className="px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-secondary hover:bg-secondary/80 border border-border text-foreground transition-all"
-                >
-                  {lang === 'es' ? 'Expandir todos' : 'Expand all'}
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleCollapseAll}
-                  className="px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold bg-secondary hover:bg-secondary/80 border border-border text-foreground transition-all"
-                >
-                  {lang === 'es' ? 'Contraer todos' : 'Collapse all'}
-                </button>
-              )}
-
-              <button
-                type="button"
-                onClick={handleReset}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs sm:text-sm text-muted-foreground hover:text-foreground bg-secondary/50 hover:bg-secondary border border-border transition-all"
-                title={lang === 'es' ? 'Restablecer niveles a 0' : 'Reset all values to 0'}
-              >
-                <span className="material-symbols-outlined text-[16px]">restart_alt</span>
-                <span className="hidden sm:inline">{lang === 'es' ? 'Limpiar a 0' : 'Reset to 0'}</span>
+              <button type="button" onClick={handleReset} className={quietBtn}>
+                <span className="material-symbols-outlined text-[18px]" aria-hidden="true">restart_alt</span>
+                {es ? 'Poner todo en 0' : 'Reset to 0'}
               </button>
             </div>
           </div>
-
-          {/* Symptom Cards Grid (2 spacious columns, expand on click) */}
-          <div className="p-5 sm:p-6 bg-secondary/5">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {configuredSymptoms.map((key) => {
-                const val = values[key] ?? 0;
-                const isExpanded = expandedSymptoms.includes(key);
-
-                return (
-                  <SymptomCardWithFAQ
-                    key={key}
-                    symptomKey={key}
-                    value={val}
-                    onChange={(newVal) => handleSymptomChange(key, newVal)}
-                    isExpanded={isExpanded}
-                    onToggleExpand={() => handleToggleExpand(key)}
-                    onRemoveFromRoutine={() => handleRemoveFromRoutine(key)}
-                    lang={lang}
-                  />
-                );
-              })}
-            </div>
+          <div className="bg-card rounded-2xl border border-border shadow-sm divide-y divide-border py-1">
+            {configuredSymptoms.map((key) => (
+              <SymptomCardWithFAQ
+                key={key}
+                symptomKey={key}
+                value={values[key] ?? 0}
+                onChange={(newVal) => handleSymptomChange(key, newVal)}
+                isExpanded={expandedSymptoms.includes(key)}
+                onToggleExpand={() => handleToggleExpand(key)}
+                onRemoveFromRoutine={() => handleRemoveFromRoutine(key)}
+                lang={lang}
+              />
+            ))}
           </div>
-
-          {/* Save Action Footer */}
-          <div className="p-5 sm:p-6 border-t border-border bg-secondary/15 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
-              <span className="material-symbols-outlined text-lg text-primary">cloud_done</span>
-              <span>
-                {saved
-                  ? lang === 'es'
-                    ? 'Tus síntomas están guardados para el día de hoy.'
-                    : 'Your symptoms are saved for today.'
-                  : lang === 'es'
-                  ? 'Tienes cambios pendientes de guardar.'
-                  : 'You have unsaved changes.'}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-3 w-full sm:w-auto">
-              {saveSuccessNotice && (
-                <span className="text-xs sm:text-sm font-semibold text-emerald-500 flex items-center gap-1.5 animate-in fade-in">
-                  <span className="material-symbols-outlined text-[18px]">check_circle</span>
-                  {lang === 'es' ? '¡Guardado con éxito!' : 'Saved successfully!'}
-                </span>
-              )}
-
-              <button
-                type="button"
-                onClick={handleSave}
-                disabled={saving || (saved && !saveSuccessNotice)}
-                className="w-full sm:w-auto px-7 bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2.5 disabled:opacity-60 shadow-lg shadow-primary/20 text-sm sm:text-base"
-              >
-                <span className="material-symbols-outlined text-xl">
-                  {saving ? 'sync' : saved ? 'check_circle' : 'save'}
-                </span>
-                <span>
-                  {saving
-                    ? lang === 'es'
-                      ? 'Guardando...'
-                      : 'Saving...'
-                    : saved
-                    ? lang === 'es'
-                      ? 'Guardado para hoy'
-                      : 'Saved for Today'
-                    : lang === 'es'
-                    ? 'Guardar Registro Diario'
-                    : 'Log Symptoms'}
-                </span>
-              </button>
-            </div>
-          </div>
+          <button
+            type="button"
+            onClick={handleOpenConfigModal}
+            className="self-start min-h-11 px-4 rounded-full border border-dashed border-border text-sm font-medium text-muted-foreground hover:text-foreground hover:border-primary inline-flex items-center gap-2 transition-colors"
+          >
+            <span className="material-symbols-outlined text-[18px]" aria-hidden="true">tune</span>
+            {es ? 'Elegir qué síntomas registrar' : 'Choose which symptoms to track'}
+          </button>
         </section>
-
+        <aside className="lg:col-span-4">
+          <div className="lg:sticky lg:top-6 bg-card/70 border border-border rounded-2xl p-5 sm:p-6 flex flex-col gap-4 shadow-sm">
+            <div>
+              <h3 className="text-lg font-semibold text-foreground tracking-tight">{es ? 'Tu registro de hoy' : 'Today’s check-in'}</h3>
+              <p className="text-sm text-muted-foreground mt-1 text-pretty">
+                {withSymptoms === 0
+                  ? (es ? 'Todo en 0 por ahora.' : 'Everything at 0 for now.')
+                  : es
+                  ? `${withSymptoms} de ${configuredSymptoms.length} con algún nivel.`
+                  : `${withSymptoms} of ${configuredSymptoms.length} with some level.`}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={handleSave}
+              disabled={saving || (saved && !saveSuccessNotice)}
+              className="w-full min-h-12 px-6 bg-primary hover:bg-primary-hover text-primary-foreground font-semibold rounded-full transition-colors flex items-center justify-center gap-2.5 disabled:opacity-60 text-base"
+            >
+              <span className="material-symbols-outlined text-[22px]" aria-hidden="true">
+                {saving ? 'sync' : saved ? 'check_circle' : 'save'}
+              </span>
+              {saving ? (es ? 'Guardando…' : 'Saving…') : saved ? (es ? 'Guardado para hoy' : 'Saved for today') : (es ? 'Guardar registro' : 'Save check-in')}
+            </button>
+            <p className="text-sm text-muted-foreground flex items-start gap-2" role="status" aria-live="polite">
+              <span className={`material-symbols-outlined text-[20px] shrink-0 ${saved ? 'text-leaf' : 'text-muted-foreground'}`} aria-hidden="true">
+                {saved ? 'cloud_done' : 'edit_note'}
+              </span>
+              <span>
+                {saveSuccessNotice
+                  ? (es ? 'Guardado con éxito.' : 'Saved successfully.')
+                  : saved
+                  ? (es ? 'Tus síntomas están guardados para hoy.' : 'Your symptoms are saved for today.')
+                  : (es ? 'Tienes cambios sin guardar.' : 'You have unsaved changes.')}
+              </span>
+            </p>
+          </div>
+        </aside>
+      </div>
         {/* Modal: Personalizar qué síntomas registrar (tucked away, doesn't take up space) */}
         {isConfigModalOpen && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
