@@ -81,7 +81,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/pastel-de-frijoles-bunuelos.webp"
   },
   {
     "title": "Pastel de Remolacha",
@@ -113,7 +114,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/pastel-de-remolacha.webp"
   },
   {
     "title": "Zumo de Cascara de Fruta",
@@ -138,7 +140,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/zumo-de-cascara-de-fruta.webp"
   },
   {
     "title": "Jugo de Naranja, Hinojo y Menta",
@@ -164,7 +167,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/jugo-de-naranja-hinojo-y-menta.webp"
   },
   {
     "title": "Pastel de Frijoles (Dulce)",
@@ -194,7 +198,8 @@
     "servings": 1,
     "tags": [
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/pastel-de-frijoles-dulce.webp"
   },
   {
     "title": "Pastel de Avena",
@@ -226,7 +231,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/pastel-de-avena.webp"
   },
   {
     "title": "Albondigas en Salsa de Papaya",
@@ -261,7 +267,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/albondigas-en-salsa-de-papaya.webp"
   },
   {
     "title": "Arroz Verde",
@@ -322,7 +329,8 @@
       "perder-peso",
       "ganar-musculo",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/crema-de-naranja-y-zanahoria.webp"
   },
   {
     "title": "Pastel de Naranja con Cascara",
@@ -352,7 +360,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/pastel-de-naranja-con-cascara.webp"
   },
   {
     "title": "Galletas de Hojas, Tallos o Cascaras de Vegetales",
@@ -385,7 +394,8 @@
       "perder-peso",
       "ganar-musculo",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/galletas-de-hojas-tallos-o-cascaras-de-vegetales.webp"
   },
   {
     "title": "Receta con Pan Duro (Version Dulce)",
@@ -422,7 +432,8 @@
       "perder-peso",
       "ganar-musculo",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/receta-con-pan-duro-version-dulce.webp"
   },
   {
     "title": "Receta con Pan Duro (Version Salada)",
@@ -459,7 +470,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/receta-con-pan-duro-version-salada.webp"
   },
   {
     "title": "Panqueque de Arroz (Salado)",
@@ -492,7 +504,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/panqueque-de-arroz-salado.webp"
   },
   {
     "title": "Arroz Dulce con Especias",
@@ -526,7 +539,8 @@
     "tags": [
       "ganar-musculo",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/arroz-dulce-con-especias.webp"
   },
   {
     "title": "Pastel Rico en Vitaminas (con Cascaras)",
@@ -559,7 +573,8 @@
     "tags": [
       "ganar-musculo",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/pastel-rico-en-vitaminas-con-cascaras.webp"
   },
   {
     "title": "Ensalada de Cascaras Sobrantes",
@@ -590,7 +605,8 @@
     "tags": [
       "ganar-musculo",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/ensalada-de-cascaras-sobrantes.webp"
   },
   {
     "title": "Solterito Arequipeno",
@@ -658,7 +674,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/pastel-de-aguacate.webp"
   },
   {
     "title": "Panqueque Super Facil",
@@ -689,7 +706,8 @@
     "tags": [
       "ganar-musculo",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/panqueque-super-facil.webp"
   },
   {
     "title": "Pastel de Calabacin y Remolacha",
@@ -722,7 +740,8 @@
     "tags": [
       "ganar-musculo",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/pastel-de-calabacin-y-remolacha.webp"
   },
   {
     "title": "Yuquitas Fritas",
@@ -779,7 +798,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/pastel-de-verduras.webp"
   },
   {
     "title": "Tortilla de Verduras",
@@ -879,7 +899,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/compota-de-entrecascara-de-naranja.webp"
   },
   {
     "title": "Tamal de Pollo",
@@ -916,7 +937,8 @@
     "tags": [
       "ganar-musculo",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/tamal-de-pollo.webp"
   },
   {
     "title": "Trufa de Platano y Chocolate",
@@ -947,7 +969,8 @@
       "perder-peso",
       "ganar-musculo",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/trufa-de-platano-y-chocolate.webp"
   },
   {
     "title": "Aguadito de Pollo",
@@ -1069,7 +1092,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/salsa-criolla.webp"
   },
   {
     "title": "Saltado de Verduras",
@@ -1131,7 +1155,8 @@
       "perder-peso",
       "ganar-musculo",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/helado-de-platano.webp"
   },
   {
     "title": "Chifles",
@@ -1203,7 +1228,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/pollo-fragante.webp"
   },
   {
     "title": "Tomates Asados para Salsa Rustica",
@@ -1234,7 +1260,8 @@
       "perder-peso",
       "ganar-musculo",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/tomates-asados-para-salsa-rustica.webp"
   },
   {
     "title": "Pan con Chicharron",
@@ -1577,7 +1604,8 @@
       "perder-peso",
       "ganar-musculo",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/avena-con-platano-y-canela.webp"
   },
   {
     "title": "Huevos Revueltos con Tomate y Cebolla",
@@ -1668,7 +1696,8 @@
     "tags": [
       "ganar-musculo",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/batido-proteico-de-platano-y-avena.webp"
   },
   {
     "title": "Tortilla de Espinaca y Queso",
@@ -1698,7 +1727,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/tortilla-de-espinaca-y-queso.webp"
   },
   {
     "title": "Quinua con Leche y Frutas",
@@ -2170,7 +2200,8 @@
     "servings": 1,
     "tags": [
       "ganar-musculo"
-    ]
+    ],
+    "imageUrl": "/recipes/tamal-verde-de-pollo.webp"
   },
   {
     "title": "Ceviche de Bonito",
@@ -2406,7 +2437,8 @@
     "tags": [
       "perder-peso",
       "mantener"
-    ]
+    ],
+    "imageUrl": "/recipes/wrap-de-pollo-con-verduras.webp"
   },
   {
     "title": "Causa Rellena Light de Atun",
@@ -2697,7 +2729,8 @@
       "hierro",
       "vitamina c",
       "salud cardiovascular"
-    ]
+    ],
+    "imageUrl": "/recipes/zumo-de-maracuya-y-remolacha.webp"
   },
   {
     "title": "Zumo de Pepino y Menta",
@@ -2728,5 +2761,1165 @@
       "vitamina c"
     ],
     "imageUrl": "/recipes/zumo-de-pepino-y-menta.webp"
+  },
+  {
+    "title": "Agua de Avena con Canela y Vainilla",
+    "description": "Bebida vegetal refrescante, cremosa y saciante con avena, canela y vainilla. La alternativa ideal para sustituir los refrescos azucarados.",
+    "category": "bebida",
+    "calories": 85,
+    "protein": 2.5,
+    "carbs": 16,
+    "fat": 1.2,
+    "ingredients": [
+      "1 taza de copos de avena integral",
+      "1 litro de agua fresca",
+      "1 ramita de canela (o 1 cucharadita de canela molida)",
+      "1 cucharadita de extracto puro de vainilla",
+      "Hielo al gusto",
+      "Canela en polvo para espolvorear"
+    ],
+    "instructions": [
+      "Remojar la avena en 2 tazas de agua durante 20 minutos para suavizarla y facilitar su digestión.",
+      "Colar y enjuagar bien la avena bajo agua limpia.",
+      "Licuar la avena escurrida con el litro de agua, la canela y la vainilla a alta velocidad hasta obtener una mezcla suave y homogénea.",
+      "Colar con un colador fino o tela para bebidas vegetales si se prefiere una textura más ligera.",
+      "Servir bien fría con abundante hielo y una pizca de canela por encima."
+    ],
+    "prepTime": 10,
+    "servings": 4,
+    "tags": [
+      "hidratacion",
+      "fibra",
+      "digestion",
+      "perder-peso",
+      "mantener"
+    ],
+    "imageUrl": "/recipes/agua-de-avena-con-canela-y-vainilla.webp"
+  },
+  {
+    "title": "Agua Fresca de Jamaica y Hierbabuena",
+    "description": "Bebida refrescante y diurética elaborada con infusión fría de flor de jamaica, hierbabuena fresca y toque cítrico de naranja.",
+    "category": "bebida",
+    "calories": 25,
+    "protein": 0.5,
+    "carbs": 6,
+    "fat": 0.1,
+    "ingredients": [
+      "1/2 taza de flores secas de jamaica",
+      "1 litro de agua",
+      "Jugo y ralladura de 1 naranja fresca",
+      "8-10 hojas de hierbabuena fresca",
+      "Hielo al gusto"
+    ],
+    "instructions": [
+      "Hervir 2 tazas de agua, verter sobre las flores de jamaica y dejar reposar 15 minutos.",
+      "Colar la infusión y combinar en una jarra con las 2 tazas restantes de agua fría.",
+      "Agregar el jugo de naranja recién exprimido y las hojas de hierbabuena ligeramente machacadas.",
+      "Refrigerar durante al menos 30 minutos y servir con abundante hielo."
+    ],
+    "prepTime": 15,
+    "servings": 4,
+    "tags": [
+      "hidratacion",
+      "antioxidante",
+      "diuretico natural",
+      "perder-peso",
+      "mantener"
+    ],
+    "imageUrl": "/recipes/agua-fresca-de-jamaica-y-hierbabuena.webp"
+  },
+  {
+    "title": "Papelón con Limón Saludable",
+    "description": "Reinterpretación ligera de la bebida típica venezolana con limón fresco exprimido y un toque sutil de panela o endulzado natural con dátiles.",
+    "category": "bebida",
+    "calories": 60,
+    "protein": 0.2,
+    "carbs": 15,
+    "fat": 0,
+    "ingredients": [
+      "1 litro de agua fresca",
+      "Zumo de 4 limones verdes grandes",
+      "2 cucharadas de papelón rallado (o 3 dátiles hidratados y licuados)",
+      "Hojas de menta fresca",
+      "Abundante hielo"
+    ],
+    "instructions": [
+      "Disolver el papelón rallado en media taza de agua tibia (o licuar los dátiles con un chorrito de agua hasta obtener un puré suave).",
+      "En una jarra grande, mezclar el resto del agua fría con el jugo de limón recién exprimido.",
+      "Integrar el endulzante natural ajustando el equilibrio de sabor y acidez.",
+      "Servir con hielo abundante y decorar con hojitas de menta."
+    ],
+    "prepTime": 10,
+    "servings": 4,
+    "tags": [
+      "hidratacion",
+      "vitamina c",
+      "energia natural",
+      "mantener"
+    ],
+    "imageUrl": "/recipes/papelon-con-limon-saludable.webp"
+  },
+  {
+    "title": "Porridge de Cacao Puro y Avena",
+    "description": "Cremoso tazón de avena caliente con cacao amargo 100%, canela y semillas, rico en magnesio y fibra para saciedad prolongada.",
+    "category": "desayuno",
+    "calories": 310,
+    "protein": 11,
+    "carbs": 48,
+    "fat": 8,
+    "ingredients": [
+      "1/2 taza de copos de avena integral",
+      "1 taza de bebida vegetal de almendras o avena sin azúcar",
+      "1 cucharada colmada de cacao puro desgrasado sin azúcar",
+      "1/2 plátano maduro machacado",
+      "1 cucharadita de semillas de chía",
+      "1 cucharadita de nibs de cacao para decorar"
+    ],
+    "instructions": [
+      "En una cacerola pequeña, verter la bebida vegetal, la avena, el plátano machacado y el cacao en polvo.",
+      "Cocinar a fuego medio-bajo durante 6-8 minutos removiendo constantemente hasta que espese y quede cremoso.",
+      "Retirar del fuego e incorporar las semillas de chía.",
+      "Servir en un bol y decorar con nibs de cacao y unas rodajitas finas de plátano."
+    ],
+    "prepTime": 10,
+    "servings": 1,
+    "tags": [
+      "energia natural",
+      "fibra",
+      "antioxidante",
+      "ganar-musculo",
+      "mantener"
+    ],
+    "imageUrl": "/recipes/porridge-de-cacao-puro-y-avena.webp"
+  },
+  {
+    "title": "Overnight Oats de Cacao y Yogur Griego",
+    "description": "Avena reposada en frío con cacao puro, yogur griego natural y semillas de linaza. Desayuno práctico, saciante y alto en proteína.",
+    "category": "desayuno",
+    "calories": 330,
+    "protein": 18,
+    "carbs": 42,
+    "fat": 9,
+    "ingredients": [
+      "1/2 taza de copos de avena",
+      "3 cucharadas de yogur griego natural sin azúcar",
+      "1/2 taza de leche o bebida de avena",
+      "1 cucharada de cacao puro en polvo",
+      "1 cucharadita de semillas de linaza molida",
+      "Frutos rojos frescos para servir"
+    ],
+    "instructions": [
+      "En un frasco o recipiente con tapa, combinar la avena, el cacao puro y la linaza molida.",
+      "Añadir la leche y el yogur griego, mezclando enérgicamente con cuchara hasta integrar bien.",
+      "Tapar y dejar en el refrigerador durante toda la noche (o mínimo 4 horas).",
+      "Consumir frío agregando frutos rojos frescos al momento de servir."
+    ],
+    "prepTime": 5,
+    "servings": 1,
+    "tags": [
+      "ganar-musculo",
+      "fibra",
+      "antioxidante",
+      "mantener"
+    ],
+    "imageUrl": "/recipes/overnight-oats-de-cacao-y-yogur-griego.webp"
+  },
+  {
+    "title": "Mousse Saludable de Cacao y Aguacate",
+    "description": "Postre chocolatoso sedoso y nutritivo a base de aguacate maduro y cacao puro 100%, sin lácteos ni azúcar refinada añadida.",
+    "category": "postre",
+    "calories": 210,
+    "protein": 4,
+    "carbs": 18,
+    "fat": 14,
+    "ingredients": [
+      "1 aguacate maduro mediano",
+      "3 cucharadas de cacao amargo puro en polvo",
+      "2 cucharadas de miel cruda o puré de dátiles hidratados",
+      "3 cucharadas de bebida vegetal sin azúcar",
+      "1/2 cucharadita de extracto de vainilla",
+      "1 pizca de sal marina"
+    ],
+    "instructions": [
+      "Extraer la pulpa del aguacate y colocarla en el vaso de la batidora o procesador.",
+      "Añadir el cacao puro, la miel o puré de dátiles, la bebida vegetal, la vainilla y la pizca de sal.",
+      "Procesar durante 2 minutos hasta lograr una textura completamente cremosa, brillante y sin grumos.",
+      "Repartir en copas y refrigerar durante al menos 1 hora antes de degustar."
+    ],
+    "prepTime": 10,
+    "servings": 2,
+    "tags": [
+      "postre",
+      "snack",
+      "antioxidante",
+      "salud cardiovascular",
+      "mantener"
+    ],
+    "imageUrl": "/recipes/mousse-saludable-de-cacao-y-aguacate.webp"
+  },
+  {
+    "title": "Bocaditos Energéticos de Avena y Cacao",
+    "description": "Bolitas saciantes sin cocción de avena, cacao puro y crema de frutos secos natural, ideales para la merienda o antes de entrenar.",
+    "category": "snack",
+    "calories": 120,
+    "protein": 4,
+    "carbs": 14,
+    "fat": 5,
+    "ingredients": [
+      "1 taza de copos de avena finos",
+      "3 cucharadas de cacao puro en polvo",
+      "1/3 taza de crema de cacahuete o almendras 100% natural",
+      "2 cucharadas de semillas de chía",
+      "3 cucharadas de puré de dátiles o miel cruda",
+      "1-2 cucharadas de agua tibia si es necesario"
+    ],
+    "instructions": [
+      "En un bol mezclar la avena, el cacao puro y las semillas de chía.",
+      "Incorporar la crema de frutos secos y el puré de dátiles o miel.",
+      "Mezclar con espátula o con las manos hasta formar una pasta compacta moldeable (añadir 1 cucharada de agua tibia si queda muy seca).",
+      "Formar bolitas pequeñas con las manos y colocarlas en un plato.",
+      "Refrigerar durante 25 minutos para que adquieran consistencia firme."
+    ],
+    "prepTime": 15,
+    "servings": 8,
+    "tags": [
+      "snack",
+      "postre",
+      "energia natural",
+      "ganar-musculo",
+      "mantener"
+    ],
+    "imageUrl": "/recipes/bocaditos-energeticos-de-avena-y-cacao.webp"
+  },
+  {
+    "title": "Galletas de Avena, Platano y Nibs de Cacao",
+    "description": "Galletas tiernas y crujientes preparadas con plátano maduro, copos de avena y nibs de cacao puro. Sin harinas refinadas ni azúcar.",
+    "category": "postre",
+    "calories": 95,
+    "protein": 2.5,
+    "carbs": 16,
+    "fat": 2.5,
+    "ingredients": [
+      "2 plátanos maduros medianos",
+      "1 taza y 1/4 de copos de avena integral",
+      "2 cucharadas de nibs de cacao puro",
+      "1/2 cucharadita de canela en polvo"
+    ],
+    "instructions": [
+      "Precalentar el horno a 180°C y colocar papel vegetal sobre una bandeja.",
+      "En un bol aplastar los plátanos con un tenedor hasta formar un puré suave.",
+      "Agregar los copos de avena, la canela y los nibs de cacao; mezclar bien hasta integrar.",
+      "Formar pequeñas porciones sobre la bandeja y aplanar con una cuchara.",
+      "Hornear durante 12-15 minutos hasta que los bordes estén ligeramente dorados."
+    ],
+    "prepTime": 20,
+    "servings": 6,
+    "tags": [
+      "postre",
+      "snack",
+      "fibra",
+      "perder-peso",
+      "mantener"
+    ],
+    "imageUrl": "/recipes/galletas-de-avena-platano-y-nibs-de-cacao.webp"
+  },
+  {
+    "title": "Arepas Saludables de Avena y Linaza",
+    "description": "Arepas venezolanas tostadas al budare, preparadas con harina de maíz precocida, avena molida y linaza para un aporte extra de fibra y saciedad.",
+    "category": "desayuno",
+    "calories": 210,
+    "protein": 6,
+    "carbs": 38,
+    "fat": 3,
+    "ingredients": [
+      "1 taza de harina de maíz precocida blanca o amarilla",
+      "1/2 taza de avena molida en hojuelas",
+      "1 cucharada de semillas de linaza molida",
+      "1 taza y 1/2 de agua tibia",
+      "1 pizca de sal marina"
+    ],
+    "instructions": [
+      "En un bol amplio colocar el agua tibia, la sal, la linaza y la avena molida. Dejar reposar 2 minutos.",
+      "Incorporar la harina de maíz poco a poco, amasando con las manos hasta obtener una masa elástica y sin grietas.",
+      "Dividir en 4 porciones, hacer bolas redondeadas y aplanarlas con las palmas creando discos de 1.5 cm de grosor.",
+      "Calentar un budare o sartén antiadherente con una gota de aceite de oliva y sellar a fuego medio 6 minutos por lado.",
+      "Hornear a 180°C por 8-10 minutos hasta que queden crujientes por fuera y esponjosas por dentro."
+    ],
+    "prepTime": 25,
+    "servings": 4,
+    "tags": [
+      "fibra",
+      "digestion",
+      "perder-peso",
+      "mantener"
+    ],
+    "imageUrl": "/recipes/arepas-saludables-de-avena-y-linaza.webp"
+  },
+  {
+    "title": "Reina Pepiada Saludable",
+    "description": "Relleno criollo venezolano de pechuga de pollo desmechada con aguacate natural, cilantro fresco y un toque de yogur griego en lugar de mayonesa.",
+    "category": "almuerzo",
+    "calories": 240,
+    "protein": 26,
+    "carbs": 6,
+    "fat": 12,
+    "ingredients": [
+      "250g de pechuga de pollo cocida y desmechada",
+      "1 aguacate maduro mediano",
+      "2 cucharadas de yogur griego natural entero sin azúcar",
+      "1 cucharadita de jugo de limón",
+      "2 cucharadas de cebollín o cebolla morada picada",
+      "2 cucharadas de cilantro fresco picado",
+      "Sal y pimienta negra al gusto"
+    ],
+    "instructions": [
+      "Triturar la mitad del aguacate con un tenedor junto con el yogur griego, el limón, la sal y la pimienta hasta lograr una pasta suave.",
+      "Cortar la otra mitad del aguacate en cubitos pequeños.",
+      "En un tazón mezclar el pollo desmechado con la crema de aguacate, el cebollín y el cilantro.",
+      "Agregar los cubitos de aguacate restantes y mezclar suavemente.",
+      "Servir fría como relleno de arepas de avena o sobre una cama de ensalada verde."
+    ],
+    "prepTime": 15,
+    "servings": 2,
+    "tags": [
+      "ganar-musculo",
+      "salud cardiovascular",
+      "perder-peso",
+      "mantener"
+    ],
+    "imageUrl": "/recipes/reina-pepiada-saludable.webp"
+  },
+  {
+    "title": "Pabellon Criollo Saludable",
+    "description": "Versión balanceada del plato tradicional venezolano con carne mechada magra, caraotas negras guisadas, arroz integral y tajadas de plátano horneadas sin freír.",
+    "category": "almuerzo",
+    "calories": 440,
+    "protein": 32,
+    "carbs": 56,
+    "fat": 9,
+    "ingredients": [
+      "150g de carne de res magra cocida y desmechada",
+      "1 taza de caraotas negras cocidas",
+      "1/2 taza de arroz integral cocido",
+      "1/2 plátano maduro en rodajas diagonales",
+      "1/2 cebolla picada finamente",
+      "1/2 pimiento rojo o ají dulce picado",
+      "1 diente de ajo machacado",
+      "1 cucharadita de comino molido",
+      "1 cucharadita de aceite de oliva virgen extra",
+      "Sal y cilantro al gusto"
+    ],
+    "instructions": [
+      "Disponer las rodajas de plátano en una bandeja con papel de horno y hornear a 200°C durante 15 minutos hasta que caramelicen.",
+      "En una sartén calentar el aceite de oliva y sofreír la cebolla, el ajo y el ají dulce con el comino por 5 minutos.",
+      "Dividir el sofrito: mezclar la mitad con la carne mechada y unas cucharadas de caldo, cocinando 5 minutos.",
+      "Incorporar la otra mitad del sofrito a las caraotas negras, rectificar de sal y dejar espesar a fuego bajo.",
+      "Servir en el plato los cuatro componentes en porciones equilibradas decorando con cilantro fresco."
+    ],
+    "prepTime": 35,
+    "servings": 2,
+    "tags": [
+      "hierro",
+      "fibra",
+      "ganar-musculo",
+      "mantener"
+    ],
+    "imageUrl": "/recipes/pabellon-criollo-saludable.webp"
+  },
+  {
+    "title": "Cachapas Saludables de Jojoto y Avena",
+    "description": "Cachapas caseras de maíz tierno ligadas con copos de avena, doradas a la plancha y rellenas de queso blanco fresco bajo en grasa.",
+    "category": "desayuno",
+    "calories": 260,
+    "protein": 12,
+    "carbs": 40,
+    "fat": 5,
+    "ingredients": [
+      "2 tazas de maíz dulce tierno en grano",
+      "3 cucharadas de copos de avena",
+      "1 huevo entero o 2 claras",
+      "2 cucharadas de leche vegetal o descremada",
+      "1 pizca de sal marina",
+      "60g de queso blanco fresco descremado"
+    ],
+    "instructions": [
+      "Procesar en licuadora el maíz tierno, la avena, el huevo, la leche y la pizca de sal dando pulsos cortos para conservar algo de textura.",
+      "Engrasar ligeramente una plancha o budare antiadherente a fuego medio.",
+      "Verter una porción generosa de masa formando un círculo de 1 cm de grosor.",
+      "Cocinar tapada 4-5 minutos hasta que aparezcan burbujas y la base esté dorada; voltear y cocinar 3 minutos más.",
+      "Colocar el queso blanco fresco en una mitad, doblar como una empanada y servir caliente."
+    ],
+    "prepTime": 20,
+    "servings": 2,
+    "tags": [
+      "fibra",
+      "energia natural",
+      "mantener"
+    ],
+    "imageUrl": "/recipes/cachapas-saludables-de-jojoto-y-avena.webp"
+  },
+  {
+    "title": "Hervido Criollo Ligero de Pollo y Auyama",
+    "description": "Sopa reconfortante criolla con pechuga de pollo, auyama, ají dulce y hierbas frescas, baja en grasa y rica en vitaminas.",
+    "category": "almuerzo",
+    "calories": 230,
+    "protein": 25,
+    "carbs": 22,
+    "fat": 4,
+    "ingredients": [
+      "300g de pechuga de pollo en cubos",
+      "200g de auyama (calabaza) en trozos medianos",
+      "2 ajíes dulces picados",
+      "2 dientes de ajo machacados",
+      "1/2 cebolla picada",
+      "1 ramita de cebollín y cilantro criollo fresco",
+      "1 litro de agua o caldo suave de verduras",
+      "Sal marina y orégano seco al gusto"
+    ],
+    "instructions": [
+      "En una olla hervir el agua con el ajo machacado, la cebolla, el ají dulce y el cebollín.",
+      "Añadir los dados de pechuga de pollo y cocinar a fuego medio durante 15 minutos desespumando si es necesario.",
+      "Incorporar la auyama y cocinar 10-12 minutos hasta que esté tierna pero entera.",
+      "Añadir el cilantro fresco picado y la pizca de orégano, apagar el fuego y dejar reposar 5 minutos tapado.",
+      "Servir caliente con unas gotas de limón al gusto."
+    ],
+    "prepTime": 30,
+    "servings": 3,
+    "tags": [
+      "vitaminas a y c",
+      "antiinflamatorio",
+      "perder-peso",
+      "mantener"
+    ],
+    "imageUrl": "/recipes/hervido-criollo-ligero-de-pollo-y-auyama.webp"
+  },
+  {
+    "title": "Pepito Venezolano Saludable",
+    "description": "Versión ligera del icónico pepito callejero venezolano: pechuga de pollo o carne magra a la plancha en baguette integral, vegetales frescos, salsa de yogur al ajo y queso blanco magro.",
+    "category": "cena",
+    "calories": 380,
+    "protein": 34,
+    "carbs": 38,
+    "fat": 10,
+    "ingredients": [
+      "2 panes baguette pequeños integrales (o pan de masa madre)",
+      "250g de pechuga de pollo o lomo magro en tiras",
+      "1 cucharadita de aceite de oliva virgen extra",
+      "1 diente de ajo picado",
+      "1/2 cebolla en juliana",
+      "1 tomate en rodajas finas",
+      "1 taza de lechuga fresca en tiras",
+      "50g de queso blanco llanero o paisa rallado bajo en grasa",
+      "3 cucharadas de yogur griego natural",
+      "Sal marina, oregano y pimienta al gusto"
+    ],
+    "instructions": [
+      "Sazonar las tiras de pollo o carne magra con ajo, oregano, sal y pimienta.",
+      "En una sarten con el aceite de oliva, saltear la carne y la cebolla a fuego vivo durante 5-6 minutos hasta dorar.",
+      "Mezclar el yogur griego con un toque de ajo triturado, limon y sal para una salsa de ajo saludable.",
+      "Tostar ligeramente los panes integrales abiertos por la mitad.",
+      "Montar los pepitos con lechuga, rodajas de tomate, la carne salteada, la salsa de ajo y culminar con el queso blanco magro rallado."
+    ],
+    "prepTime": 20,
+    "servings": 2,
+    "tags": [
+      "ganar-musculo",
+      "fibra",
+      "mantener"
+    ],
+    "imageUrl": "/recipes/pepito-venezolano-saludable.webp"
+  },
+  {
+    "title": "Lasagna Saludable de Calabacin y Pavo",
+    "description": "Lasana reconfortante sin pasta refinada, elaborada con laminas de calabacin tierno, boloñesa casera de pavo magro y queso ricotta bajo en grasa.",
+    "category": "almuerzo",
+    "calories": 310,
+    "protein": 28,
+    "carbs": 14,
+    "fat": 15,
+    "ingredients": [
+      "3 calabacines medianos en laminas a lo largo",
+      "400g de carne picada magra de pavo",
+      "2 tazas de salsa de tomate natural triturado",
+      "1/2 cebolla picada",
+      "1 diente de ajo picado",
+      "1 taza de queso ricotta o requeson magro",
+      "1/2 taza de queso mozzarella rallado bajo en grasa",
+      "1 cucharadita de oregano y albahaca",
+      "1 cucharadita de aceite de oliva",
+      "Sal marina y pimienta al gusto"
+    ],
+    "instructions": [
+      "Cortar los calabacines en laminas finas y sellarlas 1 minuto por plancha caliente o secarlas con papel absorbente para retirar exceso de agua.",
+      "En una sarten con el aceite, sofreir la cebolla y el ajo, anadir el pavo y dorar. Agregar la salsa de tomate, oregano, sal y pimienta y cocinar 10 minutos a fuego suave.",
+      "En una fuente para horno, colocar una base de laminas de calabacin, salsa boloñesa y cucharadas de ricotta.",
+      "Repetir hasta formar 3 capas y terminar con mozzarella bajo en grasa.",
+      "Hornear a 190°C durante 25-30 minutos hasta que gratine. Dejar reposar 10 minutos antes de cortar."
+    ],
+    "prepTime": 40,
+    "servings": 4,
+    "tags": [
+      "ganar-musculo",
+      "perder-peso",
+      "mantener"
+    ],
+    "imageUrl": "/recipes/lasagna-saludable-de-calabacin-y-pavo.webp"
+  },
+  {
+    "title": "Arroz Chino Saludable Especial",
+    "description": "Arroz frito oriental preparado con arroz integral, pechuga de pollo, camarones, vegetales crujientes y salsa de soja reducida en sodio con toque de sesamo.",
+    "category": "almuerzo",
+    "calories": 340,
+    "protein": 26,
+    "carbs": 42,
+    "fat": 7,
+    "ingredients": [
+      "2 tazas de arroz integral cocido (frio)",
+      "150g de pechuga de pollo en daditos",
+      "100g de camarones limpios",
+      "2 huevos batidos",
+      "1 zanahoria en cubitos pequenos",
+      "1 taza de repollo en juliana o brotes de soja",
+      "3 tallos de cebollin en rodajitas",
+      "1 trocito de jengibre fresco rallado",
+      "1 diente de ajo picado",
+      "2 cucharadas de salsa de soja baja en sodio",
+      "1 cucharadita de aceite de sesamo",
+      "1 cucharadita de aceite de oliva"
+    ],
+    "instructions": [
+      "En un wok caliente con unas gotas de aceite hacer una tortilla fina con los huevos, cortar en tiritas y reservar.",
+      "Saltear a fuego vivo el pollo y los camarones con el ajo y jengibre durante 4 minutos.",
+      "Anadir la zanahoria y el repollo; saltear 2 minutos dejando los vegetales al dente.",
+      "Agregar el arroz integral frio, las tiras de tortilla y verter la salsa de soja y el aceite de sesamo por los bordes.",
+      "Saltear todo junto a fuego muy alto por 3 minutos integrando bien. Finalizar con el cebollin fresco."
+    ],
+    "prepTime": 25,
+    "servings": 3,
+    "tags": [
+      "ganar-musculo",
+      "fibra",
+      "mantener"
+    ],
+    "imageUrl": "/recipes/arroz-chino-saludable-especial.webp"
+  },
+  {
+    "title": "Sandwich Clubhouse Saludable",
+    "description": "Clubhouse de tres pisos con pan integral tostado, pechuga de pollo a la plancha, huevo cocido o a la plancha, lonchas de pavo, aguacate y aderezo de yogur a la mostaza.",
+    "category": "almuerzo",
+    "calories": 390,
+    "protein": 32,
+    "carbs": 34,
+    "fat": 13,
+    "ingredients": [
+      "3 rebanadas de pan integral de masa madre o centeno",
+      "100g de pechuga de pollo a la plancha",
+      "1 huevo a la plancha o cocido en rodajas",
+      "2 lonchas de jamon de pavo cocido bajo en sal",
+      "1/4 de aguacate en laminas finas",
+      "2 rodajas de tomate maduro",
+      "Hojas de lechuga fresca crujiente",
+      "1 cucharadita de mostaza dijon mezclada con 1 cucharada de yogur griego",
+      "Sal y pimienta al gusto"
+    ],
+    "instructions": [
+      "Tostar las rebanadas de pan integral y untar una cara con la mezcla ligera de yogur y mostaza.",
+      "Primer piso: colocar una rebanada, lechuga, rodajas de tomate, la pechuga de pollo a la plancha y aguacate.",
+      "Segundo piso: anadir la segunda rebanada, el jamon de pavo y el huevo sazonado con sal y pimienta.",
+      "Cerrar con la tercera rebanada, insertar palillos y cortar diagonalmente en triangulos."
+    ],
+    "prepTime": 15,
+    "servings": 1,
+    "tags": [
+      "ganar-musculo",
+      "fibra",
+      "mantener"
+    ],
+    "imageUrl": "/recipes/sandwich-clubhouse-saludable.webp"
+  },
+  {
+    "title": "Hamburguesa Casera Saludable",
+    "description": "Hamburguesa de ternera magra casera en pan integral con tomate fresco, cebolla pochada, lechuga y salsa tartara ligera a base de yogur griego.",
+    "category": "almuerzo",
+    "calories": 420,
+    "protein": 36,
+    "carbs": 38,
+    "fat": 12,
+    "ingredients": [
+      "250g de carne picada de ternera magra",
+      "2 panes integrales de hamburguesa con sesamo",
+      "1/2 cebolla picada pochada suavemente",
+      "1 tomate maduro en rodajas",
+      "Hojas de lechuga o rucula fresca",
+      "1 pepinillo agridulce encurtido picado",
+      "2 cucharadas de yogur griego natural",
+      "1 cucharadita de mostaza dijon",
+      "Sal marina, ajo en polvo y pimienta negra"
+    ],
+    "instructions": [
+      "Condimentar la carne magra con ajo en polvo, pimienta, sal marina y una pizca de mostaza dijon. Moldear 2 medallones.",
+      "Cocinar los medallones en plancha caliente a fuego medio-alto 3-4 minutos por lado.",
+      "Mezclar el yogur griego con el pepinillo picado y unas gotas de limon para la salsa ligera.",
+      "Tostar ligeramente las caras internas del pan integral.",
+      "Montar la hamburguesa untando la base con la salsa de yogur, la carne jugosa, la cebolla, el tomate y las hojas verdes."
+    ],
+    "prepTime": 25,
+    "servings": 2,
+    "tags": [
+      "ganar-musculo",
+      "hierro",
+      "mantener"
+    ],
+    "imageUrl": "/recipes/hamburguesa-casera-saludable.webp"
+  },
+  {
+    "title": "Shawarma Saludable de Pollo con Salsa de Ajo",
+    "description": "Enrollado estilo shawarma de pollo marinado en especias arabes en pan pita integral, con pepino, tomate y cremosa salsa de yogur al ajo.",
+    "category": "cena",
+    "calories": 350,
+    "protein": 32,
+    "carbs": 32,
+    "fat": 9,
+    "ingredients": [
+      "2 panes pita integrales grandes o tortillas de trigo integral",
+      "250g de pechuga de pollo en tiritas",
+      "1/2 cucharadita de comino molido",
+      "1/2 cucharadita de curcuma y pimenton dulce",
+      "1 pizca de canela y ajo en polvo",
+      "1 tomate en juliana fina",
+      "1/2 pepino en bastoncitos",
+      "1/2 cebolla morada en plumas",
+      "4 cucharadas de yogur griego con 1 diente de ajo triturado y limon",
+      "1 cucharadita de aceite de oliva y sal al gusto"
+    ],
+    "instructions": [
+      "Marinar las tiras de pollo con las especias, aceite de oliva, zumo de limon y sal marina por 15 minutos.",
+      "Saltear el pollo a fuego vivo en una sarten antiadherente durante 6 minutos hasta dorar.",
+      "Batir el yogur griego con el ajo triturado, limon y una pizca de sal.",
+      "Calentar el pan pita y esparcir una cucharada de salsa de ajo de yogur.",
+      "Rellenar con el pollo especiado, pepino, tomate y cebolla morada; enrollar firmemente."
+    ],
+    "prepTime": 20,
+    "servings": 2,
+    "tags": [
+      "ganar-musculo",
+      "antiinflamatorio",
+      "mantener"
+    ],
+    "imageUrl": "/recipes/shawarma-saludable-de-pollo-con-salsa-de-ajo.webp"
+  },
+  {
+    "title": "Guasacaca Venezolana Saludable",
+    "description": "Clasica salsa verde venezolana para carnes y arepas a base de aguacate maduro, pimenton verde, cilantro, perejil y vinagre, sin excesos de aceite.",
+    "category": "almuerzo",
+    "calories": 55,
+    "protein": 1,
+    "carbs": 4,
+    "fat": 4.5,
+    "ingredients": [
+      "1 aguacate maduro mediano",
+      "1/2 pimenton verde sin semillas",
+      "1/2 cebolla blanca pequena",
+      "1 manojo de cilantro fresco",
+      "1/2 manojo de perejil fresco",
+      "1 diente de ajo",
+      "2 cucharadas de vinagre de manzana",
+      "1 cucharada de aceite de oliva virgen extra",
+      "Sal marina y pimienta al gusto"
+    ],
+    "instructions": [
+      "Picar en trozos medianos el aguacate, la cebolla, el pimenton y el diente de ajo.",
+      "Colocar en la procesadora o licuadora junto con el cilantro, perejil, vinagre y el aceite de oliva.",
+      "Procesar a pulsos cortos para textura tradicional o licuar continuo para una salsa sedosa.",
+      "Probar y rectificar de sal y vinagre.",
+      "Conservar en un frasco de vidrio en el refrigerador con el hueso de aguacate para evitar oxidacion."
+    ],
+    "prepTime": 10,
+    "servings": 6,
+    "tags": [
+      "salud cardiovascular",
+      "antioxidante",
+      "snack",
+      "mantener"
+    ],
+    "imageUrl": "/recipes/guasacaca-venezolana-saludable.webp"
+  },
+  {
+    "title": "Salsa de Aji Amarillo Peruano Saludable",
+    "description": "Emulsion cremosa peruana con pasta de aji amarillo, queso fresco magro o yogur griego y ajo, ideal para papas, vegetales o carnes.",
+    "category": "almuerzo",
+    "calories": 65,
+    "protein": 4,
+    "carbs": 5,
+    "fat": 3,
+    "ingredients": [
+      "3 cucharadas de pasta de aji amarillo peruano",
+      "1/2 taza de queso fresco bajo en grasa (o 4 cucharadas de yogur griego)",
+      "1/4 cebolla roja picada y salteada",
+      "1 diente de ajo salteado",
+      "1 cucharadita de aceite de oliva virgen extra",
+      "2 cucharadas de leche descremada o vegetal",
+      "Sal marina al gusto"
+    ],
+    "instructions": [
+      "Saltear la cebolla, el ajo y la pasta de aji amarillo en una sarten con unas gotas de aceite durante 3 minutos.",
+      "Transferir los ingredientes salteados al vaso de la licuadora.",
+      "Agregar el queso fresco magro (o yogur), la leche y la sal marina.",
+      "Licuar a velocidad alta hasta obtener una crema suave, sedosa y homogenea de color dorado.",
+      "Servir fria o templada con vegetales cocidos, papas al vapor o pechuga a la plancha."
+    ],
+    "prepTime": 10,
+    "servings": 4,
+    "tags": [
+      "antioxidante",
+      "antiinflamatorio",
+      "snack",
+      "mantener"
+    ],
+    "imageUrl": "/recipes/salsa-de-aji-amarillo-peruano-saludable.webp"
+  },
+  {
+    "title": "Aderezo Cesar Ligero de Yogur Griego",
+    "description": "Aderezo cremoso estilo Cesar para ensaladas sin mayonesa comercial: base de yogur griego, queso parmesano, mostaza dijon, ajo y zumo de limon.",
+    "category": "almuerzo",
+    "calories": 45,
+    "protein": 3.5,
+    "carbs": 2,
+    "fat": 2.5,
+    "ingredients": [
+      "1/2 taza de yogur griego natural desnatado",
+      "2 cucharadas de queso parmesano rallado fino",
+      "1 cucharadita de mostaza dijon",
+      "1 diente de ajo pequeno rallado",
+      "Zumo de 1/2 limon",
+      "1 cucharadita de aceite de oliva virgen extra",
+      "Pimienta negra molida y pizca de sal"
+    ],
+    "instructions": [
+      "En un bol pequeno, batir el yogur griego con la mostaza dijon y el zumo de limon.",
+      "Incorporar el ajo rallado, el aceite de oliva y el queso parmesano rallado.",
+      "Condimentar con pimienta negra recien molida y una pizca de sal marina.",
+      "Remover con tenedor o batidor pequeno hasta que la salsa emulsione cremosa.",
+      "Utilizar para alinar lechuga romana crujiente con pollo a la plancha."
+    ],
+    "prepTime": 5,
+    "servings": 4,
+    "tags": [
+      "perder-peso",
+      "mantener",
+      "snack"
+    ],
+    "imageUrl": "/recipes/aderezo-cesar-ligero-de-yogur-griego.webp"
+  },
+  {
+    "title": "Aderezo Cremoso de Tahini y Limon",
+    "description": "Vinagreta cremosa de pasta de sesamo (tahini), zumo de limon fresco, ajo triturado y comino. Perfecta para ensaladas verdes y verduras asadas.",
+    "category": "almuerzo",
+    "calories": 75,
+    "protein": 2.5,
+    "carbs": 3,
+    "fat": 6,
+    "ingredients": [
+      "2 cucharadas colmadas de pasta de tahini puro",
+      "Zumo de 1 limon mediano fresco",
+      "1 diente de ajo pequeno machacado",
+      "1/4 cucharadita de comino molido",
+      "3-4 cucharadas de agua tibia",
+      "Sal marina al gusto"
+    ],
+    "instructions": [
+      "En un recipiente colocar el tahini, el ajo machacado, el comino y la sal.",
+      "Agregar el zumo de limon y comenzar a batir; la mezcla se espesara de golpe.",
+      "Anadir el agua tibia cucharada a cucharada batiendo continuamente.",
+      "Seguir batiendo hasta que adquiera un color crema claro y textura fluida sedosa.",
+      "Rociar sobre ensaladas, bowls de garbanzos o verduras asadas."
+    ],
+    "prepTime": 5,
+    "servings": 4,
+    "tags": [
+      "calcio",
+      "salud cardiovascular",
+      "antiinflamatorio",
+      "snack",
+      "mantener"
+    ],
+    "imageUrl": "/recipes/aderezo-cremoso-de-tahini-y-limon.webp"
+  },
+  {
+    "title": "Cotufas Caseras Saludables Especiadas",
+    "description": "Palomitas de maiz preparadas con una gota de aceite de oliva virgen extra y sazonadas con pimenton ahumado, oregano y levadura nutricional sabor queso.",
+    "category": "snack",
+    "calories": 110,
+    "protein": 3,
+    "carbs": 20,
+    "fat": 2,
+    "ingredients": [
+      "1/3 taza de maiz para cotufas (palomitas)",
+      "1 cucharadita de aceite de oliva virgen extra",
+      "1/2 cucharadita de pimenton dulce ahumado",
+      "1/2 cucharadita de oregano seco",
+      "1 cucharada de levadura nutricional",
+      "Pizca de sal marina fina"
+    ],
+    "instructions": [
+      "En una olla mediana a fuego medio-alto calentar la cucharadita de aceite con 3 granos de maiz y tapar.",
+      "Cuando revienten los 3 granos, verter el resto del maiz formando una capa y volver a tapar.",
+      "Mover la olla suavemente sobre el fuego hasta que dejen de estallar los granos (2-3 segundos entre estallidos).",
+      "Retirar del fuego y colocar las cotufas en un bol amplio.",
+      "Espolvorear caliente con la levadura nutricional, pimenton ahumado, oregano y sal marina, agitando bien para cubrir."
+    ],
+    "prepTime": 10,
+    "servings": 2,
+    "tags": [
+      "snack",
+      "fibra",
+      "perder-peso",
+      "mantener"
+    ],
+    "imageUrl": "/recipes/cotufas-caseras-saludables-especiadas.webp"
+  },
+  {
+    "title": "Platanitos Saludables Horneados",
+    "description": "Chips de platano verde cortados en laminas ultrafinas y horneados con una pizca de aceite de oliva virgen extra y sal marina.",
+    "category": "snack",
+    "calories": 130,
+    "protein": 1.5,
+    "carbs": 28,
+    "fat": 2,
+    "ingredients": [
+      "1 platano verde macho firme",
+      "1 cucharadita de aceite de oliva virgen extra",
+      "Sal marina fina al gusto",
+      "Pizca de ajo en polvo opcional"
+    ],
+    "instructions": [
+      "Pelar el platano verde y cortarlo en laminas muy delgadas con una mandolina.",
+      "En un bol colocar las rodajas con la cucharadita de aceite de oliva y masajear para impregnar ligeramente cada lamina.",
+      "Disponer en una sola capa sobre una bandeja con papel para hornear sin solapar.",
+      "Hornear a 180°C durante 15-18 minutos (o airfryer a 170°C por 10-12 minutos) volteando a mitad de coccion.",
+      "Retirar doradas y crujientes, espolvorear inmediatamente con sal marina y dejar enfriar 5 minutos."
+    ],
+    "prepTime": 20,
+    "servings": 2,
+    "tags": [
+      "snack",
+      "fibra",
+      "energia natural",
+      "mantener"
+    ],
+    "imageUrl": "/recipes/platanitos-saludables-horneados.webp"
+  },
+  {
+    "title": "Garbanzos Crocantes Especiados al Horno",
+    "description": "Snack proteico crujiente de garbanzos cocidos horneados con comino, pimenton ahumado y ajo en polvo. Sustituto perfecto de patatas de bolsa.",
+    "category": "snack",
+    "calories": 140,
+    "protein": 7,
+    "carbs": 20,
+    "fat": 3.5,
+    "ingredients": [
+      "1 taza y 1/2 de garbanzos cocidos enjuagados",
+      "1 cucharadita de aceite de oliva virgen extra",
+      "1/2 cucharadita de comino molido",
+      "1/2 cucharadita de pimenton dulce o picante",
+      "1/4 cucharadita de ajo en polvo",
+      "Sal marina al gusto"
+    ],
+    "instructions": [
+      "Secar muy bien los garbanzos con un pano limpio o papel de cocina para retirar toda la humedad.",
+      "Mezclar en un bol los garbanzos con el aceite de oliva, comino, pimenton, ajo en polvo y sal.",
+      "Distribuir en una bandeja con papel de hornear en una sola capa separada.",
+      "Hornear a 200°C por 25-30 minutos (o airfryer a 195°C por 15 minutos) agitando a mitad del tiempo.",
+      "Dejar enfriar completamente para que queden totalmente crujientes."
+    ],
+    "prepTime": 30,
+    "servings": 3,
+    "tags": [
+      "snack",
+      "ganar-musculo",
+      "fibra",
+      "hierro",
+      "mantener"
+    ],
+    "imageUrl": "/recipes/garbanzos-crocantes-especiados-al-horno.webp"
+  },
+  {
+    "title": "Pudin de Chia con Mango y Maracuya",
+    "description": "Cremoso pudín de chía hidratado en leche de coco con dados de mango fresco y pulpa de maracuyá, rico en omega-3 y fibra.",
+    "category": "desayuno",
+    "calories": 240,
+    "protein": 6,
+    "carbs": 28,
+    "fat": 12,
+    "ingredients": [
+      "3 cucharadas de semillas de chía",
+      "3/4 taza de leche de coco ligera o almendras",
+      "1/2 taza de mango maduro en cubos",
+      "2 cucharadas de pulpa fresca de maracuyá",
+      "1 cucharadita de miel o sirope puro de agave"
+    ],
+    "instructions": [
+      "Mezclar las semillas de chía con la leche vegetal y el toque de miel en un vaso o frasco.",
+      "Dejar reposar 10 minutos, revolver nuevamente para evitar grumos y refrigerar al menos 2 horas o toda la noche.",
+      "Servir coronado con los dados de mango fresco y la pulpa de maracuyá."
+    ],
+    "prepTime": 10,
+    "servings": 1,
+    "tags": [
+      "Fase Folicular",
+      "Omega 3",
+      "Antiinflamatoria",
+      "Desayuno",
+      "Snack"
+    ],
+    "imageUrl": "/recipes/pudin-de-chia-con-mango-y-maracuya.webp"
+  },
+  {
+    "title": "Salmon al Horno con Esparragos",
+    "description": "Filete de salmón sellado al horno con limón y eneldo, acompañado de espárragos verdes crujientes a la plancha.",
+    "category": "almuerzo",
+    "calories": 420,
+    "protein": 34,
+    "carbs": 8,
+    "fat": 28,
+    "ingredients": [
+      "1 filete de salmón fresco (aprox. 180g)",
+      "1 manojo de espárragos verdes tiernos",
+      "1 cucharada de aceite de oliva virgen extra",
+      "Rodajas de limón y eneldo fresco",
+      "Sal marina y pimienta negra al gusto"
+    ],
+    "instructions": [
+      "Precalentar el horno a 200°C y cortar la base leñosa de los espárragos.",
+      "Disponer el salmón y los espárragos en una bandeja, rociar con aceite de oliva, limón, sal y pimienta.",
+      "Hornear durante 12-14 minutos hasta que el salmón esté tierno y dorado."
+    ],
+    "prepTime": 20,
+    "servings": 1,
+    "tags": [
+      "Fase Lútea",
+      "Omega 3",
+      "Antiinflamatoria",
+      "Almuerzo",
+      "Cena"
+    ],
+    "imageUrl": "/recipes/salmon-al-horno-con-esparragos.webp"
+  },
+  {
+    "title": "Curry Suave de Pollo y Coco",
+    "description": "Guiso aromático de pechuga de pollo, garbanzos y espinacas en una salsa ligera de cúrcuma y leche de coco, servido con arroz.",
+    "category": "almuerzo",
+    "calories": 480,
+    "protein": 38,
+    "carbs": 42,
+    "fat": 18,
+    "ingredients": [
+      "180g de pechuga de pollo en dados",
+      "1/2 taza de garbanzos cocidos",
+      "1 taza de hojas de espinaca baby",
+      "1/2 taza de leche de coco",
+      "1 cucharadita de curry suave y 1/2 de cúrcuma",
+      "Arroz blanco o jazmín para acompañar"
+    ],
+    "instructions": [
+      "Dorar los dados de pollo en una sartén con un hilo de aceite de oliva durante 4 minutos.",
+      "Añadir el curry, la cúrcuma, los garbanzos y la leche de coco. Dejar reducir a fuego suave 8 minutos.",
+      "Incorporar las espinacas hasta que se marchiten y servir tibio con arroz."
+    ],
+    "prepTime": 25,
+    "servings": 1,
+    "tags": [
+      "Fase Menstrual",
+      "Hierro",
+      "Almuerzo",
+      "Cena",
+      "Antiinflamatoria"
+    ],
+    "imageUrl": "/recipes/curry-suave-de-pollo-y-coco.webp"
+  },
+  {
+    "title": "Bowl de Lentejas y Aguacate",
+    "description": "Nutritivo bowl de lentejas tiernas con aguacate en cubos, tomates cherry, rúcula y semillas de calabaza tostadas.",
+    "category": "almuerzo",
+    "calories": 390,
+    "protein": 18,
+    "carbs": 45,
+    "fat": 16,
+    "ingredients": [
+      "1 taza de lentejas cocidas",
+      "1/2 aguacate maduro en dados",
+      "1 taza de rúcula fresca",
+      "6 tomates cherry en mitades",
+      "1 cucharada de semillas de calabaza tostadas",
+      "Vinagreta ligera de limón y aceite de oliva"
+    ],
+    "instructions": [
+      "Colocar la rúcula fresca como base en un bowl.",
+      "Añadir las lentejas cocidas, los tomates cherry y los dados de aguacate.",
+      "Espolvorear con las semillas de calabaza tostadas y aderezar con la vinagreta de limón."
+    ],
+    "prepTime": 15,
+    "servings": 1,
+    "tags": [
+      "Fase Folicular",
+      "Vegetariana",
+      "Fibra",
+      "Almuerzo"
+    ],
+    "imageUrl": "/recipes/bowl-de-lentejas-y-aguacate.webp"
+  },
+  {
+    "title": "Crema de Brocoli y Espinaca",
+    "description": "Sopa reconfortante de brócoli y espinacas tiernas con un toque de crema de coco y semillas de cáñamo.",
+    "category": "cena",
+    "calories": 210,
+    "protein": 8,
+    "carbs": 18,
+    "fat": 12,
+    "ingredients": [
+      "1 cabeza de brócoli en floretes",
+      "2 tazas de espinacas frescas",
+      "1 puerro pequeño picado",
+      "2 tazas de caldo vegetal bajo en sodio",
+      "2 cucharadas de crema de coco para decorar",
+      "1 cucharada de semillas de cáñamo o calabaza"
+    ],
+    "instructions": [
+      "Rehogar el puerro con un hilo de aceite, añadir el brócoli y el caldo de verduras.",
+      "Cocinar tapado durante 10 minutos. Añadir las espinacas en el último minuto.",
+      "Triturar hasta obtener una textura aterciopelada y decorar con hilo de coco y semillas."
+    ],
+    "prepTime": 20,
+    "servings": 2,
+    "tags": [
+      "Fase Lútea",
+      "Cena",
+      "Bajo IG",
+      "Digestiva",
+      "Antioxidante"
+    ],
+    "imageUrl": "/recipes/crema-de-brocoli-y-espinaca.webp"
+  },
+  {
+    "title": "Tostada de Camote con Mantequilla de Almendras",
+    "description": "Láminas de boniato/camote asadas como base de tostada, untadas con crema pura de almendras, plátano y semillas de cáñamo.",
+    "category": "desayuno",
+    "calories": 290,
+    "protein": 7,
+    "carbs": 42,
+    "fat": 11,
+    "ingredients": [
+      "2 rebanadas gruesas de camote (boniato)",
+      "2 cucharadas de mantequilla de almendras natural",
+      "1/2 plátano en rodajas",
+      "1 cucharadita de semillas de cáñamo",
+      "Pizca de canela en polvo"
+    ],
+    "instructions": [
+      "Tostar las rebanadas de camote en tostadora (2 ciclos altos) o en horno a 200°C por 15 minutos hasta tiernas.",
+      "Untar con la mantequilla de almendras.",
+      "Coronar con rodajas de plátano, semillas de cáñamo y una lluvia de canela."
+    ],
+    "prepTime": 15,
+    "servings": 1,
+    "tags": [
+      "Fase Folicular",
+      "Desayuno",
+      "Snack",
+      "Sin Gluten"
+    ],
+    "imageUrl": "/recipes/tostada-de-camote-con-mantequilla-de-almendras.webp"
+  },
+  {
+    "title": "Shakshuka Verde con Huevos Pochados",
+    "description": "Huevos camperos escalfados en una cama de puerros salteados, calabacín y espinacas con queso feta y eneldo fresco.",
+    "category": "desayuno",
+    "calories": 310,
+    "protein": 19,
+    "carbs": 12,
+    "fat": 21,
+    "ingredients": [
+      "2-3 huevos camperos",
+      "1 calabacín pequeño en medias lunas finas",
+      "1 puerro picado",
+      "2 tazas de espinacas tiernas",
+      "30g de queso feta desmenuzado",
+      "Eneldo fresco y pimienta negra"
+    ],
+    "instructions": [
+      "Saltear el puerro y el calabacín en una sartén con aceite de oliva durante 6 minutos.",
+      "Añadir las espinacas hasta que bajen de volumen. Crear huecos y cascar los huevos dentro.",
+      "Tapar y cocinar a fuego medio-bajo 4-5 minutos hasta que la clara cuaje. Espolvorear queso feta y eneldo."
+    ],
+    "prepTime": 15,
+    "servings": 1,
+    "tags": [
+      "Fase Ovulatoria",
+      "Proteína",
+      "Desayuno",
+      "Almuerzo"
+    ],
+    "imageUrl": "/recipes/shakshuka-verde-con-huevos-pochados.webp"
+  },
+  {
+    "title": "Bowl de Acai y Granola Casera",
+    "description": "Smoothie bowl espeso de pulpa de açaí puro y frutos del bosque, decorado con plátano en rodajas, granola crujiente y chía.",
+    "category": "desayuno",
+    "calories": 340,
+    "protein": 8,
+    "carbs": 54,
+    "fat": 10,
+    "ingredients": [
+      "1 paquete de pulpa de açaí sin azúcar (100g)",
+      "1 plátano congelado",
+      "1/4 taza de frutos rojos",
+      "1/4 taza de leche vegetal",
+      "3 cucharadas de granola casera de avena",
+      "1 cucharadita de semillas de chía"
+    ],
+    "instructions": [
+      "Triturar el açaí con el plátano congelado, los frutos rojos y el mínimo de leche vegetal hasta consistencia de helado.",
+      "Verter en un bowl y decorar con rodajas de plátano, granola crujiente y chía."
+    ],
+    "prepTime": 10,
+    "servings": 1,
+    "tags": [
+      "Fase Folicular",
+      "Antioxidante",
+      "Desayuno",
+      "Energía"
+    ],
+    "imageUrl": "/recipes/bowl-de-acai-y-granola-casera.webp"
+  },
+  {
+    "title": "Galletas de Semillas de Calabaza y Girasol",
+    "description": "Crujientes crackers caseros elaborados exclusivamente con semillas de calabaza, girasol, lino y sal marina (Seed Cycling).",
+    "category": "snack",
+    "calories": 180,
+    "protein": 7,
+    "carbs": 6,
+    "fat": 15,
+    "ingredients": [
+      "1/2 taza de semillas de calabaza crudas",
+      "1/2 taza de semillas de girasol",
+      "2 cucharadas de semillas de lino molidas",
+      "1/3 taza de agua tibia",
+      "1/2 cucharadita de sal marina y hierbas provenzales"
+    ],
+    "instructions": [
+      "Mezclar las semillas con el agua y la sal. Dejar reposar 15 minutos hasta que se forme un gel.",
+      "Extender finamente entre dos hojas de papel de hornear con un rodillo.",
+      "Hornear a 160°C durante 30-35 minutos hasta que estén doradas y súper crujientes. Cortar en rectángulos."
+    ],
+    "prepTime": 45,
+    "servings": 4,
+    "tags": [
+      "Fase Lútea",
+      "Seed Cycling",
+      "Snack",
+      "Keto",
+      "Sin Gluten"
+    ],
+    "imageUrl": "/recipes/galletas-de-semillas-de-calabaza-y-girasol.webp"
   }
 ]
