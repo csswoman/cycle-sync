@@ -9,10 +9,10 @@ interface SymptomGridProps {
 
 /**
  * Quick-log symptoms. Stored values stay in English for compatibility with older logs;
- * acne, hair loss, hirsutism and mood are tracked in detail in the PMOS symptoms tab.
+ * acne, hair loss, hirsutism and mood are tracked in detail in the hormonal symptoms tab.
  * Nausea / digestive upset are included because they are common metformin side effects.
  */
-const SYMPTOMS: { key: string; es: string }[] = [
+export const SYMPTOMS: { key: string; es: string }[] = [
     { key: 'Mild Cramps', es: 'Cólicos' },
     { key: 'Pelvic Pain', es: 'Dolor pélvico' },
     { key: 'Bloating', es: 'Hinchazón' },
@@ -48,15 +48,17 @@ export const SymptomGrid: React.FC<SymptomGridProps> = ({ activeSymptoms, toggle
     };
 
     return (
-        <div className="bg-secondary/40 border border-border rounded-2xl p-6 hover:border-primary/50 transition-colors">
-            <h3 className="text-lg font-bold text-foreground flex items-center gap-2 mb-1">
+        <section className="flex flex-col gap-4" aria-labelledby="log-quick-symptoms-title">
+            <div className="flex flex-col gap-1">
+            <h2 id="log-quick-symptoms-title" className="text-lg font-semibold text-foreground flex items-center gap-2">
                 <Icon name="stethoscope" size={20} weight="duotone" className="text-primary" />
                 {lang === 'es' ? 'Síntomas rápidos' : 'Symptom Quick-Log'}
-            </h3>
-            <p className="text-xs text-muted-foreground mb-4">
-                {lang === 'es' ? 'Toca lo que sientes hoy. Acné, vello y caída de cabello se registran con detalle en “Síntomas PMOS”.' : 'Tap what you feel today. Acne, hair growth and hair loss are tracked in detail under “PMOS symptoms”.'}
+            </h2>
+            <p className="text-sm text-muted-foreground max-w-[65ch]">
+                {lang === 'es' ? 'Toca lo que sientes hoy. Acné, vello y caída de cabello se registran con detalle en “Síntomas hormonales”.' : 'Tap what you feel today. Acne, hair growth and hair loss are tracked in detail under “Hormonal symptoms”.'}
             </p>
-            <div className="flex flex-wrap gap-2.5">
+            </div>
+            <div className="flex flex-wrap gap-2">
                 {[...SYMPTOMS.map((s) => s.key), ...extras].map(symptom => {
                     const isActive = activeSymptoms.includes(symptom);
                     return (
@@ -64,9 +66,9 @@ export const SymptomGrid: React.FC<SymptomGridProps> = ({ activeSymptoms, toggle
                             key={symptom}
                             onClick={() => toggleSymptom(symptom)}
                             aria-pressed={isActive}
-                            className={`px-4 py-2 rounded-full text-sm font-medium border transition-all flex items-center gap-2
+                            className={`min-h-10 px-4 py-2 rounded-full text-sm font-medium border transition-colors flex items-center gap-2
                 ${isActive
-                                    ? 'bg-primary text-primary-foreground border-primary shadow-[0_4px_10px_rgba(127,25,230,0.3)]'
+                                    ? 'bg-primary text-primary-foreground border-primary'
                                     : 'bg-secondary text-muted-foreground border-transparent hover:bg-surface-hover hover:text-foreground'}`}
                         >
                             {isActive && <Icon name="check" size={16} weight="bold" />}
@@ -76,19 +78,19 @@ export const SymptomGrid: React.FC<SymptomGridProps> = ({ activeSymptoms, toggle
                 })}
                 {adding ? (
                     <form onSubmit={(e) => { e.preventDefault(); addCustom(); }} className="flex items-center gap-2">
-                        <input autoFocus value={custom} onChange={(e) => setCustom(e.target.value)} maxLength={40}
+                        <input autoFocus aria-label={lang === 'es' ? 'Otro síntoma' : 'Other symptom'} value={custom} onChange={(e) => setCustom(e.target.value)} maxLength={40}
                             onBlur={() => { if (!custom.trim()) setAdding(false); }}
                             placeholder={lang === 'es' ? '¿Qué sientes?' : 'What do you feel?'}
-                            className="px-4 py-2 rounded-full text-sm bg-card border border-primary text-foreground w-44 focus:outline-none" />
-                        <button type="submit" className="px-3 py-2 rounded-full text-sm font-bold text-primary">{lang === 'es' ? 'Agregar' : 'Add'}</button>
+                            className="min-h-10 px-4 py-2 rounded-full text-sm bg-card border border-primary text-foreground w-44 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40" />
+                        <button type="submit" className="min-h-10 px-3 rounded-full text-sm font-bold text-primary hover:bg-primary/10">{lang === 'es' ? 'Agregar' : 'Add'}</button>
                     </form>
                 ) : (
-                    <button onClick={() => setAdding(true)} className="px-4 py-2 rounded-full border border-border border-dashed text-muted-foreground text-sm font-medium hover:text-foreground hover:border-primary hover:bg-primary/10 transition-all flex items-center gap-1 pl-3">
+                    <button onClick={() => setAdding(true)} className="min-h-10 px-4 pl-3 rounded-full border border-border border-dashed text-muted-foreground text-sm font-medium hover:text-foreground hover:border-primary hover:bg-primary/10 transition-colors flex items-center gap-1">
                         <Icon name="add" size={16} />
                         {lang === 'es' ? 'Otro' : 'Add Other'}
                     </button>
                 )}
             </div>
-        </div>
+        </section>
     );
 };

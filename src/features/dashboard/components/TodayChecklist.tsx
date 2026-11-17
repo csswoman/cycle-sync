@@ -8,44 +8,67 @@ import { useLanguage } from '@/i18n/LanguageContext';
 import { Icon } from '@/components/ui/Icon';
 import { dashboardText } from '../dashboardText';
 
-interface RowProps {
+const COPY = {
+    es: {
+        markTaken: (name: string, time: string) => `Marcar toma de ${name} de las ${time}`,
+        unmarkTaken: (name: string, time: string) => `Desmarcar toma de ${name} de las ${time}`,
+        pending: (n: number) => (n === 1 ? '1 pendiente' : `${n} pendientes`),
+        allDone: 'Todo al día',
+        addMed: 'Añadir',
+        section: 'Registro y medicación',
+    },
+    en: {
+        markTaken: (name: string, time: string) => `Mark ${name} at ${time} as taken`,
+        unmarkTaken: (name: string, time: string) => `Unmark ${name} at ${time}`,
+        pending: (n: number) => `${n} pending`,
+        allDone: 'All caught up',
+        addMed: 'Add',
+        section: 'Log and medication',
+    },
+};
+
+interface HeadProps {
     icon: string;
     title: string;
     detail: string;
     done: boolean;
     cta: string;
     onClick: () => void;
-    progress?: number;
 }
 
-const Row: React.FC<RowProps> = ({ icon, title, detail, done, cta, onClick, progress }) => (
-    <div className="flex items-center gap-4 py-3">
-        <div className={`size-11 rounded-full flex items-center justify-center shrink-0 ${done ? 'bg-leaf-soft text-leaf' : 'bg-blossom-soft text-blossom'}`}>
-            <Icon name={done ? 'check_circle' : icon} size={22} weight={done ? 'fill' : 'duotone'} />
-        </div>
+/** Section heading: status icon, title with one detail line, and a quiet link to the full page. */
+const Head: React.FC<HeadProps> = ({ icon, title, detail, done, cta, onClick }) => (
+    <div className="flex items-center gap-3">
+        <Icon
+            name={done ? 'check_circle' : icon}
+            size={22}
+            weight={done ? 'fill' : 'regular'}
+            className={`shrink-0 ${done ? 'text-leaf' : 'text-blossom'}`}
+        />
         <div className="flex-1 min-w-0">
-            <p className="text-foreground font-semibold text-sm">{title}</p>
-            <p className="text-muted-foreground text-xs truncate">{detail}</p>
-            {progress !== undefined && (
-                <div className="mt-1.5 h-1.5 w-full max-w-[200px] bg-secondary rounded-full overflow-hidden">
-                    <div className="h-full bg-blossom rounded-full" style={{ width: `${progress}%` }} />
-                </div>
-            )}
+            <p className="text-foreground font-semibold text-base leading-snug">{title}</p>
+            <p className="text-muted-foreground text-sm truncate">{detail}</p>
         </div>
         <button
+            type="button"
             onClick={onClick}
-            className={`shrink-0 px-4 h-9 rounded-full text-xs font-bold transition-colors ${done ? 'bg-secondary text-foreground' : 'bg-primary text-primary-foreground hover:bg-primary/90'}`}
+            className={`shrink-0 inline-flex items-center gap-1 px-3.5 min-h-10 rounded-full text-sm font-semibold transition-colors cursor-pointer ${done ? 'text-muted-foreground hover:bg-secondary hover:text-foreground' : 'bg-primary text-primary-foreground hover:bg-primary/90'
+                }`}
         >
             {cta}
+            {done && <Icon name="arrow_forward" size={14} />}
         </button>
     </div>
 );
 
-export const TodayChecklist: React.FC = () => {
+/** `embedded`: drops the card chrome and title so it can sit inside TodayRhythm. */
+export const TodayChecklist: React.FC<{ embedded?: boolean }> = ({ embedded = false }) => {
     const router = useRouter();
     const { language } = useLanguage();
-    const text = dashboardText[language === 'es' ? 'es' : 'en'];
-    const { todayDoses, isTaken, loading: medsLoading } = useMedications();
+    const lang = language === 'es' ? 'es' : 'en';
+    const text = dashboardText[lang];
+    const copy = COPY[lang];
+    const { todayDoses, isTaken, setTaken, loading: medsLoading } = useMedications();
     const [logged, setLogged] = useState(false);
 
     useEffect(() => {
@@ -64,28 +87,76 @@ export const TodayChecklist: React.FC = () => {
     // Only doses scheduled for today (weekday-specific medications are excluded on other days).
     const totalDoses = todayDoses.length;
     const takenDoses = todayDoses.filter((d) => isTaken(d.med.id, d.time)).length;
+    const medsDone = totalDoses > 0 && takenDoses === totalDoses;
+    const pendingTotal = (logged ? 0 : 1) + (totalDoses - takenDoses);
 
     return (
-        <div className="bg-card rounded-3xl border border-border shadow-sm p-5 sm:p-6">
-            <h3 className="text-foreground text-lg font-semibold mb-1">{text.todayTitle}</h3>
-            <div className="divide-y divide-border/60">
-                <Row
-                    icon="edit_note"
-                    title={text.logTitle}
-                    detail={logged ? text.logDone : text.logPending}
-                    done={logged}
-                    cta={logged ? text.doneLabel : text.logCta}
-                    onClick={() => router.push('/log')}
-                />
-                <Row
+        <div className={embedded ? 'flex flex-col gap-5' : 'bg-card rounded-3xl border border-border shadow-sm p-5 sm:p-6 flex flex-col gap-5'}>
+            <div className="flex items-baseline justify-between gap-3">
+                {embedded
+                    ? <h3 className="text-foreground text-base font-semibold">{copy.section}</h3>
+                    : <h3 className="text-foreground text-lg font-semibold tracking-tight">{text.todayTitle}</h3>}
+                {!medsLoading && (
+                    <span className={`text-sm tabular-nums ${pendingTotal === 0 ? 'text-leaf font-medium' : 'text-muted-foreground'}`}>
+                        {pendingTotal === 0 ? copy.allDone : copy.pending(pendingTotal)}
+                    </span>
+                )}
+            </div>
+
+            <Head
+                icon="edit_note"
+                title={text.logTitle}
+                detail={logged ? text.logDone : text.logPending}
+                done={logged}
+                cta={logged ? text.doneLabel : text.logCta}
+                onClick={() => router.push('/log')}
+            />
+
+            <div className="border-t border-border/60 pt-5 flex flex-col gap-3">
+                <Head
                     icon="medication"
                     title={text.medsTitle}
                     detail={medsLoading ? '...' : totalDoses ? text.medsProgress(takenDoses, totalDoses) : text.medsNone}
-                    done={totalDoses > 0 && takenDoses === totalDoses}
-                    cta={totalDoses ? text.medsCta : '+'}
-                    onClick={() => router.push('/log?tab=meds')}
-                    progress={totalDoses ? Math.round((takenDoses / totalDoses) * 100) : undefined}
+                    done={medsDone}
+                    cta={totalDoses ? text.medsCta : copy.addMed}
+                    onClick={() => router.push(totalDoses ? '/log?tab=meds' : '/medications')}
                 />
+
+                {totalDoses > 0 && (
+                    <ul className="flex flex-col gap-1.5 pl-0 sm:pl-[34px]">
+                        {todayDoses.map(({ med, time }) => {
+                            const taken = isTaken(med.id, time);
+                            return (
+                                <li key={`${med.id}-${time}`}>
+                                    <button
+                                        type="button"
+                                        role="checkbox"
+                                        aria-checked={taken}
+                                        aria-label={taken ? copy.unmarkTaken(med.name, time) : copy.markTaken(med.name, time)}
+                                        onClick={() => void setTaken(med.id, time, !taken)}
+                                        className={`w-full min-h-12 px-3.5 rounded-2xl flex items-center gap-3 text-left transition-colors duration-200 cursor-pointer active:scale-[0.99] ${taken ? 'bg-leaf-soft/60' : 'bg-secondary/40 hover:bg-secondary/70'
+                                            }`}
+                                    >
+                                        <span
+                                            aria-hidden
+                                            className={`size-6 rounded-full flex items-center justify-center shrink-0 border-2 transition-colors duration-200 ${taken ? 'bg-leaf border-leaf text-card' : 'border-muted-foreground/40'
+                                                }`}
+                                        >
+                                            {taken && <Icon name="check" size={14} weight="bold" />}
+                                        </span>
+                                        <span className="flex-1 min-w-0">
+                                            <span className={`block text-sm font-medium truncate ${taken ? 'text-muted-foreground' : 'text-foreground'}`}>
+                                                {med.name}
+                                            </span>
+                                            {med.dose && <span className="block text-xs text-muted-foreground truncate">{med.dose}</span>}
+                                        </span>
+                                        <span className="text-sm text-muted-foreground tabular-nums shrink-0">{time}</span>
+                                    </button>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                )}
             </div>
         </div>
     );

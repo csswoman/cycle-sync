@@ -7,6 +7,7 @@ import { useLanguage } from '@/i18n/LanguageContext';
 import type { DailyLog, PMOSSymptomEntry, Habit, HabitLog } from '@/types';
 import { toISODate } from '@/lib/cycle/cycleEngine';
 import { usePMOSOverview } from '@/hooks/usePMOSOverview';
+import { usePmosToolsVisible } from '@/hooks/useOnboardingAnswers';
 import { buildPMOSReport } from './buildPMOSReport';
 import { GardenCorner, PetalDrift, TitleSprig } from '@/components/ui/Botanical';
 
@@ -18,15 +19,15 @@ const TEXT = {
     cardSubtitle: 'Datos integrales de ciclo y bienestar',
     reportContents: 'Contenido del Reporte',
     dailyLogs: 'Registros Diarios',
-    pmosEntries: 'Registros PMOS',
+    pmosEntries: 'Registros de síntomas hormonales',
     activeHabits: 'Hábitos Activos',
     includedSections: 'Secciones Incluidas',
     sections: [
       { icon: 'water_drop', label: 'Resumen de fase, día y duración del ciclo', color: 'text-primary' },
-      { icon: 'monitoring', label: 'Tendencias de energía, sueño y estado de ánimo (30 días)', color: 'text-blue-500' },
-      { icon: 'medical_services', label: 'Severidad de síntomas PMOS con alertas clínicas', color: 'text-red-500' },
-      { icon: 'bar_chart', label: 'Análisis de frecuencia de síntomas principales', color: 'text-orange-500' },
-      { icon: 'check_circle', label: 'Tasas de cumplimiento de hábitos (7 días)', color: 'text-green-500' },
+      { icon: 'monitoring', label: 'Tendencias de energía, sueño y estado de ánimo (30 días)', color: 'text-moss' },
+      { icon: 'medical_services', label: 'Severidad de síntomas hormonales con alertas clínicas', color: 'text-destructive' },
+      { icon: 'bar_chart', label: 'Análisis de frecuencia de síntomas principales', color: 'text-sun-ink' },
+      { icon: 'check_circle', label: 'Tasas de cumplimiento de hábitos (7 días)', color: 'text-leaf' },
       { icon: 'calendar_month', label: 'Duración de ciclos, días desde el último período y ovulación por ciclo', color: 'text-primary' },
       { icon: 'medication', label: 'Medicamentos, indicaciones médicas y adherencia (30 días)', color: 'text-primary' },
       { icon: 'biotech', label: 'Últimos análisis de laboratorio, HOMA-IR, índice de andrógenos libres y presión arterial', color: 'text-primary' },
@@ -48,15 +49,15 @@ const TEXT = {
     cardSubtitle: 'Comprehensive cycle & wellness data',
     reportContents: 'Report Contents',
     dailyLogs: 'Daily Logs',
-    pmosEntries: 'PMOS Entries',
+    pmosEntries: 'Hormonal symptom entries',
     activeHabits: 'Active Habits',
     includedSections: 'Included Sections',
     sections: [
       { icon: 'water_drop', label: 'Cycle phase, day, and length overview', color: 'text-primary' },
-      { icon: 'monitoring', label: 'Energy, sleep, and mood trends (30 days)', color: 'text-blue-500' },
-      { icon: 'medical_services', label: 'PMOS symptom severity with clinical alerts', color: 'text-red-500' },
-      { icon: 'bar_chart', label: 'Top symptom frequency analysis', color: 'text-orange-500' },
-      { icon: 'check_circle', label: 'Habit completion rates (7 days)', color: 'text-green-500' },
+      { icon: 'monitoring', label: 'Energy, sleep, and mood trends (30 days)', color: 'text-moss' },
+      { icon: 'medical_services', label: 'Hormonal symptom severity with clinical alerts', color: 'text-destructive' },
+      { icon: 'bar_chart', label: 'Top symptom frequency analysis', color: 'text-sun-ink' },
+      { icon: 'check_circle', label: 'Habit completion rates (7 days)', color: 'text-leaf' },
       { icon: 'calendar_month', label: 'Cycle lengths, days since last period and ovulation per cycle', color: 'text-primary' },
       { icon: 'medication', label: "Medications, doctor's instructions and adherence (30 days)", color: 'text-primary' },
       { icon: 'biotech', label: 'Latest labs, HOMA-IR, free androgen index and blood pressure', color: 'text-primary' },
@@ -79,6 +80,7 @@ export default function ExportReport() {
   const tx = TEXT[isEs ? 'es' : 'en'];
   const { cycleInfo, loading: cycleLoading } = useCycleInfo();
   const { data: overview, loading: overviewLoading } = usePMOSOverview();
+  const showPmos = usePmosToolsVisible();
   const [includeWellbeing, setIncludeWellbeing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -210,8 +212,8 @@ export default function ExportReport() {
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div className="flex items-center gap-3 p-4 rounded-xl bg-secondary/50 border border-border/50">
-                <div className="p-2 rounded-lg bg-blue-500/10">
-                  <span className="material-symbols-outlined text-blue-500">calendar_today</span>
+                <div className="p-2 rounded-lg bg-sage/10">
+                  <span className="material-symbols-outlined text-moss">calendar_today</span>
                 </div>
                 <div>
                   <p className="text-foreground font-bold text-lg">
@@ -222,8 +224,8 @@ export default function ExportReport() {
               </div>
 
               <div className="flex items-center gap-3 p-4 rounded-xl bg-secondary/50 border border-border/50">
-                <div className="p-2 rounded-lg bg-purple-500/10">
-                  <span className="material-symbols-outlined text-purple-500">medical_services</span>
+                <div className="p-2 rounded-lg bg-blossom/10">
+                  <span className="material-symbols-outlined text-blossom">medical_services</span>
                 </div>
                 <div>
                   <p className="text-foreground font-bold text-lg">
@@ -234,8 +236,8 @@ export default function ExportReport() {
               </div>
 
               <div className="flex items-center gap-3 p-4 rounded-xl bg-secondary/50 border border-border/50">
-                <div className="p-2 rounded-lg bg-green-500/10">
-                  <span className="material-symbols-outlined text-green-500">check_circle</span>
+                <div className="p-2 rounded-lg bg-leaf/10">
+                  <span className="material-symbols-outlined text-leaf">check_circle</span>
                 </div>
                 <div>
                   <p className="text-foreground font-bold text-lg">
@@ -250,7 +252,7 @@ export default function ExportReport() {
               <h3 className="text-foreground font-bold text-sm uppercase tracking-wider">
                 {tx.includedSections}
               </h3>
-              {tx.sections.map((item) => (
+              {tx.sections.filter((item) => showPmos || item.icon !== 'spa').map((item) => (
                 <div key={item.label} className="flex items-center gap-3">
                   <span className={`material-symbols-outlined text-[18px] ${item.color}`}>{item.icon}</span>
                   <span className="text-foreground text-sm">{item.label}</span>

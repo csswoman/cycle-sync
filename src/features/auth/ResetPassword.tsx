@@ -47,7 +47,7 @@ const ResetPassword: React.FC<ResetPasswordProps> = ({ onSuccess, onBackToLogin,
       <AuthLayout isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode}>
         <div className="w-full max-w-[480px] flex flex-col gap-6 md:gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
           <div className="flex flex-col gap-3 text-center items-center">
-            <div className="size-20 rounded-full bg-green-500/10 flex items-center justify-center text-green-500 mb-2 shadow-inner ring-4 ring-green-500/5">
+            <div className="size-20 rounded-full bg-leaf/10 flex items-center justify-center text-leaf mb-2 shadow-inner ring-4 ring-leaf/5">
               <span className="material-symbols-outlined" style={{ fontSize: '48px' }}>check_circle</span>
             </div>
             <h1 className="text-3xl md:text-4xl font-black leading-tight tracking-tight text-foreground">

@@ -3,6 +3,7 @@
 import React from 'react';
 import { Card, CardHeader, CardContent } from '@/components/ui/Card';
 import { useLanguage } from '@/i18n/LanguageContext';
+import { CardFlowers } from '@/components/ui/CardFlowers';
 import { useWeeklySummary } from '@/hooks/useWeeklySummary';
 
 export const WeeklySummaryCard: React.FC = () => {
@@ -15,7 +16,8 @@ export const WeeklySummaryCard: React.FC = () => {
 
     const es = lang === 'es';
     return (
-        <Card hoverable={false} className="rounded-3xl border border-border/80 bg-card/90 shadow-sm p-5">
+        <Card hoverable={false} className="relative isolate overflow-hidden rounded-3xl !border-transparent bg-secondary/40 !shadow-none p-5">
+            <CardFlowers variant="weekly" />
             <CardHeader icon="insights" title={es ? 'Resumen de tu semana' : 'Your week in review'} />
             <CardContent>
                 {summary.loggedDays < 3 ? (

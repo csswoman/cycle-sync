@@ -3,8 +3,11 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { Bloom } from '@/components/ui/Bloom';
+import { GrowingBloom } from '@/components/ui/GrowingBloom';
+import { CardFlowers } from '@/components/ui/CardFlowers';
 import { bloomGrowth, bloomTone } from '@/lib/cycle/bloom';
 import { usesHormonalContraception } from '@/features/setup/onboarding';
+import { useGuest } from '@/hooks/useGuest';
 import type { CycleOverview } from '@/hooks/useCycleOverview';
 import { dashboardText, phaseKey } from '../dashboardText';
 
@@ -13,19 +16,42 @@ export const CycleHero: React.FC<{ overview: CycleOverview }> = ({ overview }) =
     const { language } = useLanguage();
     const text = dashboardText[language === 'es' ? 'es' : 'en'];
     const { info, estimate, next, daysToPeriod, daysLate, flags, daysToOvulation, answers, hasHistory, loading } = overview;
+    const { isGuest, promptSignup } = useGuest();
 
     if (loading) return <div className="rounded-3xl border border-border bg-card h-48 animate-pulse" />;
 
     if (!hasHistory || !info || !estimate) {
+        const es = language === 'es';
+        const points = es
+            ? ['Próxima regla y ovulación estimadas', 'Consejos de movimiento y comida por fase', 'Patrones de energía, sueño y síntomas']
+            : ['Estimated next period and ovulation', 'Movement and food tips by phase', 'Patterns in energy, sleep and symptoms'];
         return (
-            <div data-phase="follicular" className="phase-wash relative overflow-hidden rounded-3xl border border-border/80 shadow-sm p-6 sm:p-7 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <Bloom growth={0.08} className="absolute bottom-0 right-2 h-24 w-auto opacity-80 sm:static sm:order-last sm:h-28" />
-                <div className="relative">
-                    <h2 className="text-foreground text-xl sm:text-2xl font-semibold">{text.noDataTitle}</h2>
-                    <p className="text-muted-foreground text-sm mt-1 max-w-xl">{text.noDataBody}</p>
+            <div data-phase="follicular" className="phase-wash relative isolate overflow-hidden rounded-3xl border border-border/80 shadow-sm p-6 sm:p-8 flex flex-col gap-5">
+                <CardFlowers variant="hero" />
+                <GrowingBloom className="absolute -bottom-1 right-0 sm:right-6 h-32 sm:h-60 w-auto" />
+                <div className="relative flex flex-col gap-1 pr-24 sm:pr-44">
+                    <p className="text-xs font-bold uppercase tracking-wider text-phase">{es ? 'Empieza aquí' : 'Start here'}</p>
+                    <h2 className="text-foreground text-2xl sm:text-3xl font-semibold tracking-tight text-balance">
+                        {isGuest ? (es ? 'Tu ciclo, explicado día a día' : 'Your cycle, explained day by day') : text.noDataTitle}
+                    </h2>
+                    <p className="text-muted-foreground text-sm sm:text-base mt-1 max-w-xl">
+                        {isGuest
+                            ? (es ? 'Crea una cuenta gratis para guardar tus reglas y recibir predicciones hechas para ti.' : 'Create a free account to save your periods and get predictions made for you.')
+                            : text.noDataBody}
+                    </p>
                 </div>
-                <button onClick={() => router.push('/period-history')} className="relative shrink-0 self-start sm:self-auto px-6 h-11 rounded-full bg-bloom text-primary-foreground font-bold shadow-md shadow-blossom/20 transition-transform hover:scale-[1.02] active:scale-95">
-                    {text.noDataCta}
+                <ul className="relative flex flex-col sm:flex-row sm:flex-wrap gap-2 pr-24 sm:pr-44">
+                    {points.map((p) => (
+                        <li key={p} className="inline-flex items-center gap-2 rounded-full bg-card/70 border border-border/60 px-3 py-1.5 text-sm text-foreground">
+                            <span className="size-1.5 rounded-full bg-phase" aria-hidden="true" />{p}
+                        </li>
+                    ))}
+                </ul>
+                <button
+                    onClick={() => (isGuest ? promptSignup() : router.push('/period-history'))}
+                    className="relative self-start px-6 h-11 rounded-full bg-bloom text-primary-foreground font-bold shadow-md shadow-blossom/20 transition-transform hover:scale-[1.02] active:scale-95"
+                >
+                    {isGuest ? (es ? 'Crear cuenta gratis' : 'Create free account') : text.noDataCta}
                 </button>
             </div>
         );
@@ -52,7 +78,8 @@ export const CycleHero: React.FC<{ overview: CycleOverview }> = ({ overview }) =
     const growth = bloomGrowth(info.cycleDay, estimate.ovulationDay, overdue);
 
     return (
-        <div data-phase={tone} className="phase-wash relative overflow-hidden rounded-3xl border border-border/80 shadow-sm p-6 sm:p-7 flex flex-col gap-5">
+        <div data-phase={tone} className="phase-wash relative isolate overflow-hidden rounded-3xl border border-border/80 shadow-sm p-6 sm:p-7 flex flex-col gap-5">
+            <CardFlowers variant="heroData" />
             <Bloom growth={growth} tone={tone} className="absolute -top-2 right-0 h-32 sm:h-44 w-auto opacity-90" />
             <div className="relative flex flex-col gap-1 pr-20 sm:pr-32">
                 <p className="text-xs font-bold uppercase tracking-wider text-phase">
@@ -101,14 +128,14 @@ export const CycleHero: React.FC<{ overview: CycleOverview }> = ({ overview }) =
             </div>
             <div className="relative flex flex-col gap-1 text-sm">
                 {inFertile && !hormonal && answers.goal === 'fertility' && <p className="text-foreground font-semibold">{text.fertileNow} {text.fertileTip}</p>}
-                {hormonal && <p className="text-amber-500">{text.hormonalNote}</p>}
+                {hormonal && <p className="text-sun-ink">{text.hormonalNote}</p>}
                 {flags.includes('noPeriod90') && (
-                    <p className="text-amber-500 font-semibold">
+                    <p className="text-sun-ink font-semibold">
                         {text.noPeriod90}{' '}
                         <button onClick={() => router.push('/period-history')} className="underline font-bold">{text.logPeriodCta}</button>
                     </p>
                 )}
-                {estimate.irregular && <p className="text-amber-500">{text.irregularNote}</p>}
+                {estimate.irregular && <p className="text-sun-ink">{text.irregularNote}</p>}
                 <p className="text-xs text-muted-foreground">
                     {text.approx} {text.confidence}: {text.confidenceLevels[estimate.confidence]}.
                 </p>

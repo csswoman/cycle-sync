@@ -190,8 +190,8 @@ const Trends: React.FC = () => {
   const readinessTag = Number(avgEnergy) >= 7 ? tx.readinessTags.high : Number(avgEnergy) >= 4 ? tx.readinessTags.moderate : tx.readinessTags.low;
 
   const symptomStyle = (idx: number) => {
-    if (idx === 0) return 'px-4 py-2 rounded-lg bg-red-500/20 text-red-500 font-bold text-lg border border-red-500/20';
-    if (idx === 1) return 'px-3 py-1.5 rounded-lg bg-orange-500/10 text-orange-600 dark:text-orange-400 font-bold text-base border border-orange-500/20';
+    if (idx === 0) return 'px-4 py-2 rounded-lg bg-destructive/20 text-destructive font-bold text-lg border border-destructive/20';
+    if (idx === 1) return 'px-3 py-1.5 rounded-lg bg-coral/10 text-sun-ink font-bold text-base border border-coral/20';
     if (idx === 2) return 'px-3 py-1.5 rounded-lg bg-primary/10 text-primary font-bold text-base border border-primary/20';
     return 'px-2 py-1 rounded-lg bg-secondary text-muted-foreground text-sm';
   };
@@ -238,7 +238,7 @@ const Trends: React.FC = () => {
               <p className="text-foreground text-2xl font-bold">{avgEnergy}/10 — {readinessLabel}</p>
             </div>
             <div className="mt-4 flex gap-2">
-              <span className="inline-flex items-center rounded-md bg-yellow-400/10 px-2 py-1 text-xs font-medium text-yellow-500 ring-1 ring-inset ring-yellow-400/20">{readinessTag}</span>
+              <span className="inline-flex items-center rounded-md bg-sun/10 px-2 py-1 text-xs font-medium text-sun-ink ring-1 ring-inset ring-sun/20">{readinessTag}</span>
             </div>
           </div>
 
@@ -326,7 +326,7 @@ const Trends: React.FC = () => {
             <div className="flex-1 rounded-xl p-6 bg-card border border-border shadow-sm flex flex-col">
               <h3 className="text-foreground text-lg font-bold mb-4">{tx.avgSleep}</h3>
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
+                <div className="p-2 rounded-lg bg-sage/10 text-moss">
                   <span className="material-symbols-outlined">bedtime</span>
                 </div>
                 <div>

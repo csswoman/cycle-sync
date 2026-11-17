@@ -40,7 +40,7 @@ const copy = {
     protected: 'Con protección', unprotected: 'Sin protección',
     sexPrivate: 'Solo tú puedes ver este dato. No se incluye en informes ni en el asistente.',
     notes: 'Nota (opcional)',
-    save: 'Guardar día', saving: 'Guardando…', saved: 'Guardado ✓',
+    save: 'Guardar día', saving: 'Guardando…', saved: 'Día guardado',
     saveError: 'No se pudo guardar. Si es la primera vez, falta aplicar la migración de la base de datos.',
     chartTitle: 'Tu temperatura en este ciclo',
     chartEmpty: 'Registra tu temperatura varios días seguidos para ver la gráfica.',
@@ -88,7 +88,7 @@ const copy = {
     protected: 'Protected', unprotected: 'Unprotected',
     sexPrivate: 'Only you can see this. It is not included in reports or the assistant.',
     notes: 'Note (optional)',
-    save: 'Save day', saving: 'Saving…', saved: 'Saved ✓',
+    save: 'Save day', saving: 'Saving…', saved: 'Day saved',
     saveError: 'Could not save. If this is the first time, the database migration has not been applied yet.',
     chartTitle: 'Your temperature this cycle',
     chartEmpty: 'Log your temperature several days in a row to see the chart.',
@@ -112,29 +112,29 @@ const copy = {
 };
 
 const chip = (active: boolean) =>
-  `px-3 py-2 rounded-xl text-sm font-semibold border transition-all cursor-pointer ${
+  `min-h-10 px-4 rounded-full text-sm font-semibold border transition-colors cursor-pointer ${
     active ? 'bg-primary text-primary-foreground border-primary' : 'bg-secondary/50 text-foreground border-transparent hover:bg-secondary'
   }`;
 
 const inputClass =
-  'w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40';
+  'w-full min-h-11 rounded-xl border border-border bg-background px-3 text-base sm:text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40';
 
 const Section: React.FC<{ icon: string; title: string; help?: string; children: React.ReactNode }> = ({ icon, title, help, children }) => (
-  <div className="bg-card border border-border rounded-2xl p-5 flex flex-col gap-3 shadow-sm">
-    <div>
-      <h3 className="text-foreground font-bold flex items-center gap-2">
-        <span className="material-symbols-outlined text-primary text-[20px]">{icon}</span>{title}
-      </h3>
-      {help && <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{help}</p>}
+  <section className="p-5 sm:p-6 flex flex-col gap-4">
+    <div className="flex flex-col gap-1">
+      <h2 className="text-foreground text-lg font-semibold flex items-center gap-2">
+        <span className="material-symbols-outlined text-primary text-[22px]" aria-hidden="true">{icon}</span>{title}
+      </h2>
+      {help && <p className="text-sm text-muted-foreground leading-relaxed max-w-[65ch]">{help}</p>}
     </div>
     {children}
-  </div>
+  </section>
 );
 
 /** Line chart of the cycle's temperatures with the coverline once a shift is found. */
 const BBTChart: React.FC<{ readings: { date: string; celsius: number; disturbed?: boolean }[]; coverline?: number; ovulationDate?: string; label: string }> = ({ readings, coverline, ovulationDate, label }) => {
   const sorted = [...readings].sort((a, b) => a.date.localeCompare(b.date));
-  const W = 320, H = 140, P = 24;
+  const W = 320, H = 160, P = 28;
   const temps = sorted.map((r) => r.celsius).concat(coverline != null ? [coverline] : []);
   const min = Math.min(...temps) - 0.1, max = Math.max(...temps) + 0.1;
   const first = parseLocalDate(sorted[0].date).getTime();
@@ -145,12 +145,12 @@ const BBTChart: React.FC<{ readings: { date: string; celsius: number; disturbed?
   const path = valid.map((r, i) => `${i ? 'L' : 'M'}${x(r.date).toFixed(1)},${y(r.celsius).toFixed(1)}`).join(' ');
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="w-full h-auto text-primary" role="img" aria-label={label}>
-      <text x={4} y={y(max - 0.1) + 4} className="fill-muted-foreground" fontSize="9">{(max - 0.1).toFixed(1)}°</text>
-      <text x={4} y={y(min + 0.1) + 4} className="fill-muted-foreground" fontSize="9">{(min + 0.1).toFixed(1)}°</text>
+      <text x={4} y={y(max - 0.1) + 4} className="fill-muted-foreground" fontSize="12">{(max - 0.1).toFixed(1)}°</text>
+      <text x={4} y={y(min + 0.1) + 4} className="fill-muted-foreground" fontSize="12">{(min + 0.1).toFixed(1)}°</text>
       {coverline != null && (
         <line x1={P} x2={W - P} y1={y(coverline)} y2={y(coverline)} stroke="currentColor" strokeOpacity="0.45" strokeDasharray="4 3" />
       )}
-      {ovulationDate && <line x1={x(ovulationDate)} x2={x(ovulationDate)} y1={P / 2} y2={H - P} className="stroke-sky-500" strokeDasharray="2 3" />}
+      {ovulationDate && <line x1={x(ovulationDate)} x2={x(ovulationDate)} y1={P / 2} y2={H - P} className="stroke-sun" strokeDasharray="2 3" />}
       <path d={path} fill="none" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
       {sorted.map((r) => (
         <circle key={r.date} cx={x(r.date)} cy={y(r.celsius)} r={3} fill={r.disturbed ? 'none' : 'currentColor'} stroke="currentColor" strokeOpacity={r.disturbed ? 0.5 : 1} />
@@ -211,36 +211,36 @@ const BodySignsPanel: React.FC<Props> = ({ lang, cycleStart, hormonal, initialDa
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
       <div className="lg:col-span-7 flex flex-col gap-4">
-        <div className="flex items-center gap-3 flex-wrap">
-          <label className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+        {hormonal && <p className="text-sm text-sun-ink bg-sun/10 rounded-2xl px-4 py-3">{c.hormonal}</p>}
+        <div className="bg-card border border-border rounded-3xl shadow-[var(--shadow-low)] divide-y divide-border">
+        <div className="p-5 sm:p-6 flex items-center gap-3 flex-wrap">
+          <label className="text-sm font-semibold text-foreground flex items-center gap-3">
             {c.date}
             <input type="date" className={`${inputClass} w-auto`} value={date} max={todayIso} min={fromDate} onChange={(e) => e.target.value && setDate(e.target.value)} />
           </label>
           {date !== todayIso && (
-            <button type="button" onClick={() => setDate(todayIso)} className="text-xs font-bold text-primary hover:underline">{c.today}</button>
+            <button type="button" onClick={() => setDate(todayIso)} className="min-h-10 px-3 rounded-full text-sm font-semibold text-primary hover:bg-primary/10">{c.today}</button>
           )}
         </div>
-
-        {hormonal && <p className="text-sm text-amber-600 dark:text-amber-400 bg-amber-500/10 rounded-xl px-4 py-2.5">{c.hormonal}</p>}
 
         <Section icon="monitoring" title={c.flowSectionTitle} help={c.flowSectionHelp}>
           <FlowFields lang={lang} value={draft} onChange={update} />
         </Section>
         <Section icon="water_drop" title={c.spottingTitle} help={c.spottingHelp}>
-          <label className="flex items-center gap-3 text-sm font-semibold text-foreground cursor-pointer">
-            <input type="checkbox" className="size-5 accent-[hsl(var(--primary))]" checked={draft.spotting} onChange={(e) => update({ spotting: e.target.checked })} />
+          <label className="flex items-center gap-3 min-h-10 text-sm font-semibold text-foreground cursor-pointer">
+            <input type="checkbox" className="size-5 accent-primary" checked={draft.spotting} onChange={(e) => update({ spotting: e.target.checked })} />
             {c.spottingToggle}
           </label>
         </Section>
 
         <Section icon="thermometer" title={c.bbtTitle} help={c.bbtHelp}>
           <div className="flex items-center gap-2 max-w-[200px]">
-            <input className={inputClass} inputMode="decimal" placeholder="36,50" value={tempText} onChange={(e) => { setTempText(e.target.value); setStatus('idle'); }} aria-invalid={tempInvalid} />
-            <span className="text-sm text-muted-foreground">°C</span>
+            <input className={`${inputClass} tabular-nums`} inputMode="decimal" placeholder="36,50" value={tempText} onChange={(e) => { setTempText(e.target.value); setStatus('idle'); }} aria-invalid={tempInvalid} />
+            <span className="text-sm font-semibold text-muted-foreground">°C</span>
           </div>
-          {tempInvalid && <p className="text-xs font-semibold text-destructive">{c.bbtInvalid}</p>}
-          <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
-            <input type="checkbox" checked={draft.bbtDisturbed} onChange={(e) => update({ bbtDisturbed: e.target.checked })} />
+          {tempInvalid && <p className="text-sm font-semibold text-destructive">{c.bbtInvalid}</p>}
+          <label className="flex items-center gap-3 min-h-10 text-sm text-muted-foreground cursor-pointer">
+            <input type="checkbox" className="size-5 accent-primary" checked={draft.bbtDisturbed} onChange={(e) => update({ bbtDisturbed: e.target.checked })} />
             {c.bbtDisturbed}
           </label>
         </Section>
@@ -254,7 +254,7 @@ const BodySignsPanel: React.FC<Props> = ({ lang, cycleStart, hormonal, initialDa
               </button>
             ))}
           </div>
-          {isFertileMucus(draft.cervicalMucus) && <p className="text-xs font-semibold text-sky-600 dark:text-sky-400">{c.mucusFertile}</p>}
+          {isFertileMucus(draft.cervicalMucus) && <p className="text-sm font-semibold text-sun-ink">{c.mucusFertile}</p>}
         </Section>
 
         {!hormonal && (
@@ -281,15 +281,15 @@ const BodySignsPanel: React.FC<Props> = ({ lang, cycleStart, hormonal, initialDa
           </div>
           {draft.pregnancyTest === 'positive' && (
             activePreg ? (
-              <p className="text-xs font-semibold text-sky-600 dark:text-sky-400">{c.pregActive}</p>
+              <p className="text-sm font-semibold text-sun-ink">{c.pregActive}</p>
             ) : (
-              <div className="flex flex-col gap-2 rounded-xl bg-secondary/40 p-3">
+              <div className="flex flex-col gap-3 rounded-2xl bg-secondary/40 p-4">
                 <p className="text-sm text-foreground">{c.pregOffer}</p>
-                <button type="button" className="self-start px-4 h-9 rounded-xl bg-primary text-primary-foreground text-sm font-bold"
+                <button type="button" className="self-start px-5 min-h-10 rounded-full bg-primary text-primary-foreground text-sm font-bold"
                   onClick={async () => { setPregState((await startPregnancy(cycleStart ?? date, date)) ? 'idle' : 'error'); }}>
                   {c.pregActivate}
                 </button>
-                {pregState === 'error' && <p role="alert" className="text-xs text-destructive">{c.pregError}</p>}
+                {pregState === 'error' && <p role="alert" className="text-sm text-destructive">{c.pregError}</p>}
               </div>
             )
           )}
@@ -297,10 +297,14 @@ const BodySignsPanel: React.FC<Props> = ({ lang, cycleStart, hormonal, initialDa
         <Section icon="favorite" title={c.sexTitle} help={c.sexPrivate}>
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-muted-foreground">{c.sexCount}</span>
-              <button type="button" aria-label="-" className="size-9 rounded-xl bg-secondary font-bold" onClick={() => update({ sexCount: Math.max(0, draft.sexCount - 1) })}>−</button>
-              <span className="w-6 text-center font-bold text-foreground" aria-live="polite">{draft.sexCount}</span>
-              <button type="button" aria-label="+" className="size-9 rounded-xl bg-secondary font-bold" onClick={() => update({ sexCount: Math.min(10, draft.sexCount + 1) })}>+</button>
+              <span className="text-sm font-semibold text-foreground">{c.sexCount}</span>
+              <button type="button" aria-label={`${c.sexCount}: -1`} className="size-11 rounded-full bg-secondary hover:bg-surface-hover flex items-center justify-center" onClick={() => update({ sexCount: Math.max(0, draft.sexCount - 1) })}>
+                <span className="material-symbols-outlined text-[20px]" aria-hidden="true">remove</span>
+              </button>
+              <span className="w-8 text-center text-lg font-semibold text-foreground tabular-nums" aria-live="polite">{draft.sexCount}</span>
+              <button type="button" aria-label={`${c.sexCount}: +1`} className="size-11 rounded-full bg-secondary hover:bg-surface-hover flex items-center justify-center" onClick={() => update({ sexCount: Math.min(10, draft.sexCount + 1) })}>
+                <span className="material-symbols-outlined text-[20px]" aria-hidden="true">add</span>
+              </button>
             </div>
             {draft.sexCount > 0 && (
               <div className="flex gap-2" role="radiogroup" aria-label={c.protection}>
@@ -315,40 +319,48 @@ const BodySignsPanel: React.FC<Props> = ({ lang, cycleStart, hormonal, initialDa
           </div>
         </Section>
 
-        <label className="flex flex-col gap-1 text-xs font-semibold text-muted-foreground">
-          {c.notes}
-          <input className={inputClass} maxLength={300} value={draft.notes ?? ''} onChange={(e) => update({ notes: e.target.value })} />
-        </label>
+        <div className="p-5 sm:p-6 flex flex-col gap-4">
+          <label className="flex flex-col gap-2 text-sm font-semibold text-foreground">
+            {c.notes}
+            <input className={`${inputClass} font-normal`} maxLength={300} value={draft.notes ?? ''} onChange={(e) => update({ notes: e.target.value })} />
+          </label>
 
-        {(status === 'error' || error) && status !== 'saved' && <p className="text-xs font-semibold text-destructive" role="alert">{c.saveError}</p>}
-        <button type="button" onClick={onSave} disabled={status === 'saving' || tempInvalid}
-          className="w-full bg-primary hover:bg-primary-hover text-primary-foreground font-bold py-3.5 rounded-full flex items-center justify-center gap-2 disabled:opacity-60">
-          <span className="material-symbols-outlined">{status === 'saved' ? 'check_circle' : 'save'}</span>
-          {status === 'saving' ? c.saving : status === 'saved' ? c.saved : c.save}
-        </button>
+          {(status === 'error' || error) && status !== 'saved' && <p className="text-sm font-semibold text-destructive" role="alert">{c.saveError}</p>}
+          <button type="button" onClick={onSave} disabled={status === 'saving' || tempInvalid}
+            className="w-full min-h-12 bg-primary hover:bg-primary-hover text-primary-foreground font-semibold px-6 rounded-full flex items-center justify-center gap-2 transition-colors disabled:opacity-60">
+            <span className="material-symbols-outlined" aria-hidden="true">{status === 'saved' ? 'check_circle' : 'save'}</span>
+            {status === 'saving' ? c.saving : status === 'saved' ? c.saved : c.save}
+          </button>
+        </div>
+        </div>
       </div>
 
-      <div className="lg:col-span-5 flex flex-col gap-4">
-        <div className="bg-card border border-border rounded-2xl p-5 flex flex-col gap-3 shadow-sm">
-          <h3 className="text-foreground font-bold">{c.chartTitle}</h3>
+      <div className="lg:col-span-5 flex flex-col gap-4 lg:sticky lg:top-4 lg:self-start">
+        <div className="bg-card border border-border rounded-3xl p-5 sm:p-6 flex flex-col gap-3 shadow-[var(--shadow-low)]">
+          <h2 className="text-foreground text-lg font-semibold">{c.chartTitle}</h2>
           {readings.length < 2 ? (
             <p className="text-sm text-muted-foreground">{c.chartEmpty}</p>
           ) : (
             <BBTChart readings={readings} coverline={shift?.coverline} ovulationDate={shift?.ovulationDate} label={c.chartTitle} />
           )}
-          {shift && <p className="text-xs text-muted-foreground">--- {c.coverline}: {shift.coverline.toFixed(2)} °C</p>}
+          {shift && (
+            <p className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span className="w-6 border-t-2 border-dashed border-primary/60" aria-hidden="true" />
+              <span className="tabular-nums">{c.coverline}: {shift.coverline.toFixed(2)} °C</span>
+            </p>
+          )}
           {!hormonal && (
-            <p className={`text-sm ${pattern === 'monophasic' ? 'text-amber-600 dark:text-amber-400' : 'text-foreground'}`}>
+            <p className={`text-sm ${pattern === 'monophasic' ? 'text-sun-ink' : 'text-foreground'}`}>
               {pattern === 'shift' && shift ? c.pattern.shift(fmt(shift.ovulationDate)) : pattern === 'shift' ? '' : c.pattern[pattern]}
             </p>
           )}
         </div>
 
-        <div className="bg-card/70 border border-border rounded-2xl p-5 flex flex-col gap-3 shadow-sm">
+        <div className="bg-card/70 border border-border rounded-3xl p-5 sm:p-6 flex flex-col gap-3">
           <button type="button" onClick={() => setShowInfo((v) => !v)} aria-expanded={showInfo}
-            className="flex items-center justify-between gap-2 text-left text-foreground font-bold">
-            <span className="flex items-center gap-2"><span className="material-symbols-outlined text-primary text-[20px]">info</span>{c.infoTitle}</span>
-            <span className="material-symbols-outlined">{showInfo ? 'expand_less' : 'expand_more'}</span>
+            className="flex items-center justify-between gap-2 min-h-10 text-left text-foreground font-semibold">
+            <span className="flex items-center gap-2"><span className="material-symbols-outlined text-primary text-[20px]" aria-hidden="true">info</span>{c.infoTitle}</span>
+            <span className="material-symbols-outlined" aria-hidden="true">{showInfo ? 'expand_less' : 'expand_more'}</span>
           </button>
           {showInfo && c.info.map((p, i) => (
             <p key={i} className={`text-sm leading-relaxed ${i === c.info.length - 1 ? 'text-foreground font-semibold' : 'text-muted-foreground'}`}>{p}</p>

@@ -133,8 +133,8 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ onClose }) => {
             </h2>
             <div className="flex items-center gap-1.5 mt-0.5">
               <span className="relative flex h-2 w-2 shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-leaf opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-leaf"></span>
               </span>
               <span className="text-[11px] font-medium text-muted-foreground truncate">
                 {t.assistantOnline} • {t.assistantSubtitle}

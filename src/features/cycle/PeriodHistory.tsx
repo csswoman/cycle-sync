@@ -3,7 +3,10 @@ import { supabase } from '@/lib/supabase';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { usesHormonalContraception } from '@/features/setup/onboarding';
 import { useOnboardingAnswers } from '@/hooks/useOnboardingAnswers';
+import { cycleProfile, expectsLongGaps } from '@/features/setup/onboarding';
 import { CycleAnalysisCard } from './CycleAnalysisCard';
+import PremenstrualPatternCard from './PremenstrualPatternCard';
+import PeriodForecastCard from '@/features/health/pmos/PeriodForecastCard';
 import { GardenCorner, TitleSprig } from '@/components/ui/Botanical';
 import { PeriodDayCalendar, type CalendarMode } from '@/components/PeriodDayCalendar';
 import {
@@ -85,6 +88,9 @@ const PeriodHistory: React.FC = () => {
         () => (periods.length ? periods.map((p) => p.start_date.slice(0, 10)).sort().pop() as string : null),
         [periods],
     );
+    const periodStarts = useMemo(() => periods.map((p) => p.start_date), [periods]);
+    // Irregular cycles without PMOS get the forecast range here (PMOS users have it in their toolkit).
+    const showForecast = cycleProfile(answers) === 'irregular' && !!latestStart && !predictionsPaused(latestStart, pregnancies, toISODate(new Date()));
     const projections = useMemo(
         () => (latestStart && !predictionsPaused(latestStart, pregnancies, toISODate(new Date())) ? projectCycles(latestStart, estimate, 3) : []),
         [latestStart, estimate, pregnancies],
@@ -234,8 +240,8 @@ const PeriodHistory: React.FC = () => {
 
                     <div className="flex items-center gap-2.5 self-start sm:self-auto px-3.5 py-1.5 rounded-full bg-secondary/60 border border-border/70 text-xs font-medium shrink-0">
                         <span className={`size-2.5 rounded-full shrink-0 ${
-                            regularity === 'regular' ? 'bg-emerald-500' :
-                            regularity === 'irregular' ? 'bg-amber-500' :
+                            regularity === 'regular' ? 'bg-leaf' :
+                            regularity === 'irregular' ? 'bg-sun' :
                             'bg-primary'
                         }`} />
                         <span className="text-foreground font-semibold">
@@ -294,7 +300,7 @@ const PeriodHistory: React.FC = () => {
                                     <p className="text-2xl md:text-3xl font-black text-foreground tracking-tight">
                                         ~ {fmt(next.ovulation)}
                                     </p>
-                                    <p className="text-xs font-medium text-sky-600 dark:text-sky-400">
+                                    <p className="text-xs font-medium text-sun-ink">
                                         {locale === 'es' ? 'Día pico estimado' : 'Estimated peak day'}
                                     </p>
                                 </div>
@@ -321,13 +327,13 @@ const PeriodHistory: React.FC = () => {
                                         </div>
                                     )}
                                     {usesHormonalContraception(answers) && (
-                                        <div className="text-xs text-amber-600 dark:text-amber-400 bg-amber-500/10 rounded-lg px-3 py-1.5 flex items-center gap-1.5">
+                                        <div className="text-xs text-sun-ink bg-sun/10 rounded-lg px-3 py-1.5 flex items-center gap-1.5">
                                             <span className="material-symbols-outlined text-[16px]">info</span>
                                             {t.forecastHormonalNote}
                                         </div>
                                     )}
                                     {estimate.irregular && (
-                                        <div className="text-xs text-amber-600 dark:text-amber-400 bg-amber-500/10 rounded-lg px-3 py-1.5 flex items-center gap-1.5">
+                                        <div className="text-xs text-sun-ink bg-sun/10 rounded-lg px-3 py-1.5 flex items-center gap-1.5">
                                             <span className="material-symbols-outlined text-[16px]">warning</span>
                                             {t.forecastIrregularNote}
                                         </div>
@@ -479,8 +485,10 @@ const PeriodHistory: React.FC = () => {
                     {/* Column 2: Analysis & Connected Timeline (Desktop Right, Mobile when mobileTab === 'history') */}
                     <div className={`lg:col-span-7 xl:col-span-7 flex flex-col gap-8 ${mobileTab === 'history' ? 'block' : 'hidden lg:block'}`}>
                         {periods.length > 0 && (
-                            <CycleAnalysisCard periods={periods} signs={signs} pregnancies={pregnancies} expectedNext={projections[0]?.periodStart} />
+                            <CycleAnalysisCard periods={periods} signs={signs} pregnancies={pregnancies} expectedNext={projections[0]?.periodStart} expectsLongGaps={expectsLongGaps(answers)} />
                         )}
+                        {showForecast && <PeriodForecastCard lang={locale} pmos={false} />}
+                        {periods.length >= 2 && <PremenstrualPatternCard periodStarts={periodStarts} lang={locale} />}
 
                         {/* Connected Timeline for Logged Periods */}
                         <section className="flex flex-col gap-4">
@@ -580,7 +588,7 @@ const PeriodHistory: React.FC = () => {
                                                                             return (
                                                                                 <ul className="flex flex-wrap gap-1.5 mt-2">
                                                                                     {days.map((d) => (
-                                                                                        <li key={d.date} className={`text-[11px] font-medium px-2 py-1 rounded-md border ${d.flow === 'very_heavy' || d.flow === 'heavy' ? 'border-red-500/40 bg-red-500/10 text-foreground' : 'border-border bg-secondary/50 text-muted-foreground'}`}>
+                                                                                        <li key={d.date} className={`text-[11px] font-medium px-2 py-1 rounded-md border ${d.flow === 'very_heavy' || d.flow === 'heavy' ? 'border-destructive/40 bg-destructive/10 text-foreground' : 'border-border bg-secondary/50 text-muted-foreground'}`}>
                                                                                             {Number(d.date.slice(8))}
                                                                                             {d.flow ? ` · ${flowText[d.flow]}` : ''}
                                                                                             {d.clots ? (locale === 'es' ? ' · coágulos' : ' · clots') : ''}

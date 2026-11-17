@@ -32,7 +32,7 @@ const copy = {
         aboutPeriodBody: [`Un período dura normalmente entre ${NORMAL_PERIOD_MIN} y ${NORMAL_PERIOD_MAX} días.`],
         ok: 'Entendido', info: 'Información', notEnough: 'Registra al menos dos períodos para ver tus ciclos.',
         flagsTitle: 'Para comentar con tu médica',
-        flagsBody: 'Son patrones de tu registro según la guía internacional de SOP/PMOS (2023). No son un diagnóstico.',
+        flagsBody: 'Son patrones de tu registro según las guías clínicas de ciclo menstrual (SOP/PMOS 2023 y FIGO). No son un diagnóstico.',
         flags: {
             noPeriod90: `Llevas más de ${NO_PERIOD_DAYS} días sin registrar una regla. Si no es un olvido de registro, conviene revisarlo: las pausas largas sin sangrado pueden necesitar tratamiento para proteger el endometrio.`,
             longCycles: `Varios de tus ciclos recientes duraron más de ${NORMAL_CYCLE_MAX} días, lo que suele indicar ovulación tardía o ausente.`,
@@ -41,6 +41,7 @@ const copy = {
             longBleeding: `Tus últimas reglas duraron más de ${PROLONGED_BLEEDING_DAYS} días. Si además son abundantes, vale la pena revisar tu hierro.`,
             heavyBleeding: 'En una de tus últimas reglas anotaste 2 o más días de sangrado muy abundante (o abundante con coágulos). Conviene comentarlo y revisar tu hierro.',
             heavyAfterGap: 'Tuviste una regla abundante después de 90 días o más sin sangrado. Conviene comentarlo en consulta.',
+            severePain: 'En varias de tus últimas reglas anotaste dolor de 7/10 o más. Un dolor que te frena no es algo que tengas que aguantar: coméntalo, puede tener tratamiento y a veces indica endometriosis.',
         } as Record<CycleFlag, string>,
     },
     en: {
@@ -65,7 +66,7 @@ const copy = {
         aboutPeriodBody: [`A period usually lasts between ${NORMAL_PERIOD_MIN} and ${NORMAL_PERIOD_MAX} days.`],
         ok: 'Got it', info: 'Information', notEnough: 'Log at least two periods to see your cycles.',
         flagsTitle: 'Worth raising with your doctor',
-        flagsBody: 'These are patterns in your log based on the international PCOS/PMOS guideline (2023). They are not a diagnosis.',
+        flagsBody: 'These are patterns in your log based on menstrual cycle guidelines (PCOS/PMOS 2023 and FIGO). They are not a diagnosis.',
         flags: {
             noPeriod90: `It has been more than ${NO_PERIOD_DAYS} days since you logged a period. If that is not a missed entry, get it checked: long gaps without bleeding may need treatment to protect the uterine lining.`,
             longCycles: `Several of your recent cycles lasted more than ${NORMAL_CYCLE_MAX} days, which usually points to late or absent ovulation.`,
@@ -74,12 +75,13 @@ const copy = {
             longBleeding: `Your last periods lasted more than ${PROLONGED_BLEEDING_DAYS} days. If they are also heavy, it is worth checking your iron.`,
             heavyBleeding: 'In one of your recent periods you logged 2 or more days of very heavy bleeding (or heavy with clots). Worth mentioning, and worth checking your iron.',
             heavyAfterGap: 'You had a heavy period after 90 days or more without bleeding. Worth mentioning at your appointment.',
+            severePain: 'In several of your recent periods you logged pain of 7/10 or more. Pain that stops you is not something you have to put up with: mention it, it can be treated and sometimes points to endometriosis.',
         } as Record<CycleFlag, string>,
     },
 };
 
 const RatingBadge: React.FC<{ rating: Rating; label: string }> = ({ rating, label }) => (
-    <span className={`inline-flex items-center gap-1.5 text-sm font-semibold ${rating === 'normal' ? 'text-green-500' : 'text-orange-500'}`}>
+    <span className={`inline-flex items-center gap-1.5 text-sm font-semibold ${rating === 'normal' ? 'text-leaf' : 'text-sun-ink'}`}>
         <span className="material-symbols-outlined text-[18px]">{rating === 'normal' ? 'check_circle' : 'error'}</span>
         {label}
     </span>
@@ -119,9 +121,13 @@ interface Props {
     pregnancies?: Pregnancy[];
     /** Expected start of the next period (same date as the forecast card). */
     expectedNext?: Date;
+    /** Long gaps have a known cause (breastfeeding, contraception, menopause): skip the gap alerts. */
+    expectsLongGaps?: boolean;
 }
 
-export const CycleAnalysisCard: React.FC<Props> = ({ periods, signs = [], pregnancies = [], expectedNext }) => {
+const GAP_FLAGS: CycleFlag[] = ['noPeriod90', 'fewPeriodsYear', 'longCycles'];
+
+export const CycleAnalysisCard: React.FC<Props> = ({ periods, signs = [], pregnancies = [], expectedNext, expectsLongGaps = false }) => {
     const { language } = useLanguage();
     const c = copy[language === 'es' ? 'es' : 'en'];
     // Re-render every minute so the countdown drops by one when the day changes.
@@ -131,7 +137,10 @@ export const CycleAnalysisCard: React.FC<Props> = ({ periods, signs = [], pregna
         return () => clearInterval(id);
     }, []);
     const a = useMemo(() => analyzeCycles(periods, now, pregnancies), [periods, now, pregnancies]);
-    const flags = useMemo(() => cycleHealthFlags(periods, now, signs, pregnancies), [periods, now, signs, pregnancies]);
+    const flags = useMemo(
+        () => cycleHealthFlags(periods, now, signs, pregnancies).filter((f) => !expectsLongGaps || !GAP_FLAGS.includes(f)),
+        [periods, now, signs, pregnancies, expectsLongGaps],
+    );
     const [modal, setModal] = useState<'cycle' | 'period' | null>(null);
 
     return (
@@ -171,7 +180,7 @@ export const CycleAnalysisCard: React.FC<Props> = ({ periods, signs = [], pregna
                                 </p>
                                 <RatingBadge rating={a.cycleRating} label={a.cycleRating === 'normal' ? c.normal : c.abnormal} />
                             </div>
-                            <Bars values={a.cycles} mean={a.mean} avgLabel={c.avg} color="bg-indigo-400/50 dark:bg-indigo-400/40" />
+                            <Bars values={a.cycles} mean={a.mean} avgLabel={c.avg} color="bg-blossom/50" />
                             <p className="text-xs text-muted-foreground leading-relaxed mt-1">
                                 {c.summary(a.mean, a.cycles.length)}{a.cycleRating === 'abnormal' && c.summaryAbnormal}
                             </p>
@@ -209,7 +218,7 @@ export const CycleAnalysisCard: React.FC<Props> = ({ periods, signs = [], pregna
                                 </p>
                                 <RatingBadge rating={a.periodRating} label={a.periodRating === 'normal' ? c.normal : c.abnormal} />
                             </div>
-                            <Bars values={a.periodLengths} mean={a.periodMean} avgLabel={c.avg} color="bg-pink-400/50 dark:bg-pink-400/40" />
+                            <Bars values={a.periodLengths} mean={a.periodMean} avgLabel={c.avg} color="bg-bud/50" />
                             <p className="text-xs text-muted-foreground leading-relaxed mt-1">
                                 {c.periodSummary(a.periodMean, a.periodLengths.length)}
                             </p>
@@ -219,9 +228,9 @@ export const CycleAnalysisCard: React.FC<Props> = ({ periods, signs = [], pregna
             </div>
 
             {flags.length > 0 && (
-                <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-5 flex flex-col gap-2.5">
+                <div className="bg-sun/10 border border-sun/30 rounded-2xl p-5 flex flex-col gap-2.5">
                     <h4 className="font-bold text-foreground text-base flex items-center gap-2">
-                        <span className="material-symbols-outlined text-amber-500 text-[20px]">stethoscope</span>
+                        <span className="material-symbols-outlined text-sun-ink text-[20px]">stethoscope</span>
                         {c.flagsTitle}
                     </h4>
                     <ul className="flex flex-col gap-1.5 list-disc pl-5">

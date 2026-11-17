@@ -33,7 +33,7 @@ export interface FlowValue {
   pain?: number | null;
 }
 const chip = (active: boolean) =>
-  `px-3 py-2 rounded-xl text-sm font-semibold border transition-all cursor-pointer ${
+  `min-h-10 px-4 rounded-full text-sm font-semibold border transition-colors cursor-pointer ${
     active ? 'bg-primary text-primary-foreground border-primary' : 'bg-secondary/50 text-foreground border-transparent hover:bg-secondary'
   }`;
 /** Flow, clots and pain for one day. Used by the body-signs form and the calendar quick editor. */
@@ -43,7 +43,7 @@ export const FlowFields: React.FC<{ lang: Lang; value: FlowValue; onChange: (pat
   return (
     <div className="flex flex-col gap-3">
       <div>
-        <p className="text-sm font-semibold text-muted-foreground mb-2">{c.flowTitle}</p>
+        <p className="text-sm font-semibold text-foreground mb-2">{c.flowTitle}</p>
         <div className="flex flex-wrap gap-2">
           {FLOW_LEVELS.map((f) => (
             <button key={f} type="button" aria-pressed={value.flow === f} className={chip(value.flow === f)}
@@ -52,27 +52,27 @@ export const FlowFields: React.FC<{ lang: Lang; value: FlowValue; onChange: (pat
             </button>
           ))}
         </div>
-        <p className="text-xs text-muted-foreground mt-2">{c.veryHeavyHelp}</p>
+        <p className="text-sm text-muted-foreground mt-2">{c.veryHeavyHelp}</p>
       </div>
-      <label className="flex items-center gap-3 text-sm font-semibold text-foreground cursor-pointer">
-        <input type="checkbox" className="size-5 accent-[hsl(var(--primary))]" checked={!!value.clots} onChange={(e) => onChange({ clots: e.target.checked })} />
+      <label className="flex items-center gap-3 min-h-10 text-sm font-semibold text-foreground cursor-pointer">
+        <input type="checkbox" className="size-5 accent-primary" checked={!!value.clots} onChange={(e) => onChange({ clots: e.target.checked })} />
         {c.clots}
       </label>
       <div>
         <div className="flex items-center justify-between gap-2 mb-1">
-          <label htmlFor="flow-pain" className="text-sm font-semibold text-muted-foreground">{c.painTitle}</label>
+          <label htmlFor="flow-pain" className="text-sm font-semibold text-foreground">{c.painTitle}</label>
           <span className="text-sm font-bold text-foreground tabular-nums">{value.pain == null ? c.painNone : `${value.pain}/10`}</span>
         </div>
         <div className="flex items-center gap-3">
-          <input id="flow-pain" type="range" min={0} max={10} step={1} value={value.pain ?? 0} className="flex-1 accent-[hsl(var(--primary))]"
+          <input id="flow-pain" type="range" min={0} max={10} step={1} value={value.pain ?? 0} className="flex-1 h-10 accent-primary"
             onChange={(e) => onChange({ pain: Number(e.target.value) })} />
           {value.pain != null && (
-            <button type="button" className="text-xs font-bold text-primary hover:underline" onClick={() => onChange({ pain: null })}>{c.painClear}</button>
+            <button type="button" className="min-h-10 px-3 rounded-full text-sm font-semibold text-primary hover:bg-primary/10" onClick={() => onChange({ pain: null })}>{c.painClear}</button>
           )}
         </div>
       </div>
       {heavy && (
-        <p className="text-xs text-muted-foreground bg-amber-500/10 rounded-xl px-3 py-2">
+        <p className="text-sm text-muted-foreground bg-sun/10 rounded-2xl px-4 py-3">
           {c.iron}{' '}
           <Link href="/nutrition?tab=tastes" className="font-bold text-primary hover:underline">{c.ironLink}</Link>
         </p>
