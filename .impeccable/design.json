@@ -1,0 +1,212 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-17T00:00:00Z",
+  "title": "Design System: CycleSync",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Rosa flor",
+        "canonical": "light-dark(#c2306a, #ff8fb8)"
+      },
+      "leaf": {
+        "role": "secondary",
+        "displayName": "Verde hoja",
+        "canonical": "light-dark(#356d22, #a9dc84)"
+      },
+      "background": {
+        "role": "neutral",
+        "displayName": "Crema",
+        "canonical": "light-dark(#fbf3ea, #101612)"
+      },
+      "card": {
+        "role": "neutral",
+        "displayName": "Crema clara",
+        "canonical": "light-dark(#fffbf4, #18201b)"
+      },
+      "text-primary": {
+        "role": "neutral",
+        "displayName": "Tinta cálida",
+        "canonical": "light-dark(#2b2620, #f3efe6)"
+      },
+      "popover": {
+        "role": "neutral",
+        "displayName": "Popover",
+        "canonical": "light-dark(#fffbf4, #1f2922)"
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Arena",
+        "canonical": "light-dark(#f1eedf, #232d26)"
+      },
+      "border": {
+        "role": "neutral",
+        "displayName": "Borde arena",
+        "canonical": "light-dark(#ebe2d3, #2f3b32)"
+      },
+      "border-emphasized": {
+        "role": "neutral",
+        "displayName": "Borde énfasis",
+        "canonical": "light-dark(#8f8169, #71806f)"
+      },
+      "text-secondary": {
+        "role": "neutral",
+        "displayName": "Tinta suave",
+        "canonical": "light-dark(#6b6357, #b5bfb0)"
+      },
+      "leaf-soft": {
+        "role": "secondary",
+        "displayName": "Hoja suave",
+        "canonical": "light-dark(#e3ecc9, #24402a)"
+      },
+      "sun-ink": {
+        "role": "tertiary",
+        "displayName": "Tinta sol",
+        "canonical": "light-dark(#8a5300, #f2c27a)"
+      },
+      "bud": {
+        "role": "tertiary",
+        "displayName": "Capullo (menstrual)",
+        "canonical": "light-dark(#a3224a, #ff8fa8)"
+      },
+      "luteal": {
+        "role": "tertiary",
+        "displayName": "Oro lúteo",
+        "canonical": "light-dark(#a8461f, #ffa27f)"
+      }
+    },
+    "typographyMeta": {
+      "heading": {
+        "displayName": "Heading",
+        "purpose": "Títulos h1 y h2."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Texto general."
+      }
+    },
+    "shadows": [
+      {
+        "name": "low",
+        "value": "0 1px 2px #5a3a2a0d, 0 6px 16px #5a3a2a0f",
+        "purpose": "Tarjetas en reposo."
+      },
+      {
+        "name": "med",
+        "value": "0 2px 4px #5a3a2a0f, 0 12px 28px #5a3a2a14",
+        "purpose": "Superficies elevadas."
+      },
+      {
+        "name": "high",
+        "value": "0 4px 8px #5a3a2a14, 0 24px 48px #5a3a2a1f",
+        "purpose": "Modales y popovers."
+      },
+      {
+        "name": "dark-tint",
+        "value": "#050a07",
+        "purpose": "Tinte de sombra en modo oscuro (negro verdoso)."
+      }
+    ],
+    "motion": [
+      {
+        "name": "fade-in",
+        "value": "300ms ease both",
+        "purpose": "Entrada de contenido."
+      },
+      {
+        "name": "nav-transition",
+        "value": "0.2s ease",
+        "purpose": "Hover de la navegación."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Acción principal, en píldora rosa.",
+      "html": "<button class=\"ds-btn-primary\">Guardar</button>",
+      "css": ".ds-btn-primary{background:#c2306a;color:#fff;border:none;border-radius:9999px;padding:10px 22px;min-height:40px;font-family:'Instrument Sans',sans-serif;font-weight:600;cursor:pointer;transition:background .2s ease}.ds-btn-primary:hover{background:#c2306ad9}.ds-btn-primary:focus-visible{outline:2px solid #c2306a;outline-offset:2px}@media (prefers-color-scheme:dark){.ds-btn-primary{background:#ff8fb8;color:#2b0f1c}}"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Contenedor base de la app.",
+      "html": "<div class=\"ds-card\"><p class=\"ds-card-title\">Hoy</p><p>Fase folicular</p></div>",
+      "css": ".ds-card{background:#fffbf4;color:#2b2620;border:1px solid #ebe2d3;border-radius:24px;padding:20px;box-shadow:0 1px 2px #5a3a2a0d,0 6px 16px #5a3a2a0f;font-family:'Instrument Sans',sans-serif;transition:transform .3s ease}.ds-card:hover{transform:translateY(-2px)}.ds-card-title{font-weight:600;margin:0 0 4px}@media (prefers-color-scheme:dark){.ds-card{background:#18201b;color:#f3efe6;border-color:#2f3b32;box-shadow:inset 0 1px 0 #f3efe60f,0 1px 2px #050a0773,0 6px 16px #050a0780}}"
+    },
+    {
+      "name": "Phase Chip",
+      "kind": "chip",
+      "description": "Insignia con el color suave de la fase.",
+      "html": "<span class=\"ds-chip\">Folicular</span>",
+      "css": ".ds-chip{display:inline-block;background:#e3ecc9;color:#356d22;border-radius:9999px;padding:4px 12px;font-size:12px;font-weight:600;font-family:'Instrument Sans',sans-serif}@media (prefers-color-scheme:dark){.ds-chip{background:#24402a;color:#a9dc84}}"
+    },
+    {
+      "name": "Nav Item activo",
+      "kind": "nav",
+      "description": "Ítem de la barra lateral en estado activo.",
+      "html": "<a class=\"ds-nav\" href=\"#\">Rutinas</a>",
+      "css": ".ds-nav{display:block;padding:10px 14px;border:1px solid #c2306a47;border-radius:16px;color:#2b2620;text-decoration:none;font-family:'Instrument Sans',sans-serif;background-image:linear-gradient(90deg,#c2306a2e,#f08bb01a 60%,#7cb3561f)}@media (prefers-color-scheme:dark){.ds-nav{color:#f3efe6;border-color:#ff8fb847;background-image:linear-gradient(90deg,#ff8fb82e,#e07aa41a 60%,#a9d9871f)}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "El jardín que florece",
+    "overview": "El ciclo se vive como las estaciones de una flor: capullo, brote, flor abierta y fruto. La interfaz es cálida y cuidada, con fondo crema, color de fase, esquinas suaves y sombras cálidas. De noche, un bosque verde apagado donde el rosa brilla como flor. Nada de estética médica fría.",
+    "keyCharacteristics": [
+      "Fondo crema cálido con resplandores rosa y salvia.",
+      "El color de la fase activa guía los acentos.",
+      "Rosa primario solo para la acción principal y estados activos.",
+      "Botones en píldora, tarjetas de esquinas grandes.",
+      "Iconos Material Symbols, sin emojis."
+    ],
+    "rules": [
+      {
+        "name": "La Regla de la Fase",
+        "body": "Cada fase tiene su color (data-phase) y se diferencia con color, no con más texto.",
+        "section": "colors"
+      },
+      {
+        "name": "La Regla de la Voz Rosa",
+        "body": "El rosa primario marca la acción principal y lo activo.",
+        "section": "colors"
+      },
+      {
+        "name": "La Regla del Bosque Nocturno",
+        "body": "En oscuro el verde vive en los neutros; los acentos verdes necesitan más luz o un lavado crema para no perderse.",
+        "section": "colors"
+      },
+      {
+        "name": "La Regla del Token",
+        "body": "Nada de colores de la paleta de Tailwind en componentes: leaf, sun/sun-ink, destructive, bud/blossom, sage/moss.",
+        "section": "colors"
+      },
+      {
+        "name": "La Regla del Piso de 12px",
+        "body": "Ningún texto baja de 12px.",
+        "section": "typography"
+      },
+      {
+        "name": "La Regla de la Sombra Cálida",
+        "body": "Las sombras llevan tinte marrón cálido, nunca gris neutro.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do usar el color de la fase activa para diferenciar contenido.",
+      "Do reservar el rosa primario para la acción principal y los estados activos.",
+      "Do usar iconos Material Symbols.",
+      "Do mantener texto de 12px o más y controles de 40px o más.",
+      "Do usar sombras cálidas y esquinas de 16 a 24px."
+    ],
+    "donts": [
+      "Don't usar estética médica fría.",
+      "Don't usar emojis ni glifos como iconos.",
+      "Don't poner etiquetas en mayúsculas con tracking sobre los títulos.",
+      "Don't apilar muchas tarjetas del mismo peso antes del contenido.",
+      "Don't usar los tonos decorativos para texto."
+    ]
+  }
+}
