@@ -8,14 +8,22 @@ interface MacroWaterCalculatorProps {
   weightKg: number;
   onWeightChange: (newWeight: number) => void;
   compact?: boolean;
+  /** Optional call to action shown under the figures. */
+  action?: React.ReactNode;
+  /** Height in cm, optional. Makes the targets realistic for larger bodies. */
+  heightCm?: number;
+  onHeightChange?: (heightCm: number | undefined) => void;
 }
 
 export const MacroWaterCalculator: React.FC<MacroWaterCalculatorProps> = ({
   weightKg,
   onWeightChange,
   compact = false,
+  action,
+  heightCm,
+  onHeightChange,
 }) => {
-  const targets: NutritionTargets = calculateNutritionTargets(weightKg);
+  const targets: NutritionTargets = calculateNutritionTargets(weightKg, heightCm);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = parseFloat(e.target.value);
@@ -25,167 +33,133 @@ export const MacroWaterCalculator: React.FC<MacroWaterCalculatorProps> = ({
   };
 
   const adjustWeight = (delta: number) => {
-    const next = Math.max(30, Math.min(200, Math.round((weightKg + delta) * 10) / 10));
+    const next = Math.max(30, Math.min(250, Math.round((weightKg + delta) * 10) / 10));
     onWeightChange(next);
   };
 
+  const stepBtn = 'size-10 rounded-full bg-card hover:bg-accent text-foreground inline-flex items-center justify-center transition-colors border border-border/60';
+
+  const stats = [
+    {
+      key: 'protein',
+      icon: 'bowl_food',
+      label: 'Proteína diaria',
+      value: `${targets.proteinGrams}`,
+      unit: 'g al día',
+      detail: targets.usesAdjustedWeight
+        ? `Rango ${targets.proteinRange[0]} a ${targets.proteinRange[1]} g, sobre peso referencia de ${targets.proteinReferenceKg} kg`
+        : `Rango ${targets.proteinRange[0]} a ${targets.proteinRange[1]} g (1.6 a 2.2 g/kg)`,
+    },
+    {
+      key: 'fat',
+      icon: 'plant',
+      label: 'Grasas saludables',
+      value: `≥${targets.fatGrams}`,
+      unit: 'g al día',
+      detail: `Mínimo hormonal 1.0 g/kg para síntesis de estrógenos y progesterona`,
+    },
+    {
+      key: 'water',
+      icon: 'drop',
+      label: 'Agua diaria',
+      value: `${targets.waterLiters}`,
+      unit: 'L al día',
+      detail: `Rango ${targets.waterRangeLiters[0]} a ${targets.waterRangeLiters[1]} L (~${targets.waterGlasses} vasos de 250 ml)`,
+    },
+    {
+      key: 'energy',
+      icon: 'flame',
+      label: 'Energía y déficit seguro',
+      value: `~${targets.maintenanceCalories}`,
+      unit: 'kcal al día',
+      detail: `Déficit moderado: ~${targets.calorieBreakdown.safeDeficitCalories} kcal (-400 kcal) para perder grasa sin perder músculo`,
+    },
+  ];
+
   return (
-    <div className="w-full bg-card rounded-2xl border border-border p-5 sm:p-6 shadow-sm flex flex-col gap-5 transition-all">
-      {/* Header with weight selector */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border/60">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-            <Icon name="barbell" size={22} weight="duotone" />
-          </div>
-          <div>
-            <h3 className="text-foreground text-base sm:text-lg font-bold flex items-center gap-2">
-              Metas según tu Peso
-              <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-blossom-soft text-blossom border border-blossom/20">
-                Músculo y energía
-              </span>
-            </h3>
-            <p className="text-muted-foreground text-xs sm:text-sm">
-              Proteína y agua para cuidar tu masa muscular, tu energía y tu glucosa
-            </p>
-          </div>
+    <section aria-labelledby="macro-targets" className="w-full bg-card rounded-3xl border border-border p-5 sm:p-6 shadow-sm flex flex-col gap-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h3 id="macro-targets" className="text-foreground text-lg font-semibold text-balance">Tus metas según tu peso</h3>
+          <p className="text-muted-foreground text-sm text-pretty">
+            Proteína y agua para cuidar tu músculo, tu energía y tu glucosa.
+          </p>
         </div>
 
-        {/* Weight input controls */}
-        <div className="flex items-center gap-2 bg-secondary/80 p-1.5 rounded-xl border border-border self-start sm:self-auto">
-          <button
-            type="button"
-            onClick={() => adjustWeight(-1)}
-            aria-label="Disminuir peso"
-            className="w-8 h-8 rounded-lg bg-card hover:bg-accent text-foreground flex items-center justify-center transition-colors font-bold text-base shadow-sm border border-border/40"
-          >
-            -
+        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+        {onHeightChange && (
+          <label className="flex gap-1 bg-secondary/80 px-4 min-h-[3.25rem] items-center rounded-full border border-border">
+            <span className="sr-only">Estatura en centímetros (opcional)</span>
+            <input
+              type="number"
+              min="120"
+              max="220"
+              step="1"
+              inputMode="numeric"
+              placeholder="Estatura"
+              value={heightCm ?? ''}
+              onChange={(e) => {
+                const v = parseFloat(e.target.value);
+                onHeightChange(Number.isFinite(v) && v > 0 ? v : undefined);
+              }}
+              className="w-20 text-center font-semibold text-foreground text-base tabular-nums bg-transparent placeholder:font-normal placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary rounded"
+            />
+            <span className="text-sm text-muted-foreground">cm</span>
+          </label>
+        )}
+        <div className="flex items-center gap-2 bg-secondary/80 p-1.5 rounded-full border border-border">
+          <button type="button" onClick={() => adjustWeight(-1)} aria-label="Disminuir peso" className={stepBtn}>
+            <Icon name="remove" size={16} weight="bold" />
           </button>
-          <div className="flex items-baseline gap-1 px-2 min-w-[70px] justify-center">
+          <label className="flex items-baseline gap-1 px-1 min-w-[76px] justify-center">
+            <span className="sr-only">Peso en kilogramos</span>
             <input
               type="number"
               min="30"
-              max="200"
+              max="250"
               step="0.5"
               value={weightKg || ''}
               onChange={handleInputChange}
-              aria-label="Peso en kilogramos"
-              className="w-14 text-center font-bold text-foreground text-base bg-transparent focus:outline-none focus:ring-1 focus:ring-primary rounded"
+              className="w-14 text-center font-semibold text-foreground text-base tabular-nums bg-transparent focus:outline-none focus:ring-2 focus:ring-primary rounded"
             />
-            <span className="text-xs text-muted-foreground font-semibold">kg</span>
-          </div>
-          <button
-            type="button"
-            onClick={() => adjustWeight(1)}
-            aria-label="Aumentar peso"
-            className="w-8 h-8 rounded-lg bg-card hover:bg-accent text-foreground flex items-center justify-center transition-colors font-bold text-base shadow-sm border border-border/40"
-          >
-            +
+            <span className="text-sm text-muted-foreground">kg</span>
+          </label>
+          <button type="button" onClick={() => adjustWeight(1)} aria-label="Aumentar peso" className={stepBtn}>
+            <Icon name="add" size={16} weight="bold" />
           </button>
         </div>
-      </div>
-
-      {/* Target Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Card 1: Protein Target */}
-        <div className="bg-gradient-to-br from-primary/5 via-card to-card rounded-xl border border-primary/20 p-4.5 flex flex-col justify-between gap-3 shadow-xs">
-          <div className="flex items-start justify-between">
-            <div>
-              <span className="text-xs font-semibold uppercase tracking-wider text-primary">
-                Proteína Diaria
-              </span>
-              <div className="flex items-baseline gap-1.5 mt-1">
-                <span className="text-3xl font-extrabold text-foreground tracking-tight">
-                  {targets.proteinGrams}
-                </span>
-                <span className="text-sm font-bold text-muted-foreground">g / día</span>
-              </div>
-            </div>
-            <div className="p-2 rounded-lg bg-primary/10 text-primary">
-              <Icon name="bowl_food" size={20} weight="duotone" />
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-1.5 text-xs">
-            <div className="flex items-center justify-between text-muted-foreground font-medium">
-              <span>Rango óptimo (1.6 - 2.2 g/kg):</span>
-              <span className="font-bold text-foreground">
-                {targets.proteinRange[0]} - {targets.proteinRange[1]} g
-              </span>
-            </div>
-            {!compact && (
-              <p className="text-muted-foreground/90 leading-relaxed mt-1">
-                Un aporte cercano a 2.0 g/kg ayuda a conservar tu músculo y da saciedad.
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* Card 2: Water Target */}
-        <div className="bg-gradient-to-br from-blue-500/5 via-card to-card rounded-xl border border-blue-500/20 p-4.5 flex flex-col justify-between gap-3 shadow-xs">
-          <div className="flex items-start justify-between">
-            <div>
-              <span className="text-xs font-semibold uppercase tracking-wider text-blue-500">
-                Agua Diaria
-              </span>
-              <div className="flex items-baseline gap-1.5 mt-1">
-                <span className="text-3xl font-extrabold text-foreground tracking-tight">
-                  {targets.waterLiters}
-                </span>
-                <span className="text-sm font-bold text-muted-foreground">L / día</span>
-              </div>
-            </div>
-            <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
-              <Icon name="drop" size={20} weight="duotone" />
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-1.5 text-xs">
-            <div className="flex items-center justify-between text-muted-foreground font-medium">
-              <span>Rango (35 - 40 ml/kg):</span>
-              <span className="font-bold text-foreground">
-                {targets.waterRangeLiters[0]} - {targets.waterRangeLiters[1]} L
-              </span>
-            </div>
-            <div className="flex items-center justify-between text-muted-foreground font-medium">
-              <span>Equivalente:</span>
-              <span className="font-bold text-foreground">~{targets.waterGlasses} vasos (250ml)</span>
-            </div>
-            {!compact && (
-              <p className="text-muted-foreground/90 leading-relaxed mt-1">
-                El músculo es ~75% agua. La hidratación celular es vital para transportar nutrientes y sintetizar masa magra.
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* Card 3: Caloric Guidance */}
-        <div className="bg-gradient-to-br from-amber-500/5 via-card to-card rounded-xl border border-amber-500/20 p-4.5 flex flex-col justify-between gap-3 shadow-xs">
-          <div className="flex items-start justify-between">
-            <div>
-              <span className="text-xs font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-                Energía de referencia
-              </span>
-              <div className="flex items-baseline gap-1.5 mt-1">
-                <span className="text-3xl font-extrabold text-foreground tracking-tight">
-                  ~{targets.maintenanceCalories}
-                </span>
-                <span className="text-sm font-bold text-muted-foreground">kcal / día</span>
-              </div>
-            </div>
-            <div className="p-2 rounded-lg bg-amber-500/10 text-amber-500">
-              <Icon name="flame" size={20} weight="duotone" />
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-1.5 text-xs">
-            {!compact && (
-              <p className="text-muted-foreground/90 leading-relaxed mt-1">
-                Es una estimación. Tu hambre, tu energía y tu ciclo dicen más que la cifra, y comer suficiente también cuida tu tiroides y tu ovulación.
-              </p>
-            )}
-          </div>
         </div>
       </div>
-    </div>
+
+      {targets.usesAdjustedWeight && (
+        <p className="rounded-2xl bg-leaf-soft/60 px-4 py-3 text-sm text-foreground text-pretty">
+          <Icon name="info" size={16} weight="bold" className="inline -mt-0.5 mr-1.5 text-leaf" />
+          Con tu estatura ajustamos las metas para que sean alcanzables: tu músculo no necesita proteína por cada kilo de tu peso total, así que la calculamos sobre {targets.proteinReferenceKg} kg, y el agua y la energía sobre {targets.adjustedWeightKg} kg. Sigues comiendo más proteína que la media, que es lo que protege tu músculo{' '}
+          si bajas de peso.
+        </p>
+      )}
+      {onHeightChange && !targets.heightCm && weightKg >= 75 && (
+        <p className="text-sm text-muted-foreground text-pretty">
+          Añade tu estatura para una meta más realista: con más peso, calcular por cada kilo da cifras de proteína y agua más altas de lo que tu cuerpo necesita.
+        </p>
+      )}
+
+      <dl className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 ${compact ? 'gap-4 lg:gap-0 lg:divide-x lg:divide-border' : 'gap-6 lg:divide-x lg:divide-border'}`}>
+        {stats.map((s, i) => (
+          <div key={s.key} className={`flex flex-col gap-1 ${i > 0 ? 'lg:pl-5' : ''} ${i < stats.length - 1 ? 'lg:pr-5' : ''}`}>
+            <dt className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Icon name={s.icon} size={18} weight="duotone" className="text-leaf shrink-0" />
+              {s.label}
+            </dt>
+            <dd className="flex items-baseline gap-1.5">
+              <span className={`${compact ? 'text-2xl sm:text-3xl' : 'text-3xl sm:text-4xl'} font-semibold text-foreground tracking-tight tabular-nums`}>{s.value}</span>
+              <span className="text-xs sm:text-sm text-muted-foreground">{s.unit}</span>
+            </dd>
+            <dd className="text-xs sm:text-sm text-muted-foreground leading-snug">{s.detail}</dd>
+          </div>
+        ))}
+      </dl>
+      {action && <div>{action}</div>}
+    </section>
   );
 };

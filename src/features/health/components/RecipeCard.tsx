@@ -2,6 +2,7 @@
 
 import React from 'react';
 import type { LibraryRecipe } from '@/types/recipes';
+import { tagKey, tagLabel } from '@/lib/nutrition/recipeTags';
 
 interface RecipeCardProps {
   recipe: LibraryRecipe;
@@ -11,7 +12,9 @@ interface RecipeCardProps {
 }
 
 export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe: r, onToggleFavorite, onOpen }) => {
-  const tags = Array.from(new Set([...r.tags, ...r.myTags]));
+  const allTags = Array.from(new Map([...r.tags, ...r.myTags].map((t) => [tagKey(t), tagLabel(t)])).values());
+  const tags = allTags.slice(0, 3);
+  const hiddenTags = allTags.length - tags.length;
   return (
     <article
       onClick={() => onOpen(r)}
@@ -54,7 +57,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe: r, onToggleFavor
         )}
       </div>
       <div className="p-5 flex flex-col flex-1 gap-3">
-        <h3 className="text-lg font-bold leading-tight text-foreground group-hover:text-primary transition-colors">{r.title}</h3>
+        <h3 className="text-lg font-semibold leading-snug text-foreground text-balance group-hover:text-primary transition-colors">{r.title}</h3>
         {r.description && <p className="text-sm text-muted-foreground line-clamp-2">{r.description}</p>}
         {r.nutrition && (
           <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground py-0.5">
@@ -69,7 +72,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe: r, onToggleFavor
               </span>
             )}
             {r.nutrition.carbohydrates != null && (
-              <span className="text-[11px] text-muted-foreground">
+              <span className="text-xs text-muted-foreground">
                 {Math.round(r.nutrition.carbohydrates)}g C
               </span>
             )}
@@ -78,8 +81,9 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe: r, onToggleFavor
         {tags.length > 0 && (
           <div className="mt-auto pt-2 flex flex-wrap gap-2">
             {tags.map((tag) => (
-              <span key={tag} className="px-2 py-1 rounded bg-primary/10 text-primary text-xs font-medium">{tag}</span>
+              <span key={tag} className="px-2.5 py-1 rounded-full bg-secondary text-muted-foreground text-xs font-medium">{tag}</span>
             ))}
+            {hiddenTags > 0 && <span className="px-1 py-1 text-xs text-muted-foreground">+{hiddenTags}</span>}
           </div>
         )}
       </div>

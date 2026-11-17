@@ -24,12 +24,22 @@ export interface FoodItem {
   servingUnitName?: string;
   /** Brief tip or highlight for muscle building / fat loss */
   highlight?: string;
+  /** Image URL for visual catalog */
+  imageUrl?: string;
+}
+
+export function getFoodImageUrl(food: FoodItem | string): string {
+  if (typeof food === 'string') {
+    return `/foods/${food}.webp`;
+  }
+  return food.imageUrl || `/foods/${food.id}.webp`;
 }
 
 export const FOOD_DATABASE: FoodItem[] = [
   // ── PROTEIN SOURCES (ALTO VALOR BIOLÓGICO PARA GANAR MÚSCULO Y RETENERLO) ──
   {
     id: 'pechuga-pollo',
+    imageUrl: '/foods/pechuga-pollo.webp',
     name: 'Pechuga de pollo (sin piel, cocida)',
     category: 'proteins',
     calories: 165,
@@ -41,6 +51,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'salmon-cocinado',
+    imageUrl: '/foods/salmon-cocinado.webp',
     name: 'Salmón (cocinado)',
     category: 'proteins',
     calories: 206,
@@ -52,6 +63,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'ternera-magra',
+    imageUrl: '/foods/ternera-magra.webp',
     name: 'Carne de res / Ternera magra (cocida)',
     category: 'proteins',
     calories: 250,
@@ -63,6 +75,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'atun-en-agua',
+    imageUrl: '/foods/atun-en-agua.webp',
     name: 'Atún (en lata, al natural)',
     category: 'proteins',
     calories: 116,
@@ -74,6 +87,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'huevo-cocido',
+    imageUrl: '/foods/huevo-cocido.webp',
     name: 'Huevo entero (cocido)',
     category: 'proteins',
     calories: 155,
@@ -86,6 +100,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'claras-huevo',
+    imageUrl: '/foods/claras-huevo.webp',
     name: 'Claras de huevo',
     category: 'proteins',
     calories: 52,
@@ -97,6 +112,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'camaron-gamba',
+    imageUrl: '/foods/camaron-gamba.webp',
     name: 'Camarones / Gambas (cocinados)',
     category: 'proteins',
     calories: 99,
@@ -108,6 +124,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'bacalao',
+    imageUrl: '/foods/bacalao.webp',
     name: 'Bacalao (cocinado)',
     category: 'proteins',
     calories: 105,
@@ -119,6 +136,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'tofu-firme',
+    imageUrl: '/foods/tofu-firme.webp',
     name: 'Tofu firme',
     category: 'proteins',
     calories: 76,
@@ -130,6 +148,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'queso-cottage',
+    imageUrl: '/foods/queso-cottage.webp',
     name: 'Queso cottage (bajo en grasa)',
     category: 'proteins',
     calories: 85,
@@ -141,6 +160,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'yogur-griego',
+    imageUrl: '/foods/yogur-griego.webp',
     name: 'Yogur griego (natural, sin azúcar)',
     category: 'proteins',
     calories: 61,
@@ -152,6 +172,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'leche-entera',
+    imageUrl: '/foods/leche-entera.webp',
     name: 'Leche entera',
     category: 'dairy_alternatives',
     calories: 61,
@@ -165,6 +186,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   // ── CARBOHIDRATOS COMPLEJOS Y ENERGÍA ──
   {
     id: 'arroz-blanco',
+    imageUrl: '/foods/arroz-blanco.webp',
     name: 'Arroz blanco (cocido)',
     category: 'carbohydrates',
     calories: 130,
@@ -176,6 +198,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'papa-patata',
+    imageUrl: '/foods/papa-patata.webp',
     name: 'Papa / Patata cocida',
     category: 'carbohydrates',
     calories: 77,
@@ -187,6 +210,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'camote-batata',
+    imageUrl: '/foods/camote-batata.webp',
     name: 'Camote / Batata dulce cocida',
     category: 'carbohydrates',
     calories: 86,
@@ -198,6 +222,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'avena',
+    imageUrl: '/foods/avena.webp',
     name: 'Avena (en hojuelas, sin cocer)',
     category: 'carbohydrates',
     calories: 389,
@@ -209,6 +234,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'quinoa',
+    imageUrl: '/foods/quinoa.webp',
     name: 'Quinoa (cocida)',
     category: 'carbohydrates',
     calories: 120,
@@ -220,6 +246,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'pasta-cocida',
+    imageUrl: '/foods/pasta-cocida.webp',
     name: 'Pasta (cocida)',
     category: 'carbohydrates',
     calories: 158,
@@ -230,6 +257,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'pan-integral',
+    imageUrl: '/foods/pan-integral.webp',
     name: 'Pan integral',
     category: 'carbohydrates',
     calories: 250,
@@ -241,6 +269,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'lentejas-cocidas',
+    imageUrl: '/foods/lentejas-cocidas.webp',
     name: 'Lentejas (cocidas)',
     category: 'carbohydrates',
     calories: 116,
@@ -252,6 +281,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'garbanzos-cocidos',
+    imageUrl: '/foods/garbanzos-cocidos.webp',
     name: 'Garbanzos (cocidos)',
     category: 'carbohydrates',
     calories: 164,
@@ -263,6 +293,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'frijoles-negros',
+    imageUrl: '/foods/frijoles-negros.webp',
     name: 'Frijoles negros / Alubias negras (cocidas)',
     category: 'carbohydrates',
     calories: 132,
@@ -273,6 +304,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'maiz',
+    imageUrl: '/foods/maiz.webp',
     name: 'Maíz tierno',
     category: 'carbohydrates',
     calories: 86,
@@ -283,6 +315,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'cuscus',
+    imageUrl: '/foods/cuscus.webp',
     name: 'Cuscús (cocido)',
     category: 'carbohydrates',
     calories: 112,
@@ -293,6 +326,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'cebada',
+    imageUrl: '/foods/cebada.webp',
     name: 'Cebada',
     category: 'carbohydrates',
     calories: 354,
@@ -303,6 +337,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'trigo-sarraceno',
+    imageUrl: '/foods/trigo-sarraceno.webp',
     name: 'Trigo Sarraceno / Alforfón',
     category: 'carbohydrates',
     calories: 343,
@@ -313,6 +348,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'tapioca',
+    imageUrl: '/foods/tapioca.webp',
     name: 'Tapioca',
     category: 'carbohydrates',
     calories: 358,
@@ -325,6 +361,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   // ── VEGETALES Y VERDURAS (ALTO VOLUMEN, BAJAS CALORÍAS) ──
   {
     id: 'brocoli-cocido',
+    imageUrl: '/foods/brocoli-cocido.webp',
     name: 'Brócoli (cocido)',
     category: 'vegetables',
     calories: 34,
@@ -336,6 +373,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'espinaca-cruda',
+    imageUrl: '/foods/espinaca-cruda.webp',
     name: 'Espinacas (crudas)',
     category: 'vegetables',
     calories: 23,
@@ -347,6 +385,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'zanahoria',
+    imageUrl: '/foods/zanahoria.webp',
     name: 'Zanahoria',
     category: 'vegetables',
     calories: 41,
@@ -357,6 +396,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'tomate',
+    imageUrl: '/foods/tomate.webp',
     name: 'Tomate',
     category: 'vegetables',
     calories: 18,
@@ -368,6 +408,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'pepino',
+    imageUrl: '/foods/pepino.webp',
     name: 'Pepino',
     category: 'vegetables',
     calories: 16,
@@ -379,6 +420,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'lechuga',
+    imageUrl: '/foods/lechuga.webp',
     name: 'Lechuga',
     category: 'vegetables',
     calories: 15,
@@ -389,6 +431,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'coliflor',
+    imageUrl: '/foods/coliflor.webp',
     name: 'Coliflor',
     category: 'vegetables',
     calories: 25,
@@ -399,6 +442,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'calabacin',
+    imageUrl: '/foods/calabacin.webp',
     name: 'Calabacín / Zucchini',
     category: 'vegetables',
     calories: 17,
@@ -409,6 +453,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'berenjena',
+    imageUrl: '/foods/berenjena.webp',
     name: 'Berenjena',
     category: 'vegetables',
     calories: 25,
@@ -419,6 +464,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'pimiento-rojo',
+    imageUrl: '/foods/pimiento-rojo.webp',
     name: 'Pimiento rojo',
     category: 'vegetables',
     calories: 31,
@@ -430,6 +476,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'cebolla',
+    imageUrl: '/foods/cebolla.webp',
     name: 'Cebolla',
     category: 'vegetables',
     calories: 40,
@@ -440,6 +487,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'ajo',
+    imageUrl: '/foods/ajo.webp',
     name: 'Ajo',
     category: 'vegetables',
     calories: 149,
@@ -450,6 +498,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'rucula',
+    imageUrl: '/foods/rucula.webp',
     name: 'Rúcula',
     category: 'vegetables',
     calories: 25,
@@ -460,6 +509,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'repollo',
+    imageUrl: '/foods/repollo.webp',
     name: 'Repollo / Col',
     category: 'vegetables',
     calories: 25,
@@ -472,6 +522,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   // ── FRUTAS ──
   {
     id: 'platano-banana',
+    imageUrl: '/foods/platano-banana.webp',
     name: 'Plátano / Banana',
     category: 'fruits',
     calories: 89,
@@ -484,6 +535,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'manzana',
+    imageUrl: '/foods/manzana.webp',
     name: 'Manzana',
     category: 'fruits',
     calories: 52,
@@ -495,6 +547,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'fresa',
+    imageUrl: '/foods/fresa.webp',
     name: 'Fresas',
     category: 'fruits',
     calories: 32,
@@ -506,6 +559,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'arandanos',
+    imageUrl: '/foods/arandanos.webp',
     name: 'Arándanos',
     category: 'fruits',
     calories: 57,
@@ -517,6 +571,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'frambuesa',
+    imageUrl: '/foods/frambuesa.webp',
     name: 'Frambuesas',
     category: 'fruits',
     calories: 52,
@@ -527,6 +582,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'sandia',
+    imageUrl: '/foods/sandia.webp',
     name: 'Sandía',
     category: 'fruits',
     calories: 30,
@@ -538,6 +594,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'kiwi',
+    imageUrl: '/foods/kiwi.webp',
     name: 'Kiwi',
     category: 'fruits',
     calories: 61,
@@ -548,6 +605,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'pina',
+    imageUrl: '/foods/pina.webp',
     name: 'Piña',
     category: 'fruits',
     calories: 50,
@@ -559,6 +617,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'uva',
+    imageUrl: '/foods/uva.webp',
     name: 'Uva',
     category: 'fruits',
     calories: 69,
@@ -569,6 +628,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'mango',
+    imageUrl: '/foods/mango.webp',
     name: 'Mango',
     category: 'fruits',
     calories: 60,
@@ -579,6 +639,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'pera',
+    imageUrl: '/foods/pera.webp',
     name: 'Pera',
     category: 'fruits',
     calories: 57,
@@ -589,6 +650,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'naranja',
+    imageUrl: '/foods/naranja.webp',
     name: 'Naranja',
     category: 'fruits',
     calories: 47,
@@ -601,6 +663,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   // ── GRASAS SALUDABLES, SEMILLAS Y FRUTOS SECOS ──
   {
     id: 'aguacate',
+    imageUrl: '/foods/aguacate.webp',
     name: 'Aguacate / Palta',
     category: 'healthy_fats',
     calories: 160,
@@ -612,6 +675,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'almendras',
+    imageUrl: '/foods/almendras.webp',
     name: 'Almendras',
     category: 'healthy_fats',
     calories: 579,
@@ -623,6 +687,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'nueces',
+    imageUrl: '/foods/nueces.webp',
     name: 'Nueces',
     category: 'healthy_fats',
     calories: 654,
@@ -634,6 +699,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'avellanas',
+    imageUrl: '/foods/avellanas.webp',
     name: 'Avellanas',
     category: 'healthy_fats',
     calories: 628,
@@ -644,6 +710,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'anacardos',
+    imageUrl: '/foods/anacardos.webp',
     name: 'Anacardo / Castaña de Cajú',
     category: 'healthy_fats',
     calories: 553,
@@ -654,6 +721,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'cacahuetes',
+    imageUrl: '/foods/cacahuetes.webp',
     name: 'Cacahuetes / Maní',
     category: 'healthy_fats',
     calories: 567,
@@ -665,6 +733,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'mantequilla-cacahuete',
+    imageUrl: '/foods/mantequilla-cacahuete.webp',
     name: 'Mantequilla de cacahuete (100% natural)',
     category: 'healthy_fats',
     calories: 588,
@@ -676,6 +745,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'semillas-chia',
+    imageUrl: '/foods/semillas-chia.webp',
     name: 'Semillas de Chía',
     category: 'healthy_fats',
     calories: 486,
@@ -687,6 +757,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'semillas-girasol',
+    imageUrl: '/foods/semillas-girasol.webp',
     name: 'Semillas de Girasol',
     category: 'healthy_fats',
     calories: 584,
@@ -697,6 +768,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'aceitunas',
+    imageUrl: '/foods/aceitunas.webp',
     name: 'Aceitunas',
     category: 'healthy_fats',
     calories: 115,
@@ -707,6 +779,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'aceite-oliva',
+    imageUrl: '/foods/aceite-oliva.webp',
     name: 'Aceite de oliva virgen extra',
     category: 'healthy_fats',
     calories: 884,
@@ -719,6 +792,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'queso-cheddar',
+    imageUrl: '/foods/queso-cheddar.webp',
     name: 'Queso Cheddar',
     category: 'healthy_fats',
     calories: 402,
@@ -729,6 +803,7 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
   {
     id: 'coco',
+    imageUrl: '/foods/coco.webp',
     name: 'Coco rallado / pulpa',
     category: 'healthy_fats',
     calories: 354,
@@ -736,6 +811,148 @@ export const FOOD_DATABASE: FoodItem[] = [
     carbohydrates: 15,
     fat: 33,
     defaultServingGrams: 25,
+  },
+  {
+    id: 'limon',
+    imageUrl: '/foods/limon.webp',
+    name: 'Limón / Zumo de limón',
+    category: 'fruits',
+    calories: 29,
+    protein: 1.1,
+    carbohydrates: 9,
+    fat: 0.3,
+    defaultServingGrams: 60,
+    highlight: 'Rico en vitamina C y antioxidantes cítricos para favorecer la digestión y asimilación de hierro.',
+  },
+  {
+    id: 'miel',
+    imageUrl: '/foods/miel.webp',
+    name: 'Miel / Miel de abeja',
+    category: 'carbohydrates',
+    calories: 304,
+    protein: 0.3,
+    carbohydrates: 82,
+    fat: 0,
+    defaultServingGrams: 20,
+    highlight: 'Endulzante natural con propiedades antimicrobianas y prebióticas.',
+  },
+  {
+    id: 'canela',
+    imageUrl: '/foods/canela.webp',
+    name: 'Canela / Canela en polvo',
+    category: 'healthy_fats',
+    calories: 247,
+    protein: 4,
+    carbohydrates: 80,
+    fat: 1.2,
+    defaultServingGrams: 5,
+    highlight: 'Excelente apoyo para la sensibilidad a la insulina y regulación de la glucosa en sangre.',
+  },
+  {
+    id: 'azucar',
+    imageUrl: '/foods/azucar.webp',
+    name: 'Azúcar / Azúcar moreno / Panela',
+    category: 'carbohydrates',
+    calories: 387,
+    protein: 0,
+    carbohydrates: 100,
+    fat: 0,
+    defaultServingGrams: 15,
+  },
+  {
+    id: 'cilantro',
+    imageUrl: '/foods/cilantro.webp',
+    name: 'Cilantro fresco',
+    category: 'vegetables',
+    calories: 23,
+    protein: 2.1,
+    carbohydrates: 3.7,
+    fat: 0.5,
+    defaultServingGrams: 15,
+    highlight: 'Hierba desintoxicante natural rica en flavonoides y frescura digestiva.',
+  },
+  {
+    id: 'perejil',
+    imageUrl: '/foods/perejil.webp',
+    name: 'Perejil fresco',
+    category: 'vegetables',
+    calories: 36,
+    protein: 3,
+    carbohydrates: 6.3,
+    fat: 0.8,
+    defaultServingGrams: 15,
+    highlight: 'Dosis concentrada de vitamina K, vitamina C y apoyo diurético natural.',
+  },
+  {
+    id: 'menta',
+    imageUrl: '/foods/menta.webp',
+    name: 'Menta / Hierbabuena',
+    category: 'vegetables',
+    calories: 44,
+    protein: 3.3,
+    carbohydrates: 8.4,
+    fat: 0.7,
+    defaultServingGrams: 10,
+    highlight: 'Calmante gástrico natural y frescura revitalizante.',
+  },
+  {
+    id: 'mantequilla',
+    imageUrl: '/foods/mantequilla.webp',
+    name: 'Mantequilla / Ghee',
+    category: 'healthy_fats',
+    calories: 717,
+    protein: 0.9,
+    carbohydrates: 0.1,
+    fat: 81,
+    defaultServingGrams: 15,
+    highlight: 'Grasa tradicional rica en ácido butírico beneficioso para la barrera intestinal.',
+  },
+  {
+    id: 'remolacha',
+    imageUrl: '/foods/remolacha.webp',
+    name: 'Remolacha / Betabel',
+    category: 'vegetables',
+    calories: 43,
+    protein: 1.6,
+    carbohydrates: 9.6,
+    fat: 0.2,
+    defaultServingGrams: 100,
+    highlight: 'Potente aporte de betalaínas antiinflamatorias y nitratos pro-circulatorios.',
+  },
+  {
+    id: 'arvejas',
+    imageUrl: '/foods/arvejas.webp',
+    name: 'Arvejas / Guisantes',
+    category: 'vegetables',
+    calories: 81,
+    protein: 5.4,
+    carbohydrates: 14.5,
+    fat: 0.4,
+    defaultServingGrams: 100,
+    highlight: 'Excelente equilibrio vegetal entre proteína, fibra saciante e hidratos lentos.',
+  },
+  {
+    id: 'comino',
+    imageUrl: '/foods/comino.webp',
+    name: 'Comino / Comino molido',
+    category: 'vegetables',
+    calories: 375,
+    protein: 17.8,
+    carbohydrates: 44.2,
+    fat: 22.3,
+    defaultServingGrams: 5,
+    highlight: 'Especia carminativa clave que estimula la secreción de enzimas digestivas.',
+  },
+  {
+    id: 'polvo-hornear',
+    imageUrl: '/foods/polvo-hornear.webp',
+    name: 'Polvo de hornear / Levadura química',
+    category: 'carbohydrates',
+    calories: 53,
+    protein: 0,
+    carbohydrates: 28,
+    fat: 0,
+    defaultServingGrams: 5,
   },
 ];
 
