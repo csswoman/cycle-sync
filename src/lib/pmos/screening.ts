@@ -64,3 +64,42 @@ export function screeningPlan(input: ScreeningInput, today: string): ScreeningIt
     return { key, last, due, status: due <= today ? ('due' as const) : ('ok' as const) };
   });
 }
+
+/**
+ * Extra glucose checks around conception and pregnancy, from the 2023 PCOS guideline:
+ * a preconception glucose check when trying to conceive, and an oral glucose tolerance test
+ * at the first visit and again between 24 and 28 weeks of an active pregnancy. Reminders only.
+ */
+export type GestationalGlucoseKey = 'preconception_glucose' | 'early_ogtt' | 'ogtt_24_28';
+export interface GestationalGlucoseItem {
+  key: GestationalGlucoseKey;
+  done: boolean;
+}
+export function gestationalGlucosePlan(input: {
+  goal: 'fertility' | string | null;
+  gestationalWeeks: number | null;
+  /** Dates of any glucose reading (lab glucose markers or fasting glucose). */
+  glucoseDates: string[];
+  /** Date the current pregnancy started, when there is one. */
+  pregnancyStart: string | null;
+  today: string;
+}): GestationalGlucoseItem[] {
+  const since = (from: string) => input.glucoseDates.some((d) => d.slice(0, 10) >= from.slice(0, 10));
+  if (input.gestationalWeeks != null && input.pregnancyStart) {
+    const items: GestationalGlucoseItem[] = [{ key: 'early_ogtt', done: since(input.pregnancyStart) }];
+    if (input.gestationalWeeks >= 20) {
+      const weeks24 = addDays(input.pregnancyStart, 24 * 7);
+      items.push({ key: 'ogtt_24_28', done: input.glucoseDates.some((d) => d.slice(0, 10) >= weeks24) });
+    }
+    return items;
+  }
+  if (input.goal === 'fertility') return [{ key: 'preconception_glucose', done: since(addMonths(input.today, -12)) }];
+  return [];
+}
+
+function addDays(iso: string, days: number): string {
+  const [y, m, d] = iso.slice(0, 10).split('-').map(Number);
+  const date = new Date(y, m - 1, d + days);
+  const p = (n: number) => String(n).padStart(2, '0');
+  return `${date.getFullYear()}-${p(date.getMonth() + 1)}-${p(date.getDate())}`;
+}

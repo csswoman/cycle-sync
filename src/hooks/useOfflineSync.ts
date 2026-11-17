@@ -110,9 +110,9 @@ async function syncCycleSigns() {
     };
     let res = sign.deleted
       ? await supabase.from('cycle_signs').delete().eq('user_id', sign.userId).eq('date', sign.date)
-      : await supabase.from('cycle_signs').upsert({ ...base, lh_test: sign.lhTest }, { onConflict: 'user_id,date' });
+      : await supabase.from('cycle_signs').upsert({ ...base, lh_test: sign.lhTest, pregnancy_test: sign.pregnancyTest ?? null }, { onConflict: 'user_id,date' });
     // lh_test and the flow columns come from later migrations; save the rest if they are not applied yet.
-    if (res.error && /lh_test|flow|clots|pain/.test(res.error.message ?? '') && !sign.deleted) {
+    if (res.error && /lh_test|pregnancy_test|flow|clots|pain/.test(res.error.message ?? '') && !sign.deleted) {
       const { flow: _f, clots: _c, pain: _p, ...older } = base;
       res = await supabase.from('cycle_signs').upsert(older, { onConflict: 'user_id,date' });
     }

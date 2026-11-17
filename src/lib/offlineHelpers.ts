@@ -118,6 +118,7 @@ export async function saveCycleSignOffline(data: {
   sexProtection: string | null;
   notes: string | null;
   lhTest: string | null;
+  pregnancyTest?: string | null;
   flow: string | null;
   clots: boolean;
   pain: number | null;

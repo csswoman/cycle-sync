@@ -87,3 +87,14 @@ describe('projectCycles', () => {
     expect(toISODate(second.ovulation)).toBe('2025-02-12');
   });
 });
+describe('pregnancy intervals', () => {
+  const starts = ['2025-01-01', '2025-01-29', '2025-02-26', '2025-12-03', '2025-12-31'];
+  const pregnancy = [{ start_date: '2025-02-26', end_date: '2025-11-20' }];
+  it('leaves the 280-day interval out of the cycle lengths and the median', () => {
+    expect(cycleLengthsFromStarts(starts, pregnancy)).toEqual([28, 28, 28]);
+    expect(estimateCycle(starts.map((s) => ({ start_date: s })), 28, pregnancy).cycleLength).toBe(28);
+  });
+  it('does not change anything without pregnancies', () => {
+    expect(cycleLengthsFromStarts(starts.slice(0, 3))).toEqual([28, 28]);
+  });
+});

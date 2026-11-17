@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { cycleHealthFlags } from '@/lib/cycle/cycleAnalysis';
+import { activePregnancy, gestationalAge, predictionsPaused, type Pregnancy } from '@/lib/cycle/pregnancy';
 import { heavyBleedingDays, periodBleedingDays, type BleedingSign } from '@/lib/cycle/bleeding';
 import { cycleLengthsFromStarts, daysBetween, parseLocalDate } from '@/lib/cycle/cycleEngine';
 import {
@@ -27,6 +28,8 @@ export interface UserContextData {
   wellbeing?: WellbeingContext | null;
   treatment?: TreatmentContext[];
   profile?: { goal?: string; contraception?: string } | null;
+  /** Pregnancy mode: predictions are paused (active) or waiting for the next period (after). */
+  pregnancy?: { state: 'active' | 'after'; weeks: number | null } | null;
   /** No-numbers mode: the assistant must not talk about weight, waist or calories. */
   hideNumbers?: boolean;
 }
@@ -71,7 +74,16 @@ export function formatUserContext(d: UserContextData, language: 'en' | 'es'): st
       ? 'Importante: ella activó el modo sin números. No menciones peso, cintura, calorías ni macros, ni propongas bajar de peso. Habla de energía, sueño, síntomas y hábitos.'
       : 'Important: she turned on no-numbers mode. Do not mention weight, waist, calories or macros, and do not suggest losing weight. Talk about energy, sleep, symptoms and habits.');
   }
-  if (d.phase) {
+  if (d.pregnancy) {
+    lines.push(d.pregnancy.state === 'active'
+      ? (es
+        ? `Modo embarazo activo${d.pregnancy.weeks != null ? ` (semana ${d.pregnancy.weeks + 1})` : ''}. No des fechas de regla, ovulación ni ventana fértil ni consejos por fase del ciclo. Para cualquier medicación, indica que lo consulte con su médica.`
+        : `Pregnancy mode is on${d.pregnancy.weeks != null ? ` (week ${d.pregnancy.weeks + 1})` : ''}. Do not give period, ovulation or fertile-window dates or cycle-phase advice. For any medication, tell her to check with her doctor.`)
+      : (es
+        ? 'Terminó un embarazo y aún no ha registrado su siguiente regla. No des predicciones de regla ni de ovulación hasta entonces.'
+        : 'A pregnancy ended and she has not logged her next period yet. Do not give period or ovulation predictions until then.'));
+  }
+  if (d.phase && !d.pregnancy) {
     lines.push(es
       ? `Fase actual del ciclo: ${d.phase}${d.cycleDay ? ` (día ${d.cycleDay})` : ''}.`
       : `Current cycle phase: ${d.phase}${d.cycleDay ? ` (day ${d.cycleDay})` : ''}.`);
@@ -226,17 +238,23 @@ export interface ClinicalRaw {
   medications: (SchedulableMedication & { name: string })[];
   medLogs: DoseLog[];
   onboarding: { goal?: string; contraception?: string } | null;
+  pregnancies?: Pregnancy[];
 }
 /** Pure: turns raw rows into the compact clinical context. Never reads sexual activity or photos. */
-export function buildClinicalContext(raw: ClinicalRaw): Pick<UserContextData, 'cycle' | 'labs' | 'measures' | 'wellbeing' | 'treatment' | 'profile'> {
+export function buildClinicalContext(raw: ClinicalRaw): Pick<UserContextData, 'cycle' | 'labs' | 'measures' | 'wellbeing' | 'treatment' | 'profile' | 'pregnancy'> {
   const { today } = raw;
   const starts = Array.from(new Set(raw.periods.map((p) => p.start_date.slice(0, 10)))).sort();
   const now = parseLocalDate(today);
+  const pregnancies = raw.pregnancies ?? [];
+  const activePreg = activePregnancy(pregnancies, today);
+  const pregnancy: UserContextData['pregnancy'] = activePreg
+    ? { state: 'active', weeks: gestationalAge(activePreg, today)?.weeks ?? null }
+    : predictionsPaused(starts[starts.length - 1] ?? null, pregnancies, today) ? { state: 'after', weeks: null } : null;
   const cycle: CycleContext | null = starts.length
     ? {
-        lengths: cycleLengthsFromStarts(starts).slice(-6),
-        daysSinceLastPeriod: Math.max(0, daysBetween(parseLocalDate(starts[starts.length - 1]), now)),
-        flags: cycleHealthFlags(raw.periods, now, raw.bleedingSigns ?? []),
+        lengths: cycleLengthsFromStarts(starts, pregnancies).slice(-6),
+        daysSinceLastPeriod: pregnancy ? null : Math.max(0, daysBetween(parseLocalDate(starts[starts.length - 1]), now)),
+        flags: cycleHealthFlags(raw.periods, now, raw.bleedingSigns ?? [], pregnancies),
         bleeding: [...raw.periods]
           .sort((a, b) => a.start_date.localeCompare(b.start_date))
           .slice(-3)
@@ -306,7 +324,7 @@ export function buildClinicalContext(raw: ClinicalRaw): Pick<UserContextData, 'c
   const profile = raw.onboarding && (raw.onboarding.goal || raw.onboarding.contraception)
     ? { goal: raw.onboarding.goal, contraception: raw.onboarding.contraception }
     : null;
-  return { cycle, labs, measures: hasMeasures ? measures : null, wellbeing, treatment, profile };
+  return { cycle, labs, measures: hasMeasures ? measures : null, wellbeing, treatment, profile, pregnancy };
 }
 /** Loads the data the assistant can use. Each query fails soft: a missing table or error just leaves that part out. */
 export async function loadUserContext(
@@ -329,7 +347,7 @@ export async function loadUserContext(
     const n = parseLocalDate(clinicalToday);
     return toLocalISO(new Date(n.getFullYear(), n.getMonth(), n.getDate() - days));
   };
-  const [cfg, logs, pcos, meds, pantry, meals, workout, periods, bleedingRows, labRows, metricRows, wellbeingRows, fgRows, onboardingRow, medRows, medLogRows, displayRow] = await Promise.all([
+  const [cfg, logs, pcos, meds, pantry, meals, workout, periods, bleedingRows, labRows, metricRows, wellbeingRows, fgRows, onboardingRow, medRows, medLogRows, pregnancyRows, displayRow] = await Promise.all([
     soft(supabase.from('cycle_config').select('dietary_prefs').eq('user_id', userId).maybeSingle()),
     soft(supabase.from('daily_logs').select('date, mood, energy_level, sleep_hours, symptoms').eq('user_id', userId).order('date', { ascending: false }).limit(5)),
     soft(supabase.from('pcos_symptoms').select('date, acne, fatigue, hirsutism, hair_loss, mood_swings, bloating').eq('user_id', userId).order('date', { ascending: false }).limit(1)),
@@ -348,6 +366,7 @@ export async function loadUserContext(
     soft(supabase.from('cycle_config').select('onboarding_answers').eq('user_id', userId).maybeSingle()),
     soft(supabase.from('medications').select('id, name, times, days_of_week, start_date, created_at, pack_active_days, pack_break_days, pack_start_date').eq('user_id', userId).eq('active', true).limit(20)),
     soft(supabase.from('medication_logs').select('medication_id, date, scheduled_time, taken, taken_at').eq('user_id', userId).gte('date', since(30)).limit(1500)),
+    soft(supabase.from('pregnancies').select('start_date, end_date').eq('user_id', userId).limit(10)),
     // Separate query: the column comes from a later migration.
     soft(supabase.from('cycle_config').select('display_prefs').eq('user_id', userId).maybeSingle()),
   ]);
@@ -366,6 +385,7 @@ export async function loadUserContext(
     medications: ((medRows as any[] | null) ?? []).map((m) => ({ ...m, times: m.times ?? [] })),
     medLogs: ((medLogRows as any[] | null) ?? []).map((l) => ({ ...l, date: String(l.date).slice(0, 10) })),
     onboarding: ((onboardingRow as any)?.onboarding_answers ?? null) as { goal?: string; contraception?: string } | null,
+    pregnancies: ((pregnancyRows as any[] | null) ?? []).map((p) => ({ start_date: String(p.start_date).slice(0, 10), end_date: p.end_date ? String(p.end_date).slice(0, 10) : null })),
   });
   const hideNumbers = (displayRow as any)?.display_prefs?.hideNumbers === true;
   return {

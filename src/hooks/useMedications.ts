@@ -26,6 +26,9 @@ export interface Medication {
   stock?: number | null;
   units_per_dose?: number | null;
   refill_alert_days?: number | null;
+  /** Ovulation induction (e.g. letrozole): taken on `induction_cycle_days` of each cycle. */
+  is_ovulation_induction?: boolean | null;
+  induction_cycle_days?: number[] | null;
 }
 
 export interface MedicationLog {
@@ -50,6 +53,8 @@ export interface MedicationInput {
   stock: number | null;
   units_per_dose: number;
   refill_alert_days: number;
+  /** Cycle days (first..last) on which an ovulation-induction drug is taken; null when it is not one. */
+  induction?: { from: number; to: number } | null;
 }
 
 export function localDateString(d = new Date()): string {
@@ -80,6 +85,13 @@ function toRow(input: MedicationInput) {
       stock: input.stock,
       units_per_dose: input.units_per_dose,
       refill_alert_days: input.refill_alert_days,
+    },
+    // Columns from the pregnancy migration.
+    extra3: {
+      is_ovulation_induction: !!input.induction,
+      induction_cycle_days: input.induction
+        ? Array.from({ length: input.induction.to - input.induction.from + 1 }, (_, i) => input.induction!.from + i)
+        : null,
     },
   };
 }
@@ -131,12 +143,13 @@ export function useMedications() {
     const { data: { session } } = await supabase.auth.getSession();
     const user = session?.user;
     if (!user) return;
-    const { base, extra, extra2 } = toRow(input);
+    const { base, extra, extra2, extra3 } = toRow(input);
     const write = (row: object) => id
       ? supabase.from('medications').update(row).eq('id', id)
       : supabase.from('medications').insert({ user_id: user.id, ...row });
     // Fall back step by step when the newer migrations have not been applied yet.
-    let { error } = await write({ ...base, ...extra, ...extra2 });
+    let { error } = await write({ ...base, ...extra, ...extra2, ...extra3 });
+    if (isMissingColumn(error)) ({ error } = await write({ ...base, ...extra, ...extra2 }));
     if (isMissingColumn(error)) ({ error } = await write({ ...base, ...extra }));
     if (isMissingColumn(error)) {
       console.warn('medications: schedule columns missing, saving basic fields only. Apply the latest migrations.');

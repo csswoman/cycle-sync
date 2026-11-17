@@ -72,6 +72,10 @@ export interface Translations {
     guestModalBody: string;
     guestLater: string;
     guestUser: string;
+    guestPreviewTitle: string;
+    guestRoutinesPreview: string;
+    guestNutritionPreview: string;
+    guestExplorePhase: string;
     dataSecurityInfo: string;
     help: string;
     createAccount: string;
@@ -309,6 +313,10 @@ export const translations: Record<Language, Translations> = {
         guestModalBody: 'Logging, progress, medications and your personal data are saved to your account. Sign up to unlock them.',
         guestLater: 'Maybe later',
         guestUser: 'Guest',
+        guestPreviewTitle: "You're exploring as a guest",
+        guestRoutinesPreview: 'Watch every program, video and exercise. With an account you can save routines, log your sessions and get suggestions for your real phase.',
+        guestNutritionPreview: 'Browse every recipe and try the plate builder. With an account you can save favorites, add your own recipes, set your tastes and use the AI tools.',
+        guestExplorePhase: 'Explore by phase',
         dataSecurityInfo: 'Your data is encrypted and stored locally.',
         help: 'Help',
         createAccount: 'Create Account',
@@ -545,6 +553,10 @@ export const translations: Record<Language, Translations> = {
         guestModalBody: 'El registro diario, el progreso, las medicinas y tus datos personales se guardan en tu cuenta. Regístrate para desbloquearlos.',
         guestLater: 'Quizás después',
         guestUser: 'Invitada',
+        guestPreviewTitle: 'Estás explorando como invitada',
+        guestRoutinesPreview: 'Mira todos los programas, videos y ejercicios. Con una cuenta puedes guardar rutinas, registrar tus sesiones y recibir sugerencias según tu fase real.',
+        guestNutritionPreview: 'Explora todas las recetas y prueba el armador de platos. Con una cuenta puedes guardar favoritas, agregar tus recetas, elegir tus gustos y usar las herramientas con IA.',
+        guestExplorePhase: 'Explora por fase',
         dataSecurityInfo: 'Tus datos están encriptados y se almacenan localmente.',
         help: 'Ayuda',
         createAccount: 'Crear Cuenta',

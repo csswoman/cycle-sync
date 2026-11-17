@@ -1,4 +1,5 @@
 import { bbtPattern, detectTemperatureShift, readingsInCycle, type BBTPattern, type CycleSign } from '@/lib/cycle/fertilitySigns';
+import { predictionsPaused, type Pregnancy } from '@/lib/cycle/pregnancy';
 import { NO_PERIOD_DAYS, NORMAL_CYCLE_MAX } from '@/lib/cycle/cycleAnalysis';
 
 const DAY_MS = 86_400_000;
@@ -14,10 +15,12 @@ export interface PeriodGap {
 }
 
 /** Days since the last period started and how worrying that is (2023 PCOS guideline thresholds). */
-export function periodGap(periodStarts: string[], today: string): PeriodGap | null {
+export function periodGap(periodStarts: string[], today: string, pregnancies: Pregnancy[] = []): PeriodGap | null {
   const starts = [...new Set(periodStarts.map((s) => s.slice(0, 10)))].filter((s) => s <= today).sort();
   if (!starts.length) return null;
   const lastStart = starts[starts.length - 1];
+  // No late alert during a pregnancy, or after it until the next period is logged.
+  if (predictionsPaused(lastStart, pregnancies, today)) return null;
   const days = diffDays(lastStart, today);
   const level: GapLevel = days > NO_PERIOD_DAYS ? 'alert' : days > 60 ? 'very_long' : days > NORMAL_CYCLE_MAX ? 'long' : 'ok';
   return { lastStart, days, level };
@@ -63,4 +66,32 @@ export function ovulationHistory(periodStarts: string[], signs: CycleSign[], tod
     });
   }
   return out;
+}
+
+export type FertileLevel = 'high' | 'possible' | 'passed' | 'calendar';
+export interface FertileNow {
+  level: FertileLevel;
+  /** Signs that support the level, newest evidence first. */
+  reasons: ('eggwhite_mucus' | 'watery_mucus' | 'lh_positive' | 'temperature_shift')[];
+}
+/**
+ * "Buscando embarazo": the fertile window read from the body first. Fertile mucus or a positive LH
+ * in the last 3 days point to a fertile time; a temperature rise says ovulation already happened.
+ * Without any sign it falls back to the calendar estimate. With PMOS the calendar is the weakest
+ * evidence, and a positive LH alone can be a false positive.
+ */
+export function fertileNow(signs: CycleSign[], cycleStart: string | null, today: string): FertileNow {
+  const from = cycleStart && cycleStart <= today ? cycleStart : null;
+  if (from) {
+    const shift = detectTemperatureShift(readingsInCycle(signs, from));
+    if (shift) return { level: 'passed', reasons: ['temperature_shift'] };
+  }
+  const recent = signs.filter((s) => s.date <= today && diffDays(s.date, today) <= 2 && (!from || s.date >= from));
+  const reasons: FertileNow['reasons'] = [];
+  if (recent.some((s) => s.cervicalMucus === 'eggwhite')) reasons.push('eggwhite_mucus');
+  else if (recent.some((s) => s.cervicalMucus === 'watery')) reasons.push('watery_mucus');
+  if (recent.some((s) => s.lhTest === 'positive')) reasons.push('lh_positive');
+  if (reasons.length >= 2 || reasons.includes('eggwhite_mucus')) return { level: 'high', reasons };
+  if (reasons.length) return { level: 'possible', reasons };
+  return { level: 'calendar', reasons: [] };
 }

@@ -67,3 +67,22 @@ describe('analyzeCycles', () => {
     expect(a.periodRating).toBe('normal');
   });
 });
+describe('pregnancy', () => {
+  const p = (starts: string[]) => starts.map((s) => ({ start_date: s }));
+  const starts = ['2025-01-01', '2025-01-29', '2025-02-26', '2025-12-03'];
+  const ended = [{ start_date: '2025-02-26', end_date: '2025-11-20' }];
+  it('does not count the pregnancy as a cycle', () => {
+    expect(analyzeCycles(p(starts), new Date(2025, 11, 10), ended).cycles).toEqual([28, 28]);
+  });
+  it('raises no alerts and no next-period countdown during a pregnancy', () => {
+    const active = [{ start_date: '2025-02-26', end_date: null }];
+    expect(cycleHealthFlags(p(['2025-01-01', '2025-01-29', '2025-02-26']), new Date(2025, 8, 1), [], active)).toEqual([]);
+    expect(analyzeCycles(p(['2025-01-01', '2025-01-29', '2025-02-26']), new Date(2025, 8, 1), active).daysToNextPeriod).toBeNull();
+  });
+  it('counts days without a period from the end of the pregnancy', () => {
+    const only = p(['2025-01-01', '2025-01-29']);
+    const pr = [{ start_date: '2025-01-29', end_date: '2025-11-20' }];
+    expect(cycleHealthFlags(only, new Date(2025, 11, 10), [], pr)).toEqual([]);
+    expect(cycleHealthFlags(only, new Date(2025, 11, 10), [])).toContain('noPeriod90');
+  });
+});

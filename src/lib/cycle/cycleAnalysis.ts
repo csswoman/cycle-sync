@@ -1,4 +1,5 @@
-import { addDays, daysBetween, parseLocalDate, type PeriodInput } from './cycleEngine';
+import { addDays, daysBetween, parseLocalDate, toISODate as toIso, type PeriodInput } from './cycleEngine';
+import { activePregnancy, cyclePairs, predictionsPaused, type Pregnancy } from './pregnancy';
 import { heavyAfterGap, heavyPeriods, type BleedingSign } from './bleeding';
 
 export type Rating = 'normal' | 'abnormal';
@@ -28,13 +29,13 @@ export const MAX_REGULAR_DIFFERENCE = 7;
 export const NORMAL_PERIOD_MIN = 2;
 export const NORMAL_PERIOD_MAX = 7;
 
-export function analyzeCycles(periods: PeriodInput[], now: Date = new Date()): CycleAnalysis {
+export function analyzeCycles(periods: PeriodInput[], now: Date = new Date(), pregnancies: Pregnancy[] = []): CycleAnalysis {
   const sorted = [...periods].sort((a, b) => a.start_date.localeCompare(b.start_date));
   const starts = Array.from(new Set(sorted.map((p) => p.start_date.slice(0, 10))));
 
   const all: number[] = [];
-  for (let i = 1; i < starts.length; i++) {
-    all.push(daysBetween(parseLocalDate(starts[i - 1]), parseLocalDate(starts[i])));
+  for (const [a, b] of cyclePairs(starts, pregnancies)) {
+    all.push(daysBetween(parseLocalDate(a), parseLocalDate(b)));
   }
   const cycles = all.slice(-6);
   const min = cycles.length ? Math.min(...cycles) : 0;
@@ -54,7 +55,8 @@ export function analyzeCycles(periods: PeriodInput[], now: Date = new Date()): C
     periodLengths.length > 0 && periodLengths.every((n) => n >= NORMAL_PERIOD_MIN && n <= NORMAL_PERIOD_MAX) ? 'normal' : 'abnormal';
 
   let daysToNextPeriod: number | null = null;
-  if (starts.length && mean > 0) {
+  const todayIso = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  if (starts.length && mean > 0 && !predictionsPaused(starts[starts.length - 1], pregnancies, todayIso)) {
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     daysToNextPeriod = daysBetween(today, addDays(parseLocalDate(starts[starts.length - 1]), mean));
   }
@@ -88,16 +90,27 @@ export const MIN_CYCLES_PER_YEAR = 8;
 export const PROLONGED_BLEEDING_DAYS = 8;
 
 /** `signs` (optional) adds the heavy-bleeding flags from the per-day flow log. */
-export function cycleHealthFlags(periods: PeriodInput[], now: Date = new Date(), signs: BleedingSign[] = []): CycleFlag[] {
+export function cycleHealthFlags(periods: PeriodInput[], now: Date = new Date(), signs: BleedingSign[] = [], pregnancies: Pregnancy[] = []): CycleFlag[] {
   const starts = Array.from(new Set(periods.map((p) => p.start_date.slice(0, 10)))).sort().map(parseLocalDate);
   if (starts.length === 0) return [];
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const flags: CycleFlag[] = [];
 
-  if (daysBetween(starts[starts.length - 1], today) > NO_PERIOD_DAYS) flags.push('noPeriod90');
+  // During a pregnancy nothing in the period log is a warning. After it, days without a period
+  // count from the end of the pregnancy, not from the last period before it.
+  const todayIso = toIso(today);
+  if (activePregnancy(pregnancies, todayIso)) return [];
+  const lastStartIso = toIso(starts[starts.length - 1]);
+  const lastEnded = pregnancies
+    .filter((p) => p.end_date && p.start_date.slice(0, 10) >= lastStartIso)
+    .map((p) => (p.end_date as string).slice(0, 10))
+    .sort()
+    .pop();
+  const reference = lastEnded ? parseLocalDate(lastEnded) : starts[starts.length - 1];
+  if (daysBetween(reference, today) > NO_PERIOD_DAYS) flags.push('noPeriod90');
 
-  const cycles: number[] = [];
-  for (let i = 1; i < starts.length; i++) cycles.push(daysBetween(starts[i - 1], starts[i]));
+  const cycles: number[] = cyclePairs(starts.map((d) => toIso(d)), pregnancies)
+    .map(([a, b]) => daysBetween(parseLocalDate(a), parseLocalDate(b)));
   const recent = cycles.slice(-6);
   // Two cycles outside the range make it a pattern; a single one can be a one-off.
   if (recent.filter((c) => c > NORMAL_CYCLE_MAX).length >= 2) flags.push('longCycles');
@@ -105,7 +118,8 @@ export function cycleHealthFlags(periods: PeriodInput[], now: Date = new Date(),
 
   // Only meaningful with a full year of tracking behind the user.
   const yearAgo = addDays(today, -365);
-  if (starts[0] <= yearAgo && starts.filter((s) => s > yearAgo).length < MIN_CYCLES_PER_YEAR) flags.push('fewPeriodsYear');
+  const pregnantLastYear = pregnancies.some((p) => !p.end_date || parseLocalDate(p.end_date) > yearAgo);
+  if (!pregnantLastYear && starts[0] <= yearAgo && starts.filter((s) => s > yearAgo).length < MIN_CYCLES_PER_YEAR) flags.push('fewPeriodsYear');
 
   const bleeds = [...periods]
     .sort((a, b) => a.start_date.localeCompare(b.start_date))

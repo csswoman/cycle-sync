@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { estimateCycle, parseLocalDate } from '@/lib/cycle/cycleEngine';
+import { estimateCycle, parseLocalDate, toISODate } from '@/lib/cycle/cycleEngine';
+import { predictionsPaused, type Pregnancy } from '@/lib/cycle/pregnancy';
+import { usePregnancies } from '@/hooks/usePregnancies';
 import { CyclePhase, type CycleInfo, type CycleConfig, type Period } from '@/types';
 
-export function computeCycleInfo(config: CycleConfig, periods: Period[], now: Date = new Date()): CycleInfo {
-  const estimate = estimateCycle(periods, config.cycle_length);
+export function computeCycleInfo(config: CycleConfig, periods: Period[], now: Date = new Date(), pregnancies: Pregnancy[] = []): CycleInfo {
+  const estimate = estimateCycle(periods, config.cycle_length, pregnancies);
   const cycleLength = estimate.cycleLength;
 
   let lastPeriodStart: Date | null = null;
@@ -32,7 +34,8 @@ export function computeCycleInfo(config: CycleConfig, periods: Period[], now: Da
   // a menstrual phase with no bleeding. Dates before the reference period are projected backwards.
   const cycleDay = diffDays >= 0 ? diffDays + 1 : (((diffDays % cycleLength) + cycleLength) % cycleLength) + 1;
   const daysUntilNextPeriod = Math.max(0, cycleLength - cycleDay + 1);
-  const daysLate = Math.max(0, cycleDay - 1 - estimate.longestExpected);
+  const paused = predictionsPaused(toISODate(lastPeriodStart), pregnancies, toISODate(today));
+  const daysLate = paused ? 0 : Math.max(0, cycleDay - 1 - estimate.longestExpected);
 
   let phase: CyclePhase;
   if (cycleDay <= estimate.periodLength) {
@@ -55,14 +58,17 @@ export function computeCycleInfo(config: CycleConfig, periods: Period[], now: Da
     fertileEndDay: estimate.fertileEndDay,
     irregular: estimate.irregular,
     confidence: estimate.confidence,
-    overdue: cycleDay > cycleLength,
+    overdue: !paused && cycleDay > cycleLength,
     daysLate,
+    paused,
   };
 }
 
 export function useCycleInfo() {
   const [cycleInfo, setCycleInfo] = useState<CycleInfo | null>(null);
   const [loading, setLoading] = useState(true);
+  const { pregnancies, loading: pregLoading } = usePregnancies();
+  const [base, setBase] = useState<{ config: CycleConfig; periods: Period[] } | null>(null);
 
   useEffect(() => {
     async function load() {
@@ -80,11 +86,15 @@ export function useCycleInfo() {
       };
       const periods: Period[] = periodsRes.data ?? [];
 
-      setCycleInfo(computeCycleInfo(config, periods));
+      setBase({ config, periods });
       setLoading(false);
     }
     load();
   }, []);
 
-  return { cycleInfo, loading };
+  useEffect(() => {
+    if (base && !pregLoading) setCycleInfo(computeCycleInfo(base.config, base.periods, new Date(), pregnancies));
+  }, [base, pregnancies, pregLoading]);
+
+  return { cycleInfo, loading: loading || pregLoading };
 }

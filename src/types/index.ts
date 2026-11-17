@@ -76,6 +76,8 @@ export interface CycleInfo {
   overdue?: boolean;
   /** Days past the latest expected start of the next period; 0 while still inside the expected range. */
   daysLate?: number;
+  /** True during a pregnancy and until a period is logged after it: no predictions or phase advice. */
+  paused?: boolean;
 }
 
 // ── Daily Log ──────────────────────────────

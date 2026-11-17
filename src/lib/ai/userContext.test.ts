@@ -107,6 +107,18 @@ describe('clinical context', () => {
     expect(text).toContain('2026-04-15 muy abundante, 2 días muy abundantes, dolor máx 7/10');
     expect(text).toContain('regla abundante tras 90 días o más sin sangrado');
   });
+  it('tells the assistant about an active pregnancy and drops the phase and period count', () => {
+    const ctx = buildClinicalContext({ ...full, pregnancies: [{ start_date: '2026-09-01', end_date: null }] });
+    const text = formatUserContext({ ...empty, phase: 'Luteal', cycleDay: 10, ...ctx }, 'es');
+    expect(text).toContain('Modo embarazo activo (semana 11)');
+    expect(text).not.toContain('Fase actual');
+    expect(text).not.toContain('desde la última regla');
+    expect(ctx.cycle?.flags).toEqual([]);
+  });
+  it('flags the wait for the next period after a pregnancy ended', () => {
+    const ctx = buildClinicalContext({ ...full, pregnancies: [{ start_date: '2026-09-01', end_date: '2026-11-01' }] });
+    expect(formatUserContext({ ...empty, ...ctx }, 'en')).toContain('has not logged her next period');
+  });
   it('stays empty without records', () => {
     expect(formatUserContext({ ...empty, ...buildClinicalContext(rawEmpty) }, 'en')).toBe('');
   });

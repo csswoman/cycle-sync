@@ -41,3 +41,13 @@ describe('forecastNextPeriod', () => {
     expect(f.cycleLengths).toEqual([]);
   });
 });
+describe('forecastNextPeriod with pregnancy', () => {
+  const starts = ['2025-01-01', '2025-01-29', '2025-02-26'];
+  it('returns no forecast during or right after a pregnancy, until a new period is logged', () => {
+    const active = [{ start_date: '2025-02-26', end_date: null }];
+    expect(forecastNextPeriod(starts, 28, null, new Date(2025, 5, 1), active)).toBeNull();
+    const ended = [{ start_date: '2025-02-26', end_date: '2025-11-01' }];
+    expect(forecastNextPeriod(starts, 28, null, new Date(2025, 11, 1), ended)).toBeNull();
+    expect(forecastNextPeriod([...starts, '2025-12-10'], 28, null, new Date(2025, 11, 12), ended)).not.toBeNull();
+  });
+});

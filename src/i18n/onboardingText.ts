@@ -56,6 +56,8 @@ export interface OnboardingText {
       food: string;
       trainingOptions: Record<string, string>;
       foodOptions: Record<string, string>;
+    /** One-line explanation under each diet, so terms like Paleo or Keto are clear. */
+    foodHints: Record<string, string>;
     };
     profile: {
       title: string;
@@ -159,6 +161,12 @@ const en: OnboardingText = {
       food: 'Dietary focus',
       trainingOptions: { yoga: 'Yoga & Pilates', strength: 'Strength', hiit: 'HIIT', run: 'Running' },
       foodOptions: { balanced: 'Balanced', veg: 'Vegetarian', keto: 'Keto / Low carb', paleo: 'Paleo' },
+      foodHints: {
+        balanced: 'A bit of everything, in balanced portions',
+        veg: 'No meat or fish',
+        keto: 'Very few carbs, more fats and protein',
+        paleo: 'Unprocessed food: meat, fish, eggs, vegetables, fruit and nuts. No grains, dairy or legumes',
+      },
     },
     profile: {
       title: 'Finalize your profile',
@@ -262,6 +270,12 @@ const es: OnboardingText = {
       food: 'Enfoque de alimentación',
       trainingOptions: { yoga: 'Yoga y Pilates', strength: 'Fuerza', hiit: 'HIIT', run: 'Correr' },
       foodOptions: { balanced: 'Balanceada', veg: 'Vegetariana', keto: 'Keto / Baja en carbohidratos', paleo: 'Paleo' },
+      foodHints: {
+        balanced: 'Un poco de todo, en porciones equilibradas',
+        veg: 'Sin carne ni pescado',
+        keto: 'Muy pocos carbohidratos, más grasas y proteína',
+        paleo: 'Comida sin procesar: carne, pescado, huevo, verduras, frutas y frutos secos. Sin granos, lácteos ni legumbres',
+      },
     },
     profile: {
       title: 'Termina tu perfil',

@@ -1,4 +1,5 @@
-import { daysBetween, estimateCycle, projectCycles } from '@/lib/cycle/cycleEngine';
+import { predictionsPaused, type Pregnancy } from '@/lib/cycle/pregnancy';
+import { daysBetween, estimateCycle, projectCycles, toISODate } from '@/lib/cycle/cycleEngine';
 
 export interface PeriodForecast {
   /** Earliest and latest likely start dates (local midnight). */
@@ -23,12 +24,14 @@ export function forecastNextPeriod(
   configCycleLength: number | null,
   configLastPeriodStart: string | null,
   now: Date = new Date(),
+  pregnancies: Pregnancy[] = [],
 ): PeriodForecast | null {
   const starts = Array.from(new Set(periodStarts.map((s) => s.slice(0, 10)))).sort();
   const last = starts.length ? starts[starts.length - 1] : configLastPeriodStart?.slice(0, 10) ?? null;
   if (!last) return null;
+  if (predictionsPaused(last, pregnancies, toISODate(now))) return null;
 
-  const estimate = estimateCycle(starts.map((s) => ({ start_date: s })), configCycleLength);
+  const estimate = estimateCycle(starts.map((s) => ({ start_date: s })), configCycleLength, pregnancies);
   const [next] = projectCycles(last, estimate, 1);
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   return {

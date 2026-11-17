@@ -12,14 +12,16 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [language, setLanguageState] = useState<Language>('en');
+    const [language, setLanguageState] = useState<Language>('es');
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
         const saved = localStorage.getItem('language');
         if (saved === 'en' || saved === 'es') {
             setLanguageState(saved);
-        } else if (navigator.language?.toLowerCase().startsWith('es')) {
+        } else if (navigator.language?.toLowerCase().startsWith('en')) {
+            setLanguageState('en');
+        } else {
             setLanguageState('es');
         }
         setMounted(true);

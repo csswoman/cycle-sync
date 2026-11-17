@@ -11,6 +11,7 @@
  *   and the period is reported as late (see computeCycleInfo).
  */
 
+import { cyclePairs, type Pregnancy } from './pregnancy';
 export interface PeriodRun {
   start: string; // YYYY-MM-DD
   end: string;   // YYYY-MM-DD (inclusive)
@@ -97,11 +98,10 @@ export function groupDaysIntoPeriods(days: string[]): PeriodRun[] {
 }
 
 /** Days between consecutive period starts, ignoring implausible gaps (missing months, typos). */
-export function cycleLengthsFromStarts(starts: string[]): number[] {
-  const dates = Array.from(new Set(starts.map((s) => s.slice(0, 10)))).sort().map(parseLocalDate);
+export function cycleLengthsFromStarts(starts: string[], pregnancies: Pregnancy[] = []): number[] {
   const lengths: number[] = [];
-  for (let i = 1; i < dates.length; i++) {
-    const len = daysBetween(dates[i - 1], dates[i]);
+  for (const [a, b] of cyclePairs(starts, pregnancies)) {
+    const len = daysBetween(parseLocalDate(a), parseLocalDate(b));
     if (len >= MIN_PLAUSIBLE && len <= MAX_PLAUSIBLE) lengths.push(len);
   }
   return lengths;
@@ -118,8 +118,8 @@ function median(values: number[]): number {
   return sorted.length % 2 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
 }
 
-export function estimateCycle(periods: PeriodInput[], configCycleLength?: number | null): CycleEstimate {
-  const lengths = cycleLengthsFromStarts(periods.map((p) => p.start_date)).slice(-MAX_CYCLES_USED);
+export function estimateCycle(periods: PeriodInput[], configCycleLength?: number | null, pregnancies: Pregnancy[] = []): CycleEstimate {
+  const lengths = cycleLengthsFromStarts(periods.map((p) => p.start_date), pregnancies).slice(-MAX_CYCLES_USED);
   const fallback = configCycleLength && configCycleLength > 0 ? configCycleLength : DEFAULT_CYCLE;
 
   const mean = lengths.length ? lengths.reduce((s, v) => s + v, 0) / lengths.length : fallback;

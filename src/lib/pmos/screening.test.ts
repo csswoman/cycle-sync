@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { screeningPlan } from './screening';
+import { screeningPlan, gestationalGlucosePlan } from './screening';
 import { derivedSeries, freeAndrogenIndex } from './metrics';
 
 describe('screeningPlan', () => {
@@ -31,5 +31,20 @@ describe('free androgen index', () => {
       { date: '2026-02-01', marker: 'testosterone', value: 50 },
     ], 'testosterone', 'shbg', freeAndrogenIndex);
     expect(series).toEqual([{ date: '2026-01-01', value: 6.94 }]);
+  });
+});
+describe('gestationalGlucosePlan', () => {
+  const base = { glucoseDates: [] as string[], pregnancyStart: null as string | null, today: '2026-11-16' };
+  it('asks for a preconception glucose check when trying to conceive', () => {
+    expect(gestationalGlucosePlan({ ...base, goal: 'fertility', gestationalWeeks: null })).toEqual([{ key: 'preconception_glucose', done: false }]);
+    expect(gestationalGlucosePlan({ ...base, goal: 'fertility', gestationalWeeks: null, glucoseDates: ['2026-05-01'] })[0].done).toBe(true);
+    expect(gestationalGlucosePlan({ ...base, goal: 'fertility', gestationalWeeks: null, glucoseDates: ['2025-05-01'] })[0].done).toBe(false);
+    expect(gestationalGlucosePlan({ ...base, goal: 'wellness', gestationalWeeks: null })).toEqual([]);
+  });
+  it('adds the first-visit curve, and the 24-28 week one from week 20', () => {
+    const p = { ...base, goal: 'fertility', pregnancyStart: '2026-06-01' };
+    expect(gestationalGlucosePlan({ ...p, gestationalWeeks: 8 }).map((i) => i.key)).toEqual(['early_ogtt']);
+    const late = gestationalGlucosePlan({ ...p, gestationalWeeks: 22, glucoseDates: ['2026-07-01'] });
+    expect(late).toEqual([{ key: 'early_ogtt', done: true }, { key: 'ogtt_24_28', done: false }]);
   });
 });

@@ -22,13 +22,13 @@ const MAX = 6;
 export function suggestQuestions(data: PMOSOverviewData, insights: Insight[]): SuggestedQuestion[] {
   const out: SuggestedQuestion[] = [];
   const add = (q: SuggestedQuestion) => { if (!out.some((o) => o.id === q.id)) out.push(q); };
-  const flags = cycleHealthFlags(data.periodRuns, parseLocalDate(data.today), data.signs);
+  const flags = cycleHealthFlags(data.periodRuns, parseLocalDate(data.today), data.signs, data.pregnancies);
   if (flags.includes('heavyAfterGap')) {
     add({ id: 'heavy-after-gap', es: 'Tuve una regla abundante después de más de 90 días sin sangrado. ¿Necesito una ecografía o revisar el endometrio?', en: 'I had a heavy period after more than 90 days without bleeding. Do I need an ultrasound or an endometrial check?' });
   } else if (flags.includes('heavyBleeding')) {
     add({ id: 'heavy-bleeding', es: 'Tuve días de sangrado muy abundante o con coágulos. ¿Debo revisar hierro o hacerme otros estudios?', en: 'I had very heavy bleeding days or clots. Should I check my iron or have other tests?' });
   }
-  const gap = periodGap(data.periodStarts, data.today);
+  const gap = periodGap(data.periodStarts, data.today, data.pregnancies);
   if (gap && gap.level !== 'ok') {
     const d = gap.days;
     add({ id: 'period-gap',

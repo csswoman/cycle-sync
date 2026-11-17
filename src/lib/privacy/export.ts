@@ -4,7 +4,7 @@ export const EXPORT_TABLES = [
   'grocery_checks', 'habit_logs', 'habits', 'health_data', 'health_events', 'health_records',
   'hirsutism_scores', 'lab_results', 'meal_plan_entries', 'medication_dose_changes',
   'medication_logs', 'medication_side_effects', 'medications', 'pantry_items', 'pcos_symptoms',
-  'periods', 'pmos_diagnosis', 'pmos_metrics', 'progress_photos', 'recipes', 'routines',
+  'periods', 'pmos_diagnosis', 'pmos_metrics', 'pregnancies', 'progress_photos', 'recipes', 'routines',
   'user_food_preferences', 'user_recipes', 'wellbeing_checks', 'workout_logs', 'workout_plan_entries',
 ] as const;
 

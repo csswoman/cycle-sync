@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { saveWorkoutLogOffline, getUnsyncedWorkoutLogs } from '@/lib/offlineHelpers';
+import { db } from '@/lib/offlineDb';
 import { syncAll } from '@/hooks/useOfflineSync';
 
 export interface WorkoutLog {
@@ -92,20 +93,36 @@ export function useWorkoutLogs() {
 
   useEffect(() => { load(); }, [load]);
 
-  const addLog = async (input: WorkoutLogInput): Promise<boolean> => {
+  /** Saves a log and returns its id, or null when there is no signed-in user. */
+  const addLogWithId = async (input: WorkoutLogInput): Promise<string | null> => {
     setSaving(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
       const user = session?.user;
-      if (!user) return false;
-      await saveWorkoutLogOffline({ userId: user.id, date: localDateString(), ...input });
+      if (!user) return null;
+      const id = await saveWorkoutLogOffline({ userId: user.id, date: localDateString(), ...input });
       if (navigator.onLine) await syncAll();
       await load();
-      return true;
+      return id;
     } finally {
       setSaving(false);
     }
   };
-
-  return { logs, loading, saving, addLog };
+  const addLog = async (input: WorkoutLogInput): Promise<boolean> => (await addLogWithId(input)) !== null;
+  /** Deletes a log: locally when it never synced, otherwise from Supabase too. */
+  const removeLog = async (id: string): Promise<boolean> => {
+    try {
+      const local = await db.workoutLogs.filter((l) => l.remoteId === id).first();
+      if (!local || local.synced) {
+        const { error } = await supabase.from('workout_logs').delete().eq('id', id);
+        if (error) return false;
+      }
+      await db.workoutLogs.filter((l) => l.remoteId === id).delete();
+      await load();
+      return true;
+    } catch {
+      return false;
+    }
+  };
+  return { logs, loading, saving, addLog, addLogWithId, removeLog };
 }

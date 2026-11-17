@@ -5,6 +5,7 @@
 import { EATING_SYMPTOMS } from './wellbeing';
 import { ovulationHistory } from './cycleStatus';
 import { effectLabel } from './sideEffects';
+import { cyclePairs, type Pregnancy } from '@/lib/cycle/pregnancy';
 import type { CycleSign } from '@/lib/cycle/fertilitySigns';
 import { adherence, daySummary, type DoseLog, type SchedulableMedication } from '@/lib/medications/schedule';
 
@@ -27,6 +28,8 @@ export interface InsightMedication extends SchedulableMedication {
 export interface InsightInput {
   today: string;
   periodStarts: string[];
+  /** Pregnancy intervals are not cycles and are left out of cycle statistics. */
+  pregnancies?: Pregnancy[];
   medications: InsightMedication[];
   medLogs: DoseLog[];
   /** Daily PMOS symptom total (sum of the 0-3 scores). */
@@ -62,19 +65,18 @@ const fmt = (iso: string, lang: 'es' | 'en') =>
 
 export const MIN_GROUP = 4;
 
-function cycles(starts: string[]): { start: string; length: number }[] {
-  const s = [...new Set(starts.map((x) => x.slice(0, 10)))].sort();
+function cycles(starts: string[], pregnancies: Pregnancy[] = []): { start: string; length: number }[] {
   const out: { start: string; length: number }[] = [];
-  for (let i = 1; i < s.length; i++) {
-    const length = diff(s[i - 1], s[i]);
-    if (length >= 10 && length <= 180) out.push({ start: s[i - 1], length });
+  for (const [a, b] of cyclePairs(starts, pregnancies)) {
+    const length = diff(a, b);
+    if (length >= 10 && length <= 180) out.push({ start: a, length });
   }
   return out;
 }
 
 /** Cycle length before vs after starting each treatment. */
 export function cycleChangeInsights(input: InsightInput): Insight[] {
-  const all = cycles(input.periodStarts);
+  const all = cycles(input.periodStarts, input.pregnancies);
   const out: Insight[] = [];
   for (const med of input.medications) {
     if (!med.start) continue;
@@ -359,7 +361,7 @@ export function waistCycleInsight(input: InsightInput): Insight | null {
   const wb = Math.round(avg(w.slice(-half).map((x) => x.value)));
   if (Math.abs(wb - wa) < 2) return null;
   const mid = w[half].date;
-  const all = cycles(input.periodStarts);
+  const all = cycles(input.periodStarts, input.pregnancies);
   const first = all.filter((c) => c.start < mid).map((c) => c.length);
   const last = all.filter((c) => c.start >= mid).map((c) => c.length);
   if (first.length < 2 || last.length < 2) return null;

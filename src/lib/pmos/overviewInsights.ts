@@ -6,6 +6,7 @@ export function insightsFromOverview(data: PMOSOverviewData, hideNumbers: boolea
   return buildInsights({
     today: data.today,
     periodStarts: data.periodStarts,
+    pregnancies: data.pregnancies,
     medications: data.medications.map((m) => ({ ...m, start: medicationStart(m) })),
     medLogs: data.medLogs,
     symptomTotals: data.symptomTotals,

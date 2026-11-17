@@ -4,7 +4,7 @@ import type { PMOSOverviewData } from '@/hooks/usePMOSOverview';
 const base: PMOSOverviewData = {
   today: '2026-11-16', periodStarts: [], periodRuns: [], medications: [], medLogs: [], symptomTotals: [], fastingGlucose: [],
   bloodPressureDates: ['2026-10-01'], labs: [], dailyLogs: [], signs: [], mealReadings: [], workoutDates: [], healthData: [], acne: [],
-  hirsutism: [], waist: [], doseChanges: [], sideEffects: [], hormonal: false,
+  hirsutism: [], waist: [], doseChanges: [], sideEffects: [], hormonal: false, pregnancies: [], goal: null,
 };
 const ids = (d: PMOSOverviewData, ins: Parameters<typeof suggestQuestions>[1] = []) => suggestQuestions(d, ins).map((q) => q.id);
 describe('suggestQuestions', () => {

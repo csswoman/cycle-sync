@@ -15,6 +15,7 @@ function fromRow(r: any): CycleSign {
     sexProtection: r.sex_protection ?? null,
     notes: r.notes ?? null,
     lhTest: r.lh_test ?? null,
+    pregnancyTest: r.pregnancy_test ?? null,
     flow: r.flow ?? null,
     clots: !!r.clots,
     pain: r.pain != null ? Number(r.pain) : null,
@@ -91,9 +92,9 @@ export function useCycleSigns(fromDate: string) {
     };
     let res = isEmptySign(sign)
       ? await supabase.from('cycle_signs').delete().eq('user_id', user.id).eq('date', sign.date)
-      : await supabase.from('cycle_signs').upsert({ ...row, lh_test: sign.lhTest ?? null }, { onConflict: 'user_id,date' });
+      : await supabase.from('cycle_signs').upsert({ ...row, lh_test: sign.lhTest ?? null, pregnancy_test: sign.pregnancyTest ?? null }, { onConflict: 'user_id,date' });
     // lh_test and the flow columns come from later migrations; save the rest if they are not applied yet.
-    if (res.error && /lh_test|flow|clots|pain/.test(res.error.message ?? '') && !isEmptySign(sign)) {
+    if (res.error && /lh_test|pregnancy_test|flow|clots|pain/.test(res.error.message ?? '') && !isEmptySign(sign)) {
       const { flow: _f, clots: _c, pain: _p, ...older } = row;
       res = await supabase.from('cycle_signs').upsert(older, { onConflict: 'user_id,date' });
     }
@@ -110,6 +111,7 @@ export function useCycleSigns(fromDate: string) {
           sexProtection: sign.sexProtection,
           notes: sign.notes,
           lhTest: sign.lhTest ?? null,
+          pregnancyTest: sign.pregnancyTest ?? null,
           flow: sign.flow ?? null,
           clots: !!sign.clots,
           pain: sign.pain ?? null,

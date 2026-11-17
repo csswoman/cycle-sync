@@ -29,6 +29,8 @@ export interface CycleSign {
   notes: string | null;
   /** Ovulation (LH) strip result. */
   lhTest?: 'negative' | 'positive' | null;
+  /** Pregnancy test result. */
+  pregnancyTest?: 'negative' | 'positive' | null;
   /** Bleeding intensity for a period day. */
   flow?: 'light' | 'medium' | 'heavy' | 'very_heavy' | null;
   clots?: boolean;
@@ -38,13 +40,13 @@ export interface CycleSign {
 export function emptySign(date: string): CycleSign {
   return {
     date, spotting: false, bbtCelsius: null, bbtDisturbed: false,
-    cervicalMucus: null, sexCount: 0, sexProtection: null, notes: null, lhTest: null, flow: null, clots: false, pain: null,
+    cervicalMucus: null, sexCount: 0, sexProtection: null, notes: null, lhTest: null, pregnancyTest: null, flow: null, clots: false, pain: null,
   };
 }
 
 /** True when the row carries no information and can be deleted instead of stored. */
 export function isEmptySign(s: CycleSign): boolean {
-  return !s.spotting && s.bbtCelsius == null && !s.cervicalMucus && s.sexCount === 0 && !s.notes && !s.lhTest && !s.flow && !s.clots && s.pain == null;
+  return !s.spotting && s.bbtCelsius == null && !s.cervicalMucus && s.sexCount === 0 && !s.notes && !s.lhTest && !s.pregnancyTest && !s.flow && !s.clots && s.pain == null;
 }
 
 export const BBT_LOW_READINGS = 6;

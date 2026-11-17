@@ -6,6 +6,7 @@ import type { Medication, MedicationLog } from '@/hooks/useMedications';
 import type { CycleSign } from '@/lib/cycle/fertilitySigns';
 import { usesHormonalContraception } from '@/features/setup/onboarding';
 import { useOnboardingAnswers } from '@/hooks/useOnboardingAnswers';
+import type { Pregnancy } from '@/lib/cycle/pregnancy';
 import type { MealGlucoseReading } from '@/lib/pmos/mealGlucose';
 
 const SYMPTOM_KEYS = ['acne', 'fatigue', 'hirsutism', 'hair_loss', 'mood_swings', 'bloating'] as const;
@@ -34,8 +35,12 @@ export interface PMOSOverviewData {
   doseChanges: { medication_id: string; date: string; dose: string; weeks: number }[];
   sideEffects: { medication_id: string; date: string; effect: string; severity: number }[];
   hormonal: boolean;
+  /** Pregnancy intervals ([] when the table does not exist yet). */
+  pregnancies: Pregnancy[];
+  /** Questionnaire goal; 'fertility' is the "trying to conceive" mode. */
+  goal: string | null;
 }
-type LoadedData = Omit<PMOSOverviewData, 'hormonal'>;
+type LoadedData = Omit<PMOSOverviewData, 'hormonal' | 'goal'>;
 
 const daysAgo = (n: number) => { const d = new Date(); d.setDate(d.getDate() - n); return toLocalISO(d); };
 
@@ -58,7 +63,7 @@ export function usePMOSOverview() {
         const { data: d, error } = await q;
         return error ? [] : ((d as T[]) ?? []);
       };
-      const [periods, config, meds, logs, symptoms, metrics, labs, daily, signs, mealRows, workouts, health, hirsutism, sideEffects, doseChanges] = await Promise.all([
+      const [periods, config, meds, logs, symptoms, metrics, labs, daily, signs, mealRows, workouts, health, hirsutism, sideEffects, doseChanges, pregnancies] = await Promise.all([
         rows<{ start_date: string; end_date?: string | null }>(supabase.from('periods').select('start_date,end_date').eq('user_id', uid).order('start_date', { ascending: false }).limit(36)),
         rows<{ last_period_start: string | null }>(supabase.from('cycle_config').select('last_period_start').eq('user_id', uid).limit(1)),
         rows<Medication>(supabase.from('medications').select('*').eq('user_id', uid).order('created_at')),
@@ -80,6 +85,8 @@ export function usePMOSOverview() {
         rows<{ date: string; total: number }>(supabase.from('hirsutism_scores').select('date,total').eq('user_id', uid)),
         rows<PMOSOverviewData['sideEffects'][number]>(supabase.from('medication_side_effects').select('medication_id,date,effect,severity').eq('user_id', uid)),
         rows<PMOSOverviewData['doseChanges'][number]>(supabase.from('medication_dose_changes').select('medication_id,date,dose,weeks').eq('user_id', uid)),
+        rows<{ id: string; start_date: string; positive_test_date: string | null; end_date: string | null }>(
+          supabase.from('pregnancies').select('id,start_date,positive_test_date,end_date').eq('user_id', uid)),
       ]);
       const starts = periods.map((p) => p.start_date.slice(0, 10));
       const configStart = config[0]?.last_period_start?.slice(0, 10);
@@ -89,6 +96,11 @@ export function usePMOSOverview() {
         today: toLocalISO(new Date()),
         periodStarts: starts.sort(),
         periodRuns: periods.map((p) => ({ start_date: p.start_date.slice(0, 10), end_date: p.end_date ? p.end_date.slice(0, 10) : null })),
+        pregnancies: pregnancies.map((p) => ({
+          id: p.id, start_date: String(p.start_date).slice(0, 10),
+          positive_test_date: p.positive_test_date ? String(p.positive_test_date).slice(0, 10) : null,
+          end_date: p.end_date ? String(p.end_date).slice(0, 10) : null,
+        })),
         medications: meds,
         medLogs: logs,
         symptomTotals: symptoms.map((s) => ({
@@ -125,6 +137,7 @@ export function usePMOSOverview() {
           sexProtection: null,
           notes: null,
           lhTest: (r.lh_test as CycleSign['lhTest']) ?? null,
+          pregnancyTest: (r.pregnancy_test as CycleSign['pregnancyTest']) ?? null,
           flow: (r.flow as CycleSign['flow']) ?? null,
           clots: !!r.clots,
           pain: r.pain != null ? Number(r.pain) : null,
@@ -135,7 +148,7 @@ export function usePMOSOverview() {
   }, []);
 
   const data = useMemo<PMOSOverviewData | null>(
-    () => (loaded ? { ...loaded, hormonal: usesHormonalContraception(answers) } : null),
+    () => (loaded ? { ...loaded, hormonal: usesHormonalContraception(answers), goal: answers.goal ?? null } : null),
     [loaded, answers],
   );
   return { data, loading };
