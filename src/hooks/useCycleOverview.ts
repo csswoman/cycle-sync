@@ -9,7 +9,7 @@ import {
 import { cycleHealthFlags, type CycleFlag } from '@/lib/cycle/cycleAnalysis';
 import { predictionsPaused, type Pregnancy } from '@/lib/cycle/pregnancy';
 import { usePregnancies } from '@/hooks/usePregnancies';
-import type { OnboardingAnswers } from '@/features/setup/onboarding';
+import { expectsLongGaps, type OnboardingAnswers } from '@/features/setup/onboarding';
 import { useOnboardingAnswers } from '@/hooks/useOnboardingAnswers';
 import type { CycleConfig, CycleInfo, Period } from '@/types';
 
@@ -82,7 +82,9 @@ export function useCycleOverview(): CycleOverview {
     const daysToPeriod = next ? daysBetween(today, next.periodStart) : null;
     const ovulationThisCycle = addDays(parseLocalDate(lastStart), estimate.ovulationDay - 1);
     const daysToOvulation = daysBetween(today, ovulationThisCycle);
-    const flags = cycleHealthFlags(periods.length ? periods : [{ start_date: lastStart }], now, [], pregnancies);
+    // Gap alerts are noise when the user already told us why (breastfeeding, contraception, menopause).
+    const flags = cycleHealthFlags(periods.length ? periods : [{ start_date: lastStart }], now, [], pregnancies)
+      .filter((f) => !expectsLongGaps(answers) || !['noPeriod90', 'fewPeriodsYear', 'longCycles'].includes(f));
     const paused = predictionsPaused(lastStart, pregnancies, toISODate(today));
     return {
       info, estimate, next: paused ? null : next, daysToPeriod: paused ? null : daysToPeriod, daysLate: info.daysLate ?? 0, flags,

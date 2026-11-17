@@ -24,6 +24,8 @@ export interface RecipeFilters {
 
 export const EMPTY_RECIPE_FILTERS: RecipeFilters = { text: '', favoritesOnly: false, mineOnly: false, tags: [], skipAvoided: false, withLiked: false };
 
+import { tagKey, tagLabel } from '@/lib/nutrition/recipeTags';
+
 const allTagsOf = (r: LibraryRecipe) => [...r.tags, ...r.myTags];
 
 export function useRecipes(foods: Pick<FoodPreferences, 'likes' | 'avoid'> = { likes: [], avoid: [] }) {
@@ -79,10 +81,17 @@ export function useRecipes(foods: Pick<FoodPreferences, 'likes' | 'avoid'> = { l
         setRecipes((prev) => prev.filter((r) => r.id !== recipe.id));
     };
 
-    const allTags = useMemo(
-        () => Array.from(new Set(recipes.flatMap(allTagsOf))).sort((a, b) => a.localeCompare(b)),
-        [recipes]
-    );
+    // One option per canonical tag, most used first.
+    const tagOptions = useMemo(() => {
+        const counts = new Map<string, number>();
+        for (const r of recipes) {
+            for (const key of new Set(allTagsOf(r).map(tagKey))) counts.set(key, (counts.get(key) ?? 0) + 1);
+        }
+        const labelOf = new Map<string, string>();
+        for (const r of recipes) for (const t of allTagsOf(r)) if (!labelOf.has(tagKey(t))) labelOf.set(tagKey(t), tagLabel(t));
+        return Array.from(counts, ([key, count]) => ({ key, label: labelOf.get(key) ?? key, count }))
+            .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
+    }, [recipes]);
 
     const { likes, avoid } = foods;
     const filtered = useMemo(() => {
@@ -93,8 +102,8 @@ export function useRecipes(foods: Pick<FoodPreferences, 'likes' | 'avoid'> = { l
             if (filters.skipAvoided && avoidedIn(r, avoid).length > 0) return false;
             if (filters.withLiked && likedIn(r, likes).length === 0) return false;
             if (filters.tags.length > 0) {
-                const tags = allTagsOf(r);
-                if (!filters.tags.every((t) => tags.includes(t))) return false;
+                const keys = allTagsOf(r).map(tagKey);
+                if (!filters.tags.every((t) => keys.includes(t))) return false;
             }
             if (text) {
                 const haystack = [r.title, r.description, ...allTagsOf(r), ...r.ingredients].join(' ').toLowerCase();
@@ -107,7 +116,7 @@ export function useRecipes(foods: Pick<FoodPreferences, 'likes' | 'avoid'> = { l
     return {
         recipes,
         filtered,
-        allTags,
+        tagOptions,
         loading,
         error,
         filters,

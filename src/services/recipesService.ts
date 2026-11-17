@@ -251,6 +251,8 @@ export async function generateRecipes(params: {
     likes?: string[];
     /** Foods the user dislikes (names, in the recipe language). */
     avoid?: string[];
+    /** Per-serving protein range [min, max] g for one meal of the user's plan. */
+    proteinPerMeal?: [number, number];
 }): Promise<GenerateResult> {
     const response = await fetch('/api/recipes/generate', {
         method: 'POST',

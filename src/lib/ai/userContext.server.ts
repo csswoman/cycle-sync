@@ -1,3 +1,4 @@
+import { cycleProfile, type CycleProfile, type OnboardingAnswers } from '@/features/setup/onboarding';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { cycleHealthFlags } from '@/lib/cycle/cycleAnalysis';
 import { activePregnancy, gestationalAge, predictionsPaused, type Pregnancy } from '@/lib/cycle/pregnancy';
@@ -27,7 +28,7 @@ export interface UserContextData {
   measures?: MeasuresContext | null;
   wellbeing?: WellbeingContext | null;
   treatment?: TreatmentContext[];
-  profile?: { goal?: string; contraception?: string } | null;
+  profile?: { goal?: string; contraception?: string; cycleProfile?: CycleProfile; diagnosis?: string } | null;
   /** Pregnancy mode: predictions are paused (active) or waiting for the next period (after). */
   pregnancy?: { state: 'active' | 'after'; weeks: number | null } | null;
   /** No-numbers mode: the assistant must not talk about weight, waist or calories. */
@@ -136,6 +137,7 @@ const FLAG_TEXT: Record<string, { es: string; en: string }> = {
   longBleeding: { es: 'sangrados de más de 8 días', en: 'bleeding longer than 8 days' },
   heavyBleeding: { es: 'sangrado muy abundante (2 o más días en una regla)', en: 'very heavy bleeding (2 or more days in one period)' },
   heavyAfterGap: { es: 'regla abundante tras 90 días o más sin sangrado', en: 'heavy period after 90 or more days without bleeding' },
+  severePain: { es: 'dolor menstrual fuerte (7/10 o más) en varias reglas', en: 'severe period pain (7/10 or more) in several periods' },
 };
 const FLOW_TEXT: Record<string, { es: string; en: string }> = {
   light: { es: 'ligero', en: 'light' }, medium: { es: 'medio', en: 'medium' },
@@ -144,6 +146,12 @@ const FLOW_TEXT: Record<string, { es: string; en: string }> = {
 const GOAL_TEXT: Record<string, { es: string; en: string }> = {
   performance: { es: 'rendimiento', en: 'performance' }, pmos: { es: 'manejar el PMOS', en: 'manage PMOS' },
   fertility: { es: 'quedar embarazada', en: 'getting pregnant' }, wellness: { es: 'bienestar general', en: 'general wellness' },
+};
+/** Tells the assistant whether PMOS applies, so a user without it does not get PMOS advice. */
+const PROFILE_TEXT: Record<CycleProfile, { es: string; en: string }> = {
+  pmos: { es: 'tiene SOP/PMOS diagnosticado o en sospecha', en: 'has diagnosed or suspected PCOS/PMOS' },
+  irregular: { es: 'ciclos irregulares sin diagnóstico de SOP/PMOS (no asumas PMOS)', en: 'irregular cycles without a PCOS/PMOS diagnosis (do not assume PMOS)' },
+  regular: { es: 'ciclos regulares sin SOP/PMOS (no des consejos de PMOS salvo que pregunte)', en: 'regular cycles without PCOS/PMOS (no PMOS advice unless she asks)' },
 };
 const CONTRACEPTION_TEXT: Record<string, { es: string; en: string }> = {
   none: { es: 'ninguno', en: 'none' }, pill: { es: 'píldora', en: 'pill' }, iud: { es: 'DIU', en: 'IUD' },
@@ -208,8 +216,9 @@ function clinicalLines(d: UserContextData, es: boolean): string[] {
     });
     out.push(L('Tratamiento: ', 'Treatment: ') + items.join('; ') + '.');
   }
-  if (d.profile && (d.profile.goal || d.profile.contraception)) {
+  if (d.profile && (d.profile.goal || d.profile.contraception || d.profile.cycleProfile)) {
     const bits: string[] = [];
+    if (d.profile.cycleProfile) bits.push(PROFILE_TEXT[d.profile.cycleProfile][es ? 'es' : 'en']);
     if (d.profile.goal) bits.push(L('objetivo ', 'goal ') + (GOAL_TEXT[d.profile.goal]?.[es ? 'es' : 'en'] ?? clip(d.profile.goal, 30)));
     if (d.profile.contraception) bits.push(L('anticoncepción ', 'contraception ') + (CONTRACEPTION_TEXT[d.profile.contraception]?.[es ? 'es' : 'en'] ?? clip(d.profile.contraception, 30)));
     pushLine(out, L('Perfil', 'Profile'), bits);
@@ -237,7 +246,7 @@ export interface ClinicalRaw {
   ferriman: { date: string; total: number }[];
   medications: (SchedulableMedication & { name: string })[];
   medLogs: DoseLog[];
-  onboarding: { goal?: string; contraception?: string } | null;
+  onboarding: OnboardingAnswers | null;
   pregnancies?: Pregnancy[];
 }
 /** Pure: turns raw rows into the compact clinical context. Never reads sexual activity or photos. */
@@ -321,8 +330,13 @@ export function buildClinicalContext(raw: ClinicalRaw): Pick<UserContextData, 'c
     startDate: medicationStart(m),
     adherence30: adherence([m], raw.medLogs.filter((l) => l.medication_id === m.id), d30, today, today).pct,
   }));
-  const profile = raw.onboarding && (raw.onboarding.goal || raw.onboarding.contraception)
-    ? { goal: raw.onboarding.goal, contraception: raw.onboarding.contraception }
+  const profile = raw.onboarding && Object.keys(raw.onboarding).length
+    ? {
+        goal: raw.onboarding.goal,
+        contraception: raw.onboarding.contraception,
+        cycleProfile: cycleProfile(raw.onboarding),
+        diagnosis: raw.onboarding.diagnosis,
+      }
     : null;
   return { cycle, labs, measures: hasMeasures ? measures : null, wellbeing, treatment, profile, pregnancy };
 }
@@ -384,7 +398,7 @@ export async function loadUserContext(
     ferriman: ((fgRows as any[] | null) ?? []).map((r) => ({ date: String(r.date).slice(0, 10), total: Number(r.total) })),
     medications: ((medRows as any[] | null) ?? []).map((m) => ({ ...m, times: m.times ?? [] })),
     medLogs: ((medLogRows as any[] | null) ?? []).map((l) => ({ ...l, date: String(l.date).slice(0, 10) })),
-    onboarding: ((onboardingRow as any)?.onboarding_answers ?? null) as { goal?: string; contraception?: string } | null,
+    onboarding: ((onboardingRow as any)?.onboarding_answers ?? null) as OnboardingAnswers | null,
     pregnancies: ((pregnancyRows as any[] | null) ?? []).map((p) => ({ start_date: String(p.start_date).slice(0, 10), end_date: p.end_date ? String(p.end_date).slice(0, 10) : null })),
   });
   const hideNumbers = (displayRow as any)?.display_prefs?.hideNumbers === true;

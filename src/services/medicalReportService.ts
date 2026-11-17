@@ -298,9 +298,9 @@ export function generateMedicalReport(data: ReportData, jsPDFClass: JsPDFConstru
     y = drawDivider(doc, y + 2);
   }
 
-  // PMOS Symptoms
+  // Hormonal symptoms (tracked by every profile)
   if (data.pmosEntries.length > 0) {
-    y = drawSectionTitle(doc, `PMOS Symptom Tracking (${data.pmosEntries.length} entries, last 30 days)`, y);
+    y = drawSectionTitle(doc, `Hormonal Symptom Tracking (${data.pmosEntries.length} entries, last 30 days)`, y);
 
     const symptomKeys = ['acne', 'fatigue', 'hirsutism', 'hair_loss', 'mood_swings', 'bloating'] as const;
     const labels: Record<string, string> = {

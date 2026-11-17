@@ -19,7 +19,7 @@ export interface OnboardingText {
     chooseAny: string;
     questions: Record<string, { title: string; hint: string }>;
     options: Record<string, OnboardingOption>;
-    notes: { hormonalContraception: string; irregular: string };
+    notes: { hormonalContraception: string; irregular: string; suspect: string; noPeriodUnknown: string };
   };
   setup: {
     stepOf: (step: number, total: number, name: string) => string;
@@ -85,16 +85,27 @@ const en: OnboardingText = {
     chooseAny: 'Choose all that apply',
     questions: {
       goal: { title: 'What do you want most from CycleSync?', hint: 'This sets your main profile.' },
+      diagnosis: { title: 'Have you been diagnosed with PCOS/PMOS?', hint: 'This decides which tools you see. You can change it anytime in Settings.' },
       regularity: { title: 'How would you describe your periods?', hint: 'An honest guess is fine. Your logged history will refine it.' },
+      noPeriodReason: { title: 'Do you know why your period rarely comes?', hint: 'Many things can pause it. This keeps the app from assuming the wrong cause.' },
       contraception: { title: 'Do you use hormonal contraception?', hint: 'It changes how reliable cycle and ovulation estimates are.' },
       symptoms: { title: 'Which symptoms bother you the most?', hint: 'We will highlight tips for them.' },
       activity: { title: 'How active are you right now?', hint: 'Used to suggest workout intensity.' },
     },
     options: {
       goal_performance: { label: 'Train in sync with my cycle', description: 'Push harder when energy is high and recover when it is low.' },
-      goal_pmos: { label: 'Manage PMOS or irregular cycles', description: 'Hormonal balance, insulin sensitivity and symptom relief with low-impact consistency.' },
+      goal_pmos: { label: 'Manage my PCOS/PMOS', description: 'Hormonal balance, insulin sensitivity and symptom relief with low-impact consistency.' },
       goal_fertility: { label: 'Get pregnant', description: 'Track your fertile window and ovulation to time conception.' },
-      goal_wellness: { label: 'Understand my cycle', description: 'Learn your pattern, track symptoms and feel more in control.' },
+      goal_wellness: { label: 'Understand my cycle', description: 'Regular or irregular: learn your pattern, track symptoms and feel more in control.' },
+      dx_yes: { label: 'Yes', description: 'A doctor confirmed it.' },
+      dx_suspect: { label: 'I suspect it', description: 'I have signs but no diagnosis yet.' },
+      dx_no: { label: 'No' },
+      dx_private: { label: "I'd rather not say" },
+      np_breastfeeding: { label: 'I am breastfeeding or recently gave birth' },
+      np_contraception: { label: 'My contraception stops it' },
+      np_stoppedPill: { label: 'I recently stopped hormonal contraception' },
+      np_perimenopause: { label: 'Perimenopause or menopause' },
+      np_unknown: { label: "I don't know" },
       reg_regular: { label: 'Regular', description: 'About the same length every month.' },
       reg_irregular: { label: 'Irregular', description: 'Length varies a lot or I skip months.' },
       reg_unsure: { label: "I'm not sure", description: "I haven't tracked them." },
@@ -120,6 +131,8 @@ const en: OnboardingText = {
     notes: {
       hormonalContraception: 'With hormonal contraception there is usually no natural ovulation, so ovulation estimates will not apply to you.',
       irregular: 'With irregular cycles, estimates have a wider margin. The more history you add, the better they get.',
+      suspect: 'CycleSync does not diagnose, but it will show you the PMOS tools and questions to take to your doctor.',
+      noPeriodUnknown: 'Going 3 months or more without a period (when not pregnant or breastfeeding) is worth checking with a doctor.',
     },
   },
   setup: {
@@ -194,16 +207,27 @@ const es: OnboardingText = {
     chooseAny: 'Elige todas las que apliquen',
     questions: {
       goal: { title: '¿Qué quieres lograr con CycleSync?', hint: 'Esto define tu perfil principal.' },
+      diagnosis: { title: '¿Te han diagnosticado SOP/PMOS?', hint: 'Esto decide qué herramientas ves. Puedes cambiarlo cuando quieras en Ajustes.' },
       regularity: { title: '¿Cómo describirías tus reglas?', hint: 'Una idea aproximada basta. Tu historial registrado la irá afinando.' },
+      noPeriodReason: { title: '¿Sabes por qué casi no te llega?', hint: 'Muchas cosas pueden pausarla. Así la app no supone una causa equivocada.' },
       contraception: { title: '¿Usas anticoncepción hormonal?', hint: 'Cambia qué tan confiables son las estimaciones del ciclo y la ovulación.' },
       symptoms: { title: '¿Qué síntomas te molestan más?', hint: 'Destacaremos consejos para ellos.' },
       activity: { title: '¿Qué tan activa eres ahora?', hint: 'Sirve para sugerir la intensidad del entrenamiento.' },
     },
     options: {
       goal_performance: { label: 'Entrenar en sintonía con mi ciclo', description: 'Dar más cuando tengo energía y recuperarme cuando baja.' },
-      goal_pmos: { label: 'Manejar el SOP/PMOS o ciclos irregulares', description: 'Equilibrio hormonal, sensibilidad a la insulina y alivio de síntomas con constancia de bajo impacto.' },
+      goal_pmos: { label: 'Manejar mi SOP/PMOS', description: 'Equilibrio hormonal, sensibilidad a la insulina y alivio de síntomas con constancia de bajo impacto.' },
       goal_fertility: { label: 'Quedar embarazada', description: 'Seguir tu ventana fértil y tu ovulación para planear la concepción.' },
-      goal_wellness: { label: 'Entender mi ciclo', description: 'Conocer tu patrón, registrar síntomas y sentir más control.' },
+      goal_wellness: { label: 'Entender mi ciclo', description: 'Regular o irregular: conocer tu patrón, registrar síntomas y sentir más control.' },
+      dx_yes: { label: 'Sí', description: 'Me lo confirmó una médica o médico.' },
+      dx_suspect: { label: 'Lo sospecho', description: 'Tengo señales pero aún no tengo diagnóstico.' },
+      dx_no: { label: 'No' },
+      dx_private: { label: 'Prefiero no decir' },
+      np_breastfeeding: { label: 'Estoy amamantando o di a luz hace poco' },
+      np_contraception: { label: 'Mi anticonceptivo la quita' },
+      np_stoppedPill: { label: 'Dejé el anticonceptivo hormonal hace poco' },
+      np_perimenopause: { label: 'Perimenopausia o menopausia' },
+      np_unknown: { label: 'No lo sé' },
       reg_regular: { label: 'Regulares', description: 'Duran más o menos lo mismo cada mes.' },
       reg_irregular: { label: 'Irregulares', description: 'Varían mucho o a veces me salto meses.' },
       reg_unsure: { label: 'No estoy segura', description: 'No les he llevado registro.' },
@@ -229,6 +253,8 @@ const es: OnboardingText = {
     notes: {
       hormonalContraception: 'Con anticoncepción hormonal normalmente no hay ovulación natural, así que las estimaciones de ovulación no aplican en tu caso.',
       irregular: 'Con ciclos irregulares las estimaciones tienen un margen mayor. Mientras más historial agregues, mejores serán.',
+      suspect: 'CycleSync no diagnostica, pero te mostrará las herramientas de PMOS y preguntas para llevar a tu consulta.',
+      noPeriodUnknown: 'Pasar 3 meses o más sin regla (sin embarazo ni lactancia) es algo que vale la pena revisar con tu médica.',
     },
   },
   setup: {

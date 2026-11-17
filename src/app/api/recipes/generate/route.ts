@@ -32,6 +32,11 @@ export async function POST(request: Request) {
   const likes = names(body?.likes);
   const avoid = names(body?.avoid);
   const phase = clean(body?.phase, 30) || 'Follicular';
+  const range: number[] = Array.isArray(body?.proteinPerMeal) ? body.proteinPerMeal.map(Number) : [];
+  const proteinPerMeal: [number, number] | undefined =
+    range.length === 2 && range.every((n) => Number.isFinite(n) && n >= 10 && n <= 120) && range[0] <= range[1]
+      ? [Math.round(range[0]), Math.round(range[1])]
+      : undefined;
 
   if (ingredients.length === 0) {
     return NextResponse.json({ error: 'ingredients are required' }, { status: 400 });
@@ -40,7 +45,7 @@ export async function POST(request: Request) {
   try {
     const db = createAdminClient();
     const existingTitles = await listCatalogTitles(db, language);
-    const text = await generateJson(buildGeneratePrompt({ ingredients, phase, dietary, language, existingTitles, likes, avoid }));
+    const text = await generateJson(buildGeneratePrompt({ ingredients, phase, dietary, language, existingTitles, likes, avoid, proteinPerMeal }));
     const recipes = parseRecipesJson(text, language);
     if (recipes.length === 0) {
       return NextResponse.json({ error: 'The AI did not return valid recipes. Try again.' }, { status: 502 });

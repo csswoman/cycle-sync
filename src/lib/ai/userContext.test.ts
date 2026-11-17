@@ -156,3 +156,17 @@ describe('input validation', () => {
     expect(validDate('tomorrow')).toBeUndefined();
   });
 });
+
+describe('profile line', () => {
+  const base = empty;
+  it('tells the assistant not to assume PMOS for a user without it', () => {
+    const regular = buildClinicalContext({ ...rawEmpty, onboarding: { goal: 'performance', diagnosis: 'no', regularity: 'regular' } });
+    expect(formatUserContext({ ...base, ...regular }, 'es')).toContain('ciclos regulares sin SOP/PMOS');
+    const irregular = buildClinicalContext({ ...rawEmpty, onboarding: { goal: 'wellness', diagnosis: 'no', regularity: 'irregular' } });
+    expect(formatUserContext({ ...base, ...irregular }, 'en')).toContain('do not assume PMOS');
+  });
+  it('marks diagnosed PMOS', () => {
+    const pmos = buildClinicalContext({ ...rawEmpty, onboarding: { diagnosis: 'yes', regularity: 'regular' } });
+    expect(formatUserContext({ ...base, ...pmos }, 'es')).toContain('tiene SOP/PMOS diagnosticado o en sospecha');
+  });
+});

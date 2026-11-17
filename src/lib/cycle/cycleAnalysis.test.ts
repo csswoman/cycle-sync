@@ -45,6 +45,22 @@ describe('cycleHealthFlags with bleeding intensity', () => {
     expect(cycleHealthFlags(periods, new Date(2026, 3, 25))).not.toContain('heavyAfterGap');
   });
 });
+
+describe('cycleHealthFlags with period pain', () => {
+  const periods = [
+    { start_date: '2026-06-01', end_date: '2026-06-05' },
+    { start_date: '2026-06-29', end_date: '2026-07-03' },
+    { start_date: '2026-07-27', end_date: '2026-07-31' },
+  ];
+  const pain = (date: string, value: number) => ({ date, pain: value });
+  it('flags severe pain in two of the last three periods', () => {
+    const flags = cycleHealthFlags(periods, new Date(2026, 7, 5), [pain('2026-06-30', 8), pain('2026-07-27', 7)]);
+    expect(flags).toContain('severePain');
+  });
+  it('does not flag one painful period or moderate pain', () => {
+    expect(cycleHealthFlags(periods, new Date(2026, 7, 5), [pain('2026-06-30', 9), pain('2026-07-27', 5)])).not.toContain('severePain');
+  });
+});
 describe('analyzeCycles', () => {
   it('reports exact spans, range, mean and variation', () => {
     const starts = ['2025-01-01', '2025-01-29', '2025-02-26', '2025-03-26'];

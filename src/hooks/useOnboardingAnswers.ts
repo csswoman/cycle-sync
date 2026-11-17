@@ -1,43 +1,30 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
-import {
-  loadOnboardingAnswers,
-  saveOnboardingAnswers,
-  type OnboardingAnswers,
-} from '@/features/setup/onboarding';
+import { useEffect } from 'react';
+import { cycleProfile, showsPmosTools, type CycleProfile, type OnboardingAnswers } from '@/features/setup/onboarding';
+import { ensureProfileLoaded, useProfileStore } from '@/stores/profileStore';
 
 /**
- * Questionnaire answers: the local copy is returned right away and replaced by
- * `cycle_config.onboarding_answers` once it arrives (and cached locally), so a new device
- * does not lose contraception and goal.
+ * Questionnaire answers from the shared profile store: the local copy right away, replaced by
+ * `cycle_config.onboarding_answers` once it arrives. Loaded once for the whole app.
  */
 export function useOnboardingAnswers(): OnboardingAnswers {
-  const [answers, setAnswers] = useState<OnboardingAnswers>({});
-  useEffect(() => {
-    let cancelled = false;
-    setAnswers(loadOnboardingAnswers());
-    (async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        const user = session?.user;
-        if (!user) return;
-        const { data, error } = await supabase
-          .from('cycle_config')
-          .select('onboarding_answers')
-          .eq('user_id', user.id)
-          .maybeSingle();
-        if (error || cancelled) return;
-        const remote = (data as { onboarding_answers?: OnboardingAnswers | null } | null)?.onboarding_answers;
-        if (remote && typeof remote === 'object') {
-          saveOnboardingAnswers(remote);
-          setAnswers(remote);
-        }
-      } catch {
-        // Offline or column missing: keep the local copy.
-      }
-    })();
-    return () => { cancelled = true; };
-  }, []);
+  const answers = useProfileStore((s) => s.answers);
+  useEffect(() => { void ensureProfileLoaded(); }, []);
   return answers;
+}
+
+/** True once the local copy of the answers has been read, to avoid showing then hiding things. */
+export function useProfileLoaded(): boolean {
+  const loaded = useProfileStore((s) => s.loaded);
+  useEffect(() => { void ensureProfileLoaded(); }, []);
+  return loaded;
+}
+
+export function useCycleProfile(): CycleProfile {
+  return cycleProfile(useOnboardingAnswers());
+}
+
+/** Whether PMOS-specific sections should be shown to this user (see `showsPmosTools`). */
+export function usePmosToolsVisible(): boolean {
+  return showsPmosTools(useOnboardingAnswers());
 }

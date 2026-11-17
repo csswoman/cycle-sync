@@ -7,6 +7,11 @@ export interface Exercise {
     target: string;
     instructions: string[];
     secondaryMuscles?: string[];
+    /** Set when the exercise was copied from a program (those have a video instead of a GIF). */
+    videoUrl?: string | null;
+    sets?: number;
+    reps?: string;
+    restSeconds?: number;
 }
 
 export type VideoCategory = 'gym' | 'dance' | 'yoga' | 'pilates';

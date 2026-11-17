@@ -11,6 +11,11 @@ export interface PMOSMetricEntry {
   weight_kg: number | null;
   waist_cm: number | null;
   hip_cm: number | null;
+  /** At the navel. */
+  abdomen_cm?: number | null;
+  chest_cm?: number | null;
+  arm_cm?: number | null;
+  thigh_cm?: number | null;
   systolic?: number | null;
   diastolic?: number | null;
   meal_slot?: 'breakfast' | 'lunch' | 'snack' | 'dinner' | null;

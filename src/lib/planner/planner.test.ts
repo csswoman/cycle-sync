@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { addDays, weekDays, weekStartOf } from './week';
-import { buildGroceryList } from './grocery';
+import { buildGroceryList, groceryLabel } from './grocery';
 import { parsePlanJson } from './plan';
 
 describe('week helpers', () => {
@@ -21,10 +21,45 @@ describe('buildGroceryList', () => {
       ['arroz'],
     );
     expect(list.map((i) => i.label)).toEqual(['Espinaca', 'Huevos', 'Limón']);
-    expect(list.find((i) => i.key === 'huevos')?.count).toBe(2);
+    expect(list.find((i) => i.key === 'huevo')?.count).toBe(2);
   });
 });
 
+describe('groceryLabel', () => {
+  it('drops preparation and size words', () => {
+    expect(groceryLabel('zanahoria picada')).toBe('Zanahoria');
+    expect(groceryLabel('cebolla roja grande en juliana fina')).toBe('Cebolla roja');
+    expect(groceryLabel('zanahoria cruda rallada')).toBe('Zanahoria');
+    expect(groceryLabel('cebolla finamente picada')).toBe('Cebolla');
+    expect(groceryLabel('harina de arroz o harina de trigo')).toBe('Harina de arroz');
+    expect(groceryLabel('jugo de 5 limones')).toBe('Limones');
+    expect(groceryLabel('diente de ajo')).toBe('Ajo');
+    expect(groceryLabel('aceite de oliva extra virgen')).toBe('Aceite');
+  });
+  it('merges lemon juice, whole lemons and every oil into one line each', () => {
+    const list = buildGroceryList([['jugo de 5 limones', 'aceite de oliva'], ['limón', 'aceite vegetal', 'aceite']], []);
+    expect(list.map((i) => i.label).sort()).toEqual(['Aceite', 'Limón'].sort());
+  });
+  it('merges the same vegetable written several ways', () => {
+    const list = buildGroceryList([['zanahoria picada', '2 zanahorias'], ['zanahoria en cubos']], []);
+    expect(list).toHaveLength(1);
+    expect(list[0].count).toBe(2); // counted once per meal
+  });
+  it('consolidates 1 tomate, tomates, 500g de tomates and queso without repeats and skips agua tibia', () => {
+    const list = buildGroceryList(
+      [
+        ['1 tomate', '30g de queso', '1-2 cucharadas de agua tibia si es necesario'],
+        ['tomates en rodajas', 'queso rallado', '250ml de agua'],
+        ['500g de tomates muy maduros', '1/2 taza de queso fresco', 'agua tibia'],
+      ],
+      [],
+    );
+    expect(list.map((i) => i.label)).toEqual(['Queso', 'Tomate']);
+    expect(list.find((i) => i.key === 'tomate')?.count).toBe(3);
+    expect(list.find((i) => i.key === 'queso')?.count).toBe(3);
+    expect(list.find((i) => i.key.includes('agua'))).toBeUndefined();
+  });
+});
 describe('parsePlanJson', () => {
   const ids = new Set(['v1']);
   it('keeps valid rows and drops invalid ones', () => {

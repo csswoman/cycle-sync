@@ -1,6 +1,6 @@
 import { addDays, daysBetween, parseLocalDate, toISODate as toIso, type PeriodInput } from './cycleEngine';
 import { activePregnancy, cyclePairs, predictionsPaused, type Pregnancy } from './pregnancy';
-import { heavyAfterGap, heavyPeriods, type BleedingSign } from './bleeding';
+import { heavyAfterGap, heavyPeriods, periodBleedingDays, type BleedingSign } from './bleeding';
 
 export type Rating = 'normal' | 'abnormal';
 
@@ -81,9 +81,13 @@ export function analyzeCycles(periods: PeriodInput[], now: Date = new Date(), pr
  * Patterns worth raising with a clinician. Thresholds follow the 2023 International Evidence-based
  * Guideline for PCOS (irregular cycles in adults: shorter than 21 or longer than 35 days, fewer
  * than 8 cycles a year, or any single cycle longer than 90 days) and FIGO (bleeding longer than
- * 8 days is prolonged). They describe the log, they are not a diagnosis.
+ * 8 days is prolonged). Severe period pain that repeats is flagged because it is the most common
+ * reason endometriosis goes unnoticed. They describe the log, they are not a diagnosis.
  */
-export type CycleFlag = 'noPeriod90' | 'longCycles' | 'shortCycles' | 'fewPeriodsYear' | 'longBleeding' | 'heavyBleeding' | 'heavyAfterGap';
+export type CycleFlag = 'noPeriod90' | 'longCycles' | 'shortCycles' | 'fewPeriodsYear' | 'longBleeding' | 'heavyBleeding' | 'heavyAfterGap' | 'severePain';
+
+/** Pain at or above this (0-10) on any day of a period counts as severe. */
+export const SEVERE_PAIN_MIN = 7;
 
 export const NO_PERIOD_DAYS = 90;
 export const MIN_CYCLES_PER_YEAR = 8;
@@ -129,6 +133,10 @@ export function cycleHealthFlags(periods: PeriodInput[], now: Date = new Date(),
   if (bleeds.filter((n) => n > PROLONGED_BLEEDING_DAYS).length >= 2) flags.push('longBleeding');
   if (heavyPeriods(periods, signs).length > 0) flags.push('heavyBleeding');
   if (heavyAfterGap(periods, signs)) flags.push('heavyAfterGap');
+  // Two of the last three periods with severe pain make it a pattern rather than one bad month.
+  const lastThree = [...periods].sort((a, b) => a.start_date.localeCompare(b.start_date)).slice(-3);
+  const painful = lastThree.filter((p) => periodBleedingDays(signs, p).some((s) => (s.pain ?? 0) >= SEVERE_PAIN_MIN));
+  if (painful.length >= 2) flags.push('severePain');
 
   return flags;
 }
