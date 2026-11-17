@@ -2,7 +2,12 @@
 
 Fecha: 2026-11-16. Basado en la revisión del código de ese día.
 
-Fuera de este plan: recordatorios push (medicación, blíster, reposición, cribados, regla atrasada). Quedan para la app Android. Donde una fase necesita avisar de algo, el aviso es solo dentro de la app (banner o tarjeta).
+Fuera de este plan:
+
+- Recordatorios push (medicación, blíster, reposición, cribados, regla atrasada). Quedan para la app Android.
+- Datos de iPhone (Apple Health). La app es personal por ahora y solo se usa en Android.
+
+Donde una fase necesita avisar de algo, el aviso es solo dentro de la app (banner o tarjeta).
 
 Las traducciones se pulen al final. Cada fase escribe sus textos ES/EN en línea, como hace hoy el código.
 
@@ -20,7 +25,6 @@ Las traducciones se pulen al final. Cada fase escribe sus textos ES/EN en línea
 | 7 | Citas, diagnóstico y efectos secundarios | L | Sí |
 | 8 | Privacidad: borrar cuenta, exportar datos, bloqueo | M | No |
 | 9 | Buscando embarazo y embarazo | L | Sí |
-| 10 | Datos de iPhone (Apple Health por webhook) | M | No |
 
 El orden va de menor a mayor esfuerzo dentro de lo que más se usa a diario. Dos excepciones:
 
@@ -300,23 +304,6 @@ Todas respetan `MIN_GROUP` y se redactan como observación.
 **Tests.** `pregnancy.test.ts`, y casos en `cycleEngine.test.ts`, `cycleAnalysis.test.ts` y `screening.test.ts`.
 
 **Listo cuando.** Con un embarazo activo no aparece ninguna predicción ni alerta de retraso, y al terminar, la media de ciclos no cambia por ese intervalo.
-
-## Fase 10. Datos de iPhone
-
-**Por qué.** Tras quitar Fitbit solo queda Health Connect, que es Android.
-
-**Enfoque.** El webhook actual (`src/app/api/health/webhook/route.ts`) recibe JSON de una app puente. En iPhone hay apps que envían Apple Health a una URL del mismo modo. Antes de programar hay que confirmar el formato exacto del JSON de la app elegida.
-
-**Cambios.**
-
-- `src/lib/health/records.ts`: `normalizeAppleExport(payload, tz)` que produce los mismos `HealthRecord`, con `source: 'apple_health'`.
-- El webhook detecta el formato y elige el normalizador. `preferDevice` trata `apple_health` como dispositivo.
-- `HealthWebhookSettings.tsx`: instrucciones para iPhone.
-- Si la app puente lo permite, traer también temperatura de muñeca para apoyar la detección de ovulación.
-
-**Tests.** Casos nuevos en `records.test.ts` con un payload real de ejemplo.
-
-**Listo cuando.** Un iPhone envía pasos y sueño y aparecen en el dashboard igual que los de Android.
 
 ---
 

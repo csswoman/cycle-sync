@@ -37,3 +37,8 @@ next-env.d.ts
 public/sw*
 public/swe-worker*
 .env.local.bak*
+
+# Local tooling and unused package manager files
+.kiro/
+pnpm-lock.yaml
+pnpm-workspace.yaml
