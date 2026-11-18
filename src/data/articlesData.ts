@@ -2154,5 +2154,137 @@ export const IN_APP_ARTICLES: InAppArticle[] = [
         'Warning signs: constant fatigue, poor sleep, feeling cold, hair loss, irritability, low performance, or cycle changes. If they appear, raise your calories and seek care.'
       ]
     }
+  },
+  {
+    id: 'metodos-entrenamiento-aerobico',
+    category: 'training',
+    targetAudience: 'all',
+    readTimeMinutes: 6,
+    imageUrl: 'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=800&auto=format&fit=crop&q=80',
+    tags: ['cardio', 'hiit', 'liss', 'fartlek', 'tabata', 'entrenamiento-aerobico'],
+    es: {
+      title: 'Métodos de entrenamiento aeróbico: continuo, fartlek, intervalos, HIIT y LISS',
+      summary: 'No todo el cardio es igual. Conoce los métodos principales, cómo se estructura cada uno (duración, intensidad y descansos) y cuál conviene según tu nivel y tu objetivo.',
+      keyTakeaway: 'El LISS (más de 45 minutos al 60 a 70% de tu FCmáx) es la base: se puede hacer 4 o más veces por semana y casi no genera desgaste. El HIIT (90 a 100% de FCmáx en periodos cortos) es potente pero exigente: 3 sesiones por semana o menos.',
+      regularCycleTips: 'En la fase folicular y alrededor de la ovulación suele tolerarse mejor la intensidad: es buen momento para intervalos o HIIT. En la fase lútea y durante la menstruación, el LISS o el continuo uniforme suelen sentirse mejor.',
+      pmosTips: 'Con PMOS, el LISS y caminar a diario ayudan a mejorar la sensibilidad a la insulina sin elevar demasiado el cortisol. Si haces HIIT, limítalo a 1 o 2 sesiones por semana y nunca en días seguidos.',
+      appAction: 'Registra tus sesiones de cardio en el Planificador indicando el método (LISS, intervalos o HIIT) para que puedas ver cómo se reparten a lo largo de tu ciclo.',
+      fullText: [
+        'Qué es el entrenamiento aeróbico: Actividad de intensidad baja a moderada y de larga duración que involucra la mayoría de los grupos musculares. El cuerpo usa todos sus sistemas energéticos, pero el oxígeno es el protagonista: cuanto más oxígeno disponible, más grasa puede usar como combustible. Es el tipo de entrenamiento más accesible: económico, fácil de practicar y apto para casi cualquier persona.',
+        'Método continuo uniforme: Trabajo sin pausas a un ritmo constante; en carrera, a la misma velocidad todo el tiempo. Para la quema de grasa se recomienda mantenerse entre el 55 y el 75% de la frecuencia cardiaca máxima (FCmáx), alrededor del 65%, durante 45 minutos o más.',
+        'Método continuo variable: La intensidad cambia durante la sesión, ya sea por el terreno, por decisión propia o de forma planificada. Dura de 30 a 60 minutos y alterna periodos intensos de 1 a 10 minutos con periodos moderados que permiten recuperarse. Ejemplo: 60 minutos en 3 series de 8 minutos al 90% de FCmáx seguidos de 12 minutos al 65%.',
+        'Fartlek: Una versión del continuo variable donde el ritmo y la intensidad son libres, como al correr al aire libre o andar en bici por terreno irregular. Como el cuerpo nunca se acomoda a un mismo ritmo, sigue generando adaptaciones.',
+        'Método fraccionado o por intervalos: Alterna periodos de esfuerzo con periodos de recuperación. La clave es que el descanso no sea más largo que el esfuerzo. El ejemplo clásico es el Tabata: 8 ciclos de 20 segundos de trabajo intenso y 10 segundos de descanso (4 minutos en total).',
+        'HIIT (entrenamiento interválico de alta intensidad): Periodos cortos de trabajo al 90 a 100% de FCmáx con pausas activas alrededor del 60% de FCmáx. A diferencia del Tabata, aquí el descanso suele ser el doble que el trabajo (relación 1:2). Referencia: unos 20 minutos, 3 veces por semana o menos, para personas con experiencia. Ejemplo de 15 minutos: sentadilla con salto, jumping jacks, desplantes con salto, esquiador y salto a plancha, cada uno 20 segundos de trabajo por 40 de descanso, repitiendo el circuito 3 veces.',
+        'Qué pasa con la grasa en el HIIT: Durante la sesión se usa sobre todo glucógeno, no grasa. Después aparece el EPOC (el consumo extra de oxígeno tras el ejercicio) y aumentan hormonas que favorecen la movilización de grasa, como las catecolaminas. El efecto existe, pero es moderado: suma una parte pequeña de lo que gastaste en la sesión, no un metabolismo acelerado durante días.',
+        'LISS (entrenamiento prolongado de baja intensidad): Cardio constante donde lo importante es la duración. Referencia: más de 45 minutos al 60 a 70% de FCmáx, sin intervalos, 4 o más veces por semana, apto para principiantes y avanzadas. Como es suave, se puede hacer con más frecuencia y evita el impacto en tendones, articulaciones y músculos. Ejemplos: caminar a buen ritmo 45 a 60 minutos, bici, natación, elíptica o remo 30 a 60 minutos, senderismo 45 a 90 minutos, o una clase de baile de intensidad moderada.',
+        'Cuál elegir: Si empiezas, el LISS y el continuo uniforme son la base. Cuando ya tienes condición, agrega intervalos o HIIT 1 a 3 veces por semana. Recuerda que, para perder grasa, lo que más pesa es el balance de energía de toda la semana, no el método que elijas.'
+      ]
+    },
+    en: {
+      title: 'Aerobic Training Methods: Continuous, Fartlek, Intervals, HIIT, and LISS',
+      summary: 'Not all cardio is the same. Learn the main methods, how each one is structured (duration, intensity, and rest), and which one suits your level and goal.',
+      keyTakeaway: 'LISS (over 45 minutes at 60 to 70% of your max heart rate) is the foundation: you can do it 4 or more times a week with little wear and tear. HIIT (90 to 100% of max HR in short bursts) is powerful but demanding: 3 sessions a week or fewer.',
+      regularCycleTips: 'In the follicular phase and around ovulation, intensity is usually better tolerated: a good time for intervals or HIIT. In the luteal phase and during your period, LISS or steady continuous work often feels better.',
+      pmosTips: 'With PMOS, LISS and daily walking help improve insulin sensitivity without raising cortisol too much. If you do HIIT, keep it to 1 or 2 sessions a week and never on back-to-back days.',
+      appAction: 'Log your cardio sessions in the Planner with the method (LISS, intervals, or HIIT) so you can see how they are spread across your cycle.',
+      fullText: [
+        'What aerobic training is: Low-to-moderate intensity, long-duration activity that uses most muscle groups. The body uses all its energy systems, but oxygen is the key player: the more oxygen available, the more fat it can use as fuel. It is the most accessible type of training: inexpensive, easy to do, and suitable for almost anyone.',
+        'Steady continuous method: Non-stop work at a constant pace; in running, the same speed the whole time. For fat burning, the recommendation is to stay between 55 and 75% of maximum heart rate (max HR), around 65%, for 45 minutes or more.',
+        'Variable continuous method: Intensity changes during the session, because of the terrain, by choice, or as planned. It lasts 30 to 60 minutes and alternates hard periods of 1 to 10 minutes with moderate periods that allow recovery. Example: 60 minutes as 3 rounds of 8 minutes at 90% max HR followed by 12 minutes at 65%.',
+        'Fartlek: A version of the variable method where pace and intensity are free, like running outdoors or cycling on uneven terrain. Because the body never settles into one pace, it keeps adapting.',
+        'Interval method: Alternates work periods with recovery periods. The key is that rest is not longer than work. The classic example is Tabata: 8 rounds of 20 seconds of hard work and 10 seconds of rest (4 minutes total).',
+        'HIIT (high-intensity interval training): Short work periods at 90 to 100% of max HR with active rest around 60% of max HR. Unlike Tabata, rest here is usually twice as long as work (1:2 ratio). Reference: about 20 minutes, 3 times a week or fewer, for experienced exercisers. A 15-minute example: jump squats, jumping jacks, jumping lunges, skiers, and jump-to-plank, each 20 seconds of work and 40 of rest, repeating the circuit 3 times.',
+        'What happens to fat in HIIT: During the session the body mainly uses glycogen, not fat. Afterwards comes EPOC (extra oxygen consumption after exercise) and a rise in hormones that help mobilize fat, such as catecholamines. The effect is real but moderate: it adds a small share of what you burned during the session, not a metabolism that stays elevated for days.',
+        'LISS (low-intensity steady state): Steady cardio where duration is what matters. Reference: over 45 minutes at 60 to 70% of max HR, no intervals, 4 or more times a week, suitable for beginners and advanced exercisers. Because it is gentle, you can do it more often and it spares tendons, joints, and muscles. Examples: brisk walking for 45 to 60 minutes; cycling, swimming, elliptical, or rowing for 30 to 60 minutes; hiking for 45 to 90 minutes; or a moderate dance class.',
+        'Which to choose: If you are starting out, LISS and steady continuous work are the foundation. Once you have built some fitness, add intervals or HIIT 1 to 3 times a week. Remember that for fat loss, what matters most is your energy balance across the week, not the method you pick.'
+      ]
+    }
+  },
+  {
+    id: 'zonas-frecuencia-cardiaca-karvonen',
+    category: 'training',
+    targetAudience: 'all',
+    readTimeMinutes: 6,
+    imageUrl: 'https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?w=800&auto=format&fit=crop&q=80',
+    tags: ['frecuencia-cardiaca', 'zonas-de-entrenamiento', 'karvonen', 'fat-max', 'borg', 'cardio'],
+    es: {
+      title: 'Zonas de frecuencia cardiaca: cómo calcular la tuya con la fórmula de Karvonen',
+      summary: 'Calcular tu zona de entrenamiento como un simple porcentaje de tu frecuencia máxima es un error común. Aprende a estimar tu FCmáx, a usar tu frecuencia en reposo y a reconocer cada zona.',
+      keyTakeaway: 'Tu frecuencia objetivo = ((FCmáx − FC en reposo) × % de intensidad) + FC en reposo. La zona 2 (60 a 70%) es la de manejo de peso, pero la "zona quema grasa" es individual: puede estar entre el 50 y el 75% según la persona.',
+      regularCycleTips: 'En la fase lútea tu frecuencia en reposo suele subir unos cuantos latidos y el mismo ritmo se siente más pesado. Mide tu FC en reposo durante la fase folicular o usa un promedio semanal, y apóyate en la escala de esfuerzo percibido.',
+      pmosTips: 'Con PMOS, pasar la mayor parte de tu cardio en zona 2 (donde puedes hablar en frases completas) mejora la capacidad de usar grasa y la sensibilidad a la insulina sin sobrecargar al sistema de estrés.',
+      appAction: 'Revisa tu frecuencia cardiaca en reposo en el widget de salud del Inicio y úsala en la fórmula de Karvonen para calcular tus zonas.',
+      fullText: [
+        'Paso 1, estima tu FCmáx: La fórmula de Fox (220 − edad) se diseñó en población sedentaria y se usa para personas que hacen ejercicio recreativo. La de Tanaka (208 − 0.7 × edad) se estudió en deportistas y se usa para personas bien entrenadas. Ambas se basan sobre todo en datos de hombres; para mujeres existe también la fórmula de Gulati (206 − 0.88 × edad). Todas son estimaciones con un margen de error de unos 10 latidos.',
+        'Por qué no basta con un porcentaje: Es común pensar "si mi FCmáx es 190, el 70% son 133 ppm". Eso supone que tu frecuencia en reposo es 0, y nadie vive con 0 latidos. Cada persona tiene niveles de esfuerzo distintos, así que no se pueden aplicar las mismas pulsaciones a dos personas diferentes.',
+        'Paso 2, usa la fórmula de Karvonen: FC objetivo = ((FCmáx − FC en reposo) × % de intensidad) + FC en reposo. Ejemplo con FCmáx de 190 y FC en reposo de 44: ((190 − 44) × 0.7) + 44 = 146 ppm al 70%, no 133. Mide tu FC en reposo al despertar, antes de levantarte, varios días seguidos.',
+        'Las 5 zonas de entrenamiento: Zona 1 (50 a 60%): recuperación, para personas muy desentrenadas. Zona 2 (60 a 70%): manejo de peso, para la población general. Zona 3 (70 a 80%): mejora de la capacidad aeróbica, para quien ya tiene buena condición. Zona 4 (80 a 90%): umbral anaeróbico, para deportistas de alto nivel. Zona 5 (90 a 100%): alta intensidad, para deportistas con supervisión.',
+        'Ejemplo práctico: Una mujer de 30 años con FC en reposo de 65 ppm tiene una FCmáx estimada de 190 (Fox). Su zona 2 va de ((190 − 65) × 0.6) + 65 = 140 ppm a ((190 − 65) × 0.7) + 65 = 153 ppm. Como referencia, con una FC en reposo de 60 ppm la zona 2 queda en 144 a 158 ppm a los 20 años, 138 a 151 a los 30, 132 a 144 a los 40 y 126 a 137 a los 50.',
+        'Qué es el Fat Max: Concepto del fisiólogo Asker Jeukendrup: la intensidad a la que tu cuerpo oxida más grasa por minuto. Suele estar en un rango de baja a moderada intensidad, pero es muy individual: para una persona puede estar al 50% de su FCmáx y para otra al 75%. No existe una "zona quema grasa" igual para todas. Se mide con exactitud en laboratorio, analizando el oxígeno y el dióxido de carbono que respiras, y mejora con el entrenamiento de resistencia.',
+        'Sin pulsómetro, usa la escala de Borg: Califica tu esfuerzo del 6 al 20. De 6 a 7, ninguno; 8 a 9, muy, muy ligero; 10 a 11, muy ligero; 12 a 13, bastante ligero; 14 a 15, algo pesado; 16 a 17, pesado; 18 a 19, muy pesado; 20, máximo. Multiplicar el número por 10 da una estimación aproximada de tu frecuencia cardiaca. Para zona 2, apunta a 11 a 13: puedes hablar, pero no cantar.'
+      ]
+    },
+    en: {
+      title: 'Heart Rate Zones: How to Calculate Yours with the Karvonen Formula',
+      summary: 'Setting your training zone as a simple percentage of your max heart rate is a common mistake. Learn to estimate your max HR, use your resting heart rate, and recognize each zone.',
+      keyTakeaway: 'Your target heart rate = ((max HR − resting HR) × % intensity) + resting HR. Zone 2 (60 to 70%) is the weight-management zone, but the "fat-burning zone" is individual: it can sit anywhere from 50 to 75% depending on the person.',
+      regularCycleTips: 'In the luteal phase your resting heart rate usually rises a few beats and the same pace feels harder. Measure resting HR during the follicular phase or use a weekly average, and lean on the perceived exertion scale.',
+      pmosTips: 'With PMOS, spending most of your cardio in zone 2 (where you can speak in full sentences) improves your ability to use fat and your insulin sensitivity without overloading your stress system.',
+      appAction: 'Check your resting heart rate in the health widget on the Home screen and plug it into the Karvonen formula to calculate your zones.',
+      fullText: [
+        'Step 1, estimate your max HR: The Fox formula (220 − age) was designed in sedentary people and is used for recreational exercisers. The Tanaka formula (208 − 0.7 × age) was studied in athletes and is used for well-trained people. Both rely mostly on data from men; for women there is also the Gulati formula (206 − 0.88 × age). All are estimates with an error margin of about 10 beats.',
+        'Why a percentage is not enough: It is common to think "if my max HR is 190, 70% is 133 bpm." That assumes your resting heart rate is 0, and nobody lives at 0 beats. Each person has different effort levels, so the same heart rates cannot be applied to two different people.',
+        'Step 2, use the Karvonen formula: Target HR = ((max HR − resting HR) × % intensity) + resting HR. Example with max HR of 190 and resting HR of 44: ((190 − 44) × 0.7) + 44 = 146 bpm at 70%, not 133. Measure your resting HR when you wake up, before getting out of bed, several days in a row.',
+        'The 5 training zones: Zone 1 (50 to 60%): recovery, for people who are very deconditioned. Zone 2 (60 to 70%): weight management, for the general population. Zone 3 (70 to 80%): aerobic capacity, for people already in good shape. Zone 4 (80 to 90%): anaerobic threshold, for high-level athletes. Zone 5 (90 to 100%): high intensity, for supervised athletes.',
+        'Worked example: A 30-year-old woman with a resting HR of 65 bpm has an estimated max HR of 190 (Fox). Her zone 2 runs from ((190 − 65) × 0.6) + 65 = 140 bpm to ((190 − 65) × 0.7) + 65 = 153 bpm. For reference, with a resting HR of 60 bpm, zone 2 is 144 to 158 bpm at age 20, 138 to 151 at 30, 132 to 144 at 40, and 126 to 137 at 50.',
+        'What Fat Max is: A concept from exercise physiologist Asker Jeukendrup: the intensity at which your body oxidizes the most fat per minute. It usually falls in the low-to-moderate range, but it is highly individual: for one person it may be 50% of max HR and for another 75%. There is no single "fat-burning zone" for everyone. It is measured precisely in a lab by analyzing the oxygen and carbon dioxide you breathe, and it improves with endurance training.',
+        'No heart rate monitor? Use the Borg scale: Rate your effort from 6 to 20. 6 to 7, none; 8 to 9, very, very light; 10 to 11, very light; 12 to 13, fairly light; 14 to 15, somewhat hard; 16 to 17, hard; 18 to 19, very hard; 20, maximal. Multiplying the number by 10 gives a rough estimate of your heart rate. For zone 2, aim for 11 to 13: you can talk, but not sing.'
+      ]
+    }
+  },
+  {
+    id: 'ambiente-optimo-oxidar-grasa',
+    category: 'training',
+    targetAudience: 'all',
+    readTimeMinutes: 6,
+    imageUrl: 'https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=800&auto=format&fit=crop&q=80',
+    tags: ['oxidacion-de-grasa', 'l-carnitina', 'mitocondrias', 'cardio', 'fuerza', 'cortisol'],
+    es: {
+      title: 'Cómo crear el ambiente óptimo para oxidar grasa (y los límites del cardio)',
+      summary: 'Quemar grasa depende de más que hacer cardio: del orden de tu entrenamiento, de tus mitocondrias y de tu alimentación. También conoce las desventajas de abusar del cardio largo.',
+      keyTakeaway: 'Haz pesas antes del cardio, come proteína suficiente y combina fuerza con aeróbico. El cardio es útil, pero en exceso consume mucho tiempo para pocas calorías y puede costarte masa muscular.',
+      regularCycleTips: 'En la fase lútea el cuerpo tiende a usar más grasa como combustible durante el ejercicio moderado, así que es buen momento para sesiones de LISS después de las pesas.',
+      pmosTips: 'Con PMOS, conservar y ganar músculo es clave para manejar la glucosa. Prioriza la fuerza y evita sesiones de cardio muy largas que eleven el cortisol; caminar a diario suele ser mejor aliado.',
+      appAction: 'En el Planificador, programa tus días de fuerza con el cardio al final de la sesión y revisa que tu proteína diaria esté dentro de tu objetivo.',
+      fullText: [
+        'Las 5 condiciones para oxidar grasa: Niveles bajos de glucosa y glucógeno muscular; suficiente L-carnitina, que transporta la grasa al interior de la célula; buena cantidad y funcionamiento de mitocondrias; buena capacidad de transportar ácidos grasos por la sangre; y buena capacidad lipolítica, es decir, la capacidad de movilizar la grasa almacenada para usarla como energía.',
+        'Pesas primero, cardio después: El entrenamiento de fuerza (sobre todo con cargas moderadas a pesadas y series de 8 a 12 repeticiones) usa principalmente glucosa y glucógeno a través de la glucólisis. Al hacerlo primero, estimulas el músculo y bajas tus reservas de glucógeno, así el cardio que sigue puede apoyarse más en la grasa.',
+        'L-carnitina: tu cuerpo la produce: Los suplementos de L-carnitina no han demostrado ayudar a perder grasa en personas sanas. Lo que sí funciona es darle a tu cuerpo lo necesario para producirla: proteína suficiente (con los aminoácidos lisina y metionina), además de vitamina C, vitamina B6, niacina y hierro. El ejercicio regular, tanto aeróbico como de fuerza, también aumenta su uso en el músculo.',
+        'Más y mejores mitocondrias: Las mitocondrias son donde se quema la grasa. Para aumentarlas: ejercicio aeróbico 3 a 5 veces por semana durante 30 a 60 minutos; intervalos (por ejemplo, 30 segundos rápidos seguidos de 1 a 2 minutos caminando, durante 20 a 30 minutos); fuerza 2 a 3 veces por semana con grupos musculares grandes; y una dieta con frutas y verduras ricas en antioxidantes como bayas, uvas, zanahoria, espinaca y nueces.',
+        'Desventaja 1, mucho tiempo para pocas calorías: Una persona de 70 kg que corre 30 minutos gasta unas 245 kcal, más o menos lo mismo que dos mazapanes (260 kcal). Por eso intentar perder grasa solo con cardio exige mucho tiempo. La alimentación y el músculo tienen más peso en el resultado.',
+        'Desventaja 2, pérdida de masa muscular: Mucho volumen aeróbico, sobre todo sin entrenamiento de fuerza y en déficit calórico, puede reducir tu masa muscular y, con ella, tu metabolismo basal.',
+        'Desventaja 3, menos fuerza y potencia: Hay dos tipos de fibras musculares. Las tipo I son de contracción lenta y muy resistentes a la fatiga, ideales para esfuerzos largos. Las tipo II son de contracción rápida y se cansan antes, pero generan fuerza y potencia. Con mucho cardio, parte de las fibras rápidas se vuelven más resistentes y menos potentes; esto puede reducir tu fuerza en la vida diaria y en el deporte. Por eso los maratonistas tienen cerca de 82% de fibras tipo I y los saltadores solo 37%.',
+        'Desventaja 4, más cortisol: Las sesiones aeróbicas muy largas elevan el cortisol, una hormona que degrada tejido, y pueden interferir con las ganancias de fuerza y tamaño muscular. La solución no es dejar el cardio, sino dosificarlo y combinarlo con fuerza.'
+      ]
+    },
+    en: {
+      title: 'How to Create the Optimal Environment for Burning Fat (and the Limits of Cardio)',
+      summary: 'Burning fat depends on more than cardio: the order of your training, your mitochondria, and your nutrition. Also learn the downsides of overdoing long cardio sessions.',
+      keyTakeaway: 'Lift before cardio, eat enough protein, and combine strength with aerobic work. Cardio is useful, but in excess it takes a lot of time for few calories and can cost you muscle.',
+      regularCycleTips: 'In the luteal phase the body tends to use more fat as fuel during moderate exercise, so it is a good time for LISS sessions after lifting.',
+      pmosTips: 'With PMOS, keeping and building muscle is key to managing blood sugar. Prioritize strength and avoid very long cardio sessions that raise cortisol; daily walking is usually a better ally.',
+      appAction: 'In the Planner, schedule your strength days with cardio at the end of the session and check that your daily protein is within your target.',
+      fullText: [
+        'The 5 conditions for burning fat: Low blood glucose and muscle glycogen; enough L-carnitine, which carries fat into the cell; plenty of well-functioning mitochondria; good capacity to transport fatty acids in the blood; and good lipolytic capacity, meaning the ability to mobilize stored fat and use it for energy.',
+        'Weights first, cardio second: Strength training (especially with moderate to heavy loads and sets of 8 to 12 reps) mainly uses glucose and glycogen through glycolysis. Doing it first stimulates the muscle and lowers your glycogen stores, so the cardio that follows can rely more on fat.',
+        'L-carnitine: your body makes it: L-carnitine supplements have not been shown to help healthy people lose fat. What does work is giving your body what it needs to make it: enough protein (with the amino acids lysine and methionine), plus vitamin C, vitamin B6, niacin, and iron. Regular exercise, both aerobic and strength, also increases its use in muscle.',
+        'More and better mitochondria: Mitochondria are where fat is burned. To build them: aerobic exercise 3 to 5 times a week for 30 to 60 minutes; intervals (for example, 30 seconds fast followed by 1 to 2 minutes walking, for 20 to 30 minutes); strength training 2 to 3 times a week with large muscle groups; and a diet with antioxidant-rich fruits and vegetables such as berries, grapes, carrots, spinach, and nuts.',
+        'Downside 1, a lot of time for few calories: A 70 kg person running for 30 minutes burns about 245 kcal, roughly the same as two small peanut candies (260 kcal). That is why trying to lose fat with cardio alone takes a lot of time. Nutrition and muscle have a bigger impact on the result.',
+        'Downside 2, muscle loss: A high volume of aerobic work, especially without strength training and in a calorie deficit, can reduce your muscle mass and, with it, your basal metabolic rate.',
+        'Downside 3, less strength and power: There are two types of muscle fibers. Type I fibers contract slowly and are highly fatigue resistant, ideal for long efforts. Type II fibers contract quickly and tire sooner, but produce strength and power. With a lot of cardio, some fast fibers become more fatigue resistant and less powerful; this can reduce your strength in daily life and sport. That is why marathon runners have about 82% type I fibers and jumpers only 37%.',
+        'Downside 4, more cortisol: Very long aerobic sessions raise cortisol, a hormone that breaks down tissue, and can interfere with gains in strength and muscle size. The answer is not to drop cardio, but to dose it and combine it with strength training.'
+      ]
+    }
   }
 ];

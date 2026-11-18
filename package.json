@@ -14,7 +14,6 @@
     "videos:import": "tsx scripts/import-videos.ts"
   },
   "dependencies": {
-    "@astryxdesign/cli": "^0.7.16",
     "@astryxdesign/core": "^0.7.16",
     "@astryxdesign/theme-neutral": "^0.7.16",
     "@google/generative-ai": "^0.24.1",
@@ -38,6 +37,7 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
+    "@astryxdesign/cli": "^0.7.16",
     "@serwist/turbopack": "^9.5.7",
     "@types/node": "^22.14.0",
     "esbuild": "^0.27.4",

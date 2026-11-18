@@ -67,6 +67,7 @@ export interface Translations {
     signUp: string;
     guestBrowsing: string;
     guestSignIn: string;
+    logout: string;
     guestExplore: string;
     guestModalTitle: string;
     guestModalBody: string;
@@ -248,7 +249,7 @@ export const translations: Record<Language, Translations> = {
         dailyLog: 'Daily Log',
         trends: 'Trends',
         settings: 'Settings',
-        personalizeExperience: 'Personalize Experience',
+        personalizeExperience: 'Personalize experience',
         setupProfile: 'Setup Profile',
         pmosToolkit: 'PMOS Toolkit',
         routines: 'Workouts',
@@ -308,6 +309,7 @@ export const translations: Record<Language, Translations> = {
         signUp: 'Sign Up',
         guestBrowsing: 'Browsing as guest',
         guestSignIn: 'Sign in',
+        logout: 'Log out',
         guestExplore: 'Explore without an account',
         guestModalTitle: 'Create a free account to use this',
         guestModalBody: 'Logging, progress, medications and your personal data are saved to your account. Sign up to unlock them.',
@@ -321,7 +323,7 @@ export const translations: Record<Language, Translations> = {
         help: 'Help',
         createAccount: 'Create Account',
         registerDescription: 'Join CycleSync to start your personalized journey today.',
-        fullNameLabel: 'Full Name',
+        fullNameLabel: 'Full name',
         confirmPasswordLabel: 'Confirm Password',
         registerButton: 'Create Account',
         alreadyHaveAccount: 'Already have an account?',
@@ -331,14 +333,14 @@ export const translations: Record<Language, Translations> = {
         backToLogin: 'Back to Log In',
         settingsTitle: 'Settings',
         profileSection: 'Profile',
-        saveChanges: 'Save Changes',
+        saveChanges: 'Save changes',
         securitySection: 'Security',
-        updatePasswordTitle: 'Update Password',
-        newPasswordLabel: 'New Password',
-        confirmNewPasswordLabel: 'Confirm New Password',
-        updatePasswordButton: 'Update Password',
+        updatePasswordTitle: 'Update password',
+        newPasswordLabel: 'New password',
+        confirmNewPasswordLabel: 'Confirm new password',
+        updatePasswordButton: 'Update password',
         optionalStatement: 'Optional',
-        changePhotoLabel: 'Change Photo',
+        changePhotoLabel: 'Change photo',
         periodHistory: 'Period History',
         addPeriod: 'Add Period',
         periodStartDate: 'Start Date',
@@ -399,7 +401,7 @@ export const translations: Record<Language, Translations> = {
         resetLinkSentDescription: 'We\'ve sent a password reset link to your email. Click the link to set a new password.',
         resetPasswordTitle: 'Set new password',
         resetPasswordDescription: 'Enter your new password below.',
-        resetPasswordButton: 'Update Password',
+        resetPasswordButton: 'Update password',
         passwordResetSuccess: 'Password updated successfully!',
 
         // Magic Link
@@ -431,10 +433,10 @@ export const translations: Record<Language, Translations> = {
         healthWebhookSecretHint: 'Token prefix',
         healthWebhookTokenCreated: 'New URL created and copied to clipboard.',
         healthWebhookCopied: 'Copied to clipboard.',
-        healthWebhookStep1: 'Open HC Webhook → add this URL under Webhooks.',
+        healthWebhookStep1: 'Install the HC Webhook app on Android, open it and add this URL under Webhooks.',
         healthWebhookStep2: 'Grant Health Connect permissions for steps, sleep, heart rate, etc.',
         healthWebhookStep3: 'Choose data types and Save configuration.',
-        healthWebhookStep4: 'Tap Sync Now in HC Webhook or wait for the interval. On Vercel, add SUPABASE_SERVICE_ROLE_KEY (Supabase → Settings → API → service_role).',
+        healthWebhookStep4: 'Tap Sync Now in HC Webhook or wait for the interval.',
         wearableSectionTitle: 'Wearable',
         wearableHealthConnectHint:
             'Galaxy Watch data reaches CycleSync through Health Connect and the HC Webhook app.',
@@ -485,21 +487,21 @@ export const translations: Record<Language, Translations> = {
     es: {
         // Navigation
         overview: 'Resumen',
-        dailyLog: 'Registro Diario',
+        dailyLog: 'Registro diario',
         trends: 'Tendencias',
         settings: 'Configuración',
-        personalizeExperience: 'Personalizar Experiencia',
-        setupProfile: 'Configurar Perfil',
+        personalizeExperience: 'Personalizar experiencia',
+        setupProfile: 'Configurar perfil',
         pmosToolkit: 'Kit de PMOS',
         routines: 'Entrenamientos',
-        mealIdeas: 'Ideas de Comidas',
-        weeklyPlanner: 'Plan Semanal',
+        mealIdeas: 'Ideas de comidas',
+        weeklyPlanner: 'Plan semanal',
         habits: 'Hábitos',
         medications: 'Medicamentos',
 
         // Theme
-        lightMode: 'Modo Claro',
-        darkMode: 'Modo Oscuro',
+        lightMode: 'Modo claro',
+        darkMode: 'Modo oscuro',
 
         // Language
         language: 'Idioma',
@@ -548,6 +550,7 @@ export const translations: Record<Language, Translations> = {
         signUp: 'Regístrate',
         guestBrowsing: 'Navegando como invitada',
         guestSignIn: 'Iniciar sesión',
+        logout: 'Cerrar sesión',
         guestExplore: 'Explorar sin cuenta',
         guestModalTitle: 'Crea una cuenta gratis para usar esto',
         guestModalBody: 'El registro diario, el progreso, las medicinas y tus datos personales se guardan en tu cuenta. Regístrate para desbloquearlos.',
@@ -561,7 +564,7 @@ export const translations: Record<Language, Translations> = {
         help: 'Ayuda',
         createAccount: 'Crear Cuenta',
         registerDescription: 'Únete a CycleSync para comenzar tu viaje personalizado hoy mismo.',
-        fullNameLabel: 'Nombre Completo',
+        fullNameLabel: 'Nombre completo',
         confirmPasswordLabel: 'Confirmar Contraseña',
         registerButton: 'Crear Cuenta',
         alreadyHaveAccount: '¿Ya tienes una cuenta?',
@@ -571,15 +574,15 @@ export const translations: Record<Language, Translations> = {
         backToLogin: 'Volver al Inicio de Sesión',
         settingsTitle: 'Configuración',
         profileSection: 'Perfil',
-        saveChanges: 'Guardar Cambios',
+        saveChanges: 'Guardar cambios',
         securitySection: 'Seguridad',
-        updatePasswordTitle: 'Actualizar Contraseña',
-        newPasswordLabel: 'Nueva Contraseña',
-        confirmNewPasswordLabel: 'Confirmar Nueva Contraseña',
-        updatePasswordButton: 'Actualizar Contraseña',
+        updatePasswordTitle: 'Actualizar contraseña',
+        newPasswordLabel: 'Nueva contraseña',
+        confirmNewPasswordLabel: 'Confirmar nueva contraseña',
+        updatePasswordButton: 'Actualizar contraseña',
         optionalStatement: 'Opcional',
-        changePhotoLabel: 'Cambiar Foto',
-        periodHistory: 'Historial de Periodos',
+        changePhotoLabel: 'Cambiar foto',
+        periodHistory: 'Historial de periodos',
         addPeriod: 'Agregar Periodo',
         periodStartDate: 'Fecha de Inicio',
         periodEndDate: 'Fecha de Fin',
@@ -639,7 +642,7 @@ export const translations: Record<Language, Translations> = {
         resetLinkSentDescription: 'Hemos enviado un enlace para restablecer tu contraseña. Haz clic en el enlace para crear una nueva.',
         resetPasswordTitle: 'Nueva contraseña',
         resetPasswordDescription: 'Ingresa tu nueva contraseña a continuación.',
-        resetPasswordButton: 'Actualizar Contraseña',
+        resetPasswordButton: 'Actualizar contraseña',
         passwordResetSuccess: '¡Contraseña actualizada exitosamente!',
 
         // Magic Link
@@ -651,7 +654,7 @@ export const translations: Record<Language, Translations> = {
         checkSpamFolder: '¿No recibiste el correo? Revisa tu carpeta de spam.',
 
         // Export
-        exportReport: 'Exportar Reporte',
+        exportReport: 'Exportar reporte',
 
             fitbitSync: 'Sincronizar',
         fitbitLoading: 'Verificando conexión...',
@@ -671,10 +674,10 @@ export const translations: Record<Language, Translations> = {
         healthWebhookSecretHint: 'Prefijo del token',
         healthWebhookTokenCreated: 'Nueva URL creada y copiada al portapapeles.',
         healthWebhookCopied: 'Copiado al portapapeles.',
-        healthWebhookStep1: 'Abre HC Webhook → añade esta URL en Webhooks.',
+        healthWebhookStep1: 'Instala la app HC Webhook en Android, ábrela y añade esta URL en Webhooks.',
         healthWebhookStep2: 'Concede permisos de Health Connect (pasos, sueño, frecuencia cardíaca, etc.).',
         healthWebhookStep3: 'Elige tipos de datos y guarda la configuración.',
-        healthWebhookStep4: 'Pulsa Sincronizar ahora en HC Webhook o espera el intervalo. En Vercel, añade SUPABASE_SERVICE_ROLE_KEY (Supabase → Ajustes → API → service_role).',
+        healthWebhookStep4: 'Pulsa Sincronizar ahora en HC Webhook o espera el intervalo.',
         wearableSectionTitle: 'Wearable',
         wearableHealthConnectHint:
             'Los datos del Galaxy Watch llegan a CycleSync mediante Health Connect y la app HC Webhook.',

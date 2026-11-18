@@ -45,5 +45,7 @@ export const VIDEO_TITLE_OVERRIDES: Record<string, string> = {
 };
 
 export function displayVideoTitle(title: string): string {
-  return VIDEO_TITLE_OVERRIDES[title] ?? title;
+  // Brand rule: no emojis in the UI, including third-party titles.
+  const shown = VIDEO_TITLE_OVERRIDES[title] ?? title;
+  return shown.replace(/\p{Extended_Pictographic}\uFE0F?/gu, '').replace(/\s{2,}/g, ' ').replace(/\s+$/, '');
 }

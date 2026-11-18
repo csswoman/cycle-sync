@@ -6,6 +6,8 @@ const revision =
 
 export const { dynamic, dynamicParams, revalidate, generateStaticParams, GET } = createSerwistRoute({
   additionalPrecacheEntries: [{ url: '/~offline', revision }],
+  // Heavy media is cached at runtime by defaultCache (image rules), not precached.
+  globIgnores: ['public/recipes/**', 'public/foods/**', 'public/exercises/**', '**/*.gif'],
   swSrc: 'src/app/sw.ts',
   useNativeEsbuild: true,
 });
