@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Icon } from '@/components/ui/Icon';
+import { getFoodImageUrl } from '@/data/nutritionFoods';
 import {
   FOOD_CATALOG,
   FOOD_CATEGORIES,
@@ -46,6 +47,33 @@ const ACTIVITY_OPTIONS: { id: ActivityLevel; es: string; en: string }[] = [
   { id: 'active', es: 'Activa', en: 'Active' },
 ];
 
+/** Catalog id -> photo id in /public/foods. Entries without a photo get an icon tile. */
+const PHOTO: Record<string, string> = {
+  pollo: 'pechuga-pollo', res: 'ternera-magra', pescado: 'salmon-cocinado', mariscos: 'camaron-gamba', huevo: 'huevo-cocido',
+  tofu: 'tofu-firme', lentejas: 'lentejas-cocidas', garbanzos: 'garbanzos-cocidos', frijoles: 'frijoles-negros',
+  yogur: 'yogur-griego', queso: 'queso-cottage', espinaca: 'espinaca-cruda', brocoli: 'brocoli-cocido', coliflor: 'coliflor',
+  zanahoria: 'zanahoria', tomate: 'tomate', cebolla: 'cebolla', calabacin: 'calabacin', berenjena: 'berenjena',
+  champinones: 'champinones', aguacate: 'aguacate', remolacha: 'remolacha', banano: 'platano-banana', manzana: 'manzana',
+  'frutos-rojos': 'frambuesa', mango: 'mango', citricos: 'naranja', 'papaya-pina': 'pina', avena: 'avena', arroz: 'arroz-blanco',
+  quinoa: 'quinoa', 'papa-camote': 'camote-batata', pan: 'pan-integral', almendras: 'almendras', nueces: 'nueces',
+  chia: 'semillas-chia', linaza: 'semillas-lino', 'semillas-calabaza': 'semillas-calabaza', mani: 'cacahuetes', cacao: 'chocolate-negro',
+  arepa: 'arepa', cachapa: 'cachapa', empanada: 'empanada', tequenos: 'tequenos', patacon: 'patacon',
+  pabellon: 'pabellon', taco: 'taco', pizza: 'pizza', hamburguesa: 'hamburguesa', panqueques: 'panqueques',
+  cerdo: 'cerdo',
+};
+const FoodPhoto: React.FC<{ id: string; dish: boolean }> = ({ id, dish }) => {
+  const [failed, setFailed] = useState(false);
+  const photo = PHOTO[id];
+  if (!photo || failed) {
+    return (
+      <span className="w-full h-full bg-leaf-soft text-leaf flex items-center justify-center">
+        <Icon name={dish ? 'restaurant' : 'plant'} size={20} weight="duotone" />
+      </span>
+    );
+  }
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={getFoodImageUrl(photo)} alt="" loading="lazy" onError={() => setFailed(true)} className="w-full h-full object-cover" />;
+};
 export const FoodPreferencesPanel: React.FC<Props> = ({
   prefs,
   language,
@@ -97,6 +125,37 @@ export const FoodPreferencesPanel: React.FC<Props> = ({
     );
   };
 
+  const renderTile = (id: string, dish: boolean) => {
+    const state = foodState(prefs, id);
+    return (
+      <button
+        key={id}
+        type="button"
+        onClick={() => onSetFood(id, nextFoodState(state))}
+        aria-label={`${foodLabel(id, language)}: ${
+          state === 'like' ? t('me gusta', 'liked') : state === 'avoid' ? t('evito', 'avoided') : t('sin elegir', 'not set')
+        }`}
+        className={`flex items-center gap-2.5 text-left rounded-xl p-1.5 pr-3 min-h-14 border-2 bg-secondary/40 transition-colors ${
+          state === 'like' ? 'border-primary' : state === 'avoid' ? 'border-destructive/50' : 'border-transparent hover:border-border'
+        }`}
+      >
+        <span className={`block size-11 shrink-0 rounded-lg overflow-hidden ${state === 'avoid' ? 'grayscale opacity-50' : ''}`}>
+          <FoodPhoto id={id} dish={dish} />
+        </span>
+        <span className={`flex-1 min-w-0 text-sm font-medium text-balance leading-tight ${state === 'avoid' ? 'text-destructive line-through' : 'text-foreground'}`}>
+          {foodLabel(id, language)}
+        </span>
+        {state !== 'none' && (
+          <Icon
+            name={state === 'like' ? 'favorite' : 'close'}
+            size={16}
+            weight={state === 'like' ? 'fill' : 'bold'}
+            className={`shrink-0 ${state === 'like' ? 'text-primary' : 'text-destructive'}`}
+          />
+        )}
+      </button>
+    );
+  };
   const optionClass = (active: boolean) =>
     `px-4 py-2 rounded-lg text-sm font-medium transition-all ${
       active ? 'bg-primary text-primary-foreground shadow-md shadow-primary/20' : 'bg-secondary text-muted-foreground hover:bg-accent'
@@ -123,19 +182,22 @@ export const FoodPreferencesPanel: React.FC<Props> = ({
           )}
         </div>
 
+        {hasFoods && (
+          <p className="text-sm text-muted-foreground tabular-nums" aria-live="polite">
+            {t(`${prefs.likes.length} que te gustan · ${prefs.avoid.length} que evitas`, `${prefs.likes.length} liked · ${prefs.avoid.length} avoided`)}
+          </p>
+        )}
         {FOOD_CATEGORIES.map((cat) => (
           <div key={cat}>
-            <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
-              {FOOD_CATEGORY_LABELS[cat][language]}
-            </h4>
-            <div className="flex flex-wrap gap-2">
-              {FOOD_CATALOG.filter((f) => f.category === cat).map((f) => renderChip(f.id))}
+            <h4 className="text-sm font-semibold text-foreground mb-3">{FOOD_CATEGORY_LABELS[cat][language]}</h4>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {FOOD_CATALOG.filter((f) => f.category === cat).map((f) => renderTile(f.id, cat === 'dish'))}
             </div>
           </div>
         ))}
 
         <div>
-          <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
+          <h4 className="text-sm font-semibold text-foreground mb-3">
             {t('Otros alimentos o preparaciones', 'Other foods or dishes')}
           </h4>
           <div className="flex flex-col sm:flex-row gap-2">
@@ -229,62 +291,60 @@ export const FoodPreferencesPanel: React.FC<Props> = ({
 
       {/* Dish upgrades */}
       {dishTips.length > 0 && (
-        <div className="bg-card rounded-2xl border border-border p-6 shadow-sm flex flex-col gap-4">
+        <div className="bg-card rounded-2xl border border-border p-6 shadow-sm flex flex-col gap-5">
           <div>
-            <h3 className="text-foreground text-lg font-bold">{t('Cómo mejorar tus platos favoritos', 'How to upgrade your favorite dishes')}</h3>
+            <h3 className="text-foreground text-lg font-semibold text-balance">{t('Cómo mejorar tus platos favoritos', 'How to upgrade your favorite dishes')}</h3>
             <p className="text-muted-foreground text-sm mt-1">
               {t('No tienes que dejarlos: se ajusta la porción y la receta.', 'You do not have to give them up: tune the portion and the recipe.')}
             </p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <ul className="flex flex-col divide-y divide-border">
             {dishTips.map((d) => (
-              <div key={d.id} className="bg-secondary/40 rounded-xl p-4 border border-border/50 flex flex-col gap-2.5">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-bold text-foreground">{d.name}</span>
-                  <span
-                    className={`text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                      d.quality === 'solid'
-                        ? 'bg-leaf/10 text-leaf'
-                        : d.quality === 'tweak'
-                          ? 'bg-blossom-soft text-blossom'
-                          : 'bg-destructive/10 text-destructive'
-                    }`}
-                  >
-                    {d.qualityLabel}
-                  </span>
+              <li key={d.id} className="flex gap-3 py-4 first:pt-0 last:pb-0">
+                <span className="size-12 shrink-0 rounded-xl overflow-hidden">
+                  <FoodPhoto id={d.id} dish />
+                </span>
+                <div className="flex-1 min-w-0 flex flex-col gap-2">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <span className="font-semibold text-foreground">{d.name}</span>
+                    <span
+                      className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                        d.quality === 'solid' ? 'bg-leaf/10 text-leaf' : d.quality === 'tweak' ? 'bg-blossom-soft text-blossom' : 'bg-destructive/10 text-destructive'
+                      }`}
+                    >
+                      {d.qualityLabel}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground text-pretty">{d.summary}</p>
+                  <p className="text-sm text-foreground text-pretty">
+                    <strong className="font-semibold">{t('Porción: ', 'Portion: ')}</strong>
+                    {d.portion}
+                  </p>
+                  <details className="group">
+                    <summary className="flex items-center gap-1.5 min-h-10 cursor-pointer list-none [&::-webkit-details-marker]:hidden text-sm font-medium text-foreground">
+                      <Icon name="chevron_right" size={16} weight="bold" className="text-muted-foreground transition-transform group-open:rotate-90" />
+                      {t(`Cómo mejorarlo (${d.upgrades.length})`, `How to improve it (${d.upgrades.length})`)}
+                    </summary>
+                    <ul className="list-disc pl-9 pb-1 flex flex-col gap-1.5">
+                      {d.upgrades.map((u) => (
+                        <li key={u} className="text-sm text-muted-foreground text-pretty">{u}</li>
+                      ))}
+                    </ul>
+                  </details>
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">{d.summary}</p>
-                <p className="text-xs text-foreground/90 leading-relaxed">
-                  <strong>{t('Porción: ', 'Portion: ')}</strong>
-                  {d.portion}
-                </p>
-                <ul className="list-disc pl-4 flex flex-col gap-1">
-                  {d.upgrades.map((u) => (
-                    <li key={u} className="text-xs text-muted-foreground leading-relaxed">
-                      {u}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              </li>
             ))}
-          </div>
+          </ul>
         </div>
       )}
-
       {/* Suggestions */}
-      <div className="bg-card rounded-2xl border border-border p-6 shadow-sm flex flex-col gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-leaf/10 text-leaf flex items-center justify-center shrink-0">
-            <Icon name="science" size={22} weight="duotone" />
-          </div>
-          <div>
-            <h3 className="text-foreground text-lg font-bold">{t('Sugerencias para completar tu dieta', 'Ideas to round out your diet')}</h3>
-            <p className="text-muted-foreground text-xs sm:text-sm">
-              {t('Primero alimentos que sí toleras, después suplementos.', 'Foods you tolerate first, supplements second.')}
-            </p>
-          </div>
+      <div className="bg-card rounded-2xl border border-border p-6 shadow-sm flex flex-col gap-5">
+        <div>
+          <h3 className="text-foreground text-lg font-semibold text-balance">{t('Sugerencias para completar tu dieta', 'Ideas to round out your diet')}</h3>
+          <p className="text-muted-foreground text-sm mt-1">
+            {t('Primero alimentos que sí toleras, después suplementos.', 'Foods you tolerate first, supplements second.')}
+          </p>
         </div>
-
         {suggestions.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             {prefs.likes.length < MIN_LIKES_FOR_DIET_GAPS && prefs.sun === null
@@ -295,52 +355,65 @@ export const FoodPreferencesPanel: React.FC<Props> = ({
               : t('Con lo que marcaste no veo carencias evidentes. Si agregas más alimentos o hábitos, reviso de nuevo.', 'With what you marked I see no obvious gaps. Add more foods or habits and I will check again.')}
           </p>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <ul className="flex flex-col divide-y divide-border">
             {suggestions.map((s) => (
-              <div key={s.id} className="bg-secondary/40 rounded-xl p-4 border border-border/50 flex flex-col gap-2.5">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-bold text-foreground">{s.nutrient}</span>
+              <li key={s.id} className="flex flex-col gap-3 py-5 first:pt-0 last:pb-0">
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                  <span className="font-semibold text-foreground">{s.nutrient}</span>
                   <span
-                    className={`text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+                    className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                       s.priority === 'high' ? 'bg-destructive/10 text-destructive' : 'bg-blossom-soft text-blossom'
                     }`}
                   >
                     {s.priority === 'high' ? t('Prioridad', 'Priority') : t('A considerar', 'Consider')}
                   </span>
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed">{s.reason}</p>
-                <p className="text-xs text-foreground/90 leading-relaxed">{s.target}</p>
-                {s.replaces && (
-                  <p className="text-xs text-foreground/90 leading-relaxed">
-                    <strong>{t('Lo que te daría: ', 'What it would give you: ')}</strong>
-                    {s.replaces}
-                  </p>
-                )}
+                <p className="text-sm text-muted-foreground text-pretty">{s.reason}</p>
+                <p className="text-sm text-foreground text-pretty">{s.target}</p>
                 {s.foods.length > 0 && (
-                  <div className="text-xs text-foreground/90 leading-relaxed">
-                    <strong>{t('Prueba con:', 'Try:')}</strong>
-                    <ul className="list-disc pl-4 mt-1 flex flex-col gap-0.5">
+                  <div>
+                    <p className="text-sm font-semibold text-foreground mb-2">{t('Prueba con', 'Try')}</p>
+                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {s.foods.map((f) => (
-                        <li key={f.id}>
-                          <span className="font-medium">{f.name}:</span> {f.amount}
+                        <li key={f.id} className="flex items-center gap-2.5 rounded-xl bg-secondary/40 p-1.5 pr-3 min-h-14">
+                          <span className="size-11 shrink-0 rounded-lg overflow-hidden">
+                            <FoodPhoto id={f.id} dish={false} />
+                          </span>
+                          <span className="min-w-0 text-sm leading-tight">
+                            <span className="block font-medium text-foreground">{f.name}</span>
+                            <span className="block text-muted-foreground">{f.amount}</span>
+                          </span>
                         </li>
                       ))}
                     </ul>
                   </div>
                 )}
-                {s.equivalence && <p className="text-xs text-foreground/90 leading-relaxed">{s.equivalence}</p>}
-                {s.tip && <p className="text-xs text-muted-foreground leading-relaxed">{s.tip}</p>}
-                <p className="text-xs text-foreground/90 leading-relaxed">
-                  <strong>{t('Suplemento: ', 'Supplement: ')}</strong>
-                  {s.supplement}
-                </p>
-              </div>
+                <details className="group">
+                  <summary className="flex items-center gap-1.5 min-h-10 cursor-pointer list-none [&::-webkit-details-marker]:hidden text-sm font-medium text-foreground">
+                    <Icon name="chevron_right" size={16} weight="bold" className="text-muted-foreground transition-transform group-open:rotate-90" />
+                    {t('Equivalencias y suplemento', 'Equivalents and supplement')}
+                  </summary>
+                  <div className="pl-6 pb-1 flex flex-col gap-2">
+                    {s.replaces && (
+                      <p className="text-sm text-muted-foreground text-pretty">
+                        <strong className="font-semibold text-foreground">{t('Lo que te daría: ', 'What it would give you: ')}</strong>
+                        {s.replaces}
+                      </p>
+                    )}
+                    {s.equivalence && <p className="text-sm text-muted-foreground text-pretty">{s.equivalence}</p>}
+                    {s.tip && <p className="text-sm text-muted-foreground text-pretty">{s.tip}</p>}
+                    <p className="text-sm text-muted-foreground text-pretty">
+                      <strong className="font-semibold text-foreground">{t('Suplemento: ', 'Supplement: ')}</strong>
+                      {s.supplement}
+                    </p>
+                  </div>
+                </details>
+              </li>
             ))}
-          </div>
+          </ul>
         )}
-
-        <p className="text-xs text-muted-foreground leading-relaxed border-t border-border pt-3">{MEASURE_GUIDE[language]}</p>
-        <p className="text-xs text-muted-foreground leading-relaxed">{SUPPLEMENT_DISCLAIMER[language]}</p>
+        <p className="text-sm text-muted-foreground text-pretty border-t border-border pt-4">{MEASURE_GUIDE[language]}</p>
+        <p className="text-sm text-muted-foreground text-pretty">{SUPPLEMENT_DISCLAIMER[language]}</p>
       </div>
     </section>
   );

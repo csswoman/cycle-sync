@@ -35,13 +35,19 @@ export function buildGeneratePrompt(opts: {
   avoid?: string[];
   /** Protein per serving for one meal of the user's day, [min, max] g. */
   proteinPerMeal?: [number, number];
+  /** The user tracks PMOS: tune for insulin resistance. */
+  pmos?: boolean;
+  /** What to emphasize in the current cycle phase (nutrients and why). */
+  phaseFocus?: string;
 }): string {
-  const { ingredients, phase, dietary, language, existingTitles, likes = [], avoid = [], proteinPerMeal } = opts;
+  const { ingredients, phase, dietary, language, existingTitles, likes = [], avoid = [], proteinPerMeal, pmos = false, phaseFocus } = opts;
   const [pMin, pMax] = proteinPerMeal ?? [25, 40];
-  return `You are a nutrition expert specialized in cycle-synced eating and blood-sugar-friendly food that also suits PMOS.
+  return `You are a nutrition expert specialized in cycle-synced eating and blood-sugar-friendly food${pmos ? ' that also suits PMOS (insulin resistance)' : ''}.
 Create 3 different recipes using these ingredients (you may add common pantry items): ${ingredients.join(', ')}.
 Current cycle phase: ${phase}. ${dietary.length ? `Dietary restrictions: ${dietary.join(', ')}.` : ''}
-Prefer low glycemic index and anti-inflammatory ingredients.
+${phaseFocus ? `Phase focus: ${phaseFocus} Reflect it in the ingredient choices.` : ''}
+Prefer low glycemic index and anti-inflammatory ingredients: whole grains, legumes, vegetables and healthy fats, pairing carbs with protein or fiber.
+Do not make medical claims (no diagnosing, treating or curing), and no detox, "fat burning" or weight-loss claims in titles or descriptions.
 Protein per serving: main meals (breakfast, lunch, dinner) should have ${pMin}-${pMax} g of protein per serving, the amount one meal can use for muscle protein synthesis; snacks 15-25 g. Do not pack far more than ${pMax + 15} g into one serving: the user splits protein over 3-4 meals spaced 3-5 hours apart. Make the "protein" value match the ingredient amounts.
 ${avoid.length ? `The user is a picky eater and dislikes: ${avoid.join(', ')}. Do NOT use these ingredients or cooking styles in any recipe, not even as a garnish, and do not suggest them as a substitute.` : ''}
 ${likes.length ? `The user enjoys: ${likes.join(', ')}. Use them where they fit. If one is a traditional dish (arepa, tacos, empanadas...), make a nutrition-upgraded version: thinner or smaller base, more protein and fiber, baked or griddled instead of fried, and mention the portion in the description.` : ''}

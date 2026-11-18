@@ -86,17 +86,18 @@ export const MacroWaterCalculator: React.FC<MacroWaterCalculatorProps> = ({
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2 self-start sm:self-auto">
+        <div className="flex flex-wrap items-end gap-3 self-start sm:self-auto">
         {onHeightChange && (
-          <label className="flex gap-1 bg-secondary/80 px-4 min-h-[3.25rem] items-center rounded-full border border-border">
-            <span className="sr-only">Estatura en centímetros (opcional)</span>
+          <label className="flex flex-col gap-1">
+            <span className="text-xs text-muted-foreground px-1">Estatura (opcional)</span>
+            <span className="flex gap-1 bg-secondary/80 px-4 min-h-[3.25rem] items-center justify-center rounded-full border border-border">
             <input
               type="number"
               min="120"
               max="220"
               step="1"
               inputMode="numeric"
-              placeholder="Estatura"
+              placeholder="170"
               value={heightCm ?? ''}
               onChange={(e) => {
                 const v = parseFloat(e.target.value);
@@ -105,8 +106,11 @@ export const MacroWaterCalculator: React.FC<MacroWaterCalculatorProps> = ({
               className="w-20 text-center font-semibold text-foreground text-base tabular-nums bg-transparent placeholder:font-normal placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary rounded"
             />
             <span className="text-sm text-muted-foreground">cm</span>
+            </span>
           </label>
         )}
+        <div className="flex flex-col gap-1">
+        <span className="text-xs text-muted-foreground px-1">Peso</span>
         <div className="flex items-center gap-2 bg-secondary/80 p-1.5 rounded-full border border-border">
           <button type="button" onClick={() => adjustWeight(-1)} aria-label="Disminuir peso" className={stepBtn}>
             <Icon name="remove" size={16} weight="bold" />
@@ -129,6 +133,7 @@ export const MacroWaterCalculator: React.FC<MacroWaterCalculatorProps> = ({
           </button>
         </div>
         </div>
+        </div>
       </div>
 
       {targets.usesAdjustedWeight && (
@@ -140,13 +145,13 @@ export const MacroWaterCalculator: React.FC<MacroWaterCalculatorProps> = ({
       )}
       {onHeightChange && !targets.heightCm && weightKg >= 75 && (
         <p className="text-sm text-muted-foreground text-pretty">
-          Añade tu estatura para una meta más realista: con más peso, calcular por cada kilo da cifras de proteína y agua más altas de lo que tu cuerpo necesita.
+          Con tu estatura la meta se ajusta a tu cuerpo y no solo a tu peso.
         </p>
       )}
 
-      <dl className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 ${compact ? 'gap-4 lg:gap-0 lg:divide-x lg:divide-border' : 'gap-6 lg:divide-x lg:divide-border'}`}>
-        {stats.map((s, i) => (
-          <div key={s.key} className={`flex flex-col gap-1 ${i > 0 ? 'lg:pl-5' : ''} ${i < stats.length - 1 ? 'lg:pr-5' : ''}`}>
+      <dl className={`grid grid-cols-1 sm:grid-cols-2 sm:gap-y-6 ${compact ? 'gap-5' : 'gap-6'}`}>
+        {stats.map((s) => (
+          <div key={s.key} className="flex flex-col gap-1 sm:odd:border-r sm:odd:border-border sm:odd:pr-6 sm:even:pl-2 sm:[&:nth-child(n+3)]:border-t sm:[&:nth-child(n+3)]:border-border sm:[&:nth-child(n+3)]:pt-6">
             <dt className="flex items-center gap-2 text-sm text-muted-foreground">
               <Icon name={s.icon} size={18} weight="duotone" className="text-leaf shrink-0" />
               {s.label}

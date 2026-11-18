@@ -253,6 +253,8 @@ export async function generateRecipes(params: {
     avoid?: string[];
     /** Per-serving protein range [min, max] g for one meal of the user's plan. */
     proteinPerMeal?: [number, number];
+    /** The user tracks PMOS. */
+    pmos?: boolean;
 }): Promise<GenerateResult> {
     const response = await fetch('/api/recipes/generate', {
         method: 'POST',

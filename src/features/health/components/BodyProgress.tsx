@@ -100,15 +100,15 @@ export const BodyProgress: React.FC<BodyProgressProps> = ({
         <div>
           <h3 id="progress-title" className="text-foreground text-lg font-semibold text-balance">Mi progreso</h3>
           <p className="text-sm text-muted-foreground text-pretty max-w-prose">
-            Tu peso y tus medidas en el tiempo. Las medidas suelen contar mejor la historia que la báscula: con PMOS, la grasa abdominal es la que más se relaciona con la glucosa y la insulina.
+            Tu peso y tus medidas en el tiempo. Con PMOS, la cintura cuenta mejor la historia que la báscula.
           </p>
         </div>
 
         {loading ? (
           <p className="text-sm text-muted-foreground">Cargando…</p>
         ) : (
-          <dl className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div className="rounded-2xl bg-secondary/60 px-4 py-3 flex flex-col gap-0.5">
+          <dl className="grid grid-cols-2 md:grid-cols-4 gap-y-5 md:gap-y-0 md:divide-x md:divide-border border-t border-border pt-5">
+            <div className="flex flex-col gap-0.5 md:px-5 md:first:pl-0 md:last:pr-0">
               <dt className="text-sm text-muted-foreground">Peso inicial</dt>
               <dd className="text-2xl font-semibold text-foreground tabular-nums">
                 {weightSummary ? `${weightSummary.start.value} kg` : profile.startWeightKg ? `${profile.startWeightKg} kg` : '—'}
@@ -117,12 +117,12 @@ export const BodyProgress: React.FC<BodyProgressProps> = ({
                 {weightSummary ? fmtDate(weightSummary.start.date) : profile.startDate ? fmtDate(profile.startDate) : 'Aún sin registro'}
               </dd>
             </div>
-            <div className="rounded-2xl bg-secondary/60 px-4 py-3 flex flex-col gap-0.5">
+            <div className="flex flex-col gap-0.5 md:px-5 md:first:pl-0 md:last:pr-0">
               <dt className="text-sm text-muted-foreground">Peso actual</dt>
               <dd className="text-2xl font-semibold text-foreground tabular-nums">{weightSummary ? `${weightSummary.latest.value} kg` : '—'}</dd>
               <dd className="text-sm text-muted-foreground">{weightSummary ? fmtDate(weightSummary.latest.date) : 'Aún sin registro'}</dd>
             </div>
-            <div className="rounded-2xl bg-secondary/60 px-4 py-3 flex flex-col gap-0.5">
+            <div className="flex flex-col gap-0.5 md:px-5 md:first:pl-0 md:last:pr-0">
               <dt className="text-sm text-muted-foreground">Cambio de peso</dt>
               <dd className={`text-2xl font-semibold tabular-nums ${weightSummary && weightSummary.change < 0 ? 'text-leaf' : 'text-foreground'}`}>
                 {weightSummary && weightSummary.days > 0 ? `${signed(weightSummary.change)} kg` : '—'}
@@ -135,7 +135,7 @@ export const BodyProgress: React.FC<BodyProgressProps> = ({
               const key: MeasureKey = series.abdomen_cm.length ? 'abdomen_cm' : 'waist_cm';
               const s = progressSummary(series[key]);
               return (
-                <div className="rounded-2xl bg-secondary/60 px-4 py-3 flex flex-col gap-0.5">
+                <div className="flex flex-col gap-0.5 md:px-5 md:first:pl-0 md:last:pr-0">
                   <dt className="text-sm text-muted-foreground">{key === 'abdomen_cm' ? 'Abdomen' : 'Cintura'}</dt>
                   <dd className={`text-2xl font-semibold tabular-nums ${s && s.change < 0 ? 'text-leaf' : 'text-foreground'}`}>
                     {s && s.days > 0 ? `${signed(s.change)} cm` : s ? `${s.latest.value} cm` : '—'}
@@ -183,55 +183,9 @@ export const BodyProgress: React.FC<BodyProgressProps> = ({
         )}
       </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Log form */}
-        <section aria-labelledby="progress-log" className="lg:col-span-5 bg-card rounded-3xl border border-border p-5 sm:p-6 shadow-sm flex flex-col gap-4">
-          <h3 id="progress-log" className="text-foreground text-lg font-semibold">Registrar medidas</h3>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <label className="flex flex-col gap-1 text-sm text-muted-foreground">
-              Fecha
-              <input type="date" value={date} max={todayLocal()} onChange={(e) => setDate(e.target.value)} className={fieldClass} required />
-            </label>
-            <div className="grid grid-cols-2 gap-3">
-              {MEASURES.map((m) => (
-                <label key={m.key} className="flex flex-col gap-1 text-sm text-muted-foreground">
-                  {m.label} ({m.unit})
-                  <input
-                    inputMode="decimal"
-                    value={values[m.key]}
-                    onChange={(e) => setValues((v) => ({ ...v, [m.key]: e.target.value }))}
-                    placeholder={series[m.key].length ? String(series[m.key][series[m.key].length - 1].value) : ''}
-                    className={fieldClass}
-                  />
-                </label>
-              ))}
-            </div>
-            <p className="text-sm text-muted-foreground">Solo llena lo que midas hoy; lo demás puede quedar vacío.</p>
-            <button type="submit" disabled={saving} className="min-h-11 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold disabled:opacity-60">
-              {saving ? 'Guardando…' : 'Guardar'}
-            </button>
-            {(formMsg || error) && (
-              <p role="status" className={`text-sm ${formMsg?.ok ? 'text-leaf font-medium' : 'text-destructive'}`}>
-                {formMsg?.text ?? error}
-              </p>
-            )}
-          </form>
-          <details className="group border-t border-border pt-3">
-            <summary className="flex items-center gap-2 min-h-10 cursor-pointer list-none [&::-webkit-details-marker]:hidden text-sm font-medium text-foreground">
-              <Icon name="chevron_right" size={16} weight="bold" className="text-muted-foreground transition-transform group-open:rotate-90" />
-              Cómo medirte para que los números sean comparables
-            </summary>
-            <ul className="flex flex-col gap-2 pt-2 pl-6">
-              {MEASURES.map((m) => (
-                <li key={m.key} className="text-sm text-muted-foreground text-pretty"><strong className="text-foreground">{m.label}:</strong> {m.how}</li>
-              ))}
-              <li className="text-sm text-muted-foreground text-pretty">Usa una cinta flexible sin apretar la piel. Mídete cada 2 a 4 semanas, el mismo día de tu ciclo si puedes: antes de la regla es normal retener líquido.</li>
-            </ul>
-          </details>
-        </section>
-
+      <div className="flex flex-col gap-6">
         {/* Charts */}
-        <section aria-labelledby="progress-chart" className="lg:col-span-7 bg-card rounded-3xl border border-border p-5 sm:p-6 shadow-sm flex flex-col gap-4">
+        <section aria-labelledby="progress-chart" className="bg-card rounded-3xl border border-border p-5 sm:p-6 shadow-sm flex flex-col gap-4">
           <h3 id="progress-chart" className="text-foreground text-lg font-semibold">Evolución</h3>
           {measuresWithData.length === 0 ? (
             <p className="text-sm text-muted-foreground py-8 text-center">Cuando registres tu peso o tus medidas, verás aquí cómo cambian.</p>
@@ -325,6 +279,52 @@ export const BodyProgress: React.FC<BodyProgressProps> = ({
             Estos datos se comparten con la sección de medidas de Cuidado PMOS. Tu energía, tu ciclo y tu glucosa dicen tanto como la báscula.
           </p>
         </section>
+        {/* Log form */}
+        <section aria-labelledby="progress-log" className="bg-card rounded-3xl border border-border p-5 sm:p-6 shadow-sm flex flex-col gap-4">
+          <h3 id="progress-log" className="text-foreground text-lg font-semibold">Registrar medidas</h3>
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <label className="flex flex-col gap-1 text-sm text-muted-foreground">
+              Fecha
+              <input type="date" value={date} max={todayLocal()} onChange={(e) => setDate(e.target.value)} className={fieldClass} required />
+            </label>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+              {MEASURES.map((m) => (
+                <label key={m.key} className="flex flex-col gap-1 text-sm text-muted-foreground">
+                  {m.label} ({m.unit})
+                  <input
+                    inputMode="decimal"
+                    value={values[m.key]}
+                    onChange={(e) => setValues((v) => ({ ...v, [m.key]: e.target.value }))}
+                    placeholder={series[m.key].length ? String(series[m.key][series[m.key].length - 1].value) : ''}
+                    className={fieldClass}
+                  />
+                </label>
+              ))}
+            </div>
+            <p className="text-sm text-muted-foreground">Solo llena lo que midas hoy; lo demás puede quedar vacío.</p>
+            <button type="submit" disabled={saving} className="min-h-11 rounded-full bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold disabled:opacity-60">
+              {saving ? 'Guardando…' : 'Guardar'}
+            </button>
+            {(formMsg || error) && (
+              <p role="status" className={`text-sm ${formMsg?.ok ? 'text-leaf font-medium' : 'text-destructive'}`}>
+                {formMsg?.text ?? error}
+              </p>
+            )}
+          </form>
+          <details className="group border-t border-border pt-3">
+            <summary className="flex items-center gap-2 min-h-10 cursor-pointer list-none [&::-webkit-details-marker]:hidden text-sm font-medium text-foreground">
+              <Icon name="chevron_right" size={16} weight="bold" className="text-muted-foreground transition-transform group-open:rotate-90" />
+              Cómo medirte para que los números sean comparables
+            </summary>
+            <ul className="flex flex-col gap-2 pt-2 pl-6">
+              {MEASURES.map((m) => (
+                <li key={m.key} className="text-sm text-muted-foreground text-pretty"><strong className="text-foreground">{m.label}:</strong> {m.how}</li>
+              ))}
+              <li className="text-sm text-muted-foreground text-pretty">Usa una cinta flexible sin apretar la piel. Mídete cada 2 a 4 semanas, el mismo día de tu ciclo si puedes: antes de la regla es normal retener líquido.</li>
+            </ul>
+          </details>
+        </section>
+
       </div>
     </div>
   );

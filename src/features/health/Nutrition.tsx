@@ -252,13 +252,18 @@ const Nutrition: React.FC = () => {
     if (previewImage) analyzePlate(previewImage, language);
   };
 
-  const addIngredient = () => {
-    const trimmed = ingredientInput.trim();
+  const addIngredient = (value = ingredientInput) => {
+    const trimmed = value.trim();
     if (trimmed && !ingredients.includes(trimmed)) {
       setIngredients([...ingredients, trimmed]);
       setIngredientInput('');
     }
   };
+  // Phase foods to add with one tap, skipping what is already added or avoided.
+  const avoidedNames = entriesToNames(avoid, language).map((n) => n.toLowerCase());
+  const ingredientIdeas = [...new Set(phaseFocus.foods.map((fd) => fd.label[language === 'en' ? 'en' : 'es']))]
+    .filter((n) => !ingredients.includes(n) && !avoidedNames.includes(n.toLowerCase()))
+    .slice(0, 8);
 
   const removeIngredient = (ing: string) => {
     setIngredients(ingredients.filter((i) => i !== ing));
@@ -282,6 +287,7 @@ const Nutrition: React.FC = () => {
         proteinPerMeal: hideNumbers ? undefined : mealPlan.perMealRange,
         likes: entriesToNames(likes, language),
         avoid: entriesToNames(avoid, language),
+        pmos: showPmos,
       });
       setGeneration({ loading: false, error: null, result });
       await library.refresh();
@@ -341,7 +347,7 @@ const Nutrition: React.FC = () => {
         <GuestPreviewBanner message={t.guestNutritionPreview} />
 
         {/* Tab Switcher */}
-        <div role="tablist" aria-label={isEs ? 'Secciones de nutrición' : 'Nutrition sections'} className="w-full flex gap-1 sm:gap-1.5 bg-card p-1.5 rounded-2xl border border-border shadow-sm overflow-x-auto scrollbar-hide">
+        <div role="tablist" aria-label={isEs ? 'Secciones de nutrición' : 'Nutrition sections'} className="w-full flex gap-1 bg-card p-1.5 rounded-2xl border border-border shadow-sm overflow-x-auto scrollbar-hide sm:flex-wrap sm:overflow-visible">
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -349,9 +355,13 @@ const Nutrition: React.FC = () => {
               id={`nutrition-tab-${tab.id}`}
               aria-selected={shownTab === tab.id}
               aria-controls={`nutrition-panel-${tab.id}`}
-              onClick={() => (isLocked(tab.id) ? promptSignup() : setActiveTab(tab.id))}
+              onClick={(e) => {
+                e.currentTarget.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+                if (isLocked(tab.id)) promptSignup();
+                else setActiveTab(tab.id);
+              }}
               aria-disabled={isLocked(tab.id) || undefined}
-              className={`flex-1 min-w-[112px] sm:min-w-0 min-h-11 flex items-center justify-center gap-2 px-3 rounded-xl text-sm font-semibold transition-colors whitespace-nowrap ${
+              className={`flex-none sm:flex-auto min-h-11 flex items-center justify-center gap-2 px-3.5 rounded-xl text-sm font-semibold transition-colors whitespace-nowrap ${
                 shownTab === tab.id
                   ? 'bg-primary text-primary-foreground'
                   : 'text-muted-foreground hover:text-foreground hover:bg-card'
@@ -784,7 +794,7 @@ const Nutrition: React.FC = () => {
 
         {/* === AI RECIPE GENERATOR TAB === */}
         {shownTab === 'generate' && (
-          <section role="tabpanel" id="nutrition-panel-generate" aria-labelledby="nutrition-tab-generate" tabIndex={0} className="w-full max-w-3xl mx-auto flex flex-col gap-6">
+          <section role="tabpanel" id="nutrition-panel-generate" aria-labelledby="nutrition-tab-generate" data-phase={phaseKey} tabIndex={0} className="w-full max-w-3xl mx-auto flex flex-col gap-6">
             <div className="bg-card rounded-xl border border-border p-6 flex flex-col gap-6">
               <div className="flex items-center gap-3">
                 <div className="p-3 bg-primary/10 rounded-xl">
@@ -792,12 +802,16 @@ const Nutrition: React.FC = () => {
                 </div>
                 <div>
                   <h3 className="text-foreground text-lg font-semibold text-balance">{isEs ? 'Generador de recetas con IA' : 'AI recipe generator'}</h3>
-                  <p className="text-muted-foreground text-sm">
+                  <p className="text-muted-foreground text-sm text-pretty">
                     {isEs
-                      ? `Ingresa tus ingredientes disponibles y obtén recetas antiinflamatorias para tu fase ${phaseDisplay}`
-                      : `Enter your available ingredients and get anti-inflammatory recipes for your ${phase} phase`}
+                      ? 'Dinos qué tienes en casa y creamos 3 recetas que respetan tus gustos y tu fase.'
+                      : 'Tell us what you have at home and we create 3 recipes that fit your tastes and phase.'}
                   </p>
                 </div>
+              </div>
+              <div className="bg-phase-soft rounded-xl p-4 flex flex-col gap-2">
+                <p className="text-phase text-sm font-semibold">{isEs ? `Fase ${phaseDisplay}` : `${phase} phase`}</p>
+                <p className="text-foreground/90 text-sm text-pretty">{phaseFocus.why[isEs ? 'es' : 'en']}</p>
               </div>
 
               {/* Ingredient Input */}
@@ -812,13 +826,30 @@ const Nutrition: React.FC = () => {
                     placeholder={isEs ? 'Escribe un ingrediente y presiona Enter...' : 'Type an ingredient and press Enter...'}
                   />
                   <button
-                    onClick={addIngredient}
+                    onClick={() => addIngredient()}
                     aria-label={isEs ? 'Añadir ingrediente' : 'Add ingredient'}
                     className="px-4 min-h-11 bg-secondary hover:bg-accent rounded-lg border border-border transition-colors"
                   >
                     <span className="material-symbols-outlined text-foreground">add</span>
                   </button>
                 </div>
+                {ingredientIdeas.length > 0 && (
+                  <div className="mt-3">
+                    <p className="text-sm text-muted-foreground mb-2">{isEs ? 'Ideas para tu fase, toca para añadir' : 'Ideas for your phase, tap to add'}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {ingredientIdeas.map((idea) => (
+                        <button
+                          key={idea}
+                          onClick={() => addIngredient(idea)}
+                          className="text-sm bg-secondary text-muted-foreground px-3.5 min-h-10 rounded-full hover:bg-accent transition-colors inline-flex items-center gap-1.5"
+                        >
+                          <span className="material-symbols-outlined text-[14px]" aria-hidden="true">add</span>
+                          {idea}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 {ingredients.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-3">
                     {ingredients.map((ing) => (
@@ -894,8 +925,8 @@ const Nutrition: React.FC = () => {
                 disabled={(ingredients.length === 0 && likes.length === 0) || generation.loading}
                 className="w-full bg-bloom hover:brightness-105 text-primary-foreground font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg shadow-primary/20"
               >
-                <span className="material-symbols-outlined">{generation.loading ? 'hourglass_empty' : 'auto_awesome'}</span>
-                {generation.loading ? (isEs ? 'Generando Recetas...' : 'Generating Recipes...') : (isEs ? `Generar recetas para la fase ${phaseDisplay}` : `Generate ${phase}-Phase Recipes`)}
+                <span className={`material-symbols-outlined ${generation.loading ? 'animate-spin' : ''}`} aria-hidden="true">{generation.loading ? 'progress_activity' : 'auto_awesome'}</span>
+                {generation.loading ? (isEs ? 'Creando recetas, puede tardar unos segundos...' : 'Creating recipes, this can take a few seconds...') : (isEs ? `Generar recetas para la fase ${phaseDisplay}` : `Generate ${phase}-Phase Recipes`)}
               </button>
             </div>
 

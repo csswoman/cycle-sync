@@ -20,7 +20,7 @@ const Bar: React.FC<{ label: string; value: string; pct: number; done: boolean }
       <span className="text-sm font-medium text-muted-foreground">{label}</span>
       <span className={`text-sm font-bold ${done ? 'text-leaf' : 'text-foreground'}`}>{value}</span>
     </div>
-    <div className="h-2 w-full bg-secondary rounded-full overflow-hidden" role="progressbar" aria-label={label} aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100}>
+    <div className="h-2 w-full bg-foreground/15 rounded-full overflow-hidden" role="progressbar" aria-label={label} aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100}>
       <div className={`h-full rounded-full transition-all ${done ? 'bg-leaf' : 'bg-primary'}`} style={{ width: `${pct}%` }} />
     </div>
   </div>

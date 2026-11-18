@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { generateJson } from '@/lib/ai/gemini.server';
 import { buildGeneratePrompt } from '@/lib/recipes/prompts';
 import { parseRecipesJson } from '@/lib/recipes/sanitize';
+import { FOOD_FOCUS, toPhaseKey } from '@/lib/cycle/phaseSuggestions';
 import { listCatalogTitles, saveCatalogRecipes } from '@/lib/recipes/catalog.server';
 
 export const dynamic = 'force-dynamic';
@@ -38,6 +39,8 @@ export async function POST(request: Request) {
       ? [Math.round(range[0]), Math.round(range[1])]
       : undefined;
 
+  const focus = FOOD_FOCUS[toPhaseKey(phase)];
+  const phaseFocus = `${focus.nutrients.map((n) => n.en).join(', ')}. ${focus.why.en}`;
   if (ingredients.length === 0) {
     return NextResponse.json({ error: 'ingredients are required' }, { status: 400 });
   }
@@ -45,7 +48,7 @@ export async function POST(request: Request) {
   try {
     const db = createAdminClient();
     const existingTitles = await listCatalogTitles(db, language);
-    const text = await generateJson(buildGeneratePrompt({ ingredients, phase, dietary, language, existingTitles, likes, avoid, proteinPerMeal }));
+    const text = await generateJson(buildGeneratePrompt({ ingredients, phase, dietary, language, existingTitles, likes, avoid, proteinPerMeal, pmos: body?.pmos === true, phaseFocus }));
     const recipes = parseRecipesJson(text, language);
     if (recipes.length === 0) {
       return NextResponse.json({ error: 'The AI did not return valid recipes. Try again.' }, { status: 502 });
