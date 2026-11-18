@@ -68,7 +68,7 @@ const DailyLog: React.FC = () => {
   const [medSummary, setMedSummary] = useState<MedicationSummary>({ taken: 0, total: 0 });
   const focusTab = (id: Tab) => {
     setTab(id);
-    document.getElementById(`log-tab-${id}`)?.focus();
+    document.getElementById(`log-tab-${id}`)?.focus({ preventScroll: true });
   };
   const tabs: { id: Tab; icon: string; label: string; badge?: string; badgeIcon?: string }[] = [
     { id: 'today', icon: 'mood', label: lang === 'es' ? 'Hoy' : 'Today', badgeIcon: saved ? 'check' : undefined },
@@ -175,7 +175,7 @@ const DailyLog: React.FC = () => {
 
   return (
     <div className="flex-1 overflow-y-auto h-full scrollbar-hide">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-8 pb-32">
+      <div className="max-w-page mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-8 pb-32">
         <header className="flex flex-col gap-2">
           <h1 className="text-3xl md:text-4xl font-semibold text-foreground tracking-tight text-balance"><TitleSprig bud={null} />{lang === 'es' ? 'Registro diario' : 'Daily Log'}</h1>
           <p className="flex items-center gap-2 text-muted-foreground text-base">

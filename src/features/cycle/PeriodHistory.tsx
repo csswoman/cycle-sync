@@ -9,6 +9,7 @@ import { CycleAnalysisCard } from './CycleAnalysisCard';
 import PremenstrualPatternCard from './PremenstrualPatternCard';
 import PeriodForecastCard from '@/features/health/pmos/PeriodForecastCard';
 import { GardenCorner, TitleSprig } from '@/components/ui/Botanical';
+import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { PeriodDayCalendar, type CalendarMode } from '@/components/PeriodDayCalendar';
 import {
     addDays, daysBetween, estimateCycle, groupDaysIntoPeriods, parseLocalDate, projectCycles, toISODate,
@@ -278,7 +279,7 @@ const PeriodHistory: React.FC = () => {
 
     return (
         <div className="flex-1 overflow-y-auto h-full scrollbar-hide">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-8 pb-32">
+            <div className="max-w-page mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-8 pb-32">
                 {/* Header with inline regularity indicator */}
                 <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-2 border-b border-border/50">
                     <div className="flex flex-col gap-1.5">
@@ -314,72 +315,96 @@ const PeriodHistory: React.FC = () => {
 
                 {/* Forecast Hero: clean typographic metrics with rhythm instead of generic cards */}
                 {next && (
-                    <section className="relative overflow-hidden rounded-3xl garden-wash border border-border/80 p-6 md:p-8 shadow-sm">
-                        <GardenCorner variant="blossom" className="size-32 sm:size-44 opacity-80" />
+                    <section className="relative overflow-hidden rounded-3xl garden-wash border border-border/80 p-4 sm:p-5 shadow-sm">
+                        <GardenCorner variant="blossom" className="size-20 sm:size-24 opacity-60" />
 
-                        <div className="relative z-10 flex flex-col gap-6">
-                            <div className="flex items-center justify-between gap-3">
-                                <div className="flex items-center gap-2">
-                                    <h2 className="text-foreground font-bold text-lg md:text-xl tracking-tight">{t.forecastTitle}</h2>
+                        <div className="relative z-10 flex flex-col gap-3">
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                                <div className="flex items-center gap-1">
+                                    <h2 className="text-foreground font-bold text-base md:text-lg tracking-tight">{t.forecastTitle}</h2>
+                                    <InfoTooltip label={locale === 'es' ? 'Cómo se calculan' : 'How these are calculated'}>
+                                        <p>{locale === 'es'
+                                            ? `Se calculan con la duración media de tus ciclos registrados (${estimate.cycleLength} días) y cuánto varían entre sí.`
+                                            : `Based on the average length of your logged cycles (${estimate.cycleLength} days) and how much they vary.`}</p>
+                                        <p className="text-xs text-muted-foreground">{t.forecastDisclaimer}</p>
+                                    </InfoTooltip>
                                 </div>
-                                <span className="text-xs font-semibold text-primary bg-primary/10 border border-primary/20 rounded-full px-3 py-1">
-                                    {t.confidenceLabel}: {estimate.confidence === 'high' ? t.confidenceHigh : estimate.confidence === 'medium' ? t.confidenceMedium : t.confidenceLow}
-                                </span>
+                                <div className="flex items-center gap-1">
+                                    {estimate.irregular && (
+                                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-sun-ink bg-sun/15 border border-sun/30 rounded-full px-2.5 py-0.5">
+                                            <span className="material-symbols-outlined text-[14px]">warning</span>
+                                            {locale === 'es' ? 'Ciclos variables' : 'Variable cycles'}
+                                        </span>
+                                    )}
+                                    <span className="text-[11px] font-semibold text-primary bg-primary/10 border border-primary/20 rounded-full px-2.5 py-0.5">
+                                        {t.confidenceLabel}: {estimate.confidence === 'high' ? t.confidenceHigh : estimate.confidence === 'medium' ? t.confidenceMedium : t.confidenceLow}
+                                    </span>
+                                    <InfoTooltip label={locale === 'es' ? 'Qué significa la confianza' : 'What confidence means'}>
+                                        <p>{locale === 'es'
+                                            ? 'La confianza sube cuantos más ciclos registras y más parecidos son entre sí. Con ciclos variables, el rango de fechas se amplía.'
+                                            : 'Confidence grows the more cycles you log and the more similar they are. With variable cycles the date range widens.'}</p>
+                                        {estimate.irregular && <p className="text-sun-ink">{t.forecastIrregularNote}</p>}
+                                    </InfoTooltip>
+                                </div>
                             </div>
 
-                            <div className="flex flex-col gap-1">
-                                <p className="text-sm text-muted-foreground">{t.nextPeriodLabel}</p>
-                                <p className="text-3xl md:text-4xl font-semibold text-foreground tracking-tight">
-                                    {next.periodEarliest.getTime() === next.periodLatest.getTime()
-                                        ? fmt(next.periodStart)
-                                        : `${fmt(next.periodEarliest)} – ${fmt(next.periodLatest)}`}
-                                </p>
-                                {countdownDays !== null && (
-                                    <p className="text-sm font-medium text-primary">
-                                        {countdownDays > 0 ? (locale === 'es' ? `en ${countdownDays} días` : `in ${countdownDays} days`) : countdownDays === 0 ? (locale === 'es' ? 'hoy' : 'today') : (locale === 'es' ? `${-countdownDays} días de retraso` : `${-countdownDays} days late`)}
-                                    </p>
-                                )}
-                            </div>
-                            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 pt-4 border-t border-border/50">
-                                <div className="flex flex-col gap-0.5">
-                                    <dt className="text-sm text-muted-foreground">{t.ovulationLabel}</dt>
-                                    <dd className="text-lg font-semibold text-foreground">
-                                        ~ {fmt(next.ovulation)}
-                                        <span className="ml-2 text-xs font-medium text-sun-ink">{locale === 'es' ? 'Día pico estimado' : 'Estimated peak day'}</span>
+                            <dl className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                                <div className="rounded-2xl bg-primary/10 border border-primary/20 px-3.5 py-2.5 flex flex-col gap-0.5">
+                                    <dt className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
+                                        <span className="size-2 rounded-full bg-primary" />
+                                        {t.nextPeriodLabel}
+                                        <InfoTooltip label={locale === 'es' ? 'Sobre la próxima menstruación' : 'About the next period'} className="-my-1 size-5">
+                                            <p>{locale === 'es'
+                                                ? 'Rango de días en que es más probable que empiece tu próxima regla. Cuanto más variables son tus ciclos, más amplio es.'
+                                                : 'The days your next period is most likely to start. The more your cycles vary, the wider it gets.'}</p>
+                                        </InfoTooltip>
+                                    </dt>
+                                    <dd className="text-xl md:text-2xl font-semibold text-foreground tracking-tight leading-tight">
+                                        {next.periodEarliest.getTime() === next.periodLatest.getTime()
+                                            ? fmt(next.periodStart)
+                                            : `${fmt(next.periodEarliest)} – ${fmt(next.periodLatest)}`}
                                     </dd>
+                                    {countdownDays !== null && (
+                                        <dd className="text-xs font-semibold text-primary">
+                                            {countdownDays > 0 ? (locale === 'es' ? `en ${countdownDays} días` : `in ${countdownDays} days`) : countdownDays === 0 ? (locale === 'es' ? 'hoy' : 'today') : (locale === 'es' ? `${-countdownDays} días de retraso` : `${-countdownDays} days late`)}
+                                        </dd>
+                                    )}
                                 </div>
-                                <div className="flex flex-col gap-0.5">
-                                    <dt className="text-sm text-muted-foreground">{t.fertileWindowLabel}</dt>
-                                    <dd className="text-lg font-semibold text-foreground">
-                                        {fmt(next.fertileStart)} – {fmt(next.fertileEnd)}
-                                        <span className="ml-2 text-xs font-medium text-muted-foreground">{locale === 'es' ? 'Mayor probabilidad' : 'Highest chance'}</span>
-                                    </dd>
+                                <div className="rounded-2xl bg-card/70 border border-border/60 px-3.5 py-2.5 flex flex-col gap-0.5">
+                                    <dt className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
+                                        <span className="size-2 rounded-full bg-sun" />
+                                        {t.ovulationLabel}
+                                        <InfoTooltip label={locale === 'es' ? 'Sobre la ovulación' : 'About ovulation'} className="-my-1 size-5">
+                                            <p>{locale === 'es'
+                                                ? 'Día pico estimado: suele ocurrir unos 14 días antes de la siguiente regla. Si registras temperatura basal, podemos confirmarla.'
+                                                : 'Estimated peak day: usually about 14 days before the next period. Logging basal temperature lets us confirm it.'}</p>
+                                        </InfoTooltip>
+                                    </dt>
+                                    <dd className="text-xl md:text-2xl font-semibold text-foreground tracking-tight leading-tight">~{fmt(next.ovulation)}</dd>
+                                    <dd className="text-xs font-medium text-sun-ink">{locale === 'es' ? 'Día pico estimado' : 'Estimated peak day'}</dd>
+                                </div>
+                                <div className="rounded-2xl bg-card/70 border border-border/60 px-3.5 py-2.5 flex flex-col gap-0.5">
+                                    <dt className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
+                                        <span className="size-2 rounded-full bg-sun/40" />
+                                        {t.fertileWindowLabel}
+                                        <InfoTooltip label={locale === 'es' ? 'Sobre la ventana fértil' : 'About the fertile window'} className="-my-1 size-5">
+                                            <p>{locale === 'es'
+                                                ? 'Los ~5 días antes de la ovulación y el propio día. Es cuando hay más probabilidad de embarazo.'
+                                                : 'The ~5 days before ovulation plus the day itself, when pregnancy is most likely.'}</p>
+                                            {answers.goal === 'fertility' && <p className="text-xs">{t.forecastFertilityTip}</p>}
+                                        </InfoTooltip>
+                                    </dt>
+                                    <dd className="text-xl md:text-2xl font-semibold text-foreground tracking-tight leading-tight">{fmt(next.fertileStart)} – {fmt(next.fertileEnd)}</dd>
+                                    <dd className="text-xs font-medium text-muted-foreground">{locale === 'es' ? 'Mayor probabilidad' : 'Highest chance'}</dd>
                                 </div>
                             </dl>
-                            {/* Contextual Tips & Medical Disclaimer */}
-                            {(answers.goal === 'fertility' || usesHormonalContraception(answers) || estimate.irregular) && (
-                                <div className="flex flex-col gap-1.5 pt-3 border-t border-border/50">
-                                    {answers.goal === 'fertility' && (
-                                        <div className="text-xs text-foreground flex items-start gap-1.5">
-                                            <span className="material-symbols-outlined text-[16px] text-primary">favorite</span>
-                                            {t.forecastFertilityTip}
-                                        </div>
-                                    )}
-                                    {usesHormonalContraception(answers) && (
-                                        <div className="text-xs text-sun-ink flex items-start gap-1.5">
-                                            <span className="material-symbols-outlined text-[16px]">info</span>
-                                            {t.forecastHormonalNote}
-                                        </div>
-                                    )}
-                                    {estimate.irregular && (
-                                        <div className="text-xs text-sun-ink flex items-start gap-1.5">
-                                            <span className="material-symbols-outlined text-[16px]">warning</span>
-                                            {t.forecastIrregularNote}
-                                        </div>
-                                    )}
-                                </div>
+
+                            {usesHormonalContraception(answers) && (
+                                <p className="text-xs text-sun-ink flex items-start gap-1.5">
+                                    <span className="material-symbols-outlined text-[16px]">info</span>
+                                    {t.forecastHormonalNote}
+                                </p>
                             )}
-                            <p className="text-xs text-muted-foreground/80 leading-normal">{t.forecastDisclaimer}</p>
                         </div>
                     </section>
                 )}
@@ -425,11 +450,24 @@ const PeriodHistory: React.FC = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                     {/* Column 1: Interactive Period Logger (Desktop Left, Mobile when mobileTab === 'log') */}
                     <aside className={`lg:col-span-5 xl:col-span-5 lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto scrollbar-hide ${mobileTab === 'log' ? 'block' : 'hidden lg:block'}`}>
-                        <div className="bg-card border border-border/80 rounded-3xl p-6 shadow-sm flex flex-col gap-5">
+                        <div className="bg-card border border-border/80 rounded-3xl p-5 shadow-sm flex flex-col gap-4">
                             <div className="flex flex-col gap-1">
                                 <div className="flex items-center gap-2">
-                                    <span className="material-symbols-outlined text-primary text-[22px]">calendar_add_on</span>
+                                    <span className="size-8 rounded-xl bg-primary/10 text-primary inline-flex items-center justify-center">
+                                        <span className="material-symbols-outlined text-[18px]">calendar_add_on</span>
+                                    </span>
                                     <h3 className="text-foreground font-bold text-lg">{t.addPeriod}</h3>
+                                    <InfoTooltip label={locale === 'es' ? 'Cómo marcar días' : 'How to mark days'} className="ml-auto">
+                                        <p>{locale === 'es'
+                                            ? 'Toca el primer día de sangrado y luego el último: se rellena el rango (hasta 10 días). Toca un día marcado para quitarlo.'
+                                            : 'Tap the first bleeding day, then the last: the range fills in (up to 10 days). Tap a marked day to remove it.'}</p>
+                                        <p>{locale === 'es'
+                                            ? 'Toca un día de regla ya guardado para anotar la intensidad del sangrado y el dolor.'
+                                            : 'Tap a saved period day to log bleeding intensity and pain.'}</p>
+                                        <p className="text-xs text-muted-foreground">{locale === 'es'
+                                            ? 'Los días futuros solo muestran predicciones y no se pueden marcar.'
+                                            : 'Future days only show predictions and cannot be marked.'}</p>
+                                    </InfoTooltip>
                                 </div>
                                 <p className="text-muted-foreground text-xs leading-relaxed">
                                     {calendarMode === 'period'
@@ -442,9 +480,9 @@ const PeriodHistory: React.FC = () => {
 
                             <div role="radiogroup" aria-label={locale === 'es' ? 'Qué marcar' : 'What to mark'} className="grid grid-cols-3 p-1 rounded-xl bg-secondary/60 gap-1">
                                 {([
-                                    { id: 'period', icon: 'water_drop', es: 'Regla', en: 'Period' },
-                                    { id: 'spotting', icon: 'grain', es: 'Manchado', en: 'Spotting' },
-                                    { id: 'sex', icon: 'favorite', es: 'Relación', en: 'Sex' },
+                                    { id: 'period', icon: 'water_drop', tint: 'text-primary', es: 'Regla', en: 'Period' },
+                                    { id: 'spotting', icon: 'grain', tint: 'text-petal', es: 'Manchado', en: 'Spotting' },
+                                    { id: 'sex', icon: 'favorite', tint: 'text-blossom', es: 'Relación', en: 'Sex' },
                                 ] as const).map((m) => (
                                     <button
                                         key={m.id}
@@ -452,9 +490,12 @@ const PeriodHistory: React.FC = () => {
                                         role="radio"
                                         aria-checked={calendarMode === m.id}
                                         onClick={() => setCalendarMode(m.id)}
-                                        className={`flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-bold transition-all ${calendarMode === m.id ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'}`}
+                                        className={`flex items-center justify-center gap-1.5 h-9 rounded-lg text-xs font-bold transition-all ${calendarMode === m.id ? 'bg-card text-foreground shadow-sm ring-1 ring-border/70' : 'text-muted-foreground hover:text-foreground'}`}
                                     >
-                                        <span className="material-symbols-outlined text-[16px]">{m.icon}</span>
+                                        <span
+                                            className={`material-symbols-outlined text-[16px] ${calendarMode === m.id ? m.tint : ''}`}
+                                            style={calendarMode === m.id ? { fontVariationSettings: "'FILL' 1" } : undefined}
+                                        >{m.icon}</span>
                                         {locale === 'es' ? m.es : m.en}
                                     </button>
                                 ))}
@@ -465,7 +506,7 @@ const PeriodHistory: React.FC = () => {
                                 </p>
                             )}
 
-                            <div className="flex justify-center">
+                            <div className="flex justify-center rounded-2xl bg-background/60 border border-border/50 px-2 py-3 sm:px-3">
                                 <PeriodDayCalendar
                                     selected={selectedDays}
                                     onChange={setSelectedDays}
@@ -485,10 +526,6 @@ const PeriodHistory: React.FC = () => {
                             {calendarMode === 'period' && (
                                 flowDay ? (
                                     <FlowQuickEditor lang={locale} sign={signFor(flowDay)} onSave={saveSign} onClose={() => setFlowDay(null)} />
-                                ) : savedDays.length > 0 ? (
-                                    <p className="text-xs text-muted-foreground">
-                                        {locale === 'es' ? 'Toca un día de regla ya guardado para anotar la intensidad del sangrado y el dolor.' : 'Tap a saved period day to log bleeding intensity and pain.'}
-                                    </p>
                                 ) : null
                             )}
                             <div className={`pt-3 border-t border-border/60 flex-col gap-3 ${calendarMode === 'period' ? 'flex' : 'hidden'}`}>

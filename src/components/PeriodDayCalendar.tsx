@@ -48,6 +48,7 @@ export const PeriodDayCalendar: React.FC<PeriodDayCalendarProps> = ({
     const n = new Date();
     return new Date(n.getFullYear(), n.getMonth(), n.getDate());
   }, []);
+  const todayIso = toISODate(today);
   const [month, setMonth] = useState(() => {
     const base = initialMonth ?? today;
     return new Date(base.getFullYear(), base.getMonth(), 1);
@@ -63,7 +64,9 @@ export const PeriodDayCalendar: React.FC<PeriodDayCalendarProps> = ({
   const confirmedSet = useMemo(() => new Set(confirmedOvulationDays), [confirmedOvulationDays]);
   const es = locale === 'es';
 
-  const monthLabel = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(month);
+  const rawMonthLabel = new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(month);
+  // Capitalize only the first letter ("Noviembre de 2026", not "Noviembre De 2026").
+  const monthLabel = rawMonthLabel.charAt(0).toUpperCase() + rawMonthLabel.slice(1);
   const weekdays = useMemo(() => {
     // 2023-01-01 is a Sunday
     const fmt = new Intl.DateTimeFormat(locale, { weekday: 'narrow' });
@@ -77,6 +80,10 @@ export const PeriodDayCalendar: React.FC<PeriodDayCalendarProps> = ({
     ...Array.from({ length: daysInMonth }, (_, i) => toISODate(new Date(month.getFullYear(), month.getMonth(), i + 1))),
   ];
   const isNextDisabled = new Date(month.getFullYear(), month.getMonth() + 1, 1) > new Date(today.getFullYear(), today.getMonth() + 3, 1);
+  const isCurrentMonth = month.getFullYear() === today.getFullYear() && month.getMonth() === today.getMonth();
+
+  const isBleeding = (iso: string | null | undefined) => !!iso && (savedSet.has(iso) || selectedSet.has(iso));
+  const isFertileish = (iso: string | null | undefined) => !!iso && !isBleeding(iso) && (fertileSet.has(iso) || ovulationSet.has(iso));
 
   const handleDay = (iso: string) => {
     if (mode !== 'period') {
@@ -108,35 +115,51 @@ export const PeriodDayCalendar: React.FC<PeriodDayCalendarProps> = ({
     setAnchor(iso);
   };
 
+  const navBtn = 'size-9 inline-flex items-center justify-center rounded-full border border-border/70 bg-card text-foreground hover:bg-secondary transition-colors disabled:opacity-30 disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring';
+
   return (
     <div className="w-full max-w-[360px]">
-      <div className="flex items-center justify-between mb-3 text-foreground">
+      <div className="flex items-center justify-between gap-2 mb-2">
         <button
           type="button"
           onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))}
-          className="p-2 hover:bg-secondary rounded-full transition-colors"
+          className={navBtn}
           aria-label={t.previousMonth}
         >
-          <span className="material-symbols-outlined">chevron_left</span>
+          <span className="material-symbols-outlined text-[20px]">chevron_left</span>
         </button>
-        <p className="text-base font-bold text-center capitalize">{monthLabel}</p>
+        <div className="flex flex-col items-center leading-tight">
+          <p className="text-sm font-bold text-foreground" aria-live="polite">{monthLabel}</p>
+          {!isCurrentMonth && (
+            <button
+              type="button"
+              onClick={() => setMonth(new Date(today.getFullYear(), today.getMonth(), 1))}
+              className="text-[11px] font-semibold text-primary hover:underline"
+            >
+              {es ? 'Volver a hoy' : 'Back to today'}
+            </button>
+          )}
+        </div>
         <button
           type="button"
           disabled={isNextDisabled}
           onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))}
-          className="p-2 hover:bg-secondary rounded-full transition-colors disabled:opacity-30"
+          className={navBtn}
           aria-label={t.nextMonth}
         >
-          <span className="material-symbols-outlined">chevron_right</span>
+          <span className="material-symbols-outlined text-[20px]">chevron_right</span>
         </button>
       </div>
-      <div className="grid grid-cols-7 gap-y-1 text-foreground">
+
+      <div className="grid grid-cols-7 text-foreground">
         {weekdays.map((d, i) => (
-          <div key={i} className="text-center text-xs font-bold text-muted-foreground py-2">{d}</div>
+          <div key={i} className="text-center text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80 pb-1.5">{d}</div>
         ))}
         {cells.map((iso, i) => {
-          if (!iso) return <div key={`b${i}`} />;
+          if (!iso) return <div key={`b${i}`} className="h-10" />;
+          const col = i % 7;
           const future = parseLocalDate(iso) > today;
+          const isToday = iso === todayIso;
           const isSaved = savedSet.has(iso);
           const isSelected = selectedSet.has(iso);
           const isOvulation = ovulationSet.has(iso);
@@ -145,42 +168,65 @@ export const PeriodDayCalendar: React.FC<PeriodDayCalendarProps> = ({
           const hasSpotting = spottingSet.has(iso);
           const hasSex = sexSet.has(iso);
           const flow = flowByDay[iso];
-          let cls = 'hover:bg-secondary';
-          if (isSaved) cls = `bg-primary/40 text-foreground ${mode === 'period' ? 'cursor-default' : ''}`;
-          else if (isSelected) cls = 'bg-primary text-primary-foreground shadow-lg shadow-primary/40 font-bold';
-          else if (isConfirmed) cls = 'bg-sun/30 text-foreground font-bold ring-2 ring-sun';
-          else if (isOvulation) cls = 'bg-sun/30 text-foreground font-bold';
-          else if (isFertile) cls = 'bg-sun/10 text-foreground';
+
+          // Connected range band behind consecutive days in the same week row.
+          const bleeding = isSaved || isSelected;
+          const fertileish = !bleeding && (isFertile || isOvulation);
+          const prev = col > 0 ? cells[i - 1] : null;
+          const next = col < 6 ? cells[i + 1] : null;
+          const joinPrev = bleeding ? isBleeding(prev) : fertileish && isFertileish(prev);
+          const joinNext = bleeding ? isBleeding(next) : fertileish && isFertileish(next);
+          const bandCls = bleeding ? (isSelected ? 'bg-primary/20' : 'bg-primary/15') : 'bg-sun/10';
+
+          let cls = 'text-foreground hover:bg-secondary';
+          if (isSaved) cls = `bg-primary/30 text-foreground font-semibold ${mode === 'period' ? 'hover:bg-primary/40' : ''}`;
+          else if (isSelected) cls = 'bg-primary text-primary-foreground font-bold shadow-md shadow-primary/30';
+          else if (isConfirmed) cls = 'bg-sun/35 text-sun-ink font-bold ring-2 ring-sun';
+          else if (isOvulation) cls = 'bg-sun/35 text-sun-ink font-bold';
+          else if (isFertile) cls = 'bg-sun/15 text-sun-ink';
+          if (future) cls += ' cursor-not-allowed';
+          const todayCls = isToday && !bleeding ? 'ring-[1.5px] ring-primary/70 font-bold text-primary' : '';
+
           return (
-            <button
-              key={iso}
-              type="button"
-              disabled={future}
-              onClick={() => handleDay(iso)}
-              aria-label={[
-                iso,
-                hasSpotting ? (es ? 'manchado' : 'spotting') : '',
-                hasSex ? (es ? 'relación sexual' : 'sexual activity') : '',
-                isConfirmed ? (es ? 'ovulación confirmada' : 'confirmed ovulation') : '',
-              ].filter(Boolean).join(', ')}
-              className={`relative h-10 w-10 mx-auto flex items-center justify-center rounded-full text-sm transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${cls} ${anchor === iso ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : ''}`}
-            >
-              {Number(iso.slice(8))}
-              {flow && <span className={`absolute bottom-0.5 left-1/2 -translate-x-1/2 rounded-full bg-bud ${flow === 'very_heavy' ? 'w-4 h-1.5' : flow === 'heavy' ? 'w-3 h-1.5' : flow === 'medium' ? 'size-1.5' : 'size-1 opacity-60'}`} />}
-              {hasSpotting && <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 size-1.5 rounded-full bg-petal" />}
-              {hasSex && <span className="material-symbols-outlined absolute -top-0.5 -right-0.5 text-[13px] text-blossom" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>}
-            </button>
+            <div key={iso} className="relative h-10 flex items-center justify-center">
+              {joinPrev && <span aria-hidden className={`absolute inset-y-1 left-0 right-1/2 ${bandCls}`} />}
+              {joinNext && <span aria-hidden className={`absolute inset-y-1 left-1/2 right-0 ${bandCls}`} />}
+              {/* Opaque underlay so the band doesn't tint half of the translucent circle. */}
+              {(joinPrev || joinNext) && <span aria-hidden className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 size-9 rounded-full bg-card" />}
+              <button
+                type="button"
+                disabled={future}
+                onClick={() => handleDay(iso)}
+                aria-pressed={bleeding || undefined}
+                aria-label={[
+                  iso,
+                  isToday ? (es ? 'hoy' : 'today') : '',
+                  isSaved ? (es ? 'regla guardada' : 'saved period') : isSelected ? (es ? 'marcado' : 'marked') : '',
+                  hasSpotting ? (es ? 'manchado' : 'spotting') : '',
+                  hasSex ? (es ? 'relación sexual' : 'sexual activity') : '',
+                  isConfirmed ? (es ? 'ovulación confirmada' : 'confirmed ovulation') : isOvulation ? (es ? 'ovulación estimada' : 'estimated ovulation') : isFertile ? (es ? 'ventana fértil' : 'fertile window') : '',
+                ].filter(Boolean).join(', ')}
+                className={`relative z-10 size-9 flex items-center justify-center rounded-full text-sm tabular-nums transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${cls} ${todayCls} ${future && !fertileish ? 'text-muted-foreground/45' : ''} ${anchor === iso ? 'ring-2 ring-primary ring-offset-2 ring-offset-card' : ''}`}
+              >
+                {Number(iso.slice(8))}
+                {flow && <span className={`absolute bottom-0.5 left-1/2 -translate-x-1/2 rounded-full bg-bud ${flow === 'very_heavy' ? 'w-4 h-1' : flow === 'heavy' ? 'w-3 h-1' : flow === 'medium' ? 'size-1' : 'size-1 opacity-60'}`} />}
+                {hasSpotting && <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 size-1.5 rounded-full bg-petal" />}
+                {hasSex && <span aria-hidden className="material-symbols-outlined absolute top-[2px] left-1/2 -translate-x-1/2 leading-none text-blossom" style={{ fontSize: 9, fontVariationSettings: "'FILL' 1" }}>favorite</span>}
+              </button>
+            </div>
           );
         })}
       </div>
-      <div className="flex flex-wrap gap-x-4 gap-y-1 mt-4 text-xs text-muted-foreground">
-        <span className="flex items-center gap-1.5"><span className="size-3 rounded-full bg-primary" />{t.legendNewDays}</span>
-        {saved.length > 0 && <span className="flex items-center gap-1.5"><span className="size-3 rounded-full bg-primary/40" />{t.legendSavedDays}</span>}
-        {fertileDays.length > 0 && <span className="flex items-center gap-1.5"><span className="size-3 rounded-full bg-sun/30" />{t.legendFertile}</span>}
-        {confirmedOvulationDays.length > 0 && <span className="flex items-center gap-1.5"><span className="size-3 rounded-full ring-2 ring-sun" />{es ? 'Ovulación confirmada (temperatura)' : 'Confirmed ovulation (temperature)'}</span>}
-        {Object.keys(flowByDay).length > 0 && <span className="flex items-center gap-1.5"><span className="h-1.5 w-3 rounded-full bg-bud" />{es ? 'Intensidad del sangrado' : 'Bleeding intensity'}</span>}
-        {spottingDays.length > 0 && <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-petal" />{es ? 'Manchado' : 'Spotting'}</span>}
-        {sexDays.length > 0 && <span className="flex items-center gap-1.5"><span className="material-symbols-outlined text-[13px] text-blossom" style={{ fontVariationSettings: "'FILL' 1" }}>favorite</span>{es ? 'Relación sexual' : 'Sexual activity'}</span>}
+
+      <div className="flex flex-wrap gap-x-3.5 gap-y-1.5 mt-3 pt-3 border-t border-border/50 text-[11px] text-muted-foreground">
+        <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-primary" />{t.legendNewDays}</span>
+        {saved.length > 0 && <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-primary/30" />{t.legendSavedDays}</span>}
+        {fertileDays.length > 0 && <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-full bg-sun/35" />{t.legendFertile}</span>}
+        {confirmedOvulationDays.length > 0 && <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-full ring-2 ring-sun" />{es ? 'Ovulación confirmada' : 'Confirmed ovulation'}</span>}
+        {Object.keys(flowByDay).length > 0 && <span className="flex items-center gap-1.5"><span className="h-1 w-3 rounded-full bg-bud" />{es ? 'Intensidad' : 'Intensity'}</span>}
+        {spottingDays.length > 0 && <span className="flex items-center gap-1.5"><span className="size-1.5 rounded-full bg-petal" />{es ? 'Manchado' : 'Spotting'}</span>}
+        {sexDays.length > 0 && <span className="flex items-center gap-1.5"><span aria-hidden className="material-symbols-outlined leading-none text-blossom" style={{ fontSize: 11, fontVariationSettings: "'FILL' 1" }}>favorite</span>{es ? 'Relación' : 'Sex'}</span>}
+        <span className="flex items-center gap-1.5"><span className="size-2.5 rounded-full ring-[1.5px] ring-primary/70" />{es ? 'Hoy' : 'Today'}</span>
       </div>
     </div>
   );

@@ -222,7 +222,7 @@ const Trends: React.FC = () => {
 
   return (
     <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 pb-32">
+      <div className="max-w-page mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 pb-32">
         <section className="relative overflow-hidden rounded-3xl garden-wash wash-leaf border border-border/80 shadow-sm p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-6">
           <PetalFall colors={['var(--petal)', 'var(--leaf-fresh)']} count={4} className="absolute inset-0 h-full w-full opacity-60" />
           <div className="relative flex flex-col gap-2">
@@ -244,7 +244,7 @@ const Trends: React.FC = () => {
             e.preventDefault();
             const next = RANGES[(RANGES.indexOf(range) + step + RANGES.length) % RANGES.length];
             setRange(next);
-            e.currentTarget.querySelector<HTMLButtonElement>(`[data-range="${next}"]`)?.focus();
+            e.currentTarget.querySelector<HTMLButtonElement>(`[data-range="${next}"]`)?.focus({ preventScroll: true });
           }}
         >
           {RANGES.map((r) => (
@@ -265,7 +265,13 @@ const Trends: React.FC = () => {
           ))}
         </div>
 
-        {empty ? (
+        {loading ? (
+          <div className="flex flex-col gap-6" aria-hidden="true">
+            <div className="h-32 rounded-3xl bg-card border border-border animate-pulse" />
+            <div className="h-64 rounded-3xl bg-card border border-border animate-pulse" />
+            <div className="h-40 rounded-3xl bg-card border border-border animate-pulse" />
+          </div>
+        ) : empty ? (
           <section className={`${card} p-6 sm:p-8 flex flex-col items-start gap-4`}>
             <span className="material-symbols-outlined text-primary" aria-hidden="true">edit_calendar</span>
             <div className="flex flex-col gap-1 max-w-prose">
