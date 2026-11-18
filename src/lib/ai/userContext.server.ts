@@ -237,7 +237,7 @@ export interface ClinicalRaw {
   periods: { start_date: string; end_date?: string | null }[];
   /** Only date, flow, clots and pain: never the sexual-activity columns of cycle_signs. */
   bleedingSigns?: BleedingSign[];
-  labs: { marker: string; value: number; date: string }[];
+  labs: { marker: string; value: number; date: string; ref_low?: number | null; ref_high?: number | null }[];
   metrics: {
     date: string; glucose_mg_dl: number | null; glucose_context: string | null; insulin_uiu_ml: number | null;
     weight_kg: number | null; waist_cm: number | null; systolic: number | null; diastolic: number | null;
@@ -279,17 +279,18 @@ export function buildClinicalContext(raw: ClinicalRaw): Pick<UserContextData, 'c
     : null;
   // Latest value per known marker.
   const known = new Set<string>(LAB_MARKERS.map((m) => m.key));
-  const latest = new Map<string, { value: number; date: string }>();
+  const latest = new Map<string, { value: number; date: string; low: number | null; high: number | null }>();
+  const num = (x: unknown) => (x == null ? null : Number(x));
   for (const r of raw.labs) {
     if (!known.has(r.marker)) continue;
     const cur = latest.get(r.marker);
-    if (!cur || r.date > cur.date) latest.set(r.marker, { value: Number(r.value), date: r.date });
+    if (!cur || r.date > cur.date) latest.set(r.marker, { value: Number(r.value), date: r.date, low: num(r.ref_low), high: num(r.ref_high) });
   }
   const labs: LabContext[] = [];
   for (const [marker, v] of latest) {
     if (marker === 'homa_ir') continue; // handled below, preferring the value derived from glucose and insulin
     const info = markerInfo(marker as LabMarker);
-    labs.push({ label: info.labelEs, value: v.value, unit: info.unit, date: v.date, status: markerStatus(info, v.value) });
+    labs.push({ label: info.labelEs, value: v.value, unit: info.unit, date: v.date, status: markerStatus(info, v.value, { low: v.low, high: v.high }) });
   }
   const labRows = raw.labs.filter((l) => known.has(l.marker)).map((l) => ({ date: l.date, marker: l.marker as LabMarker, value: Number(l.value) }));
   const metricLabRows = raw.metrics.flatMap((m) => [
@@ -372,7 +373,8 @@ export async function loadUserContext(
     soft(supabase.from('periods').select('start_date, end_date').eq('user_id', userId).order('start_date', { ascending: false }).limit(13)),
     // Explicit columns on purpose: cycle_signs also holds sexual activity, which the assistant must not see.
     soft(supabase.from('cycle_signs').select('date, flow, clots, pain').eq('user_id', userId).gte('date', since(400)).or('flow.not.is.null,pain.not.is.null').limit(200)),
-    soft(supabase.from('lab_results').select('marker, value, date').eq('user_id', userId).order('date', { ascending: false }).limit(300)),
+    // '*' so the lab's own range comes along once its migration is applied.
+    soft(supabase.from('lab_results').select('*').eq('user_id', userId).order('date', { ascending: false }).limit(300)),
     soft(supabase.from('pmos_metrics').select('date, glucose_mg_dl, glucose_context, insulin_uiu_ml, weight_kg, waist_cm, systolic, diastolic').eq('user_id', userId).gte('date', since(90)).order('date', { ascending: false }).limit(300)),
     soft(supabase.from('wellbeing_checks').select('date, phq_interest, phq_mood, gad_nervous, gad_worry, snoring, daytime_tiredness, observed_apnea').eq('user_id', userId).order('date', { ascending: false }).limit(1)),
     soft(supabase.from('hirsutism_scores').select('date, total').eq('user_id', userId).order('date', { ascending: false }).limit(2)),
@@ -392,7 +394,10 @@ export async function loadUserContext(
     today: clinicalToday,
     periods: ((periods as any[] | null) ?? []).map((p) => ({ start_date: String(p.start_date), end_date: p.end_date ? String(p.end_date) : null })),
     bleedingSigns: ((bleedingRows as any[] | null) ?? []).map((s) => ({ date: String(s.date).slice(0, 10), flow: s.flow, clots: !!s.clots, pain: s.pain != null ? Number(s.pain) : null })),
-    labs: ((labRows as any[] | null) ?? []).map((l) => ({ marker: l.marker, value: Number(l.value), date: String(l.date).slice(0, 10) })),
+    labs: ((labRows as any[] | null) ?? []).map((l) => ({
+      marker: l.marker, value: Number(l.value), date: String(l.date).slice(0, 10),
+      ref_low: l.ref_low != null ? Number(l.ref_low) : null, ref_high: l.ref_high != null ? Number(l.ref_high) : null,
+    })),
     metrics: ((metricRows as any[] | null) ?? []).map((m) => ({ ...m, date: String(m.date).slice(0, 10) })),
     wellbeing: wb ? { ...wb, date: String(wb.date).slice(0, 10) } : null,
     ferriman: ((fgRows as any[] | null) ?? []).map((r) => ({ date: String(r.date).slice(0, 10), total: Number(r.total) })),

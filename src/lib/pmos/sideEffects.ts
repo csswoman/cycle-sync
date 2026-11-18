@@ -1,3 +1,5 @@
+import { METFORMIN_PATTERN } from './metformin';
+
 /** Side-effect chips by type of medication. Free text is never stored; only these keys. */
 export type EffectKey =
   | 'nausea' | 'diarrhea' | 'stomach_pain' | 'metallic_taste' | 'bloating' | 'dizziness' | 'frequent_urination'
@@ -19,7 +21,7 @@ export const EFFECT_LABELS: Record<EffectKey, { es: string; en: string }> = {
   other: { es: 'Otro', en: 'Other' },
 };
 const BY_TYPE: { test: RegExp; effects: EffectKey[] }[] = [
-  { test: /metformin/i, effects: ['nausea', 'diarrhea', 'stomach_pain', 'metallic_taste', 'bloating', 'fatigue'] },
+  { test: METFORMIN_PATTERN, effects: ['nausea', 'diarrhea', 'stomach_pain', 'metallic_taste', 'bloating', 'fatigue'] },
   { test: /espironolact|spironolact/i, effects: ['dizziness', 'frequent_urination', 'breast_tenderness', 'irregular_bleeding', 'headache', 'fatigue'] },
   { test: /anticonceptiv|contracept|p[ií]ldora|\bpill\b/i, effects: ['spotting', 'nausea', 'headache', 'breast_tenderness', 'mood_changes', 'bloating'] },
 ];

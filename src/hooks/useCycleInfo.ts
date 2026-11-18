@@ -53,6 +53,7 @@ export function computeCycleInfo(config: CycleConfig, periods: Period[], now: Da
     cycleDay,
     daysUntilNextPeriod,
     cycleLength,
+    periodLength: estimate.periodLength,
     ovulationDay: estimate.ovulationDay,
     fertileStartDay: estimate.fertileStartDay,
     fertileEndDay: estimate.fertileEndDay,

@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { toLocalISO } from '@/lib/medications/schedule';
 import type { Medication, MedicationLog } from '@/hooks/useMedications';
 import type { CycleSign } from '@/lib/cycle/fertilitySigns';
-import { usesHormonalContraception } from '@/features/setup/onboarding';
+import { expectsLongGaps, usesHormonalContraception } from '@/features/setup/onboarding';
 import { useOnboardingAnswers } from '@/hooks/useOnboardingAnswers';
 import type { Pregnancy } from '@/lib/cycle/pregnancy';
 import type { MealGlucoseReading } from '@/lib/pmos/mealGlucose';
@@ -21,7 +21,13 @@ export interface PMOSOverviewData {
   symptomTotals: { date: string; total: number }[];
   fastingGlucose: { date: string; value: number }[];
   bloodPressureDates: string[];
-  labs: { date: string; marker: string; value: number }[];
+  /** Most recent blood pressure reading, or null. */
+  latestBloodPressure: { date: string; systolic: number; diastolic: number } | null;
+  /** From the body profile; null when not set or the column does not exist yet. */
+  heightCm: number | null;
+  latestWeightKg: number | null;
+  /** ref_low / ref_high are the lab's own range when it was logged. */
+  labs: { date: string; marker: string; value: number; ref_low?: number | null; ref_high?: number | null }[];
   dailyLogs: { date: string; sleep_hours: number | null; energy_level: number | null; symptoms: string[] | null }[];
   signs: CycleSign[];
   /** Post-meal readings with their meal; [] when the meal columns do not exist yet. */
@@ -35,12 +41,14 @@ export interface PMOSOverviewData {
   doseChanges: { medication_id: string; date: string; dose: string; weeks: number }[];
   sideEffects: { medication_id: string; date: string; effect: string; severity: number }[];
   hormonal: boolean;
+  /** Hormonal contraception, breastfeeding or perimenopause: long gaps without a period are expected. */
+  gapsExpected: boolean;
   /** Pregnancy intervals ([] when the table does not exist yet). */
   pregnancies: Pregnancy[];
   /** Questionnaire goal; 'fertility' is the "trying to conceive" mode. */
   goal: string | null;
 }
-type LoadedData = Omit<PMOSOverviewData, 'hormonal' | 'goal'>;
+type LoadedData = Omit<PMOSOverviewData, 'hormonal' | 'gapsExpected' | 'goal'>;
 
 const daysAgo = (n: number) => { const d = new Date(); d.setDate(d.getDate() - n); return toLocalISO(d); };
 
@@ -63,15 +71,16 @@ export function usePMOSOverview() {
         const { data: d, error } = await q;
         return error ? [] : ((d as T[]) ?? []);
       };
-      const [periods, config, meds, logs, symptoms, metrics, labs, daily, signs, mealRows, workouts, health, hirsutism, sideEffects, doseChanges, pregnancies] = await Promise.all([
+      const [periods, config, meds, logs, symptoms, metrics, labs, daily, signs, mealRows, workouts, health, hirsutism, sideEffects, doseChanges, pregnancies, profile] = await Promise.all([
         rows<{ start_date: string; end_date?: string | null }>(supabase.from('periods').select('start_date,end_date').eq('user_id', uid).order('start_date', { ascending: false }).limit(36)),
         rows<{ last_period_start: string | null }>(supabase.from('cycle_config').select('last_period_start').eq('user_id', uid).limit(1)),
         rows<Medication>(supabase.from('medications').select('*').eq('user_id', uid).order('created_at')),
         rows<MedicationLog>(supabase.from('medication_logs').select('*').eq('user_id', uid).gte('date', daysAgo(180))),
         rows<Record<string, number | string>>(supabase.from('pcos_symptoms').select('*').eq('user_id', uid).gte('date', daysAgo(400))),
-        rows<{ date: string; glucose_mg_dl: number | null; glucose_context: string | null; systolic?: number | null; waist_cm?: number | null }>(
+        rows<{ date: string; glucose_mg_dl: number | null; glucose_context: string | null; systolic?: number | null; diastolic?: number | null; waist_cm?: number | null; weight_kg?: number | null }>(
           supabase.from('pmos_metrics').select('*').eq('user_id', uid)),
-        rows<{ date: string; marker: string; value: number }>(supabase.from('lab_results').select('date,marker,value').eq('user_id', uid)),
+        // '*' so the lab range columns come along once their migration is applied.
+        rows<{ date: string; marker: string; value: number; ref_low?: number | null; ref_high?: number | null }>(supabase.from('lab_results').select('*').eq('user_id', uid)),
         rows<PMOSOverviewData['dailyLogs'][number]>(
           supabase.from('daily_logs').select('date,sleep_hours,energy_level,symptoms').eq('user_id', uid).gte('date', daysAgo(120))),
         rows<Record<string, unknown>>(supabase.from('cycle_signs').select('*').eq('user_id', uid).gte('date', daysAgo(220))),
@@ -87,7 +96,12 @@ export function usePMOSOverview() {
         rows<PMOSOverviewData['doseChanges'][number]>(supabase.from('medication_dose_changes').select('medication_id,date,dose,weeks').eq('user_id', uid)),
         rows<{ id: string; start_date: string; positive_test_date: string | null; end_date: string | null }>(
           supabase.from('pregnancies').select('id,start_date,positive_test_date,end_date').eq('user_id', uid)),
+        // Separate from the config query above so a missing column does not hide the last period.
+        rows<{ height_cm: number | null }>(supabase.from('cycle_config').select('height_cm').eq('user_id', uid).limit(1)),
       ]);
+      const byDateDesc = <T extends { date: string }>(xs: T[]) => [...xs].sort((a, b) => String(b.date).localeCompare(String(a.date)));
+      const lastBp = byDateDesc(metrics.filter((m) => m.systolic != null && m.diastolic != null))[0];
+      const lastWeight = byDateDesc(metrics.filter((m) => m.weight_kg != null))[0];
       const starts = periods.map((p) => p.start_date.slice(0, 10));
       const configStart = config[0]?.last_period_start?.slice(0, 10);
       if (configStart && !starts.includes(configStart)) starts.push(configStart);
@@ -112,7 +126,13 @@ export function usePMOSOverview() {
           .map((m) => ({ date: m.date, value: Number(m.glucose_mg_dl) }))
           .concat(labs.filter((l) => l.marker === 'fasting_glucose').map((l) => ({ date: l.date, value: Number(l.value) }))),
         bloodPressureDates: metrics.filter((m) => m.systolic != null).map((m) => m.date),
-        labs: labs.map((l) => ({ ...l, value: Number(l.value) })),
+        latestBloodPressure: lastBp ? { date: String(lastBp.date).slice(0, 10), systolic: Number(lastBp.systolic), diastolic: Number(lastBp.diastolic) } : null,
+        heightCm: profile[0]?.height_cm != null ? Number(profile[0].height_cm) : null,
+        latestWeightKg: lastWeight ? Number(lastWeight.weight_kg) : null,
+        labs: labs.map((l) => ({
+          date: String(l.date).slice(0, 10), marker: l.marker, value: Number(l.value),
+          ref_low: l.ref_low != null ? Number(l.ref_low) : null, ref_high: l.ref_high != null ? Number(l.ref_high) : null,
+        })),
         dailyLogs: daily,
         doseChanges: doseChanges.map((c) => ({ ...c, date: String(c.date).slice(0, 10), weeks: Number(c.weeks) })),
         sideEffects: sideEffects.map((e) => ({ ...e, date: String(e.date).slice(0, 10) })),
@@ -148,7 +168,12 @@ export function usePMOSOverview() {
   }, []);
 
   const data = useMemo<PMOSOverviewData | null>(
-    () => (loaded ? { ...loaded, hormonal: usesHormonalContraception(answers), goal: answers.goal ?? null } : null),
+    () => (loaded ? {
+      ...loaded,
+      hormonal: usesHormonalContraception(answers),
+      gapsExpected: usesHormonalContraception(answers) || expectsLongGaps(answers),
+      goal: answers.goal ?? null,
+    } : null),
     [loaded, answers],
   );
   return { data, loading };

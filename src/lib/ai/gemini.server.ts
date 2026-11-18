@@ -3,9 +3,9 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 // Server-only: this file reads GEMINI_API_KEY and must never be imported from client components.
 
 const DEFAULT_MODELS = [
-  'gemini-4-hydrogen',
-  'gemini-3.8-flash',
-  'gemini-3.5-flash-lite',
+  'gemini-2.5-flash',
+  'gemini-2.0-flash',
+  'gemini-2.5-flash-lite',
 ];
 
 /** Fallback order, overridable with GEMINI_MODELS="model-a,model-b" without touching code. */

@@ -5,9 +5,9 @@ import { Icon } from '@/components/ui/Icon';
 import type { PMOSOverviewData } from '@/hooks/usePMOSOverview';
 import type { InsightTone } from '@/lib/pmos/insights';
 import { insightsFromOverview } from '@/lib/pmos/overviewInsights';
-import { ovulationHistory, periodGap, type OvulationStatus } from '@/lib/pmos/cycleStatus';
+import { ovulationHistory, periodGap, progesteroneOf, type OvulationStatus } from '@/lib/pmos/cycleStatus';
 import { cycleHealthFlags } from '@/lib/cycle/cycleAnalysis';
-import { screeningPlan, type ScreeningKey } from '@/lib/pmos/screening';
+import { screeningInputFromOverview, screeningPlan, type ScreeningKey } from '@/lib/pmos/screening';
 import { useDisplayPrefs } from '@/hooks/useDisplayPrefs';
 import { medicationStart, parseLocalDate } from '@/lib/medications/schedule';
 import { groupMealGlucose, hasEnoughMealData, SPIKE_THRESHOLD_MG_DL } from '@/lib/pmos/mealGlucose';
@@ -81,8 +81,8 @@ const OV_STYLE: Record<OvulationStatus, { cls: string; es: string; en: string }>
 };
 
 export const CycleStatusCard: React.FC<{ lang: Lang; data: PMOSOverviewData }> = ({ lang, data }) => {
-  const gap = periodGap(data.periodStarts, data.today, data.pregnancies);
-  const history = useMemo(() => ovulationHistory(data.periodStarts, data.signs, data.today), [data]);
+  const gap = periodGap(data.periodStarts, data.today, data.pregnancies, { gapsExpected: data.gapsExpected });
+  const history = useMemo(() => ovulationHistory(data.periodStarts, data.signs, data.today, 6, progesteroneOf(data.labs)), [data]);
   const es = lang === 'es';
   const bleedingFlags = useMemo(
     () => cycleHealthFlags(data.periodRuns, parseLocalDate(data.today), data.signs, data.pregnancies).filter((f) => f === 'heavyBleeding' || f === 'heavyAfterGap'),
@@ -91,7 +91,12 @@ export const CycleStatusCard: React.FC<{ lang: Lang; data: PMOSOverviewData }> =
   const confirmed = history.filter((h) => h.end && h.status === 'confirmed').length;
   const finished = history.filter((h) => h.end && h.status !== 'no_data').length;
 
-  const gapText = !gap ? null : {
+  const gapText = !gap ? null : gap.expected ? (data.hormonal
+    ? (es ? 'Con anticonceptivo hormonal es normal que el sangrado cambie o desaparezca, así que no se marca como retraso.'
+        : 'On hormonal contraception bleeding often changes or stops, so this is not flagged as late.')
+    : (es ? 'Por lo que nos contaste en tu perfil, pasar meses sin regla puede ser esperable, así que no se marca como retraso.'
+        : 'From what you told us in your profile, months without a period can be expected, so this is not flagged as late.'))
+  : {
     ok: es ? 'Dentro de lo esperado para un ciclo.' : 'Within a typical cycle.',
     long: es ? 'Tu ciclo ya es más largo de 35 días. Es común con PMOS; si buscas embarazo o no es tu patrón habitual, coméntalo.' : 'Your cycle is now longer than 35 days. Common with PMOS; mention it if you are trying to conceive or it is unusual for you.',
     very_long: es ? 'Más de 60 días sin regla. Considera una prueba de embarazo si aplica y anota cualquier manchado.' : 'More than 60 days without a period. Consider a pregnancy test if it applies and log any spotting.',
@@ -113,9 +118,11 @@ export const CycleStatusCard: React.FC<{ lang: Lang; data: PMOSOverviewData }> =
             <p className="text-sm text-muted-foreground mt-1">{es ? 'días' : 'days'}</p>
           </div>
           <div className="flex flex-col gap-1">
-            <p className="text-sm font-semibold text-foreground">{es ? `desde tu última regla (${fmt(gap.lastStart, lang)})` : `since your last period (${fmt(gap.lastStart, lang)})`}</p>
+            <p className="text-sm font-semibold text-foreground">{gap.since === 'pregnancy_end'
+              ? (es ? `desde que terminó tu embarazo (${fmt(gap.from, lang)}), sin regla todavía` : `since your pregnancy ended (${fmt(gap.from, lang)}), no period yet`)
+              : (es ? `desde tu última regla (${fmt(gap.lastStart, lang)})` : `since your last period (${fmt(gap.lastStart, lang)})`)}</p>
             <p className="text-sm text-foreground/90 leading-relaxed">{gapText}</p>
-            {data.hormonal && (
+            {data.hormonal && !gap.expected && (
               <p className="text-sm text-muted-foreground">{es ? 'Con anticonceptivo hormonal, el sangrado de la semana de descanso no es una regla natural.' : 'On hormonal contraception, the break-week bleed is not a natural period.'}</p>
             )}
           </div>
@@ -150,16 +157,23 @@ export const CycleStatusCard: React.FC<{ lang: Lang; data: PMOSOverviewData }> =
                   {fmt(h.start, lang)}
                   <span className="text-muted-foreground"> · {h.length ? `${h.length} ${es ? 'días' : 'days'}` : es ? 'ciclo actual' : 'current cycle'}</span>
                 </span>
-                <span className={`text-xs font-semibold rounded-full px-2.5 py-1 ${OV_STYLE[h.status].cls}`}>
-                  {OV_STYLE[h.status][lang]}{h.ovulationDate ? ` · ${parseLocalDate(h.ovulationDate).toLocaleDateString(es ? 'es-MX' : 'en-US', { day: 'numeric', month: 'short' })}` : ''}
+                <span className="flex flex-col items-end gap-0.5">
+                  <span className={`text-xs font-semibold rounded-full px-2.5 py-1 ${OV_STYLE[h.status].cls}`}>
+                    {OV_STYLE[h.status][lang]}
+                    {h.confirmedBy === 'progesterone' ? (es ? ' (progesterona)' : ' (progesterone)') : ''}
+                    {h.ovulationDate ? ` · ${parseLocalDate(h.ovulationDate).toLocaleDateString(es ? 'es-MX' : 'en-US', { day: 'numeric', month: 'short' })}` : ''}
+                  </span>
+                  {h.lhUnreliable && (
+                    <span className="text-xs text-muted-foreground">{es ? 'LH positiva varios días: no se cuenta' : 'LH positive on many days: not counted'}</span>
+                  )}
                 </span>
               </li>
             ))}
           </ul>
           <p className="text-sm text-muted-foreground">
             {es
-              ? 'Se confirma con una subida sostenida de temperatura basal. Una LH positiva sola no confirma la ovulación con PMOS. Registra ambas en '
-              : 'Confirmed by a sustained basal temperature rise. A positive LH alone does not confirm ovulation with PMOS. Log both in '}
+              ? 'Se confirma con una subida sostenida de temperatura basal o con una progesterona de 3 ng/mL o más en la segunda mitad del ciclo. Una LH positiva sola no confirma la ovulación con PMOS, y si sale positiva muchos días no se toma en cuenta. Registra temperatura y LH en '
+              : 'Confirmed by a sustained basal temperature rise or a progesterone of 3 ng/mL or more in the second half of the cycle. A positive LH alone does not confirm ovulation with PMOS, and LH positive on many days is not counted. Log temperature and LH in '}
             <Link href="/log?tab=body" className="font-semibold text-primary hover:underline">{es ? 'Cuerpo y fertilidad' : 'Body & fertility'}</Link>.
           </p>
         </div>
@@ -183,12 +197,20 @@ const SCREEN_TEXT: Record<ScreeningKey, { es: string; en: string; whyEs: string;
 
 export const ScreeningCard: React.FC<{ lang: Lang; data: PMOSOverviewData; onOpenLabs: () => void }> = ({ lang, data, onOpenLabs }) => {
   const es = lang === 'es';
-  const plan = screeningPlan({
-    labs: data.labs,
-    fastingGlucoseDates: data.fastingGlucose.map((g) => g.date),
-    bloodPressureDates: data.bloodPressureDates,
-    onMetformin: data.medications.some((m) => m.active && /metformin/i.test(m.name)),
-  }, data.today);
+  const plan = screeningPlan(screeningInputFromOverview(data), data.today);
+  const glucoseWhy = (p: (typeof plan)[number]) => {
+    if (p.key !== 'glucose') return null;
+    const lowRisk = p.riskFactors?.length === 0;
+    if (p.preferOgtt) return es
+      ? 'Cada año, de preferencia con curva de tolerancia: tu registro muestra factores de riesgo. Solo cuentan análisis de laboratorio, no el glucómetro.'
+      : 'Every year, ideally a glucose tolerance test: your log shows risk factors. Only lab results count, not a home meter.';
+    if (lowRisk) return es
+      ? 'Cada 3 años: no vemos factores de riesgo en tu registro. Solo cuentan análisis de laboratorio, no el glucómetro.'
+      : 'Every 3 years: no risk factors in your log. Only lab results count, not a home meter.';
+    return es
+      ? 'Cada año hasta que registres tu altura y peso (con ellos puede espaciarse). Solo cuentan análisis de laboratorio, no el glucómetro.'
+      : 'Every year until you log your height and weight (then it may be spaced out). Only lab results count, not a home meter.';
+  };
 
   return (
     <Card icon="biotech" title={es ? 'Chequeos recomendados' : 'Recommended check-ups'}
@@ -198,6 +220,8 @@ export const ScreeningCard: React.FC<{ lang: Lang; data: PMOSOverviewData; onOpe
           const txt = SCREEN_TEXT[p.key];
           const badge = p.status === 'ok'
             ? { cls: 'bg-leaf/15 text-leaf', label: es ? `Al día · próximo ${fmt(p.due!, lang)}` : `Up to date · next ${fmt(p.due!, lang)}` }
+            : p.status === 'soon'
+              ? { cls: 'bg-primary/10 text-primary', label: es ? `Pronto · ${fmt(p.due!, lang)}` : `Coming up · ${fmt(p.due!, lang)}` }
             : p.status === 'due'
               ? { cls: 'bg-sun/15 text-sun-ink', label: es ? `Toca revisar (último ${fmt(p.last!, lang)})` : `Due (last ${fmt(p.last!, lang)})` }
               : { cls: 'bg-secondary text-muted-foreground', label: es ? 'Sin registro' : 'Not logged' };
@@ -205,7 +229,7 @@ export const ScreeningCard: React.FC<{ lang: Lang; data: PMOSOverviewData; onOpe
             <li key={p.key} className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-3 rounded-xl border border-border p-3">
               <div>
                 <p className="text-sm font-semibold text-foreground">{txt[lang]}</p>
-                <p className="text-sm text-muted-foreground">{es ? txt.whyEs : txt.whyEn}</p>
+                <p className="text-sm text-muted-foreground">{glucoseWhy(p) ?? (es ? txt.whyEs : txt.whyEn)}</p>
               </div>
               <span className={`self-start sm:self-center shrink-0 text-xs font-semibold rounded-full px-2.5 py-1 ${badge.cls}`}>{badge.label}</span>
             </li>

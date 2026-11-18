@@ -5,6 +5,7 @@ const base: PMOSOverviewData = {
   today: '2026-11-16', periodStarts: [], periodRuns: [], medications: [], medLogs: [], symptomTotals: [], fastingGlucose: [],
   bloodPressureDates: ['2026-10-01'], labs: [], dailyLogs: [], signs: [], mealReadings: [], workoutDates: [], healthData: [], acne: [],
   hirsutism: [], waist: [], doseChanges: [], sideEffects: [], hormonal: false, pregnancies: [], goal: null,
+  latestBloodPressure: null, heightCm: null, latestWeightKg: null, gapsExpected: false,
 };
 const ids = (d: PMOSOverviewData, ins: Parameters<typeof suggestQuestions>[1] = []) => suggestQuestions(d, ins).map((q) => q.id);
 describe('suggestQuestions', () => {
@@ -22,6 +23,16 @@ describe('suggestQuestions', () => {
     const q = suggestQuestions(d, []);
     expect(q.find((x) => x.id === 'period-gap')?.es).toContain('138 días');
     expect(q.find((x) => x.id === 'homa')?.es).toContain('3.46');
+  });
+  it('does not ask about a late period on hormonal contraception', () => {
+    expect(ids({ ...base, periodStarts: ['2026-07-01'], gapsExpected: true })).not.toContain('period-gap');
+  });
+  it('asks about other causes when thyroid, prolactin or 17-OHP is out of range', () => {
+    expect(ids({ ...base, labs: [{ date: '2026-10-01', marker: 'prolactin', value: 48 }] })).toContain('exclusions');
+  });
+  it('suggests a glucose tolerance test with risk factors', () => {
+    const q = suggestQuestions({ ...base, heightCm: 160, latestWeightKg: 80 }, []);
+    expect(q.find((x) => x.id === 'screen-glucose')?.es).toContain('curva');
   });
   it('turns attention insights into questions and caps the list at 6', () => {
     const ins = [

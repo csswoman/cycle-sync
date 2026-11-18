@@ -5,11 +5,11 @@ import { Icon } from '@/components/ui/Icon';
 import { useAppointments } from '@/hooks/useAppointments';
 import type { PMOSOverviewData } from '@/hooks/usePMOSOverview';
 import { bringList, daysUntil, lastPastAppointment, nextAppointment, type Appointment } from '@/lib/pmos/appointments';
-import { screeningPlan, type ScreeningKey } from '@/lib/pmos/screening';
+import { screeningInputFromOverview, screeningPlan, type ScreeningKey } from '@/lib/pmos/screening';
 import { parseLocalDate, toLocalISO } from '@/lib/medications/schedule';
 type Lang = 'es' | 'en';
 const SCREEN_LABEL: Record<ScreeningKey, { es: string; en: string }> = {
-  glucose: { es: 'Control de glucosa (HbA1c o glucosa en ayunas)', en: 'Glucose check (HbA1c or fasting glucose)' },
+  glucose: { es: 'Control de glucosa de laboratorio (HbA1c, glucosa en ayunas o curva)', en: 'Lab glucose check (HbA1c, fasting glucose or tolerance test)' },
   lipids: { es: 'Perfil de lípidos', en: 'Lipid profile' },
   blood_pressure: { es: 'Presión arterial', en: 'Blood pressure' },
   vitamin_b12: { es: 'Vitamina B12 (por la metformina)', en: 'Vitamin B12 (because of metformin)' },
@@ -87,10 +87,7 @@ export const AppointmentSection: React.FC<{
   const last = lastPastAppointment(items, today);
   const showAfter = last && daysUntil(last.date, today) >= -30 && !(next && next.date < today);
   const fmt = (iso: string) => parseLocalDate(iso).toLocaleDateString(lang === 'es' ? 'es-MX' : 'en-US', { weekday: 'long', day: 'numeric', month: 'long' });
-  const plan = data ? screeningPlan({
-    labs: data.labs, fastingGlucoseDates: data.fastingGlucose.map((g) => g.date), bloodPressureDates: data.bloodPressureDates,
-    onMetformin: data.medications.some((m) => m.active && /metformin/i.test(m.name)),
-  }, data.today) : [];
+  const plan = data ? screeningPlan(screeningInputFromOverview(data), data.today) : [];
   const bring = bringList(plan, questions);
   const count = next ? daysUntil(next.date, today) : 0;
   return (

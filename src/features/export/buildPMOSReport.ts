@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import type { PMOSOverviewData } from '@/hooks/usePMOSOverview';
-import type { PMOSReportExtra } from '@/services/medicalReportService';
+import type { PMOSReportExtra, ReportLang } from '@/services/medicalReportService';
 import { adherence, instructionLabel, medicationStart, toLocalISO } from '@/lib/medications/schedule';
 import { ovulationHistory, periodGap } from '@/lib/pmos/cycleStatus';
 import { analyzeCycles, cycleHealthFlags } from '@/lib/cycle/cycleAnalysis';
@@ -13,11 +13,18 @@ import { phenotype, PHENOTYPE_INFO, type DiagnosisCriteria } from '@/lib/pmos/di
 import { effectLabel, SEVERITY_LABELS } from '@/lib/pmos/sideEffects';
 import { scoreWellbeing, type WellbeingAnswers } from '@/lib/pmos/wellbeing';
 
-const BP_TEXT = { normal: 'normal', elevated: 'elevated', stage1: 'high (stage 1)', stage2: 'high (stage 2)' };
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const BP_TEXT = {
+  en: { normal: 'normal', elevated: 'elevated', stage1: 'high (stage 1)', stage2: 'high (stage 2)' },
+  es: { normal: 'normal', elevated: 'elevada', stage1: 'alta (etapa 1)', stage2: 'alta (etapa 2)' },
+};
+const DAYS = { en: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], es: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'] };
+const CRITERIA_TEXT: Record<ReportLang, Record<keyof DiagnosisCriteria, string>> = {
+  en: { irregular_cycles: 'irregular cycles or no ovulation', clinical_hyperandrogenism: 'clinical androgen excess', biochemical_hyperandrogenism: 'high androgens on labs', polycystic_ovaries: 'polycystic ovaries on ultrasound' },
+  es: { irregular_cycles: 'ciclos irregulares o sin ovulación', clinical_hyperandrogenism: 'exceso de andrógenos clínico', biochemical_hyperandrogenism: 'andrógenos altos en análisis', polycystic_ovaries: 'ovarios poliquísticos en ecografía' },
+};
 
 /** Collects the PMOS follow-up sections of the PDF report. Missing tables just leave sections out. */
-export async function buildPMOSReport(data: PMOSOverviewData, includeWellbeing: boolean): Promise<PMOSReportExtra> {
+export async function buildPMOSReport(data: PMOSOverviewData, includeWellbeing: boolean, lang: ReportLang = 'es'): Promise<PMOSReportExtra> {
   const { data: { session } } = await supabase.auth.getSession();
   const uid = session?.user?.id;
   const soft = async <T,>(q: PromiseLike<{ data: unknown; error: unknown }>): Promise<T[]> => {
@@ -51,10 +58,10 @@ export async function buildPMOSReport(data: PMOSOverviewData, includeWellbeing: 
   const labs: PMOSReportExtra['labs'] = LAB_MARKERS.flatMap((info) => {
     const l = latestLab.get(info.key);
     if (!l) return [];
-    return [{ label: info.label, value: `${l.value} ${info.unit}`.trim(), date: l.date, flag: markerStatus(info, l.value) === 'none' ? null : markerStatus(info, l.value) as 'low' | 'high' | 'ok' }];
+    return [{ label: lang === 'es' ? info.labelEs : info.label, value: `${l.value} ${info.unit}`.trim(), date: l.date, flag: markerStatus(info, l.value) === 'none' ? null : markerStatus(info, l.value) as 'low' | 'high' | 'ok' }];
   });
-  if (homa && !latestLab.has('homa_ir')) labs.push({ label: 'HOMA-IR (calculated)', value: String(homa.value), date: homa.date, flag: homa.value > 2.5 ? 'high' : 'ok' });
-  if (fai) labs.push({ label: 'Free androgen index (calc.)', value: String(fai.value), date: fai.date, flag: fai.value >= FAI_HIGH ? 'high' : 'ok' });
+  if (homa && !latestLab.has('homa_ir')) labs.push({ label: lang === 'es' ? 'HOMA-IR (calculado)' : 'HOMA-IR (calculated)', value: String(homa.value), date: homa.date, flag: homa.value > 2.5 ? 'high' : 'ok' });
+  if (fai) labs.push({ label: lang === 'es' ? 'Índice de andrógenos libres (calc.)' : 'Free androgen index (calc.)', value: String(fai.value), date: fai.date, flag: fai.value >= FAI_HIGH ? 'high' : 'ok' });
 
   // Only flow, clots and pain go into the report. Sexual activity and notes in the same table stay out.
   const bleedingPeriods = [...data.periodRuns]
@@ -66,14 +73,11 @@ export async function buildPMOSReport(data: PMOSOverviewData, includeWellbeing: 
     }))
     .filter((per) => per.days.length > 0);
   const bleedingFlags = cycleHealthFlags(data.periodRuns, parseLocalDate(today), data.signs, data.pregnancies).filter((f) => f === 'heavyBleeding' || f === 'heavyAfterGap');
-  const CRITERIA_EN: Record<keyof DiagnosisCriteria, string> = {
-    irregular_cycles: 'irregular cycles or no ovulation', clinical_hyperandrogenism: 'clinical androgen excess',
-    biochemical_hyperandrogenism: 'high androgens on labs', polycystic_ovaries: 'polycystic ovaries on ultrasound',
-  };
+  const CRITERIA_EN = CRITERIA_TEXT[lang];
   const dx = dxRows[0];
   const pheno = dx ? phenotype(dx) : null;
   const diagnosis: PMOSReportExtra['diagnosis'] = dx || eventRows.length ? {
-    phenotype: pheno ? `${pheno}: ${PHENOTYPE_INFO[pheno].en}` : null,
+    phenotype: pheno ? `${pheno}: ${PHENOTYPE_INFO[pheno][lang]}` : null,
     diagnosedOn: dx?.diagnosed_on ? dx.diagnosed_on.slice(0, 10) : null,
     criteria: dx ? (Object.keys(CRITERIA_EN) as (keyof DiagnosisCriteria)[]).filter((k) => dx[k]).map((k) => CRITERIA_EN[k]) : [],
     notes: dx?.notes ?? null,
@@ -81,7 +85,7 @@ export async function buildPMOSReport(data: PMOSOverviewData, includeWellbeing: 
   } : undefined;
   const sideEffects: PMOSReportExtra['sideEffects'] = data.medications.flatMap((m) => {
     const entries = effectRows.filter((e) => e.medication_id === m.id).slice(0, 8)
-      .map((e) => ({ date: e.date.slice(0, 10), effect: effectLabel(e.effect, 'en'), severity: SEVERITY_LABELS[e.severity as 1 | 2 | 3]?.en ?? '' }));
+      .map((e) => ({ date: e.date.slice(0, 10), effect: effectLabel(e.effect, lang), severity: SEVERITY_LABELS[e.severity as 1 | 2 | 3]?.[lang] ?? '' }));
     return entries.length ? [{ medication: m.name, entries }] : [];
   });
   const w = wellbeing[0];
@@ -94,17 +98,17 @@ export async function buildPMOSReport(data: PMOSOverviewData, includeWellbeing: 
     bleeding: bleedingPeriods.length ? { flags: bleedingFlags, periods: bleedingPeriods } : undefined,
     medications: data.medications.filter((m) => m.active).map((m) => {
       const times = m.times.map((t) => {
-        const ins = instructionLabel(m.time_instructions?.[t], 'en');
+        const ins = instructionLabel(m.time_instructions?.[t], lang);
         return ins ? `${t} (${ins.toLowerCase()})` : t;
       }).join(', ');
       const days = m.pack_active_days
-        ? `pack ${m.pack_active_days}+${m.pack_break_days ?? 0}`
-        : m.days_of_week?.length && m.days_of_week.length < 7 ? m.days_of_week.map((d) => DAYS[d]).join('/') : 'daily';
+        ? `${lang === 'es' ? 'blíster' : 'pack'} ${m.pack_active_days}+${m.pack_break_days ?? 0}`
+        : m.days_of_week?.length && m.days_of_week.length < 7 ? m.days_of_week.map((d) => DAYS[lang][d]).join('/') : lang === 'es' ? 'diario' : 'daily';
       const a = adherence([m], data.medLogs, toLocalISO(from), today, today);
       return { name: m.name, dose: m.dose, schedule: `${days} · ${times}`, notes: m.notes, adherencePct: a.total >= 3 ? a.pct : null, since: medicationStart(m) };
     }),
     labs,
-    bloodPressure: bp[0] ? { value: `${bp[0].systolic}/${bp[0].diastolic}`, date: bp[0].date, category: BP_TEXT[bloodPressureCategory(bp[0].systolic, bp[0].diastolic)] } : null,
+    bloodPressure: bp[0] ? { value: `${bp[0].systolic}/${bp[0].diastolic}`, date: bp[0].date, category: BP_TEXT[lang][bloodPressureCategory(bp[0].systolic, bp[0].diastolic)] } : null,
     hirsutism: hirsutism[0] ? { ...hirsutism[0], previous: hirsutism[1] ?? null } : null,
     wellbeing: w && ws ? { date: w.date, phq2: ws.phq2, gad2: ws.gad2, sleepSigns: [w.snoring, w.daytime_tiredness, w.observed_apnea].filter(Boolean).length } : null,
     questions: questions.map((q) => q.question),

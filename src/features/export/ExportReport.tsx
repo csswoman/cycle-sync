@@ -155,10 +155,11 @@ export default function ExportReport() {
         import('@/services/medicalReportService'),
         import('jspdf'),
       ]);
-      const pmos = overview ? await buildPMOSReport(overview, includeWellbeing) : undefined;
+      const pmos = overview ? await buildPMOSReport(overview, includeWellbeing, isEs ? 'es' : 'en') : undefined;
       generateMedicalReport(
         {
           ...reportData,
+          lang: isEs ? 'es' : 'en',
           pmos,
           cycleInfo: cycleInfo ?? null,
           generatedAt: new Date().toLocaleDateString(tx.locale, {

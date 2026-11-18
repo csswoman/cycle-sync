@@ -78,7 +78,7 @@ const MemberContent: React.FC<{ lang: 'es' | 'en' }> = ({ lang }) => {
           <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] gap-6 items-start">
             <div className="flex flex-col gap-6">
               {activePregnancy(data.pregnancies, data.today) && <PregnancyMedicationCard lang={lang} />}
-              <DiagnosisCard lang={lang} />
+              <DiagnosisCard lang={lang} data={data} />
               <InsightsCard lang={lang} data={data} />
               <MealGlucoseCard lang={lang} data={data} />
               <ScreeningCard lang={lang} data={data} onOpenLabs={() => go('labs')} />

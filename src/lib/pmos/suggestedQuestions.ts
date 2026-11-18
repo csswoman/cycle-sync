@@ -3,8 +3,9 @@
  * own data and asks; none of them interprets or diagnoses.
  */
 import type { PMOSOverviewData } from '@/hooks/usePMOSOverview';
-import { periodGap, ovulationHistory } from './cycleStatus';
-import { screeningPlan, type ScreeningKey } from './screening';
+import { periodGap, ovulationHistory, progesteroneOf } from './cycleStatus';
+import { screeningInputFromOverview, screeningPlan, type ScreeningKey } from './screening';
+import { exclusionChecks, type ExclusionKey } from './diagnosis';
 import { derivedSeries, homaIr, freeAndrogenIndex, FAI_HIGH, type LabMarker } from './metrics';
 import { cycleHealthFlags } from '@/lib/cycle/cycleAnalysis';
 import { parseLocalDate } from '@/lib/medications/schedule';
@@ -17,6 +18,15 @@ const SCREEN_Q: Record<ScreeningKey, { es: string; en: string }> = {
   blood_pressure: { es: 'No tengo una presión arterial reciente en mi registro. ¿Cada cuánto debo controlarla?', en: 'I have no recent blood pressure reading. How often should I check it?' },
   vitamin_b12: { es: 'Tomo metformina y no tengo vitamina B12 reciente. ¿Conviene revisarla?', en: 'I take metformin and have no recent vitamin B12. Should I check it?' },
 };
+const GLUCOSE_OGTT_Q = {
+  es: 'No tengo un control de glucosa reciente y tengo factores de riesgo de diabetes en mi registro. ¿Me conviene una curva de tolerancia a la glucosa?',
+  en: 'I have no recent glucose check and my log shows diabetes risk factors. Should I have a glucose tolerance test?',
+};
+const EXCLUSION_NAME: Record<ExclusionKey, { es: string; en: string }> = {
+  tsh: { es: 'TSH (tiroides)', en: 'TSH (thyroid)' },
+  prolactin: { es: 'prolactina', en: 'prolactin' },
+  ohp17: { es: '17-OH progesterona', en: '17-OH progesterone' },
+};
 const MAX = 6;
 /** Highest priority first; at most 6. */
 export function suggestQuestions(data: PMOSOverviewData, insights: Insight[]): SuggestedQuestion[] {
@@ -28,18 +38,29 @@ export function suggestQuestions(data: PMOSOverviewData, insights: Insight[]): S
   } else if (flags.includes('heavyBleeding')) {
     add({ id: 'heavy-bleeding', es: 'Tuve días de sangrado muy abundante o con coágulos. ¿Debo revisar hierro o hacerme otros estudios?', en: 'I had very heavy bleeding days or clots. Should I check my iron or have other tests?' });
   }
-  const gap = periodGap(data.periodStarts, data.today, data.pregnancies);
+  const gap = periodGap(data.periodStarts, data.today, data.pregnancies, { gapsExpected: data.gapsExpected });
   if (gap && gap.level !== 'ok') {
     const d = gap.days;
-    add({ id: 'period-gap',
-      es: `Llevo ${d} días sin regla. ¿Necesito algún estudio, o algo para proteger el endometrio si pasa mucho tiempo sin sangrar?`,
-      en: `It has been ${d} days since my last period. Do I need any tests, or something to protect my uterine lining if long gaps continue?` });
+    add(gap.since === 'pregnancy_end'
+      ? { id: 'period-gap',
+          es: `Han pasado ${d} días desde que terminó mi embarazo y no me ha vuelto la regla. ¿Es esperable o necesito algún estudio?`,
+          en: `It has been ${d} days since my pregnancy ended and my period has not come back. Is that expected or do I need any tests?` }
+      : { id: 'period-gap',
+          es: `Llevo ${d} días sin regla. ¿Necesito algún estudio, o algo para proteger el endometrio si pasa mucho tiempo sin sangrar?`,
+          en: `It has been ${d} days since my last period. Do I need any tests, or something to protect my uterine lining if long gaps continue?` });
   }
-  const plan = screeningPlan({
-    labs: data.labs, fastingGlucoseDates: data.fastingGlucose.map((g) => g.date), bloodPressureDates: data.bloodPressureDates,
-    onMetformin: data.medications.some((m) => m.active && /metformin/i.test(m.name)),
-  }, data.today);
-  for (const p of plan) if (p.status !== 'ok') add({ id: `screen-${p.key}`, ...SCREEN_Q[p.key] });
+  const abnormal = exclusionChecks(data.labs).filter((c) => c.status === 'abnormal');
+  if (abnormal.length) {
+    const names = abnormal.map((c) => EXCLUSION_NAME[c.key]);
+    add({ id: 'exclusions',
+      es: `Mi ${names.map((n) => n.es).join(' y ')} salió fuera de rango. ¿Hay que descartar otra causa antes de atribuirlo todo al PMOS?`,
+      en: `My ${names.map((n) => n.en).join(' and ')} came back out of range. Should another cause be ruled out before putting it all down to PMOS?` });
+  }
+  const plan = screeningPlan(screeningInputFromOverview(data), data.today);
+  for (const p of plan) {
+    if (p.status === 'ok' || p.status === 'soon') continue;
+    add({ id: `screen-${p.key}`, ...(p.key === 'glucose' && p.preferOgtt ? GLUCOSE_OGTT_Q : SCREEN_Q[p.key]) });
+  }
   const labs = data.labs as { date: string; marker: LabMarker; value: number }[];
   const homa = derivedSeries(labs, 'fasting_glucose', 'fasting_insulin', homaIr).at(-1);
   if (homa && homa.value > 2.5) {
@@ -63,7 +84,7 @@ export function suggestQuestions(data: PMOSOverviewData, insights: Insight[]): S
     }
   }
   if (!data.hormonal) {
-    const hist = ovulationHistory(data.periodStarts, data.signs, data.today, 6).filter((c) => c.end);
+    const hist = ovulationHistory(data.periodStarts, data.signs, data.today, 6, progesteroneOf(data.labs)).filter((c) => c.end);
     if (hist.length >= 3 && hist.every((c) => c.status === 'not_detected')) {
       add({ id: 'no-ovulation', es: 'Mi temperatura no muestra ovulación en mis últimos ciclos. ¿Cómo puedo confirmar si estoy ovulando?', en: 'My temperature chart shows no ovulation in my last cycles. How can I confirm whether I am ovulating?' });
     }

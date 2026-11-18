@@ -79,7 +79,9 @@ export const LAB_MARKERS: LabMarkerInfo[] = [
   { key: 'prolactin', label: 'Prolactin', labelEs: 'Prolactina', unit: 'ng/mL', group: 'hormones', low: 5, high: 25 },
   { key: 'tsh', label: 'TSH', labelEs: 'TSH (tiroides)', unit: 'mIU/L', group: 'hormones', low: 0.4, high: 4 },
   { key: 'fasting_glucose', label: 'Fasting glucose', labelEs: 'Glucosa en ayunas', unit: 'mg/dL', group: 'metabolic', low: 70, high: 99 },
-  { key: 'fasting_insulin', label: 'Fasting insulin', labelEs: 'Insulina en ayunas', unit: 'µIU/mL', group: 'metabolic', low: 2, high: 20 },
+  { key: 'fasting_insulin', label: 'Fasting insulin', labelEs: 'Insulina en ayunas', unit: 'µIU/mL', group: 'metabolic', low: 2, high: 20,
+    noteEs: 'El rango de laboratorio es amplio. Muchos médicos ya ven resistencia a la insulina con valores de 10 a 12 o más; mira también el HOMA-IR.',
+    noteEn: 'Lab ranges are wide. Many doctors already see insulin resistance from about 10 to 12; check HOMA-IR too.' },
   { key: 'homa_ir', label: 'HOMA-IR', labelEs: 'HOMA-IR', unit: '', group: 'metabolic', low: null, high: 2.5,
     noteEs: 'Se calcula solo si registras glucosa e insulina en ayunas del mismo día.', noteEn: 'Calculated automatically from same-day fasting glucose and insulin.' },
   { key: 'hba1c', label: 'HbA1c', labelEs: 'Hemoglobina glicosilada (HbA1c)', unit: '%', group: 'metabolic', low: null, high: 5.6,
@@ -150,9 +152,19 @@ export function markerInfo(key: LabMarker): LabMarkerInfo {
   return LAB_MARKERS.find((m) => m.key === key)!;
 }
 
-export function markerStatus(info: LabMarkerInfo, value: number): 'low' | 'high' | 'ok' | 'none' {
-  if (info.low == null && info.high == null) return 'none';
-  if (info.low != null && value < info.low) return 'low';
-  if (info.high != null && value > info.high) return 'high';
+/** Reference range printed by the user's own lab, in the marker's canonical unit. */
+export interface LabRange { low?: number | null; high?: number | null }
+
+/** The lab's own range when it has at least one bound, otherwise the app's typical range. */
+export function effectiveRange(info: LabMarkerInfo, lab?: LabRange | null): { low: number | null; high: number | null; source: 'lab' | 'app' } {
+  if (lab && (lab.low != null || lab.high != null)) return { low: lab.low ?? null, high: lab.high ?? null, source: 'lab' };
+  return { low: info.low, high: info.high, source: 'app' };
+}
+
+export function markerStatus(info: LabMarkerInfo, value: number, lab?: LabRange | null): 'low' | 'high' | 'ok' | 'none' {
+  const { low, high } = effectiveRange(info, lab);
+  if (low == null && high == null) return 'none';
+  if (low != null && value < low) return 'low';
+  if (high != null && value > high) return 'high';
   return 'ok';
 }

@@ -67,6 +67,8 @@ export interface CycleInfo {
   cycleDay: number;
   daysUntilNextPeriod: number;
   cycleLength: number;
+  /** Estimated bleeding days; with ovulationDay it lets a screen project the phase of any date. */
+  periodLength?: number;
   ovulationDay?: number;
   fertileStartDay?: number;
   fertileEndDay?: number;

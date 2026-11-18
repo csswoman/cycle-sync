@@ -3,7 +3,7 @@ import React, { useMemo, useState } from 'react';
 import { useLabResults } from '@/hooks/useLabResults';
 import { LineChart } from '@/components/ui/LineChart';
 import {
-  derivedSeries, FAI_HIGH, freeAndrogenIndex, homaIr, LAB_MARKERS, markerInfo, markerLabel, markerStatus,
+  derivedSeries, effectiveRange, FAI_HIGH, freeAndrogenIndex, homaIr, LAB_MARKERS, markerInfo, markerLabel, markerStatus,
   type LabGroup, type LabMarker,
 } from '@/lib/pmos/metrics';
 import { convertToCanonical, unitOptions } from '@/lib/pmos/units';
@@ -24,6 +24,8 @@ const T = {
     errValue: 'Escribe un valor mayor que 0.', loading: 'Cargando…', none: 'Sin resultados', results: 'Resultados', del: 'Eliminar',
     status: { ok: 'En rango', low: 'Bajo', high: 'Alto', none: 'Sin rango' },
     unit: 'Unidad', noRange: 'Sin rango de referencia en la app',
+    labRange: 'Rango de tu laboratorio (opcional, en la misma unidad)', rangeLow: 'Mínimo', rangeHigh: 'Máximo',
+    errRange: 'Revisa el rango: usa números y que el mínimo no supere el máximo.', labRangeTag: 'rango de tu laboratorio',
     groups: { hormones: 'Hormonas', metabolic: 'Glucosa e insulina', lipids: 'Lípidos', other: 'Vitaminas' } as Record<LabGroup, string>,
     derived: 'Calculado', fai: 'Índice de andrógenos libres (FAI)',
     faiNote: `Se calcula con testosterona total y SHBG del mismo día. Alrededor de ${FAI_HIGH} o más suele leerse como elevado.`,
@@ -35,6 +37,8 @@ const T = {
     errValue: 'Enter a value greater than 0.', loading: 'Loading…', none: 'No results yet', results: 'Results', del: 'Delete',
     status: { ok: 'In range', low: 'Below range', high: 'Above range', none: 'No range' },
     unit: 'Unit', noRange: 'No reference range in the app',
+    labRange: "Your lab's reference range (optional, same unit)", rangeLow: 'Low', rangeHigh: 'High',
+    errRange: 'Check the range: use numbers, with the low value not above the high one.', labRangeTag: "your lab's range",
     groups: { hormones: 'Hormones', metabolic: 'Glucose & insulin', lipids: 'Lipids', other: 'Vitamins' } as Record<LabGroup, string>,
     derived: 'Calculated', fai: 'Free androgen index (FAI)',
     faiNote: `Calculated from same-day total testosterone and SHBG. Around ${FAI_HIGH} or more is commonly read as elevated.`,
@@ -52,6 +56,8 @@ const LabResultsSection: React.FC<{ lang?: Lang }> = ({ lang = 'es' }) => {
   const [value, setValue] = useState('');
   const [unit, setUnit] = useState('');
   const [date, setDate] = useState(todayLocal());
+  const [refLow, setRefLow] = useState('');
+  const [refHigh, setRefHigh] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
   const [group, setGroup] = useState<LabGroup>('hormones');
 
@@ -63,10 +69,18 @@ const LabResultsSection: React.FC<{ lang?: Lang }> = ({ lang = 'es' }) => {
     e.preventDefault();
     const v = parseNum(value);
     if (v == null) { setFormError(t.errValue); return; }
-    const converted = convertToCanonical(marker, v, unit || markerInfo(marker).unit);
+    const fromUnit = unit || markerInfo(marker).unit;
+    const converted = convertToCanonical(marker, v, fromUnit);
     if (converted == null) { setFormError(t.errValue); return; }
+    // Optional lab range, typed in the same unit as the value.
+    const bound = (s: string) => { const n = s.trim() ? parseNum(s) : null; return n == null ? null : convertToCanonical(marker, n, fromUnit); };
+    const low = bound(refLow);
+    const high = bound(refHigh);
+    if ((refLow.trim() && low == null) || (refHigh.trim() && high == null) || (low != null && high != null && low > high)) {
+      setFormError(t.errRange); return;
+    }
     setFormError(null);
-    if (await add(marker, converted, date)) { setValue(''); setGroup(markerInfo(marker).group); }
+    if (await add(marker, converted, date, { low, high })) { setValue(''); setRefLow(''); setRefHigh(''); setGroup(markerInfo(marker).group); }
   };
 
   const selected = markerInfo(marker);
@@ -119,6 +133,17 @@ const LabResultsSection: React.FC<{ lang?: Lang }> = ({ lang = 'es' }) => {
             {saving ? t.saving : t.add}
           </button>
         </div>
+        <fieldset className="col-span-full flex flex-wrap items-end gap-3">
+          <legend className="text-sm font-medium text-muted-foreground mb-1.5">{t.labRange}</legend>
+          <label className="flex flex-col gap-1.5 text-sm text-muted-foreground w-32">
+            {t.rangeLow}
+            <input inputMode="decimal" value={refLow} onChange={(ev) => setRefLow(ev.target.value)} className={INPUT_CLASS} />
+          </label>
+          <label className="flex flex-col gap-1.5 text-sm text-muted-foreground w-32">
+            {t.rangeHigh}
+            <input inputMode="decimal" value={refHigh} onChange={(ev) => setRefHigh(ev.target.value)} className={INPUT_CLASS} />
+          </label>
+        </fieldset>
         {(lang === 'es' ? selected.noteEs : selected.noteEn) && (
           <p className="col-span-full text-sm text-muted-foreground">{lang === 'es' ? selected.noteEs : selected.noteEn}</p>
         )}
@@ -140,20 +165,24 @@ const LabResultsSection: React.FC<{ lang?: Lang }> = ({ lang = 'es' }) => {
         ) : (
           <>
             {LAB_MARKERS.filter((m) => m.group === group).map((info) => {
-              let points = results.filter((r) => r.marker === info.key).map((r) => ({ date: r.date, value: r.value }));
+              const rows = results.filter((r) => r.marker === info.key);
+              let points = rows.map((r) => ({ date: r.date, value: r.value }));
               if (info.key === 'homa_ir') {
                 const typed = new Set(points.map((p) => p.date));
                 points = [...points, ...homaDerived.filter((p) => !typed.has(p.date))].sort((a, b) => a.date.localeCompare(b.date));
               }
               const latest = points[points.length - 1];
-              const status = latest ? markerStatus(info, latest.value) : null;
+              const latestRow = latest ? rows.filter((r) => r.date === latest.date).at(-1) : undefined;
+              const labRange = latestRow ? { low: latestRow.ref_low, high: latestRow.ref_high } : null;
+              const range = effectiveRange(info, labRange);
+              const status = latest ? markerStatus(info, latest.value, labRange) : null;
               return (
                 <div key={info.key} className="flex flex-col gap-2 rounded-2xl border border-border p-4">
                   <div className="flex justify-between items-center gap-2">
                     <h3 className="text-sm font-semibold text-foreground">{markerLabel(info, lang)}</h3>
                     {latest && status && status !== 'none' && (
                       <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${STATUS_STYLE[status]}`}>
-                        {latest.value} {info.unit} · {t.status[status]}
+                        {latest.value} {info.unit} · {t.status[status]}{range.source === 'lab' ? ` (${t.labRangeTag})` : ''}
                       </span>
                     )}
                   </div>
@@ -163,7 +192,7 @@ const LabResultsSection: React.FC<{ lang?: Lang }> = ({ lang = 'es' }) => {
                   {points.length === 0 ? (
                     <p className="text-sm text-muted-foreground">{t.none}</p>
                   ) : (
-                    <LineChart points={points} unit={info.unit} refLow={info.low} refHigh={info.high} />
+                    <LineChart points={points} unit={info.unit} refLow={range.low} refHigh={range.high} />
                   )}
                   {info.key === 'homa_ir' && <p className="text-sm text-muted-foreground">{t.homaNote}</p>}
                 </div>
