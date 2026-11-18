@@ -6,10 +6,14 @@ import { TodayChecklist } from './TodayChecklist';
 import { TodayPlanCard } from './TodayPlanCard';
 import { HabitsProgress, WeekActivity } from './HabitsProgress';
 import { CardFlowers } from '@/components/ui/CardFlowers';
+import { QuickCheckin } from './QuickCheckin';
+import { DailyGuide } from './DailyGuide';
+import { useTodayCheckin } from '@/hooks/useTodayCheckin';
+import type { CycleOverview } from '@/hooks/useCycleOverview';
 
 const COPY = {
-    es: { title: 'Ritmo de hoy', subtitle: 'Registro, medicación, plan y hábitos en un solo lugar.' },
-    en: { title: "Today's rhythm", subtitle: 'Log, medication, plan and habits in one place.' },
+    es: { title: 'Ritmo de hoy', subtitle: 'Cómo te sientes, tu plan adaptado, medicación y hábitos en un solo lugar.' },
+    en: { title: "Today's rhythm", subtitle: 'How you feel, your adapted plan, medication and habits in one place.' },
 };
 
 /**
@@ -17,9 +21,11 @@ const COPY = {
  * workout, and habits. Each part keeps its own logic; this only gives them one
  * card and one hierarchy instead of three competing boxes.
  */
-export const TodayRhythm: React.FC = () => {
+export const TodayRhythm: React.FC<{ overview: CycleOverview }> = ({ overview }) => {
     const { language } = useLanguage();
-    const copy = COPY[language === 'es' ? 'es' : 'en'];
+    const lang = language === 'es' ? 'es' : 'en';
+    const copy = COPY[lang];
+    const checkin = useTodayCheckin();
 
     return (
         <section
@@ -32,7 +38,19 @@ export const TodayRhythm: React.FC = () => {
                 <p className="text-muted-foreground text-sm">{copy.subtitle}</p>
             </header>
 
-            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] gap-6">
+            {/* Check-in first: everything below adapts to it. Pregnancy mode keeps only the check-in. */}
+            <div className={`grid grid-cols-1 gap-6 ${overview.paused ? '' : 'lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]'}`}>
+                <div className="min-w-0">
+                    <QuickCheckin state={checkin} lang={lang} />
+                </div>
+                {!overview.paused && (
+                    <div className="min-w-0 border-t border-border/60 pt-6 lg:border-t-0 lg:pt-0 lg:border-l lg:pl-6">
+                        <DailyGuide state={checkin} overview={overview} lang={lang} />
+                    </div>
+                )}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] gap-6 border-t border-border/60 pt-6">
                 <div className="flex flex-col gap-6 min-w-0">
                     <TodayChecklist embedded />
                     {/* Without a plan TodayPlanCard shows empty slots that open the planner. */}

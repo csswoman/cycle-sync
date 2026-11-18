@@ -10,6 +10,7 @@ import { loadDay, setDone, type MealEntry, type WorkoutEntry } from '@/services/
 import { listLibrary } from '@/services/recipesService';
 import { CATALOG_RECIPES } from '@/data/seedRecipes';
 import { titleKey, isSimilarTitle } from '@/lib/recipes/normalize';
+import { TODAY_CHANGED_EVENT } from '@/hooks/useTodayCheckin';
 
 const COPY = {
     es: {
@@ -151,10 +152,14 @@ export const TodayPlanCard: React.FC<{ embedded?: boolean }> = ({ embedded = fal
             .catch(() => { /* keep catalog photos */ });
     }, []);
     useEffect(() => {
-        loadDay(toISODate(new Date()))
+        const load = () => loadDay(toISODate(new Date()))
             .then((day) => { setMeals(day.meals); setWorkout(day.workout); })
             .catch(() => { /* signed out or offline: no plan card */ })
             .finally(() => { setLoading(false); });
+        void load();
+        // "Your version of today" can mark the planned workout done.
+        window.addEventListener(TODAY_CHANGED_EVENT, load);
+        return () => window.removeEventListener(TODAY_CHANGED_EVENT, load);
     }, []);
 
     const toggleWorkout = async () => {

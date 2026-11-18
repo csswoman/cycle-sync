@@ -56,12 +56,12 @@ const Dashboard: React.FC<DashboardProps> = ({ userName }) => {
 
                 {explore ? (
                     <>
-                        <TodayRhythm />
+                        <TodayRhythm overview={overview} />
                         <PhaseExplorer answers={overview.answers} />
                     </>
                 ) : (
                     <>
-                        <TodayRhythm />
+                        <TodayRhythm overview={overview} />
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                             {showPhase && (
                                 <div className="lg:col-span-8">

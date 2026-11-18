@@ -11,6 +11,10 @@ export interface OfflineDailyLog {
   sleepQuality: string | null;
   symptoms: string[];
   notes: string | null;
+  /** Quick check-in fields; undefined on rows saved by older screens, so sync leaves the remote value alone. */
+  cravings?: string[];
+  cravingIntensity?: number | null;
+  motivation?: number | null;
   synced: boolean;
   updatedAt: string;
 }

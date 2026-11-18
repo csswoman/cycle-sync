@@ -7,6 +7,7 @@ import { useMedications, localDateString } from '@/hooks/useMedications';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { Icon } from '@/components/ui/Icon';
 import { dashboardText } from '../dashboardText';
+import { TODAY_CHANGED_EVENT } from '@/hooks/useTodayCheckin';
 
 const COPY = {
     es: {
@@ -72,7 +73,7 @@ export const TodayChecklist: React.FC<{ embedded?: boolean }> = ({ embedded = fa
     const [logged, setLogged] = useState(false);
 
     useEffect(() => {
-        (async () => {
+        const check = async () => {
             const { data: { session } } = await supabase.auth.getSession();
             const user = session?.user;
             if (!user) return;
@@ -81,7 +82,11 @@ export const TodayChecklist: React.FC<{ embedded?: boolean }> = ({ embedded = fa
             if (local) { setLogged(true); return; }
             const { data } = await supabase.from('daily_logs').select('id').eq('user_id', user.id).eq('date', date).maybeSingle();
             setLogged(!!data);
-        })();
+        };
+        void check();
+        // The quick check-in on the dashboard also counts as today's log.
+        window.addEventListener(TODAY_CHANGED_EVENT, check);
+        return () => window.removeEventListener(TODAY_CHANGED_EVENT, check);
     }, []);
 
     // Only doses scheduled for today (weekday-specific medications are excluded on other days).

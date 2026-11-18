@@ -9,6 +9,9 @@ export async function saveDailyLogOffline(data: {
   sleepQuality: string | null;
   symptoms: string[];
   notes: string | null;
+  cravings?: string[];
+  cravingIntensity?: number | null;
+  motivation?: number | null;
 }) {
   // transaction makes check+write atomic, avoiding duplicate rows
   await db.transaction('rw', db.dailyLogs, async () => {

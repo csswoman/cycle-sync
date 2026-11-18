@@ -17,6 +17,10 @@ async function syncDailyLogs(uid: string) {
         sleep_quality: log.sleepQuality,
         symptoms: log.symptoms,
         notes: log.notes,
+        // undefined is dropped from the payload, so screens that don't edit these keep the stored value.
+        cravings: log.cravings,
+        craving_intensity: log.cravingIntensity,
+        motivation: log.motivation,
       },
       { onConflict: 'user_id,date' },
     );

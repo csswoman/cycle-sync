@@ -96,6 +96,12 @@ export interface DailyLog {
   sleep_quality: string | null;
   symptoms: string[];
   notes: string | null;
+  /** Quick check-in: 'sweet' | 'salty' | 'carbs'. */
+  cravings?: string[] | null;
+  /** 1 mild, 2 moderate, 3 strong. */
+  craving_intensity?: number | null;
+  /** "Ganas de moverme": 1 none, 2 a little, 3 ready to go. */
+  motivation?: number | null;
   created_at: string;
 }
 
