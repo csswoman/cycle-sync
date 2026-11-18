@@ -593,7 +593,7 @@ const WeeklyPlanner: React.FC = () => {
 
     return (
         <div className="flex-1 overflow-y-auto h-full scrollbar-hide">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 sm:gap-8 pb-36 md:pb-28">
+            <div className="max-w-page mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 sm:gap-8 pb-36 md:pb-28">
                 {/* HERO HEADER */}
                 <header className="relative overflow-hidden rounded-2xl garden-wash border border-border/80 shadow-sm px-4 py-3 sm:px-5 sm:py-4 flex flex-col md:flex-row md:items-center justify-between gap-3 md:gap-5">
                     <div className="relative flex flex-col gap-1">
