@@ -169,7 +169,7 @@ const Habits: React.FC = () => {
 
   return (
     <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide">
-      <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-8 pb-32">
+      <div className="w-full max-w-page mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-8 pb-32">
 
         {/* Header */}
         <div className="relative overflow-hidden rounded-3xl garden-wash wash-leaf border border-border/80 shadow-sm p-6 sm:p-8 flex flex-col md:flex-row md:items-end justify-between gap-4">

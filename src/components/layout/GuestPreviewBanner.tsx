@@ -26,13 +26,13 @@ export default function GuestPreviewBanner({ message, className = '' }: GuestPre
         </span>
         <div className="min-w-0">
           <p className="text-sm font-bold text-foreground">{t.guestPreviewTitle}</p>
-          <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">{message}</p>
+          <p className="text-sm text-muted-foreground leading-relaxed">{message}</p>
         </div>
       </div>
       <button
         type="button"
         onClick={promptSignup}
-        className="shrink-0 self-stretch sm:self-auto bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-bold px-4 py-2 rounded-xl transition-colors"
+        className="shrink-0 self-stretch sm:self-auto bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-bold px-4 min-h-10 py-2 rounded-xl transition-colors"
       >
         {t.createAccount}
       </button>

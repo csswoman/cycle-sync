@@ -53,7 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           rel="stylesheet"
         />
       </head>
-      <body className="font-display overflow-hidden selection:bg-primary selection:text-white" suppressHydrationWarning>
+      <body className="font-display overflow-clip selection:bg-primary selection:text-white" suppressHydrationWarning>
         <SerwistProvider swUrl="/serwist/sw.js">
           <Providers>{children}</Providers>
         </SerwistProvider>

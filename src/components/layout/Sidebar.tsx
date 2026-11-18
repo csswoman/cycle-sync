@@ -179,7 +179,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
 
         <button
           onClick={() => (isGuest ? router.push('/login') : supabase.auth.signOut())}
-          className={`flex items-center gap-3 px-4 py-2 rounded-full transition-all cursor-pointer group w-full text-muted-foreground ${isGuest ? 'hover:bg-card hover:text-foreground' : 'hover:bg-destructive/10 hover:text-destructive'}`}
+          className={`flex items-center gap-3 px-4 min-h-10 py-2 rounded-full transition-all cursor-pointer group w-full text-muted-foreground ${isGuest ? 'hover:bg-card hover:text-foreground' : 'hover:bg-destructive/10 hover:text-destructive'}`}
         >
           <Icon
             name={isGuest ? 'login' : 'logout'}

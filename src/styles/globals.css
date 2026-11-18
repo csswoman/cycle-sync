@@ -137,6 +137,7 @@
   font-family: var(--font-family-heading);
   font-weight: 600;
   letter-spacing: -0.025em;
+  word-spacing: 0.08em;
   text-wrap: balance;
 }
 
@@ -144,6 +145,7 @@
   font-family: var(--font-family-heading);
   font-weight: 600;
   letter-spacing: -0.015em;
+  word-spacing: 0.06em;
   text-wrap: balance;
 }
 

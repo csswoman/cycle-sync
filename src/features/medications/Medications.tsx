@@ -329,7 +329,7 @@ const Medications: React.FC<MedicationsProps> = ({ embedded = false, onSummary }
   if (embedded) return <div className="flex flex-col gap-6">{content}</div>;
   return (
     <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide">
-      <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 pb-32">
+      <div className="w-full max-w-page mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 pb-32">
         {content}
       </div>
     </div>

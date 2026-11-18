@@ -94,7 +94,7 @@ export default function AppLayoutClient({ children }: { children: React.ReactNod
   const currentTitle = getPageTitle(pathname);
 
   return (
-    <div className="garden-canvas flex h-screen w-full text-foreground font-display overflow-hidden relative transition-colors duration-300">
+    <div className="garden-canvas flex h-screen w-full text-foreground font-display overflow-clip relative transition-colors duration-300">
       {/* Background doodles */}
       <Flower
         petal="var(--leaf-soft)"
@@ -130,12 +130,12 @@ export default function AppLayoutClient({ children }: { children: React.ReactNod
       <Sidebar />
 
       {/* Main Content Area */}
-      <main className="flex-1 flex flex-col h-full relative z-10 overflow-hidden min-w-0">
+      <main className="flex-1 flex flex-col h-full relative z-10 overflow-clip min-w-0">
         {/* TOP NAVBAR */}
         <header className="flex items-center justify-between border-b border-border/60 bg-background/50 backdrop-blur-xl z-20 px-4 sm:px-6 py-3 sm:py-3.5 transition-colors">
           <div className="flex items-center gap-3">
             <button
-              className="md:hidden text-foreground p-1.5 -ml-1 rounded-full hover:bg-card/70 transition-colors"
+              className="md:hidden text-foreground p-1.5 -ml-1 min-h-10 min-w-10 inline-flex items-center justify-center rounded-full hover:bg-card/70 transition-colors"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label="Open menu"
             >
@@ -152,7 +152,7 @@ export default function AppLayoutClient({ children }: { children: React.ReactNod
             {/* Language Switcher */}
             <button
               onClick={toggleLanguage}
-              className="flex items-center gap-1.5 bg-card/70 hover:bg-card backdrop-blur transition-all rounded-full px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-foreground shadow-sm border border-border/60 group"
+              className="flex items-center gap-1.5 bg-card/70 hover:bg-card backdrop-blur transition-all rounded-full px-3 sm:px-4 min-h-10 py-2 text-xs sm:text-sm font-semibold text-foreground shadow-sm border border-border/60 group"
               title="Cambiar idioma / Change language"
             >
               <Icon name="language" size={18} />
@@ -162,7 +162,7 @@ export default function AppLayoutClient({ children }: { children: React.ReactNod
             {/* Dark Mode Toggle */}
             <button
               onClick={() => setTheme(isDarkMode ? 'light' : 'dark')}
-              className="flex items-center gap-1.5 bg-card/70 hover:bg-card backdrop-blur transition-all rounded-full px-3 sm:px-4 py-2 text-xs sm:text-sm font-semibold text-foreground shadow-sm border border-border/60 group"
+              className="flex items-center gap-1.5 bg-card/70 hover:bg-card backdrop-blur transition-all rounded-full px-3 sm:px-4 min-h-10 py-2 text-xs sm:text-sm font-semibold text-foreground shadow-sm border border-border/60 group"
               title={isDarkMode ? t.lightMode : t.darkMode}
             >
               <Icon

@@ -262,7 +262,7 @@ export default function ArticlesCatalog() {
         </main>
       ) : (
         /* CATALOG LIST VIEW */
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 space-y-6 animate-fade-in relative">
+        <div className="max-w-page mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 space-y-6 animate-fade-in relative">
           {/* Header: compact title + one toolbar */}
           <header className="flex flex-col gap-1.5 max-w-2xl">
             <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground tracking-tight leading-tight font-display text-balance">
