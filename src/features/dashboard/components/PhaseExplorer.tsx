@@ -31,8 +31,6 @@ const COPY = {
         tryBody: 'Te mostramos en qué fase estarías hoy. Es solo una vista previa: no se guarda.',
         youAre: (day: number, phase: string) => `Hoy estarías en el día ${day}, fase ${phase}.`,
         clear: 'Borrar',
-        movement: 'Movimiento',
-        food: 'Comida',
     },
     en: {
         title: 'Get to know your cycle phases',
@@ -43,8 +41,6 @@ const COPY = {
         tryBody: 'We will show which phase you would be in today. It is only a preview: nothing is saved.',
         youAre: (day: number, phase: string) => `Today you would be on day ${day}, ${phase} phase.`,
         clear: 'Clear',
-        movement: 'Movement',
-        food: 'Food',
     },
 };
 
@@ -98,12 +94,12 @@ export const PhaseExplorer: React.FC<{ answers: OnboardingAnswers }> = ({ answer
             <div data-phase={current.tone} className="relative isolate overflow-hidden bg-card rounded-3xl border border-border shadow-sm p-5 sm:p-6 flex flex-col gap-5">
                 <CardFlowers variant="explorer" />
                 <header>
-                    <h2 id="phase-explorer-title" className="text-foreground text-xl font-semibold tracking-tight">{copy.title}</h2>
-                    <p className="text-muted-foreground text-sm max-w-2xl">{copy.subtitle}</p>
+                    <h2 id="phase-explorer-title" className="text-foreground text-xl font-semibold tracking-tight text-balance">{copy.title}</h2>
+                    <p className="text-muted-foreground text-sm max-w-2xl text-pretty">{copy.subtitle}</p>
                 </header>
 
                 {/* Phase selector: one segment per phase, sized by its reference length. */}
-                <div role="tablist" aria-label={copy.title} className="flex gap-1.5">
+                <div role="tablist" aria-label={copy.title} className="grid grid-cols-2 xl:flex gap-1.5">
                     {PHASES.map((p) => {
                         const active = p.phase === selected;
                         const len = p.days[1] - p.days[0] + 1;
@@ -122,40 +118,30 @@ export const PhaseExplorer: React.FC<{ answers: OnboardingAnswers }> = ({ answer
                                     }`}
                             >
                                 <span className={`block h-1.5 rounded-full mb-2 ${active ? 'bg-phase' : 'bg-phase opacity-40'}`} />
-                                <span className={`block text-xs sm:text-sm font-semibold truncate ${active ? 'text-phase' : 'text-foreground'}`}>
+                                <span className={`block text-sm font-semibold truncate ${active ? 'text-phase' : 'text-foreground'}`}>
                                     {text.phases[phaseKey(p.phase)].name}
                                 </span>
-                                <span className="block text-[11px] sm:text-xs text-muted-foreground truncate">{copy.days(p.days[0], p.days[1])}</span>
+                                <span className="block text-sm text-muted-foreground truncate">{copy.days(p.days[0], p.days[1])}</span>
                             </button>
                         );
                     })}
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_minmax(0,18rem)] gap-5">
-                    <div className="phase-wash relative overflow-hidden rounded-2xl border border-border/60 p-5 flex flex-col gap-3 min-h-44">
+                <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(0,18rem)] gap-5">
+                    <div className="phase-wash relative overflow-hidden rounded-2xl border border-border/60 p-5 flex flex-col justify-center gap-3">
                         <Bloom growth={current.growth} tone={current.tone} className="absolute -bottom-1 right-1 h-28 w-auto opacity-90" />
                         <div className="relative pr-20">
-                            <p className="text-xs font-bold uppercase tracking-wider text-phase">{phaseCopy.hormones}</p>
-                            <h3 className="text-foreground text-2xl font-semibold tracking-tight mt-1">{phaseCopy.focus}</h3>
+                            <h3 className="text-foreground text-2xl font-semibold tracking-tight text-balance">{phaseCopy.focus}</h3>
+                            <p className="text-sm font-semibold text-phase mt-1">{phaseCopy.hormones}</p>
                         </div>
                         <div className="relative flex items-center gap-2" aria-label={`${copy.energy}: ${current.energy}/4`}>
-                            <span className="text-xs font-semibold text-muted-foreground">{copy.energy}</span>
+                            <span className="text-sm font-semibold text-muted-foreground">{copy.energy}</span>
                             <span className="flex gap-1" aria-hidden="true">
                                 {[1, 2, 3, 4].map((i) => (
                                     <Icon key={i} name="bolt" size={16} weight={i <= current.energy ? 'fill' : 'regular'} className={i <= current.energy ? 'text-phase' : 'text-muted-foreground/40'} />
                                 ))}
                             </span>
                         </div>
-                        <dl className="relative grid grid-cols-1 sm:grid-cols-2 gap-3 pr-0 sm:pr-16 text-sm">
-                            <div>
-                                <dt className="flex items-center gap-1.5 font-semibold text-foreground"><Icon name="fitness_center" size={16} className="text-phase" />{copy.movement}</dt>
-                                <dd className="text-muted-foreground mt-0.5">{phaseCopy.movement.title}</dd>
-                            </div>
-                            <div>
-                                <dt className="flex items-center gap-1.5 font-semibold text-foreground"><Icon name="restaurant" size={16} className="text-phase" />{copy.food}</dt>
-                                <dd className="text-muted-foreground mt-0.5">{phaseCopy.food.title}</dd>
-                            </div>
-                        </dl>
                     </div>
 
                     {/* Unsaved preview: a date gives a phase today, nothing is stored server side. */}
@@ -164,7 +150,7 @@ export const PhaseExplorer: React.FC<{ answers: OnboardingAnswers }> = ({ answer
                             <Icon name="calendar_today" size={18} className="text-blossom" />
                             <p className="text-sm font-semibold text-foreground">{copy.tryTitle}</p>
                         </div>
-                        <p className="text-xs text-muted-foreground leading-relaxed">{copy.tryBody}</p>
+                        <p className="text-sm text-muted-foreground leading-relaxed">{copy.tryBody}</p>
                         <div className="flex items-center gap-2">
                             <input
                                 type="date"
@@ -175,7 +161,7 @@ export const PhaseExplorer: React.FC<{ answers: OnboardingAnswers }> = ({ answer
                                 className="flex-1 min-w-0 h-11 rounded-xl border border-border bg-card px-3 text-sm text-foreground"
                             />
                             {lastStart && (
-                                <button type="button" onClick={() => onDate('')} className="shrink-0 px-3 h-11 rounded-xl text-xs font-semibold text-muted-foreground hover:text-foreground cursor-pointer">
+                                <button type="button" onClick={() => onDate('')} className="shrink-0 px-3 h-11 rounded-xl text-sm font-semibold text-muted-foreground hover:text-foreground cursor-pointer">
                                     {copy.clear}
                                 </button>
                             )}

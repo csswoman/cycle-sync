@@ -52,11 +52,11 @@ const GoalSettings: React.FC<{ language: Language }> = ({ language }) => {
                 {goals.map((id) => {
                     const opt = options[`goal_${id}`];
                     return (
-                        <label key={id} className={`flex items-start gap-3 rounded-xl border p-3 cursor-pointer ${answers.goal === id ? 'border-primary bg-primary/5' : 'border-border'}`}>
-                            <input type="radio" name="goal" checked={answers.goal === id} onChange={() => update({ goal: id })} className="mt-1 accent-primary" />
+                        <label key={id} className={`flex items-start gap-3 rounded-xl border p-4 cursor-pointer transition-colors ${answers.goal === id ? 'border-primary bg-primary/10 ring-1 ring-primary' : 'border-border hover:bg-secondary/60'}`}>
+                            <input type="radio" name="goal" checked={answers.goal === id} onChange={() => update({ goal: id })} className="mt-1 size-5 accent-primary" />
                             <span>
-                                <span className="block text-sm font-bold text-foreground">{opt?.label}</span>
-                                {opt?.description && <span className="block text-xs text-muted-foreground">{opt.description}</span>}
+                                <span className="block text-base font-bold text-foreground">{opt?.label}</span>
+                                {opt?.description && <span className="block text-sm text-muted-foreground">{opt.description}</span>}
                             </span>
                         </label>
                     );
@@ -77,7 +77,7 @@ const GoalSettings: React.FC<{ language: Language }> = ({ language }) => {
 
             <fieldset className="flex flex-col gap-2">
                 <legend className="text-sm font-bold text-foreground mb-1">{c.tools}</legend>
-                <p className="text-xs text-muted-foreground">{c.toolsHint}</p>
+                <p className="text-sm text-muted-foreground">{c.toolsHint}</p>
                 <div className="flex flex-wrap gap-2">
                     {prefs.map((id) => (
                         <label key={id} className={`px-3.5 py-2 rounded-full border text-sm font-semibold cursor-pointer ${pref === id ? 'border-primary bg-primary/10 text-foreground' : 'border-border text-muted-foreground'}`}>
@@ -86,11 +86,11 @@ const GoalSettings: React.FC<{ language: Language }> = ({ language }) => {
                         </label>
                     ))}
                 </div>
-                {pref === 'auto' && <p className="text-xs text-muted-foreground">{c.auto(cycleProfile(answers) === 'pmos')}</p>}
+                {pref === 'auto' && <p className="text-sm text-muted-foreground">{c.auto(cycleProfile(answers) === 'pmos')}</p>}
             </fieldset>
 
-            {state === 'saved' && <p className="text-xs text-leaf" aria-live="polite">{c.saved}</p>}
-            {state === 'error' && <p className="text-xs text-destructive" role="alert">{c.error}</p>}
+            {state === 'saved' && <p className="text-sm text-leaf" aria-live="polite">{c.saved}</p>}
+            {state === 'error' && <p className="text-sm text-destructive" role="alert">{c.error}</p>}
         </div>
     );
 };

@@ -1,6 +1,5 @@
 'use client';
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { supabase } from '@/lib/supabase';
 import { db } from '@/lib/offlineDb';
@@ -27,7 +26,6 @@ async function fetchAll(table: string, userId: string): Promise<unknown[] | null
 const PrivacySettings: React.FC = () => {
   const { language } = useLanguage();
   const es = language === 'es';
-  const router = useRouter();
   const [hasPin, setHasPin] = useState(() => loadPinRecord() !== null);
   const [idle, setIdle] = useState<number>(() => loadPinRecord()?.idleMinutes ?? DEFAULT_IDLE_MINUTES);
   const [pin, setPin] = useState('');
@@ -64,7 +62,11 @@ const PrivacySettings: React.FC = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('no user');
       const results: Record<string, unknown[] | null> = {};
-      await Promise.all(EXPORT_TABLES.map(async (t) => { results[t] = await fetchAll(t, user.id); }));
+      // 4 workers pull from a shared index so at most 4 tables are fetched at once.
+      let next = 0;
+      await Promise.all(Array.from({ length: 4 }, async () => {
+        while (next < EXPORT_TABLES.length) { const t = EXPORT_TABLES[next++]; results[t] = await fetchAll(t, user.id); }
+      }));
       const out = buildExport({ id: user.id, email: user.email }, results);
       const url = URL.createObjectURL(new Blob([JSON.stringify(out, null, 2)], { type: 'application/json' }));
       const a = document.createElement('a');
@@ -88,7 +90,8 @@ const PrivacySettings: React.FC = () => {
       db.close();
       await db.delete().catch(() => undefined);
       await supabase.auth.signOut().catch(() => undefined);
-      router.replace('/login');
+      // Full reload: db is an in-memory singleton and is now closed/deleted.
+      window.location.href = '/login';
     } catch {
       setMsg({ ok: false, text: es ? 'No se pudo borrar la cuenta. No se perdió nada; inténtalo de nuevo.' : 'Could not delete the account. Nothing was lost; try again.' });
       setDeleting(false);
@@ -96,7 +99,7 @@ const PrivacySettings: React.FC = () => {
   };
 
   return (
-    <SettingsSection title={es ? 'Privacidad y datos' : 'Privacy and data'} icon="lock">
+    <SettingsSection quiet title={es ? 'Privacidad y datos' : 'Privacy and data'} icon="lock">
       <div className="flex flex-col gap-8">
         {msg && (
           <div role="status" className={`p-3 rounded-xl border text-sm ${msg.ok ? 'bg-leaf/10 border-leaf/20 text-leaf' : 'bg-destructive/10 border-destructive/20 text-destructive'}`}>{msg.text}</div>
@@ -120,7 +123,7 @@ const PrivacySettings: React.FC = () => {
               {hasPin && <button type="button" onClick={removePin} className="px-6 h-11 rounded-xl border border-border text-foreground font-bold">{es ? 'Quitar PIN' : 'Remove PIN'}</button>}
               <label className="flex items-center gap-2 text-sm text-muted-foreground">
                 {es ? 'Bloquear tras' : 'Lock after'}
-                <select value={idle} onChange={(e) => void changeIdle(Number(e.target.value))} className="bg-secondary border border-border rounded-lg px-2 py-1 text-foreground">
+                <select value={idle} onChange={(e) => void changeIdle(Number(e.target.value))} className="bg-secondary border border-border rounded-xl px-3 min-h-10 text-foreground">
                   {IDLE_OPTIONS.map((m) => <option key={m} value={m}>{m} min</option>)}
                 </select>
               </label>
@@ -146,7 +149,7 @@ const PrivacySettings: React.FC = () => {
               : 'Deletes your account, all your records and your photos. This cannot be undone. Download your data first if you want a copy.'}
           </p>
           <label className="flex flex-col gap-1 text-sm text-foreground">
-            {es ? <>Escribe <strong>{confirmWord}</strong> para confirmar</> : <>Type <strong>{confirmWord}</strong> to confirm</>}
+            <span>{es ? <>Escribe <strong>{confirmWord}</strong> para confirmar</> : <>Type <strong>{confirmWord}</strong> to confirm</>}</span>
             <input className={inputCls} value={word} onChange={(e) => setWord(e.target.value)} autoComplete="off" />
           </label>
           <button type="button" onClick={() => void deleteAccount()} disabled={deleting || word.trim() !== confirmWord}

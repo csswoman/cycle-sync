@@ -143,7 +143,7 @@ const en: DashboardText = {
 };
 
 const es: DashboardText = {
-  greeting: (name) => (name ? `Hola, ${name}!` : 'Tu día'),
+  greeting: (name) => (name ? `¡Hola, ${name}!` : 'Tu día'),
   subtitle: 'Lo que importa hoy, según tu ciclo.',
   dayOf: (d, t) => `Día ${d} de ~${t}`,
   phaseWord: 'fase',
@@ -154,7 +154,7 @@ const es: DashboardText = {
   anyDay: 'en cualquier momento',
   expectedBetween: (from, to) => `Esperada entre el ${from} y el ${to}`,
   lateTitle: 'Tu regla va con retraso',
-  lateBody: 'Con SOP/PMOS suele significar que la ovulación llegó más tarde de lo habitual o no ocurrió en este ciclo. La cuenta sigue hasta que registres tu próxima regla.',
+  lateBody: 'Con PMOS suele significar que la ovulación llegó más tarde de lo habitual o no ocurrió en este ciclo. La cuenta sigue hasta que registres tu próxima regla.',
   overdueDay: (d) => `Día ${d} · esperando tu regla`,
   ovulationUnsure: 'puede haberse retrasado',
   noPeriod90: 'Han pasado más de 90 días desde tu última regla registrada. Las guías recomiendan revisar pausas tan largas con tu médica.',
@@ -167,7 +167,7 @@ const es: DashboardText = {
   fertileNow: 'Estás en tu ventana fértil estimada.',
   fertileTip: 'Tus probabilidades son mayores los dos días antes de la ovulación y el día de la ovulación.',
   hormonalNote: 'Usas anticoncepción hormonal, así que las fechas de ovulación son solo una referencia.',
-  irregularNote: 'Tus ciclos varían bastante, así que estas fechas tienen un margen amplio. Con SOP/PMOS la ovulación puede retrasarse o no ocurrir; las señales del cuerpo (moco cervical, temperatura basal) dicen más que el calendario, y las tiras de LH pueden dar falsos positivos.',
+  irregularNote: 'Tus ciclos varían bastante, así que estas fechas tienen un margen amplio. Con PMOS la ovulación puede retrasarse o no ocurrir; las señales del cuerpo (moco cervical, temperatura basal) dicen más que el calendario, y las tiras de LH pueden dar falsos positivos.',
   approx: 'Estimaciones aproximadas, no son un método anticonceptivo ni consejo médico.',
   confidence: 'Confianza',
   confidenceLevels: { low: 'Baja', medium: 'Media', high: 'Alta' },
@@ -182,7 +182,7 @@ const es: DashboardText = {
   logCta: 'Registrar',
   medsTitle: 'Medicación',
   medsProgress: (t, n) => `${t} de ${n} tomas hechas`,
-  medsNone: 'Aún no agregas medicación',
+  medsNone: 'Aún no has agregado medicación',
   medsCta: 'Abrir',
   habitsTitle: 'Hábitos',
   habitsProgress: (p) => `${p}% completado`,
@@ -192,7 +192,7 @@ const es: DashboardText = {
   workoutCta: 'Ver rutinas',
   foodCta: 'Ver ideas de comidas',
   lowActivityNote: 'Dijiste que eres sedentaria casi siempre: mantén sesiones cortas y sube poco a poco.',
-  pmosNote: 'Con SOP/PMOS importa más el total semanal que la fase del ciclo: apunta a 150 min de actividad moderada (o 75 vigorosa) más 2 días de fuerza, y ajusta cada sesión a cómo te sientes.',
+  pmosNote: 'Con PMOS importa más el total semanal que la fase del ciclo: apunta a 150 min de actividad moderada (o 75 vigorosa) más 2 días de fuerza, y ajusta cada sesión a cómo te sientes.',
   disclaimer: 'Este plan se basa en tus datos registrados. Escucha primero a tu cuerpo y consulta a un profesional de la salud para decisiones médicas.',
   phases: {
     Menstrual: {

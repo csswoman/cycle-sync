@@ -4,7 +4,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useLanguage } from '@/i18n/LanguageContext';
 
 export default function HealthWebhookSettings() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const friendly = (status: number, fallback: string) =>
+    status === 401
+      ? language === 'es' ? 'Inicia sesión para conectar tu reloj.' : 'Sign in to connect your watch.'
+      : fallback;
   const [loading, setLoading] = useState(true);
   const [configured, setConfigured] = useState(false);
   const [webhookUrl, setWebhookUrl] = useState<string | null>(null);
@@ -17,7 +21,7 @@ export default function HealthWebhookSettings() {
     try {
       const res = await fetch('/api/health/token');
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Error');
+      if (!res.ok) throw new Error(friendly(res.status, data.error || 'Error'));
       setConfigured(!!data.configured);
       setWebhookUrl(data.webhookUrl ?? null);
       setSecretPrefix(data.secretPrefix ?? null);
@@ -50,7 +54,7 @@ export default function HealthWebhookSettings() {
         body: JSON.stringify({ timezone: Intl.DateTimeFormat().resolvedOptions().timeZone }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Error');
+      if (!res.ok) throw new Error(friendly(res.status, data.error || 'Error'));
       setWebhookUrl(data.webhookUrl);
       setConfigured(true);
       setSecretPrefix(null);
@@ -92,11 +96,11 @@ export default function HealthWebhookSettings() {
 
       {configured && webhookUrl && (
         <div className="space-y-2">
-          <label className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
+          <label className="text-sm font-bold text-foreground/80">
             {t.healthWebhookUrlLabel}
           </label>
           <div className="flex flex-col sm:flex-row gap-2">
-            <code className="flex-1 text-xs p-3 rounded-xl bg-secondary border border-border break-all text-foreground">
+            <code className="flex-1 text-sm p-3 rounded-xl bg-secondary border border-border break-all text-foreground">
               {webhookUrl}
             </code>
             <button
@@ -108,7 +112,7 @@ export default function HealthWebhookSettings() {
             </button>
           </div>
           {secretPrefix && (
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-muted-foreground">
               {t.healthWebhookSecretHint}: {secretPrefix}
             </p>
           )}
@@ -120,13 +124,13 @@ export default function HealthWebhookSettings() {
           type="button"
           disabled={generating}
           onClick={handleGenerate}
-          className="px-6 h-11 rounded-xl bg-[#4285F4] text-white font-bold text-sm hover:bg-[#3367d6] disabled:opacity-50"
+          className="px-6 h-11 rounded-xl bg-primary text-primary-foreground font-bold text-sm hover:bg-primary/90 disabled:opacity-50"
         >
           {configured ? t.healthWebhookRotate : t.healthWebhookGenerate}
         </button>
       </div>
 
-      <ol className="text-xs text-muted-foreground space-y-2 list-decimal pl-4">
+      <ol className="text-sm text-muted-foreground space-y-2 list-decimal pl-4">
         <li>{t.healthWebhookStep1}</li>
         <li>{t.healthWebhookStep2}</li>
         <li>{t.healthWebhookStep3}</li>

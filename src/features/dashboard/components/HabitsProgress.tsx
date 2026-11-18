@@ -59,7 +59,7 @@ const HabitGarden: React.FC<{ items: GardenItem[] }> = ({ items }) => {
     ? items
     : ['water', 'sleep', 'mindfulness'].map((type) => ({ key: type, type, ratio: 0, complete: false }));
   return (
-    <div className="absolute right-3 bottom-3 top-3 flex items-end" aria-hidden="true">
+    <div className={`absolute right-3 bottom-3 flex items-end ${items.length ? "h-[5.5rem]" : "h-40"}`} aria-hidden="true">
       {stems.map((item, i) => (
         <Stem
           key={item.key}
@@ -149,24 +149,28 @@ export const HabitsProgress: React.FC<{ embedded?: boolean }> = ({ embedded = fa
   const doneCount = visible.filter((h) => getLogForHabit(h.id)?.completed).length;
 
   return (
-    <div className={embedded ? 'flex flex-col gap-4' : 'bg-card rounded-3xl border border-border shadow-sm p-4 sm:p-5 flex flex-col gap-4'}>
-      <div className="relative rounded-2xl bg-leaf-soft/70 overflow-hidden min-h-28 p-4 flex flex-col justify-between gap-2">
+    <div className={embedded ? `flex flex-col gap-4 ${visible.length === 0 ? 'lg:h-full' : ''}` : 'bg-card rounded-3xl border border-border shadow-sm p-4 sm:p-5 flex flex-col gap-4'}>
+      <div className={`relative rounded-2xl bg-leaf-soft/70 overflow-hidden min-h-24 ${visible.length === 0 ? 'flex-1' : ''} p-4 flex flex-col justify-between gap-2`}>
         <div className="relative z-10 flex flex-col">
-          <h3 className="text-foreground text-lg font-semibold tracking-tight leading-snug text-balance">{copy.title}</h3>
-          <p className="text-sm text-foreground/70 tabular-nums">
-            {visible.length ? copy.count(doneCount, visible.length) : copy.empty}
-          </p>
+          <h3 className="text-foreground text-lg font-semibold tracking-tight leading-snug text-balance">{visible.length === 0 && isGuest ? copy.guestTitle : copy.title}</h3>
+          {visible.length > 0 ? (
+            <p className="text-sm text-foreground/70 tabular-nums">{copy.count(doneCount, visible.length)}</p>
+          ) : (
+            <p className="text-sm text-foreground/80 text-pretty max-w-[16rem]">{isGuest ? copy.guestBody : copy.emptyBody}</p>
+          )}
         </div>
         <div className="relative z-10 flex items-end gap-3">
-          <span className="text-3xl font-semibold tracking-tight tabular-nums text-foreground leading-none">
-            {dailyProgress}<span className="text-sm font-medium text-foreground/70">%</span>
-          </span>
+          {visible.length > 0 && (
+            <span className="text-3xl font-semibold tracking-tight tabular-nums text-foreground leading-none">
+              {dailyProgress}<span className="text-sm font-medium text-foreground/70">%</span>
+            </span>
+          )}
           <button
             type="button"
-            onClick={() => router.push('/habits')}
+            onClick={() => (visible.length === 0 && isGuest ? promptSignup() : router.push('/habits'))}
             className="-mb-2 px-2 min-h-10 text-blossom text-sm font-semibold hover:text-blossom/80 transition-colors flex items-center gap-1 cursor-pointer"
           >
-            {copy.all}
+            {visible.length === 0 && isGuest ? (language === 'es' ? 'Crear cuenta' : 'Create account') : copy.all}
             <Icon name="arrow_forward" size={14} />
           </button>
         </div>
@@ -184,17 +188,8 @@ export const HabitsProgress: React.FC<{ embedded?: boolean }> = ({ embedded = fa
         <span aria-hidden className="absolute bottom-0 inset-x-0 h-1.5 bg-leaf/25" />
       </div>
 
-      {visible.length === 0 ? (
-        <button
-          type="button"
-          onClick={() => (isGuest ? promptSignup() : router.push('/habits'))}
-          className="rounded-2xl bg-secondary/50 hover:bg-secondary/80 transition-colors p-4 text-left min-h-12 cursor-pointer"
-        >
-          <span className="block text-sm font-medium text-foreground">{isGuest ? copy.guestTitle : copy.emptyTitle}</span>
-          <span className="block text-sm text-muted-foreground text-pretty">{isGuest ? copy.guestBody : copy.emptyBody}</span>
-        </button>
-      ) : (
-        <ul className="flex flex-col gap-2.5">
+      {visible.length === 0 ? null : (
+        <ul className="flex flex-col gap-2">
           {visible.map((habit) => {
             const log = getLogForHabit(habit.id);
             const isComplete = log?.completed ?? false;
@@ -211,7 +206,7 @@ export const HabitsProgress: React.FC<{ embedded?: boolean }> = ({ embedded = fa
             return (
               <li
                 key={habit.id}
-                className="rounded-2xl p-3.5 flex flex-col gap-2 transition-colors duration-300"
+                className="rounded-2xl p-3 flex flex-col gap-1 transition-colors duration-300"
                 style={{ background: `color-mix(in srgb, ${fill} ${isComplete ? 26 : 14}%, transparent)` }}
               >
                 <div className="flex items-center gap-2.5">
@@ -277,20 +272,30 @@ export const HabitsProgress: React.FC<{ embedded?: boolean }> = ({ embedded = fa
         </ul>
       )}
 
-      <div className="rounded-2xl bg-secondary/40 p-4 flex flex-col gap-3">
-        <div className="flex items-center justify-between gap-2">
-          <h4 className="text-base font-semibold tracking-tight text-foreground">{copy.week}</h4>
-          <button
-            type="button"
-            onClick={() => router.push('/routines')}
-            className="-mr-2 px-2 text-blossom text-sm font-semibold hover:text-blossom/80 transition-colors flex items-center gap-1 min-h-10 cursor-pointer"
-          >
-            {copy.weekLink}
-            <Icon name="arrow_forward" size={14} />
-          </button>
-        </div>
-        <WeeklyGoalCard compact week={week} loading={workoutLogs.loading} />
+    </div>
+  );
+};
+/** Weekly activity bars (minutes and strength days), shown beside the plan in TodayRhythm. */
+export const WeekActivity: React.FC = () => {
+  const router = useRouter();
+  const { language } = useLanguage();
+  const copy = COPY[language === 'es' ? 'es' : 'en'];
+  const workoutLogs = useWorkoutLogs();
+  const week = useMemo(() => summarizeWeek(workoutLogs.logs), [workoutLogs.logs]);
+  return (
+    <div className="rounded-2xl bg-secondary/40 p-4 flex flex-col gap-3">
+      <div className="flex items-center justify-between gap-2">
+        <h4 className="text-base font-semibold tracking-tight text-foreground">{copy.week}</h4>
+        <button
+          type="button"
+          onClick={() => router.push('/routines')}
+          className="-mr-2 px-2 text-blossom text-sm font-semibold hover:text-blossom/80 transition-colors flex items-center gap-1 min-h-10 cursor-pointer"
+        >
+          {copy.weekLink}
+          <Icon name="arrow_forward" size={14} />
+        </button>
       </div>
+      <WeeklyGoalCard compact week={week} loading={workoutLogs.loading} />
     </div>
   );
 };

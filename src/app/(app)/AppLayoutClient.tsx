@@ -170,12 +170,12 @@ export default function AppLayoutClient({ children }: { children: React.ReactNod
                 size={18}
                 className="transition-transform group-hover:rotate-12"
               />
-              <span className="hidden sm:inline">{isDarkMode ? t.lightMode : t.darkMode}</span>
+              <span className="hidden xl:inline">{isDarkMode ? t.lightMode : t.darkMode}</span>
             </button>
 
             {/* User Info */}
             <div className="flex items-center gap-2.5 pl-2 sm:pl-3 border-l border-border/60">
-              <div className="text-right hidden sm:block">
+              <div className="text-right hidden lg:block">
                 <p className="text-foreground text-xs sm:text-sm font-bold truncate max-w-[140px]">
                   {isGuest ? t.guestUser : user?.user_metadata?.full_name || 'User'}
                 </p>
@@ -244,7 +244,7 @@ export default function AppLayoutClient({ children }: { children: React.ReactNod
       <button
         onClick={() => (isGuest ? setSignupPromptOpen(true) : toggleAssistant())}
         aria-label="Toggle assistant"
-        className={`fixed bottom-20 right-4 md:bottom-6 md:right-6 z-40 flex items-center justify-center w-14 h-14 md:w-16 md:h-16 rounded-full shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 group ${
+        className={`fixed bottom-20 right-3 md:bottom-6 md:right-6 z-40 flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-full shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 group ${
           isAssistantOpen
             ? 'bg-secondary text-foreground rotate-90 shadow-secondary/30'
             : 'bg-primary text-primary-foreground shadow-primary/35 hover:shadow-primary/50'

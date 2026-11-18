@@ -13,7 +13,6 @@ import HealthConnectWidget from './components/HealthConnectWidget';
 import { FertilityWindowCard, PregnancyHero } from '@/features/pregnancy/PregnancyCards';
 import { PhaseExplorer } from './components/PhaseExplorer';
 import { CycleStatsCard } from './components/CycleStatsCard';
-import { DiscoverSection } from './components/DiscoverSection';
 import { dashboardText } from './dashboardText';
 
 interface DashboardProps {
@@ -22,11 +21,11 @@ interface DashboardProps {
 }
 
 /**
- * Hierarchy: the cycle hero leads. With data, today's ritual follows, then phase
+ * Hierarchy: the cycle hero leads, then today's body data. With data, today's ritual follows, then phase
  * suggestions beside the cycle numbers and the weekly summary. Without data
  * (guests, new accounts) a phase explorer takes the place of the personal
- * sections so the page still teaches something. A rotating article and
- * shortcuts close the page for everyone.
+ * sections so the page still teaches something. Catalog content
+ * (articles, recipes, videos) lives on its own pages.
  */
 const Dashboard: React.FC<DashboardProps> = ({ userName }) => {
     const { language } = useLanguage();
@@ -41,11 +40,10 @@ const Dashboard: React.FC<DashboardProps> = ({ userName }) => {
         <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide">
             <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 pb-32">
                 <header className="flex flex-col gap-1">
-                    <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground first-letter:uppercase">{today}</p>
-                    <h1 className="text-foreground text-3xl sm:text-4xl font-semibold leading-tight tracking-tight">
+                    <h1 className="text-foreground text-3xl sm:text-4xl font-semibold leading-tight tracking-tight text-balance">
                         {text.greeting(userName?.split(' ')[0])}
                     </h1>
-                    <p className="text-muted-foreground text-sm sm:text-base">{text.subtitle}</p>
+                    <p className="text-muted-foreground text-sm sm:text-base text-pretty first-letter:uppercase">{today}. {text.subtitle}</p>
                 </header>
 
                 <AppointmentBanner />
@@ -54,12 +52,12 @@ const Dashboard: React.FC<DashboardProps> = ({ userName }) => {
                     ? <PregnancyHero overview={overview} lang={lang} />
                     : <CycleHero overview={overview} />}
                 <FertilityWindowCard overview={overview} lang={lang} />
+                <HealthConnectWidget />
 
                 {explore ? (
                     <>
-                        <PhaseExplorer answers={overview.answers} />
                         <TodayRhythm />
-                        <WeeklySummaryCard />
+                        <PhaseExplorer answers={overview.answers} />
                     </>
                 ) : (
                     <>
@@ -78,12 +76,10 @@ const Dashboard: React.FC<DashboardProps> = ({ userName }) => {
                     </>
                 )}
 
-                <DiscoverSection lang={lang} />
 
-                <HealthConnectWidget quiet />
 
                 <footer className="pt-4 border-t border-border/60 text-center">
-                    <p className="text-xs text-muted-foreground max-w-lg mx-auto leading-relaxed">{text.disclaimer}</p>
+                    <p className="text-sm text-muted-foreground max-w-lg mx-auto leading-relaxed text-pretty">{text.disclaimer}</p>
                 </footer>
             </div>
         </div>

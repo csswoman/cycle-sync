@@ -78,13 +78,13 @@ export const ProfileNudge: React.FC<{ overview: CycleOverview; lang: 'es' | 'en'
       <span className="material-symbols-outlined text-leaf shrink-0">{kind === 'review' ? 'update' : 'event_repeat'}</span>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-bold text-foreground">{t.title}</p>
-        <p className="text-xs text-muted-foreground leading-relaxed">{t.body}</p>
+        <p className="text-sm text-muted-foreground leading-relaxed text-pretty">{t.body}</p>
       </div>
       <div className="flex items-center gap-2 shrink-0">
-        <button type="button" onClick={kind === 'review' ? keep : dismiss} className="px-3 h-9 rounded-full text-xs font-bold text-muted-foreground hover:text-foreground">
+        <button type="button" onClick={kind === 'review' ? keep : dismiss} className="px-3 h-10 rounded-full text-sm font-bold text-muted-foreground hover:text-foreground">
           {kind === 'review' ? c.keep : c.later}
         </button>
-        <Link href="/archetype" className="px-4 h-9 inline-flex items-center rounded-full bg-primary text-primary-foreground text-xs font-bold">
+        <Link href="/archetype" className="px-4 h-10 inline-flex items-center rounded-full bg-primary text-primary-foreground text-sm font-bold">
           {t.action}
         </Link>
       </div>

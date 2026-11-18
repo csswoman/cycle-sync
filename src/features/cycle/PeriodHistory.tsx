@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { supabase } from '@/lib/supabase';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { usesHormonalContraception } from '@/features/setup/onboarding';
@@ -19,6 +20,7 @@ import { predictionsPaused } from '@/lib/cycle/pregnancy';
 import { FlowQuickEditor } from './components/FlowQuickEditor';
 import { periodBleedingDays } from '@/lib/cycle/bleeding';
 
+const PAGE_SIZE = 6;
 const SIGNS_FROM = toISODate(addDays(new Date(), -400));
 
 interface Period {
@@ -30,7 +32,14 @@ interface Period {
 const PeriodHistory: React.FC = () => {
     const { language, t } = useLanguage();
     const locale = language === 'es' ? 'es' : 'en';
-    const [periods, setPeriods] = useState<Period[]>([]);
+    const [rawPeriods, setPeriods] = useState<Period[]>([]);
+    const [pendingDelete, setPendingDelete] = useState<Period | null>(null);
+    const pendingRef = useRef<{ period: Period; timer: ReturnType<typeof setTimeout> } | null>(null);
+    const [confirmId, setConfirmId] = useState<string | null>(null);
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const listRef = useRef<HTMLElement | null>(null);
+    // A period waiting for its undo window to close is hidden everywhere.
+    const periods = useMemo(() => rawPeriods.filter((p) => p.id !== pendingDelete?.id), [rawPeriods, pendingDelete]);
     const [configLength, setConfigLength] = useState<number | null>(null);
     const [selectedDays, setSelectedDays] = useState<string[]>([]);
     const [saving, setSaving] = useState(false);
@@ -40,6 +49,8 @@ const PeriodHistory: React.FC = () => {
     const [calendarMode, setCalendarMode] = useState<CalendarMode>('period');
     const { signs, signFor, saveSign, error: signsError } = useCycleSigns(SIGNS_FROM);
     const [flowDay, setFlowDay] = useState<string | null>(null);
+    const [yearChoice, setYearChoice] = useState<number | null>(null);
+    const [page, setPage] = useState(0);
     const flowByDay = useMemo(() => {
         const out: Record<string, NonNullable<(typeof signs)[number]['flow']>> = {};
         for (const s of signs) if (s.flow) out[s.date] = s.flow;
@@ -185,23 +196,49 @@ const PeriodHistory: React.FC = () => {
             setSelectedDays([]);
             await fetchPeriods();
         } catch (error: any) {
-            alert(error.message);
+            setErrorMsg(error.message);
         } finally {
             setSaving(false);
         }
     };
 
-    const deletePeriod = async (id: string) => {
-        const { error } = await supabase
-            .from('periods')
-            .delete()
-            .eq('id', id);
-        if (error) {
-            alert(error.message);
-        } else {
-            fetchPeriods();
-        }
+    const commitDelete = async (id: string) => {
+        const { error } = await supabase.from('periods').delete().eq('id', id);
+        if (error) setErrorMsg(error.message);
+        await fetchPeriods();
     };
+    const flushPending = () => {
+        const p = pendingRef.current;
+        if (!p) return;
+        clearTimeout(p.timer);
+        pendingRef.current = null;
+        setPendingDelete(null);
+        void commitDelete(p.period.id);
+    };
+    const deletePeriod = (id: string) => {
+        setConfirmId(null);
+        flushPending();
+        const period = rawPeriods.find((p) => p.id === id);
+        if (!period) return;
+        const timer = setTimeout(() => {
+            pendingRef.current = null;
+            setPendingDelete(null);
+            void commitDelete(id);
+        }, 6000);
+        pendingRef.current = { period, timer };
+        setPendingDelete(period);
+    };
+    const undoDelete = () => {
+        const p = pendingRef.current;
+        if (p) clearTimeout(p.timer);
+        pendingRef.current = null;
+        setPendingDelete(null);
+    };
+    // Leaving the page commits a pending delete instead of dropping it.
+    useEffect(() => () => {
+        const p = pendingRef.current;
+        if (p) { clearTimeout(p.timer); void supabase.from('periods').delete().eq('id', p.period.id); }
+    }, []);
 
     const next = projections[0];
     const periodsFound = groupDaysIntoPeriods(selectedDays).length;
@@ -219,6 +256,19 @@ const PeriodHistory: React.FC = () => {
             .map(([year, list]) => ({ year, periods: list }));
     }, [periods]);
 
+    // Pagination: one year at a time (newest by default), PAGE_SIZE periods per page.
+    const activeYear = periodsByYear.find((y) => y.year === yearChoice) ?? periodsByYear[0];
+    const activePeriods = activeYear?.periods ?? [];
+    const pageCount = Math.max(1, Math.ceil(activePeriods.length / PAGE_SIZE));
+    const currentPage = Math.min(page, pageCount - 1);
+    const pagePeriods = activePeriods.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
+    const visibleYears = activeYear ? [{ year: activeYear.year, periods: pagePeriods }] : [];
+    const scrollToList = () => {
+        const reduce = typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+        listRef.current?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
+    };
+    const goPage = (n: number) => { setPage(n); scrollToList(); };
+    const pickYear = (year: number) => { setYearChoice(year); setPage(0); scrollToList(); };
     const countdownDays = useMemo(() => {
         if (!next) return null;
         const today = new Date();
@@ -270,86 +320,81 @@ const PeriodHistory: React.FC = () => {
                         <div className="relative z-10 flex flex-col gap-6">
                             <div className="flex items-center justify-between gap-3">
                                 <div className="flex items-center gap-2">
-                                    <span className="material-symbols-outlined text-primary text-[22px]">auto_awesome</span>
                                     <h2 className="text-foreground font-bold text-lg md:text-xl tracking-tight">{t.forecastTitle}</h2>
                                 </div>
-                                <span className="text-[11px] font-bold uppercase tracking-wider text-primary bg-primary/10 border border-primary/20 rounded-full px-3 py-1">
+                                <span className="text-xs font-semibold text-primary bg-primary/10 border border-primary/20 rounded-full px-3 py-1">
                                     {t.confidenceLabel}: {estimate.confidence === 'high' ? t.confidenceHigh : estimate.confidence === 'medium' ? t.confidenceMedium : t.confidenceLow}
                                 </span>
                             </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 divide-y sm:divide-y-0 sm:divide-x divide-border/60">
-                                {/* Metric 1: Next Period with Countdown */}
-                                <div className="flex flex-col gap-1 sm:pr-4 pt-3 sm:pt-0">
-                                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t.nextPeriodLabel}</span>
-                                    <p className="text-2xl md:text-3xl font-black text-foreground tracking-tight">
-                                        {next.periodEarliest.getTime() === next.periodLatest.getTime()
-                                            ? fmt(next.periodStart)
-                                            : `${fmt(next.periodEarliest)} – ${fmt(next.periodLatest)}`}
+                            <div className="flex flex-col gap-1">
+                                <p className="text-sm text-muted-foreground">{t.nextPeriodLabel}</p>
+                                <p className="text-3xl md:text-4xl font-semibold text-foreground tracking-tight">
+                                    {next.periodEarliest.getTime() === next.periodLatest.getTime()
+                                        ? fmt(next.periodStart)
+                                        : `${fmt(next.periodEarliest)} – ${fmt(next.periodLatest)}`}
+                                </p>
+                                {countdownDays !== null && (
+                                    <p className="text-sm font-medium text-primary">
+                                        {countdownDays > 0 ? (locale === 'es' ? `en ${countdownDays} días` : `in ${countdownDays} days`) : countdownDays === 0 ? (locale === 'es' ? 'hoy' : 'today') : (locale === 'es' ? `${-countdownDays} días de retraso` : `${-countdownDays} days late`)}
                                     </p>
-                                    {countdownDays !== null && (
-                                        <p className="text-xs font-medium text-primary">
-                                            {countdownDays > 0 ? (locale === 'es' ? `en ${countdownDays} días` : `in ${countdownDays} days`) : countdownDays === 0 ? (locale === 'es' ? 'hoy' : 'today') : (locale === 'es' ? `${-countdownDays} días de retraso` : `${-countdownDays} days late`)}
-                                        </p>
-                                    )}
-                                </div>
-
-                                {/* Metric 2: Ovulation */}
-                                <div className="flex flex-col gap-1 sm:px-4 pt-4 sm:pt-0">
-                                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t.ovulationLabel}</span>
-                                    <p className="text-2xl md:text-3xl font-black text-foreground tracking-tight">
-                                        ~ {fmt(next.ovulation)}
-                                    </p>
-                                    <p className="text-xs font-medium text-sun-ink">
-                                        {locale === 'es' ? 'Día pico estimado' : 'Estimated peak day'}
-                                    </p>
-                                </div>
-
-                                {/* Metric 3: Fertile Window */}
-                                <div className="flex flex-col gap-1 sm:pl-4 pt-4 sm:pt-0">
-                                    <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">{t.fertileWindowLabel}</span>
-                                    <p className="text-2xl md:text-3xl font-black text-foreground tracking-tight">
-                                        {fmt(next.fertileStart)} – {fmt(next.fertileEnd)}
-                                    </p>
-                                    <p className="text-xs font-medium text-muted-foreground">
-                                        {locale === 'es' ? 'Mayor probabilidad' : 'Highest chance'}
-                                    </p>
-                                </div>
+                                )}
                             </div>
-
+                            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 pt-4 border-t border-border/50">
+                                <div className="flex flex-col gap-0.5">
+                                    <dt className="text-sm text-muted-foreground">{t.ovulationLabel}</dt>
+                                    <dd className="text-lg font-semibold text-foreground">
+                                        ~ {fmt(next.ovulation)}
+                                        <span className="ml-2 text-xs font-medium text-sun-ink">{locale === 'es' ? 'Día pico estimado' : 'Estimated peak day'}</span>
+                                    </dd>
+                                </div>
+                                <div className="flex flex-col gap-0.5">
+                                    <dt className="text-sm text-muted-foreground">{t.fertileWindowLabel}</dt>
+                                    <dd className="text-lg font-semibold text-foreground">
+                                        {fmt(next.fertileStart)} – {fmt(next.fertileEnd)}
+                                        <span className="ml-2 text-xs font-medium text-muted-foreground">{locale === 'es' ? 'Mayor probabilidad' : 'Highest chance'}</span>
+                                    </dd>
+                                </div>
+                            </dl>
                             {/* Contextual Tips & Medical Disclaimer */}
                             {(answers.goal === 'fertility' || usesHormonalContraception(answers) || estimate.irregular) && (
-                                <div className="flex flex-wrap gap-2 pt-2 border-t border-border/50">
+                                <div className="flex flex-col gap-1.5 pt-3 border-t border-border/50">
                                     {answers.goal === 'fertility' && (
-                                        <div className="text-xs text-foreground bg-secondary/50 rounded-lg px-3 py-1.5 flex items-center gap-1.5">
+                                        <div className="text-xs text-foreground flex items-start gap-1.5">
                                             <span className="material-symbols-outlined text-[16px] text-primary">favorite</span>
                                             {t.forecastFertilityTip}
                                         </div>
                                     )}
                                     {usesHormonalContraception(answers) && (
-                                        <div className="text-xs text-sun-ink bg-sun/10 rounded-lg px-3 py-1.5 flex items-center gap-1.5">
+                                        <div className="text-xs text-sun-ink flex items-start gap-1.5">
                                             <span className="material-symbols-outlined text-[16px]">info</span>
                                             {t.forecastHormonalNote}
                                         </div>
                                     )}
                                     {estimate.irregular && (
-                                        <div className="text-xs text-sun-ink bg-sun/10 rounded-lg px-3 py-1.5 flex items-center gap-1.5">
+                                        <div className="text-xs text-sun-ink flex items-start gap-1.5">
                                             <span className="material-symbols-outlined text-[16px]">warning</span>
                                             {t.forecastIrregularNote}
                                         </div>
                                     )}
                                 </div>
                             )}
-                            <p className="text-[11px] text-muted-foreground/80 leading-normal">{t.forecastDisclaimer}</p>
+                            <p className="text-xs text-muted-foreground/80 leading-normal">{t.forecastDisclaimer}</p>
                         </div>
                     </section>
                 )}
 
-                {/* Mobile View Switcher (Hidden on Desktop) */}
-                <div className="flex lg:hidden bg-secondary/60 p-1 rounded-2xl border border-border/60">
+                {errorMsg && (
+    <div role="alert" className="flex items-start justify-between gap-3 rounded-2xl border border-destructive/40 bg-destructive/10 px-4 py-3 text-sm text-foreground">
+        <span>{errorMsg}</span>
+        <button type="button" onClick={() => setErrorMsg(null)} className="shrink-0 min-h-10 px-2 font-semibold text-foreground">{locale === 'es' ? 'Cerrar' : 'Dismiss'}</button>
+    </div>
+)}
+{/* Mobile View Switcher (Hidden on Desktop) */}
+                <div role="tablist" className="flex lg:hidden bg-secondary/60 p-1 rounded-2xl border border-border/60">
                     <button
                         type="button"
-                        onClick={() => setMobileTab('log')}
+                        role="tab" aria-selected={mobileTab === 'log'} onClick={() => setMobileTab('log')}
                         className={`flex-1 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
                             mobileTab === 'log'
                                 ? 'bg-card text-foreground shadow-sm'
@@ -364,7 +409,7 @@ const PeriodHistory: React.FC = () => {
                     </button>
                     <button
                         type="button"
-                        onClick={() => setMobileTab('history')}
+                        role="tab" aria-selected={mobileTab === 'history'} onClick={() => setMobileTab('history')}
                         className={`flex-1 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
                             mobileTab === 'history'
                                 ? 'bg-card text-foreground shadow-sm'
@@ -373,16 +418,13 @@ const PeriodHistory: React.FC = () => {
                     >
                         <span className="material-symbols-outlined text-[18px]">history</span>
                         {locale === 'es' ? 'Períodos' : 'Periods'}
-                        <span className="text-xs bg-secondary px-2 py-0.5 rounded-full text-foreground font-semibold">
-                            {periods.length}
-                        </span>
                     </button>
                 </div>
 
                 {/* Main Two-Column Responsive Layout: Logging Input on Left, Analysis & History on Right */}
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                     {/* Column 1: Interactive Period Logger (Desktop Left, Mobile when mobileTab === 'log') */}
-                    <aside className={`lg:col-span-5 xl:col-span-5 lg:sticky lg:top-6 ${mobileTab === 'log' ? 'block' : 'hidden lg:block'}`}>
+                    <aside className={`lg:col-span-5 xl:col-span-5 lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto scrollbar-hide ${mobileTab === 'log' ? 'block' : 'hidden lg:block'}`}>
                         <div className="bg-card border border-border/80 rounded-3xl p-6 shadow-sm flex flex-col gap-5">
                             <div className="flex flex-col gap-1">
                                 <div className="flex items-center gap-2">
@@ -484,14 +526,8 @@ const PeriodHistory: React.FC = () => {
 
                     {/* Column 2: Analysis & Connected Timeline (Desktop Right, Mobile when mobileTab === 'history') */}
                     <div className={`lg:col-span-7 xl:col-span-7 flex flex-col gap-8 ${mobileTab === 'history' ? 'block' : 'hidden lg:block'}`}>
-                        {periods.length > 0 && (
-                            <CycleAnalysisCard periods={periods} signs={signs} pregnancies={pregnancies} expectedNext={projections[0]?.periodStart} expectsLongGaps={expectsLongGaps(answers)} />
-                        )}
-                        {showForecast && <PeriodForecastCard lang={locale} pmos={false} />}
-                        {periods.length >= 2 && <PremenstrualPatternCard periodStarts={periodStarts} lang={locale} />}
-
-                        {/* Connected Timeline for Logged Periods */}
-                        <section className="flex flex-col gap-4">
+                        {/* Logged periods: first in the column, it is what the page is for */}
+                        <section ref={listRef} className="flex flex-col gap-4 scroll-mt-4">
                             <div className="flex items-center justify-between px-1">
                                 <h3 className="text-foreground font-bold text-xl">
                                     {locale === 'es' ? 'Períodos registrados' : 'Logged periods'}
@@ -500,12 +536,8 @@ const PeriodHistory: React.FC = () => {
                                     {periods.length} {periods.length === 1 ? t.periodSingular : t.periodPlural}
                                 </span>
                             </div>
-
                             {periods.length === 0 ? (
                                 <div className="p-8 text-center bg-card/60 border border-border/80 rounded-3xl flex flex-col items-center gap-3 shadow-sm">
-                                    <div className="size-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
-                                        <span className="material-symbols-outlined text-3xl">insights</span>
-                                    </div>
                                     <div className="flex flex-col gap-1 max-w-sm">
                                         <h4 className="font-bold text-foreground text-base">
                                             {locale === 'es' ? 'Comienza registrando tu último período' : t.noPeriodsYet}
@@ -515,22 +547,35 @@ const PeriodHistory: React.FC = () => {
                                                 ? 'Marca los días de sangrado en el calendario. Al registrar 2 o más períodos calcularemos automáticamente tu regularidad, duración media y fases.'
                                                 : t.calendarHint}
                                         </p>
+                                        <button type="button" onClick={() => setMobileTab('log')} className="lg:hidden mt-3 min-h-10 self-center rounded-full bg-primary px-5 text-sm font-semibold text-primary-foreground">
+                                            {locale === 'es' ? 'Marcar en el calendario' : 'Mark on the calendar'}
+                                        </button>
                                     </div>
                                 </div>
                             ) : (
-                                <div className="space-y-8">
-                                    {periodsByYear.map(({ year, periods: yearPeriods }) => (
+                                <div className="space-y-6">
+                                    {periodsByYear.length > 1 && (
+                                        <div role="tablist" aria-label={locale === 'es' ? 'Año' : 'Year'} className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 scrollbar-hide">
+                                            {periodsByYear.map(({ year, periods: yp }) => {
+                                                const on = year === activeYear.year;
+                                                return (
+                                                    <button
+                                                        key={year}
+                                                        type="button"
+                                                        role="tab"
+                                                        aria-selected={on}
+                                                        onClick={() => pickYear(year)}
+                                                        className={`shrink-0 min-h-10 inline-flex items-center gap-2 rounded-full border px-4 text-sm font-semibold tabular-nums transition-colors ${on ? 'bg-primary text-primary-foreground border-primary' : 'bg-card/70 text-foreground border-border/70 hover:border-primary/40'}`}
+                                                    >
+                                                        {year}
+                                                        <span className={`text-xs font-medium ${on ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>{yp.length}</span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    )}
+                                    {visibleYears.map(({ year, periods: yearPeriods }) => (
                                         <div key={year} className="flex flex-col gap-4">
-                                            <div className="flex items-center gap-3">
-                                                <span className="text-xs font-black text-foreground bg-secondary/80 px-3 py-1 rounded-full border border-border/70 tracking-wide">
-                                                    {year}
-                                                </span>
-                                                <span className="text-xs text-muted-foreground font-medium">
-                                                    {yearPeriods.length} {yearPeriods.length === 1 ? t.periodSingular : t.periodPlural}
-                                                </span>
-                                                <div className="h-px flex-1 bg-border/40" />
-                                            </div>
-
                                             <div className="relative pl-6 space-y-4 before:absolute before:left-2.5 before:top-3 before:bottom-3 before:w-0.5 before:bg-border/60">
                                                 {yearPeriods.map((period) => {
                                                     const start = fmtFull(period.start_date);
@@ -544,14 +589,15 @@ const PeriodHistory: React.FC = () => {
                                                     const duration = period.end_date
                                                         ? Math.round((parseLocalDate(period.end_date).getTime() - parseLocalDate(period.start_date).getTime()) / (1000 * 60 * 60 * 24)) + 1
                                                         : null;
-
+                                                    const days = periodBleedingDays(signs, period);
+                                                    const flowText = locale === 'es'
+                                                        ? { light: 'ligero', medium: 'medio', heavy: 'abundante', very_heavy: 'muy abundante' }
+                                                        : { light: 'light', medium: 'medium', heavy: 'heavy', very_heavy: 'very heavy' };
                                                     return (
                                                         <div key={period.id} className="relative group">
-                                                            {/* Node dot on timeline */}
                                                             <div className={`absolute -left-6 top-4 size-3 rounded-full ring-4 ring-background transition-colors ${
                                                                 isLatest ? 'bg-primary ring-primary/20' : 'bg-muted-foreground/40 group-hover:bg-primary/70'
                                                             }`} />
-
                                                             <div className="bg-card/70 hover:bg-card border border-border/70 hover:border-primary/40 rounded-2xl p-4 sm:p-5 transition-all shadow-sm">
                                                                 <div className="flex items-start justify-between gap-3">
                                                                     <div className="flex flex-col gap-1">
@@ -560,12 +606,11 @@ const PeriodHistory: React.FC = () => {
                                                                                 {end ? `${start} – ${end}` : start}
                                                                             </p>
                                                                             {isLatest && (
-                                                                                <span className="text-[11px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                                                                                <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
                                                                                     {locale === 'es' ? 'Más reciente' : 'Latest'}
                                                                                 </span>
                                                                             )}
                                                                         </div>
-
                                                                         <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mt-0.5">
                                                                             {duration && (
                                                                                 <span className="font-medium text-foreground bg-secondary/80 px-2 py-0.5 rounded-md">
@@ -578,17 +623,14 @@ const PeriodHistory: React.FC = () => {
                                                                                 </span>
                                                                             )}
                                                                         </div>
-
-                                                                        {(() => {
-                                                                            const days = periodBleedingDays(signs, period);
-                                                                            if (days.length === 0) return null;
-                                                                            const flowText = locale === 'es'
-                                                                                ? { light: 'ligero', medium: 'medio', heavy: 'abundante', very_heavy: 'muy abundante' }
-                                                                                : { light: 'light', medium: 'medium', heavy: 'heavy', very_heavy: 'very heavy' };
-                                                                            return (
+                                                                        {days.length > 0 && (
+                                                                            <details className="mt-2">
+                                                                                <summary className="cursor-pointer text-xs font-medium text-primary min-h-6 inline-flex items-center">
+                                                                                    {locale === 'es' ? `Detalle por día (${days.length})` : `Day details (${days.length})`}
+                                                                                </summary>
                                                                                 <ul className="flex flex-wrap gap-1.5 mt-2">
                                                                                     {days.map((d) => (
-                                                                                        <li key={d.date} className={`text-[11px] font-medium px-2 py-1 rounded-md border ${d.flow === 'very_heavy' || d.flow === 'heavy' ? 'border-destructive/40 bg-destructive/10 text-foreground' : 'border-border bg-secondary/50 text-muted-foreground'}`}>
+                                                                                        <li key={d.date} className={`text-xs font-medium px-2 py-1 rounded-md border ${d.flow === 'very_heavy' || d.flow === 'heavy' ? 'border-primary/40 bg-primary/10 text-foreground' : 'border-border bg-secondary/50 text-muted-foreground'}`}>
                                                                                             {Number(d.date.slice(8))}
                                                                                             {d.flow ? ` · ${flowText[d.flow]}` : ''}
                                                                                             {d.clots ? (locale === 'es' ? ' · coágulos' : ' · clots') : ''}
@@ -596,8 +638,8 @@ const PeriodHistory: React.FC = () => {
                                                                                         </li>
                                                                                     ))}
                                                                                 </ul>
-                                                                            );
-                                                                        })()}
+                                                                            </details>
+                                                                        )}
                                                                         {currentDay && (
                                                                             <p className="text-xs font-semibold text-primary mt-1 flex items-center gap-1.5">
                                                                                 <span className="size-1.5 rounded-full bg-primary" />
@@ -605,16 +647,31 @@ const PeriodHistory: React.FC = () => {
                                                                             </p>
                                                                         )}
                                                                     </div>
-
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => deletePeriod(period.id)}
-                                                                        className="opacity-60 group-hover:opacity-100 text-muted-foreground hover:text-destructive p-2 rounded-lg hover:bg-destructive/10 transition-all shrink-0"
-                                                                        aria-label={t.deletePeriod}
-                                                                        title={t.deletePeriod}
-                                                                    >
-                                                                        <span className="material-symbols-outlined text-[18px]">delete</span>
-                                                                    </button>
+                                                                    {confirmId === period.id ? (
+                                                                        <div role="group" aria-label={t.deletePeriod} className="flex shrink-0 flex-col items-end gap-1.5">
+                                                                            <span className="text-xs font-medium text-foreground">{locale === 'es' ? '¿Eliminar este período?' : 'Delete this period?'}</span>
+                                                                            <div className="flex gap-1.5">
+                                                                                <button type="button" onClick={() => setConfirmId(null)} autoFocus
+                                                                                    className="min-h-10 rounded-full border border-border/70 px-3 text-xs font-semibold text-foreground hover:bg-secondary">
+                                                                                    {locale === 'es' ? 'Cancelar' : 'Cancel'}
+                                                                                </button>
+                                                                                <button type="button" onClick={() => deletePeriod(period.id)}
+                                                                                    className="min-h-10 rounded-full bg-destructive px-3 text-xs font-semibold text-white hover:bg-destructive/90">
+                                                                                    {locale === 'es' ? 'Eliminar' : 'Delete'}
+                                                                                </button>
+                                                                            </div>
+                                                                        </div>
+                                                                    ) : (
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => setConfirmId(period.id)}
+                                                                            className="size-10 inline-flex items-center justify-center text-muted-foreground hover:text-destructive rounded-lg hover:bg-destructive/10 transition-colors shrink-0"
+                                                                            aria-label={t.deletePeriod}
+                                                                            title={t.deletePeriod}
+                                                                        >
+                                                                            <span className="material-symbols-outlined text-[18px]">delete</span>
+                                                                        </button>
+                                                                    )}
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -623,12 +680,44 @@ const PeriodHistory: React.FC = () => {
                                             </div>
                                         </div>
                                     ))}
+                                    {pageCount > 1 && (
+                                        <nav aria-label={locale === 'es' ? 'Paginación de períodos' : 'Period pages'} className="flex items-center justify-between gap-3">
+                                            <button type="button" onClick={() => goPage(currentPage - 1)} disabled={currentPage === 0}
+                                                className="min-h-10 inline-flex items-center gap-1 rounded-full border border-border/70 bg-card/70 pl-3 pr-4 text-sm font-medium text-foreground transition-colors hover:border-primary/40 disabled:opacity-40 disabled:pointer-events-none">
+                                                <span className="material-symbols-outlined text-[18px]" aria-hidden="true">chevron_left</span>
+                                                {locale === 'es' ? 'Anterior' : 'Previous'}
+                                            </button>
+                                            <span className="text-xs font-medium text-muted-foreground tabular-nums" aria-live="polite">
+                                                {currentPage * PAGE_SIZE + 1}–{currentPage * PAGE_SIZE + pagePeriods.length} {locale === 'es' ? 'de' : 'of'} {activePeriods.length}
+                                            </span>
+                                            <button type="button" onClick={() => goPage(currentPage + 1)} disabled={currentPage >= pageCount - 1}
+                                                className="min-h-10 inline-flex items-center gap-1 rounded-full border border-border/70 bg-card/70 pl-4 pr-3 text-sm font-medium text-foreground transition-colors hover:border-primary/40 disabled:opacity-40 disabled:pointer-events-none">
+                                                {locale === 'es' ? 'Siguiente' : 'Next'}
+                                                <span className="material-symbols-outlined text-[18px]" aria-hidden="true">chevron_right</span>
+                                            </button>
+                                        </nav>
+                                    )}
                                 </div>
                             )}
                         </section>
+
+                        {periods.length > 0 && (
+                            <CycleAnalysisCard periods={periods} signs={signs} pregnancies={pregnancies} expectedNext={projections[0]?.periodStart} expectsLongGaps={expectsLongGaps(answers)} />
+                        )}
+                        {showForecast && <PeriodForecastCard lang={locale} pmos={false} />}
+                        {periods.length >= 2 && <PremenstrualPatternCard periodStarts={periodStarts} lang={locale} />}
                     </div>
                 </div>
             </div>
+        {pendingDelete && typeof document !== 'undefined' && createPortal(
+            <div role="status" className="fixed bottom-24 md:bottom-6 left-1/2 z-[60] flex -translate-x-1/2 items-center gap-4 rounded-full border border-border bg-card py-1 pl-5 pr-1 text-sm shadow-lg">
+                <span className="text-foreground">{locale === 'es' ? 'Período eliminado' : 'Period deleted'}</span>
+                <button type="button" onClick={undoDelete} className="min-h-10 rounded-full px-4 font-semibold text-primary hover:bg-primary/10">
+                    {locale === 'es' ? 'Deshacer' : 'Undo'}
+                </button>
+            </div>,
+            document.body,
+        )}
         </div>
     );
 };

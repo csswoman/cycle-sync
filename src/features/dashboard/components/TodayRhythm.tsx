@@ -4,7 +4,7 @@ import React from 'react';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { TodayChecklist } from './TodayChecklist';
 import { TodayPlanCard } from './TodayPlanCard';
-import { HabitsProgress } from './HabitsProgress';
+import { HabitsProgress, WeekActivity } from './HabitsProgress';
 import { CardFlowers } from '@/components/ui/CardFlowers';
 
 const COPY = {
@@ -39,6 +39,7 @@ export const TodayRhythm: React.FC = () => {
                     <div className="empty:hidden border-t border-border/60 pt-5">
                         <TodayPlanCard embedded />
                     </div>
+                    <WeekActivity />
                 </div>
                 <div className="min-w-0 border-t border-border/60 pt-6 lg:border-t-0 lg:pt-0 lg:border-l lg:pl-6">
                     <HabitsProgress embedded />

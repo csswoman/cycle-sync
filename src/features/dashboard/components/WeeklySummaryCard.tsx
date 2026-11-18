@@ -12,7 +12,7 @@ export const WeeklySummaryCard: React.FC = () => {
     const { summary, loading } = useWeeklySummary(lang);
 
     // Signed out (guest), still loading or failed: nothing to show.
-    if (loading || !summary) return null;
+    if (loading || !summary || summary.loggedDays < 3) return null;
 
     const es = lang === 'es';
     return (
@@ -28,7 +28,7 @@ export const WeeklySummaryCard: React.FC = () => {
                     </p>
                 ) : (
                     <>
-                        <p className="text-xs text-muted-foreground mb-2">
+                        <p className="text-sm text-muted-foreground mb-2">
                             {es ? `${summary.loggedDays} días registrados` : `${summary.loggedDays} days logged`}
                             {summary.avgEnergy != null && ` · ${es ? 'energía' : 'energy'} ${summary.avgEnergy}/10`}
                             {summary.avgSleep != null && ` · ${es ? 'sueño' : 'sleep'} ${summary.avgSleep} h`}

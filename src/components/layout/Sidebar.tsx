@@ -119,7 +119,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
           />
           <div className="flex flex-col">
             <h1 className="text-foreground text-xl font-bold tracking-tight">CycleSync</h1>
-            <p className="text-muted-foreground text-xs font-normal">Holistic Health</p>
+            <p className="text-muted-foreground text-xs font-normal">{language === 'es' ? 'Salud integral' : 'Holistic health'}</p>
           </div>
         </div>
 
@@ -127,7 +127,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
           <button
             onClick={onClose}
             className="md:hidden text-muted-foreground hover:text-foreground p-1.5 rounded-full hover:bg-card transition-colors"
-            aria-label="Close menu"
+            aria-label={language === 'es' ? 'Cerrar menú' : 'Close menu'}
           >
             <Icon name="close" size={20} />
           </button>
@@ -135,7 +135,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
       </div>
 
       {/* Nav Menu with independent scroll */}
-      <nav className="flex-1 overflow-y-auto min-h-0 flex flex-col gap-1 py-3 scrollbar-hide my-1 pr-1">
+      <nav className="flex-1 overflow-y-auto min-h-0 flex flex-col gap-1 pt-3 pb-8 scrollbar-hide my-1 pr-1 [mask-image:linear-gradient(to_bottom,black_calc(100%-2rem),transparent)]">
         {navGroups.map((group) => (
           <div key={group.label} className="flex flex-col gap-1 mb-2">
             <p className="px-4 pt-2 pb-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70">{group.label}</p>
@@ -157,7 +157,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
             }
             onClose?.();
           }}
-          className="cta-bloom w-full rounded-2xl px-3.5 py-3 mb-1 flex items-center gap-3 text-left transition-transform hover:scale-[1.02] active:scale-95"
+          className="cta-bloom w-full rounded-2xl px-3.5 py-2.5 mb-1 flex items-center gap-3 text-left transition-transform hover:scale-[1.02] active:scale-95"
         >
           <Flower
             petal="#ffffff"
@@ -172,9 +172,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
           </span>
           <span className="relative flex-1 min-w-0">
             <span className="block text-sm font-bold leading-tight">{t.personalizeExperience}</span>
-            <span className="block text-[11px] font-medium opacity-85 leading-tight mt-0.5">
-              {language === 'es' ? 'Tu arquetipo, metas y ritmo' : 'Your archetype, goals and rhythm'}
-            </span>
           </span>
         </button>
 
@@ -189,7 +186,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
             size={20}
             className={isGuest ? 'group-hover:text-foreground' : 'group-hover:text-destructive'}
           />
-          <p className="text-sm font-medium">{isGuest ? t.guestSignIn : 'Logout'}</p>
+          <p className="text-sm font-medium">{isGuest ? t.guestSignIn : t.logout}</p>
         </button>
       </div>
     </aside>

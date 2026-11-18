@@ -109,7 +109,8 @@ export const FertilityWindowCard: React.FC<{ overview: CycleOverview; lang: Lang
   const today = toISODate(new Date());
   const from = toISODate(addDays(new Date(), -45));
   const { signs } = useCycleSigns(from);
-  const state = useMemo(() => fertileNow(signs, lastPeriodStart, today), [signs, lastPeriodStart, today]);
+  const irregular = !!estimate?.irregular;
+  const state = useMemo(() => fertileNow(signs, lastPeriodStart, today, { irregular }), [signs, lastPeriodStart, today, irregular]);
   if (overview.paused || !info || !estimate || answers.goal !== 'fertility') return null;
   const calendar = lastPeriodStart
     ? {
@@ -122,6 +123,7 @@ export const FertilityWindowCard: React.FC<{ overview: CycleOverview; lang: Lang
     possible: es ? 'Podrías estar en tu ventana fértil' : 'You may be in your fertile window',
     passed: es ? 'Tu temperatura indica que la ovulación ya ocurrió en este ciclo' : 'Your temperature shows ovulation already happened this cycle',
     calendar: es ? 'Sin señales recientes' : 'No recent signs',
+    unknown: es ? 'Sin señales recientes, y tus ciclos varían demasiado para estimarla por calendario' : 'No recent signs, and your cycles vary too much for a calendar estimate',
   }[state.level];
   return (
     <section className={panel}>
@@ -142,11 +144,11 @@ export const FertilityWindowCard: React.FC<{ overview: CycleOverview; lang: Lang
         </p>
       )}
       <p className="text-xs text-muted-foreground">
-        {state.level === 'calendar'
+        {state.level === 'calendar' || state.level === 'unknown'
           ? (es ? 'Registra temperatura, flujo y tiras de LH en Cuerpo y fertilidad: con ciclos irregulares valen más que el calendario. '
               : 'Log temperature, mucus and LH strips in Body & fertility: with irregular cycles they count for more than the calendar. ')
           : (es ? 'El calendario es solo una referencia: ' : 'The calendar is only a reference: ')}
-        {calendar && (es ? `estimación por calendario del ${fmt(calendar.start, lang)} al ${fmt(calendar.end, lang)}, poco fiable si tus ciclos varían.`
+        {calendar && state.level !== 'unknown' && (es ? `estimación por calendario del ${fmt(calendar.start, lang)} al ${fmt(calendar.end, lang)}, poco fiable si tus ciclos varían.`
           : `calendar estimate ${fmt(calendar.start, lang)} to ${fmt(calendar.end, lang)}, unreliable if your cycles vary.`)}
       </p>
       <Link href="/log?tab=body" className="self-start text-sm font-bold text-primary hover:underline">
@@ -160,8 +162,7 @@ export const FertilityWindowCard: React.FC<{ overview: CycleOverview; lang: Lang
 export const PreconceptionCard: React.FC<{ lang: Lang; data: PMOSOverviewData }> = ({ lang, data }) => {
   const es = lang === 'es';
   const glucose = gestationalGlucosePlan({
-    goal: data.goal, gestationalWeeks: null, pregnancyStart: null, today: data.today,
-    glucoseDates: [...data.fastingGlucose.map((g) => g.date), ...data.labs.filter((l) => ['hba1c', 'fasting_glucose', 'glucose_2h'].includes(l.marker)).map((l) => l.date)],
+    goal: data.goal, gestationalWeeks: null, pregnancyStart: null, today: data.today, labs: data.labs,
   });
   if (data.goal !== 'fertility' || glucose.length === 0) return null;
   const yearAgo = toISODate(addDays(parseLocalDate(data.today), -365));
@@ -169,7 +170,7 @@ export const PreconceptionCard: React.FC<{ lang: Lang; data: PMOSOverviewData }>
   const items: { done: boolean | null; es: string; en: string }[] = [
     { done: null, es: 'Ácido fólico: pregunta a tu médica la dosis antes de empezar.', en: 'Folic acid: ask your doctor about the dose before you start.' },
     { done: null, es: 'Revisión de medicación: algunos medicamentos no se usan al buscar o durante un embarazo.', en: 'Medication review: some medicines are not used when trying to conceive or during pregnancy.' },
-    { done: glucose[0].done, es: 'Control de glucosa en el último año.', en: 'Glucose check in the last year.' },
+    { done: glucose[0].done, es: 'Control de glucosa de laboratorio en el último año (de preferencia curva de tolerancia).', en: 'Lab glucose check in the last year (ideally a glucose tolerance test).' },
     { done: bp, es: 'Presión arterial en el último año.', en: 'Blood pressure in the last year.' },
   ];
   return (
@@ -199,8 +200,7 @@ export const PregnancyGlucoseCard: React.FC<{ lang: Lang; data: PMOSOverviewData
   const es = lang === 'es';
   const age = gestationalAge(pregnancy, data.today);
   const items = gestationalGlucosePlan({
-    goal: data.goal, gestationalWeeks: age?.weeks ?? null, pregnancyStart: pregnancy.start_date, today: data.today,
-    glucoseDates: [...data.fastingGlucose.map((g) => g.date), ...data.labs.filter((l) => ['hba1c', 'fasting_glucose', 'glucose_2h'].includes(l.marker)).map((l) => l.date)],
+    goal: data.goal, gestationalWeeks: age?.weeks ?? null, pregnancyStart: pregnancy.start_date, today: data.today, labs: data.labs,
   });
   if (!items.length) return null;
   const label = {

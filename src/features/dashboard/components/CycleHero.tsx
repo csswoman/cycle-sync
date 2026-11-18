@@ -30,19 +30,18 @@ export const CycleHero: React.FC<{ overview: CycleOverview }> = ({ overview }) =
                 <CardFlowers variant="hero" />
                 <GrowingBloom className="absolute -bottom-1 right-0 sm:right-6 h-32 sm:h-60 w-auto" />
                 <div className="relative flex flex-col gap-1 pr-24 sm:pr-44">
-                    <p className="text-xs font-bold uppercase tracking-wider text-phase">{es ? 'Empieza aquí' : 'Start here'}</p>
                     <h2 className="text-foreground text-2xl sm:text-3xl font-semibold tracking-tight text-balance">
                         {isGuest ? (es ? 'Tu ciclo, explicado día a día' : 'Your cycle, explained day by day') : text.noDataTitle}
                     </h2>
                     <p className="text-muted-foreground text-sm sm:text-base mt-1 max-w-xl">
                         {isGuest
-                            ? (es ? 'Crea una cuenta gratis para guardar tus reglas y recibir predicciones hechas para ti.' : 'Create a free account to save your periods and get predictions made for you.')
+                            ? (es ? 'Crea una cuenta gratis para guardar tus reglas y ver tus predicciones.' : 'Create a free account to save your periods and see your predictions.')
                             : text.noDataBody}
                     </p>
                 </div>
                 <ul className="relative flex flex-col sm:flex-row sm:flex-wrap gap-2 pr-24 sm:pr-44">
-                    {points.map((p) => (
-                        <li key={p} className="inline-flex items-center gap-2 rounded-full bg-card/70 border border-border/60 px-3 py-1.5 text-sm text-foreground">
+                    {points.map((p, i) => (
+                        <li key={p} className={`${i > 0 ? 'hidden sm:inline-flex' : 'inline-flex'}  items-center gap-2 rounded-full bg-card/70 border border-border/60 px-3 py-1.5 text-sm text-foreground`}>
                             <span className="size-1.5 rounded-full bg-phase" aria-hidden="true" />{p}
                         </li>
                     ))}
@@ -82,11 +81,12 @@ export const CycleHero: React.FC<{ overview: CycleOverview }> = ({ overview }) =
             <CardFlowers variant="heroData" />
             <Bloom growth={growth} tone={tone} className="absolute -top-2 right-0 h-32 sm:h-44 w-auto opacity-90" />
             <div className="relative flex flex-col gap-1 pr-20 sm:pr-32">
-                <p className="text-xs font-bold uppercase tracking-wider text-phase">
+                <h2 className="text-foreground text-2xl sm:text-3xl font-semibold tracking-tight text-balance">{late ? text.lateTitle : phase.focus}</h2>
+                <p className="text-sm sm:text-base font-semibold text-phase">
                     {overdue ? text.overdueDay(info.cycleDay) : `${phase.name} · ${text.dayOf(info.cycleDay, info.cycleLength)}`}
+                    {!late && <span className="font-normal text-muted-foreground"> · {phase.hormones}</span>}
                 </p>
-                <h2 className="text-foreground text-2xl sm:text-3xl font-semibold tracking-tight">{late ? text.lateTitle : phase.focus}</h2>
-                <p className="text-sm text-muted-foreground max-w-2xl">{late ? text.lateBody : phase.hormones}</p>
+                {late && <p className="text-sm text-muted-foreground max-w-2xl text-pretty">{text.lateBody}</p>}
             </div>
             <div
                 role="progressbar"
@@ -105,10 +105,10 @@ export const CycleHero: React.FC<{ overview: CycleOverview }> = ({ overview }) =
             </div>
             <div className="relative grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="bg-secondary/40 rounded-2xl p-4">
-                    <p className="text-xs font-bold text-muted-foreground uppercase">{text.nextPeriod}</p>
+                    <p className="text-sm font-medium text-muted-foreground">{text.nextPeriod}</p>
                     <p className="text-foreground font-bold text-xl mt-1">{periodText}</p>
                     {next && (
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-sm text-muted-foreground">
                             {next.periodEarliest.getTime() === next.periodLatest.getTime()
                                 ? `~ ${fmt(next.periodStart)}`
                                 : text.expectedBetween(fmt(next.periodEarliest), fmt(next.periodLatest))}
@@ -116,11 +116,11 @@ export const CycleHero: React.FC<{ overview: CycleOverview }> = ({ overview }) =
                     )}
                 </div>
                 <div className="bg-secondary/40 rounded-2xl p-4">
-                    <p className="text-xs font-bold text-muted-foreground uppercase">{text.ovulation}</p>
+                    <p className="text-sm font-medium text-muted-foreground">{text.ovulation}</p>
                     <p className="text-foreground font-bold text-xl mt-1">{ovulationText}</p>
                 </div>
                 <div className="bg-secondary/40 rounded-2xl p-4">
-                    <p className="text-xs font-bold text-muted-foreground uppercase">{text.fertileWindow}</p>
+                    <p className="text-sm font-medium text-muted-foreground">{text.fertileWindow}</p>
                     {next && (
                         <p className="text-foreground font-bold text-xl mt-1">{overdue ? '-' : `${fmt(next.fertileStart)} – ${fmt(next.fertileEnd)}`}</p>
                     )}
@@ -136,7 +136,7 @@ export const CycleHero: React.FC<{ overview: CycleOverview }> = ({ overview }) =
                     </p>
                 )}
                 {estimate.irregular && <p className="text-sun-ink">{text.irregularNote}</p>}
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm text-muted-foreground">
                     {text.approx} {text.confidence}: {text.confidenceLevels[estimate.confidence]}.
                 </p>
             </div>

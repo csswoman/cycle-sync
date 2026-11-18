@@ -17,6 +17,7 @@ const copy = {
     date: 'Día', today: 'Hoy',
     flowSectionTitle: 'Sangrado y dolor',
     flowSectionHelp: 'Para los días de regla. El sangrado muy abundante o con coágulos es útil comentarlo en consulta.',
+    testsTitle: 'Pruebas',
     spottingTitle: 'Manchado (spotting)',
     spottingHelp: 'Sangrado leve fuera de la regla: unas gotas, rosado o marrón, sin necesitar compresa. No cuenta como regla ni cambia tus predicciones.',
     spottingToggle: 'Tuve manchado este día',
@@ -65,6 +66,7 @@ const copy = {
     date: 'Day', today: 'Today',
     flowSectionTitle: 'Bleeding and pain',
     flowSectionHelp: 'For period days. Very heavy bleeding or clots are worth mentioning at your appointment.',
+    testsTitle: 'Tests',
     spottingTitle: 'Spotting',
     spottingHelp: 'Light bleeding outside your period: a few drops, pink or brown, no pad needed. It does not count as a period or change your predictions.',
     spottingToggle: 'I had spotting this day',
@@ -208,6 +210,17 @@ const BodySignsPanel: React.FC<Props> = ({ lang, cycleStart, hormonal, initialDa
   const pattern = bbtPattern(readings);
   const fmt = (iso: string) => new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'short' }).format(parseLocalDate(iso));
 
+  const saveBlock = (
+    <>
+      {(status === 'error' || error) && status !== 'saved' && <p className="text-sm font-semibold text-destructive" role="alert">{c.saveError}</p>}
+      <button type="button" onClick={onSave} disabled={status === 'saving' || tempInvalid}
+        className="w-full min-h-12 bg-primary hover:bg-primary-hover text-primary-foreground font-semibold px-6 rounded-full flex items-center justify-center gap-2 transition-colors disabled:opacity-60">
+        <span className="material-symbols-outlined" aria-hidden="true">{status === 'saved' ? 'check_circle' : 'save'}</span>
+        {status === 'saving' ? c.saving : status === 'saved' ? c.saved : c.save}
+      </button>
+    </>
+  );
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
       <div className="lg:col-span-7 flex flex-col gap-4">
@@ -225,24 +238,27 @@ const BodySignsPanel: React.FC<Props> = ({ lang, cycleStart, hormonal, initialDa
 
         <Section icon="monitoring" title={c.flowSectionTitle} help={c.flowSectionHelp}>
           <FlowFields lang={lang} value={draft} onChange={update} />
+          <div className="flex flex-col gap-2 border-t border-border pt-4">
+            <h3 className="text-sm font-semibold text-foreground">{c.spottingTitle}</h3>
+            <p className="text-sm text-muted-foreground leading-relaxed max-w-[65ch]">{c.spottingHelp}</p>
+            <label className="flex items-center gap-3 min-h-10 text-sm font-semibold text-foreground cursor-pointer">
+              <input type="checkbox" className="size-5 accent-primary" checked={draft.spotting} onChange={(e) => update({ spotting: e.target.checked })} />
+              {c.spottingToggle}
+            </label>
+          </div>
         </Section>
-        <Section icon="water_drop" title={c.spottingTitle} help={c.spottingHelp}>
-          <label className="flex items-center gap-3 min-h-10 text-sm font-semibold text-foreground cursor-pointer">
-            <input type="checkbox" className="size-5 accent-primary" checked={draft.spotting} onChange={(e) => update({ spotting: e.target.checked })} />
-            {c.spottingToggle}
-          </label>
-        </Section>
-
         <Section icon="thermometer" title={c.bbtTitle} help={c.bbtHelp}>
-          <div className="flex items-center gap-2 max-w-[200px]">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
+          <div className="flex items-center gap-2 w-[180px]">
             <input className={`${inputClass} tabular-nums`} inputMode="decimal" placeholder="36,50" value={tempText} onChange={(e) => { setTempText(e.target.value); setStatus('idle'); }} aria-invalid={tempInvalid} />
             <span className="text-sm font-semibold text-muted-foreground">°C</span>
           </div>
-          {tempInvalid && <p className="text-sm font-semibold text-destructive">{c.bbtInvalid}</p>}
-          <label className="flex items-center gap-3 min-h-10 text-sm text-muted-foreground cursor-pointer">
-            <input type="checkbox" className="size-5 accent-primary" checked={draft.bbtDisturbed} onChange={(e) => update({ bbtDisturbed: e.target.checked })} />
+          <label className="flex items-center gap-3 min-h-10 text-sm text-muted-foreground cursor-pointer flex-1 min-w-[220px]">
+            <input type="checkbox" className="size-5 accent-primary shrink-0" checked={draft.bbtDisturbed} onChange={(e) => update({ bbtDisturbed: e.target.checked })} />
             {c.bbtDisturbed}
           </label>
+          </div>
+          {tempInvalid && <p className="text-sm font-semibold text-destructive">{c.bbtInvalid}</p>}
         </Section>
 
         <Section icon="opacity" title={c.mucusTitle}>
@@ -257,27 +273,34 @@ const BodySignsPanel: React.FC<Props> = ({ lang, cycleStart, hormonal, initialDa
           {isFertileMucus(draft.cervicalMucus) && <p className="text-sm font-semibold text-sun-ink">{c.mucusFertile}</p>}
         </Section>
 
-        {!hormonal && (
-          <Section icon="science" title={c.lhTitle} help={c.lhHelp}>
-            <div className="flex flex-wrap gap-2">
-              {(['negative', 'positive'] as const).map((v) => (
-                <button key={v} type="button" aria-pressed={draft.lhTest === v} className={chip(draft.lhTest === v)}
-                  onClick={() => update({ lhTest: draft.lhTest === v ? null : v })}>
-                  {c.lh[v]}
-                </button>
-              ))}
+        <Section icon="science" title={c.testsTitle}>
+          <div className={`grid grid-cols-1 gap-6 ${hormonal ? '' : 'md:grid-cols-2'}`}>
+            {!hormonal && (
+              <div className="flex flex-col gap-3">
+                <h3 className="text-sm font-semibold text-foreground">{c.lhTitle}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{c.lhHelp}</p>
+                <div className="flex flex-wrap gap-2 mt-auto">
+                  {(['negative', 'positive'] as const).map((v) => (
+                    <button key={v} type="button" aria-pressed={draft.lhTest === v} className={chip(draft.lhTest === v)}
+                      onClick={() => update({ lhTest: draft.lhTest === v ? null : v })}>
+                      {c.lh[v]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="flex flex-col gap-3">
+              <h3 className="text-sm font-semibold text-foreground">{c.pregTitle}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{c.pregHelp}</p>
+              <div className="flex flex-wrap gap-2 mt-auto">
+                {(['negative', 'positive'] as const).map((v) => (
+                  <button key={v} type="button" aria-pressed={draft.pregnancyTest === v} className={chip(draft.pregnancyTest === v)}
+                    onClick={() => update({ pregnancyTest: draft.pregnancyTest === v ? null : v })}>
+                    {c.preg[v]}
+                  </button>
+                ))}
+              </div>
             </div>
-          </Section>
-        )}
-
-        <Section icon="pregnant_woman" title={c.pregTitle} help={c.pregHelp}>
-          <div className="flex flex-wrap gap-2">
-            {(['negative', 'positive'] as const).map((v) => (
-              <button key={v} type="button" aria-pressed={draft.pregnancyTest === v} className={chip(draft.pregnancyTest === v)}
-                onClick={() => update({ pregnancyTest: draft.pregnancyTest === v ? null : v })}>
-                {c.preg[v]}
-              </button>
-            ))}
           </div>
           {draft.pregnancyTest === 'positive' && (
             activePreg ? (
@@ -325,17 +348,16 @@ const BodySignsPanel: React.FC<Props> = ({ lang, cycleStart, hormonal, initialDa
             <input className={`${inputClass} font-normal`} maxLength={300} value={draft.notes ?? ''} onChange={(e) => update({ notes: e.target.value })} />
           </label>
 
-          {(status === 'error' || error) && status !== 'saved' && <p className="text-sm font-semibold text-destructive" role="alert">{c.saveError}</p>}
-          <button type="button" onClick={onSave} disabled={status === 'saving' || tempInvalid}
-            className="w-full min-h-12 bg-primary hover:bg-primary-hover text-primary-foreground font-semibold px-6 rounded-full flex items-center justify-center gap-2 transition-colors disabled:opacity-60">
-            <span className="material-symbols-outlined" aria-hidden="true">{status === 'saved' ? 'check_circle' : 'save'}</span>
-            {status === 'saving' ? c.saving : status === 'saved' ? c.saved : c.save}
-          </button>
+          <div className="lg:hidden flex flex-col gap-4">{saveBlock}</div>
         </div>
         </div>
       </div>
 
       <div className="lg:col-span-5 flex flex-col gap-4 lg:sticky lg:top-4 lg:self-start">
+        <div className="hidden lg:flex flex-col gap-3 bg-card border border-border rounded-3xl p-5 sm:p-6 shadow-[var(--shadow-low)]">
+          <p className="text-sm text-muted-foreground">{c.date}: <span className="font-semibold text-foreground tabular-nums">{fmt(date)}</span></p>
+          {saveBlock}
+        </div>
         <div className="bg-card border border-border rounded-3xl p-5 sm:p-6 flex flex-col gap-3 shadow-[var(--shadow-low)]">
           <h2 className="text-foreground text-lg font-semibold">{c.chartTitle}</h2>
           {readings.length < 2 ? (

@@ -63,9 +63,9 @@ export const CycleStatsCard: React.FC<{ overview: CycleOverview; lang: 'es' | 'e
             <dl className="grid grid-cols-2 gap-2">
                 {stats.map((s) => (
                     <div key={s.label} className="rounded-2xl bg-secondary/40 p-3">
-                        <dt className="text-[11px] font-bold uppercase tracking-wide text-muted-foreground">{s.label}</dt>
+                        <dt className="text-sm font-medium text-muted-foreground">{s.label}</dt>
                         <dd className="mt-0.5 text-foreground text-2xl font-semibold tabular-nums leading-tight">
-                            {s.value}{s.unit && <span className="text-xs font-medium text-muted-foreground ml-1">{s.unit}</span>}
+                            {s.value}{s.unit && <span className="text-sm font-medium text-muted-foreground ml-1">{s.unit}</span>}
                         </dd>
                     </div>
                 ))}
@@ -73,14 +73,14 @@ export const CycleStatsCard: React.FC<{ overview: CycleOverview; lang: 'es' | 'e
 
             {lengths.length > 1 ? (
                 <div>
-                    <p className="text-xs font-semibold text-muted-foreground mb-2">{c.recent}</p>
+                    <p className="text-sm font-semibold text-muted-foreground mb-2">{c.recent}</p>
                     <ul className="flex items-end gap-1.5 h-20" aria-label={c.recent}>
                         {lengths.map((len, i) => {
                             const out = len < 21 || len > 35;
                             const h = 25 + 75 * ((len - min) / Math.max(1, max - min));
                             return (
                                 <li key={i} className="flex-1 min-w-0 h-full flex flex-col items-center justify-end gap-1" aria-label={c.dayLabel(len)}>
-                                    <span className="text-[11px] tabular-nums text-muted-foreground" aria-hidden="true">{len}</span>
+                                    <span className="text-xs tabular-nums text-muted-foreground" aria-hidden="true">{len}</span>
                                     <span
                                         aria-hidden="true"
                                         className={`w-full max-w-8 rounded-t-lg ${out ? 'bg-sun' : i === lengths.length - 1 ? 'bg-blossom' : 'bg-petal'}`}

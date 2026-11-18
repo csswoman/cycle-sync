@@ -1,9 +1,11 @@
 'use client';
 import React, { useMemo } from 'react';
 import Link from 'next/link';
+import { Icon } from '@/components/ui/Icon';
 import workoutVideos from '@/data/workoutVideos.json';
 import { parseYouTubeId } from '@/lib/youtube';
 import { displayVideoTitle } from '@/data/videoTitleOverrides';
+import { PROGRAMS } from '@/lib/planner/programs';
 import type { PhaseKey } from '@/lib/cycle/phaseSuggestions';
 
 interface RawVideo {
@@ -36,6 +38,26 @@ function dayIndex(): number {
     return Math.floor(new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime() / 86_400_000);
 }
 
+const PROGRAMS_COPY = {
+    es: { title: 'Programas', weeks: 'sem', routines: 'rutinas', home: 'En casa', gym: 'Gimnasio' },
+    en: { title: 'Programs', weeks: 'wk', routines: 'routines', home: 'At home', gym: 'Gym' },
+};
+
+/** One program at home and one at the gym per day; a sedentary profile only gets beginner ones. */
+function pickPrograms(lowActivity: boolean) {
+    const day = dayIndex();
+    const out = [];
+    for (const category of ['home', 'gym'] as const) {
+        let pool = PROGRAMS.filter((p) => p.category === category && p.routines.length > 0);
+        if (lowActivity) {
+            const easy = pool.filter((p) => p.difficulty.toLowerCase() === 'principiante');
+            if (easy.length > 0) pool = easy;
+        }
+        if (pool.length > 0) out.push(pool[day % pool.length]);
+    }
+    return out;
+}
+
 /**
  * A few catalog videos for the phase, with YouTube thumbnails, read from the bundled
  * list so it works for guests and offline. The pick rotates daily.
@@ -65,9 +87,12 @@ export const PhaseVideoPicks: React.FC<{ phase: PhaseKey; lang: 'es' | 'en'; low
         return out;
     }, [phase, lowActivity, count]);
 
-    if (picks.length === 0) return null;
-
+    const programs = useMemo(() => pickPrograms(lowActivity), [lowActivity]);
+    const pc = PROGRAMS_COPY[lang];
+    if (picks.length === 0 && programs.length === 0) return null;
     return (
+        <>
+        {picks.length > 0 && (
         <ul className="flex flex-col gap-2">
             {picks.map((v) => (
                 <li key={v.id}>
@@ -97,5 +122,32 @@ export const PhaseVideoPicks: React.FC<{ phase: PhaseKey; lang: 'es' | 'en'; low
                 </li>
             ))}
         </ul>
+        )}
+        {programs.length > 0 && (
+            <>
+                <p className="text-sm font-semibold text-muted-foreground mt-1">{pc.title}</p>
+                <ul className="flex flex-col gap-2">
+                    {programs.map((p) => (
+                        <li key={p.id}>
+                            <Link
+                                href="/routines?tab=programs"
+                                className="group w-full flex items-center gap-3 rounded-xl border border-border bg-card hover:border-primary/50 transition-colors px-3 py-2.5 min-h-12"
+                            >
+                                <span className="size-9 rounded-full bg-phase-soft text-phase flex items-center justify-center shrink-0">
+                                    <Icon name="fitness_center" size={18} weight="duotone" />
+                                </span>
+                                <span className="min-w-0 flex-1">
+                                    <span className="block text-foreground text-sm font-semibold leading-snug line-clamp-2">{p.name}</span>
+                                    <span className="block text-xs text-phase truncate">
+                                        {p.category === 'home' ? pc.home : pc.gym} · {p.durationWeeks} {pc.weeks} · {p.routines.length} {pc.routines}
+                                    </span>
+                                </span>
+                            </Link>
+                        </li>
+                    ))}
+                </ul>
+            </>
+        )}
+        </>
     );
 };

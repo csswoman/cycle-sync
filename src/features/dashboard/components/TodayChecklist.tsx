@@ -47,7 +47,7 @@ const Head: React.FC<HeadProps> = ({ icon, title, detail, done, cta, onClick }) 
         />
         <div className="flex-1 min-w-0">
             <p className="text-foreground font-semibold text-base leading-snug">{title}</p>
-            <p className="text-muted-foreground text-sm truncate">{detail}</p>
+            <p className="text-muted-foreground text-sm line-clamp-2">{detail}</p>
         </div>
         <button
             type="button"

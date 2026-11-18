@@ -7,11 +7,14 @@ import { Icon } from '@/components/ui/Icon';
 import { MEAL_SLOTS, toISODate } from '@/lib/planner/week';
 import { useGuest } from '@/hooks/useGuest';
 import { loadDay, setDone, type MealEntry, type WorkoutEntry } from '@/services/plannerService';
+import { listLibrary } from '@/services/recipesService';
+import { CATALOG_RECIPES } from '@/data/seedRecipes';
+import { titleKey, isSimilarTitle } from '@/lib/recipes/normalize';
 
 const COPY = {
     es: {
         title: 'Tu plan de hoy',
-        open: 'Ver planner',
+        open: 'Ver plan semanal',
         rest: 'Día de descanso',
         workout: 'Ejercicio',
         empty: 'Aún no hay nada planeado para hoy.',
@@ -50,9 +53,9 @@ const Item: React.FC<ItemProps> = ({ icon, label, title, detail, done, onToggle 
             <Icon name={icon} size={18} weight="duotone" />
         </div>
         <div className="flex-1 min-w-0">
-            <p className="text-xs text-muted-foreground">{label}</p>
+            <p className="text-sm text-muted-foreground">{label}</p>
             <p className={`text-sm font-medium truncate ${done ? 'text-muted-foreground line-through' : 'text-foreground'}`}>{title}</p>
-            {detail && <p className="text-xs text-muted-foreground">{detail}</p>}
+            {detail && <p className="text-sm text-muted-foreground">{detail}</p>}
         </div>
         {onToggle && (
             <button
@@ -72,6 +75,63 @@ const Item: React.FC<ItemProps> = ({ icon, label, title, detail, done, onToggle 
     </div>
 );
 
+type Photo = { title: string; key: string; url: string };
+const collectPhotos = (recipes: { title: string; imageUrl?: string | null }[]): Photo[] =>
+    recipes.filter((r) => r.imageUrl).map((r) => ({ title: r.title, key: titleKey(r.title), url: r.imageUrl as string }));
+
+/** Planner entries only store the meal title, so the photo comes from the matching recipe. */
+const photoFor = (photos: Photo[], title: string): string | null => {
+    const key = titleKey(title);
+    return (photos.find((p) => p.key === key) ?? photos.find((p) => isSimilarTitle(p.title, title)))?.url ?? null;
+};
+
+interface MealTileProps {
+    slotLabel: string;
+    meal: MealEntry;
+    image: string | null;
+    onBroken: (url: string) => void;
+    onToggle: () => void;
+}
+const MealTile: React.FC<MealTileProps> = ({ slotLabel, meal, image, onBroken, onToggle }) => (
+    <li className="min-w-0 flex flex-col gap-2">
+        <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-muted">
+            {image ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                    src={image}
+                    alt=""
+                    loading="lazy"
+                    onError={() => onBroken(image)}
+                    className={`size-full object-cover transition-opacity ${meal.done ? 'opacity-50' : ''}`}
+                />
+            ) : (
+                <span className="size-full flex items-center justify-center text-muted-foreground/60">
+                    <Icon name="restaurant" size={28} weight="duotone" />
+                </span>
+            )}
+            <button
+                onClick={onToggle}
+                aria-pressed={meal.done}
+                aria-label={meal.title}
+                className="absolute top-1 right-1 size-10 rounded-full flex items-center justify-center cursor-pointer"
+            >
+                <span className="size-8 rounded-full bg-card/90 shadow-sm flex items-center justify-center">
+                    <Icon
+                        name="check_circle"
+                        size={22}
+                        weight={meal.done ? 'fill' : 'regular'}
+                        className={meal.done ? 'text-leaf' : 'text-muted-foreground'}
+                    />
+                </span>
+            </button>
+        </div>
+        <div className="min-w-0">
+            <p className="text-sm text-muted-foreground">{slotLabel}</p>
+            <p className={`text-sm font-medium leading-snug line-clamp-2 text-pretty ${meal.done ? 'text-muted-foreground line-through' : 'text-foreground'}`}>{meal.title}</p>
+        </div>
+    </li>
+);
+
 /** Today's planned workout and meals from the planner, checkable in place. Without a plan it shows empty slots that open the planner. */
 /** `embedded`: drops the card chrome so it can sit inside TodayRhythm. */
 export const TodayPlanCard: React.FC<{ embedded?: boolean }> = ({ embedded = false }) => {
@@ -82,7 +142,14 @@ export const TodayPlanCard: React.FC<{ embedded?: boolean }> = ({ embedded = fal
     const [meals, setMeals] = useState<MealEntry[]>([]);
     const [workout, setWorkout] = useState<WorkoutEntry | null>(null);
     const [loading, setLoading] = useState(true);
-
+    const [photos, setPhotos] = useState<Photo[]>(() => collectPhotos(CATALOG_RECIPES));
+    const [broken, setBroken] = useState<Set<string>>(new Set());
+    useEffect(() => {
+        // Library recipes first (planner meals usually come from there); the bundled catalog stays as fallback and for guests.
+        listLibrary()
+            .then((lib) => setPhotos(collectPhotos([...lib, ...CATALOG_RECIPES])))
+            .catch(() => { /* keep catalog photos */ });
+    }, []);
     useEffect(() => {
         loadDay(toISODate(new Date()))
             .then((day) => { setMeals(day.meals); setWorkout(day.workout); })
@@ -135,10 +202,6 @@ export const TodayPlanCard: React.FC<{ embedded?: boolean }> = ({ embedded = fal
     // No plan yet: show the day's empty slots so the space reads as "fill me in", not as missing.
     if (!workout && meals.length === 0) {
         const open = () => (isGuest ? promptSignup() : router.push('/planner'));
-        const slots = [
-            { key: 'workout', icon: 'fitness_center', label: copy.workout },
-            ...MEAL_SLOTS.map((slot) => ({ key: slot, icon: 'restaurant', label: copy.slots[slot] })),
-        ];
         return (
             <div className={embedded ? 'flex flex-col gap-3' : 'bg-card rounded-3xl border border-border shadow-sm p-5 sm:p-6 flex flex-col gap-3'}>
                 <div className="flex items-center justify-between gap-2">
@@ -151,25 +214,6 @@ export const TodayPlanCard: React.FC<{ embedded?: boolean }> = ({ embedded = fal
                     </button>
                 </div>
                 <p className="text-sm text-muted-foreground">{isGuest ? copy.guestEmpty : copy.empty}</p>
-                <ul className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                    {slots.map((s) => (
-                        <li key={s.key}>
-                            <button
-                                type="button"
-                                onClick={open}
-                                className="w-full h-full rounded-2xl border border-dashed border-border hover:border-primary/50 hover:bg-secondary/40 transition-colors p-3 flex flex-col items-start gap-2 text-left cursor-pointer"
-                            >
-                                <span className="size-8 rounded-full bg-blossom-soft text-blossom flex items-center justify-center">
-                                    <Icon name={s.icon} size={16} weight="duotone" />
-                                </span>
-                                <span className="min-w-0">
-                                    <span className="block text-sm font-semibold text-foreground truncate">{s.label}</span>
-                                    <span className="block text-xs text-muted-foreground truncate">{copy.slotHint}</span>
-                                </span>
-                            </button>
-                        </li>
-                    ))}
-                </ul>
             </div>
         );
     }
@@ -187,8 +231,8 @@ export const TodayPlanCard: React.FC<{ embedded?: boolean }> = ({ embedded = fal
                     {copy.open}<Icon name="arrow_forward" size={14} />
                 </button>
             </div>
-            <div className="divide-y divide-border/60">
-                {workout && (
+            {workout && (
+                <div className="divide-y divide-border/60">
                     <Item
                         icon="fitness_center"
                         label={workout.kind === 'rest' ? copy.rest : workout.kind === 'gym' ? 'Gym' : 'Video'}
@@ -197,18 +241,25 @@ export const TodayPlanCard: React.FC<{ embedded?: boolean }> = ({ embedded = fal
                         done={workout.done}
                         onToggle={workout.kind === 'rest' ? undefined : toggleWorkout}
                     />
-                )}
-                {ordered.map((meal) => (
-                    <Item
-                        key={meal.id}
-                        icon="restaurant"
-                        label={copy.slots[meal.slot]}
-                        title={meal.title}
-                        done={meal.done}
-                        onToggle={() => toggleMeal(meal)}
-                    />
-                ))}
-            </div>
+                </div>
+            )}
+            {ordered.length > 0 && (
+                <ul className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 gap-x-3 gap-y-4 mt-3">
+                    {ordered.map((meal) => {
+                        const url = photoFor(photos, meal.title);
+                        return (
+                            <MealTile
+                                key={meal.id}
+                                slotLabel={copy.slots[meal.slot]}
+                                meal={meal}
+                                image={url && !broken.has(url) ? url : null}
+                                onBroken={(u) => setBroken((prev) => new Set(prev).add(u))}
+                                onToggle={() => toggleMeal(meal)}
+                            />
+                        );
+                    })}
+                </ul>
+            )}
         </div>
     );
 };
