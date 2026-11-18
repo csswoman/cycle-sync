@@ -19,6 +19,11 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      // Shared width for the main app pages (dashboard, logs, health, planner...).
+      // Wide enough that two-column layouts breathe on desktop without lines getting too long.
+      maxWidth: {
+        page: '88rem',
+      },
       colors: {
         border: c('border'),
         input: c('input'),
