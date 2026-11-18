@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Icon } from '@/components/ui/Icon';
+import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { useGuest } from '@/hooks/useGuest';
 import type { TodayCheckinState, StoredLog } from '@/hooks/useTodayCheckin';
 import type { CravingKind } from '@/lib/today/dailyPlan';
@@ -13,6 +14,7 @@ const COPY = {
     es: {
         title: '¿Cómo vas hoy?',
         hint: 'Un toque por fila. Se guarda solo y puedes dejar filas vacías.',
+        hintLabel: 'Cómo funciona el check-in',
         done: 'Guardado',
         same: 'Igual que ayer',
         energy: 'Energía',
@@ -34,6 +36,7 @@ const COPY = {
     en: {
         title: 'How are you today?',
         hint: 'One tap per row. It saves on its own and rows can stay empty.',
+        hintLabel: 'How the check-in works',
         done: 'Saved',
         same: 'Same as yesterday',
         energy: 'Energy',
@@ -73,24 +76,26 @@ const Chip: React.FC<ChipProps> = ({ selected, onClick, children, role = 'radio'
         role={role}
         aria-checked={selected}
         onClick={onClick}
-        className={`min-h-10 px-3.5 rounded-full text-sm font-medium border transition-colors cursor-pointer active:scale-[0.98] ${selected
+        className={`min-h-8 px-2.5 rounded-full text-[13px] font-medium border transition-colors cursor-pointer active:scale-[0.98] ${selected
             ? 'bg-primary/15 border-primary/40 text-primary'
-            : 'bg-secondary/50 border-transparent text-muted-foreground hover:bg-secondary hover:text-foreground'
+            : 'bg-card border-border/60 text-muted-foreground hover:border-border hover:text-foreground'
             }`}
     >
         {children}
     </button>
 );
 
-const Row: React.FC<{ label: string; icon: string; children: React.ReactNode; multi?: boolean }> = ({ label, icon, children, multi }) => (
-    <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-        <p className="flex items-center gap-2 text-sm text-foreground font-medium sm:w-40 shrink-0">
-            <Icon name={icon} size={18} weight="duotone" className="text-blossom" />{label}
+/** Mini dashboard tile: tinted icon + label inline, chips below. `wide` spans both columns. */
+const Row: React.FC<{ label: string; icon: string; children: React.ReactNode; multi?: boolean; wide?: boolean }> = ({ label, icon, children, multi, wide }) => (
+    <div className={`flex flex-col gap-2 min-w-0 rounded-xl bg-card/70 border border-border/50 p-2.5 ${wide ? 'col-span-2' : ''}`}>
+        <p className="flex items-center gap-2 text-[13px] text-foreground font-semibold">
+            <span className="grid place-items-center size-6 rounded-lg bg-blossom/10 text-blossom shrink-0">
+                <Icon name={icon} size={14} weight="duotone" />
+            </span>{label}
         </p>
-        <div role={multi ? 'group' : 'radiogroup'} aria-label={label} className="flex flex-wrap gap-2">{children}</div>
+        <div role={multi ? 'group' : 'radiogroup'} aria-label={label} className="flex flex-wrap gap-1.5">{children}</div>
     </div>
 );
-
 /** One-tap daily check-in: energy, motivation, sleep, cravings and a few body signals. */
 export const QuickCheckin: React.FC<{ state: TodayCheckinState; lang: Lang }> = ({ state, lang }) => {
     const copy = COPY[lang];
@@ -123,18 +128,16 @@ export const QuickCheckin: React.FC<{ state: TodayCheckinState; lang: Lang }> = 
     }
 
     return (
-        <section aria-labelledby="quick-checkin-title" className="flex flex-col gap-4">
-            <div className="flex items-start justify-between gap-3">
-                <div>
-                    <h3 id="quick-checkin-title" className="text-foreground text-base font-semibold flex items-center gap-2">
-                        {copy.title}
-                        {logged && (
-                            <span className="inline-flex items-center gap-1 text-leaf text-sm font-medium" role="status">
-                                <Icon name="check_circle" size={16} weight="fill" />{copy.done}
-                            </span>
-                        )}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">{copy.hint}</p>
+        <section aria-labelledby="quick-checkin-title" className="flex flex-col gap-2.5">
+            <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-1.5 min-h-9">
+                    <h3 id="quick-checkin-title" className="text-foreground text-base font-semibold">{copy.title}</h3>
+                    <InfoTooltip label={copy.hintLabel}><p>{copy.hint}</p></InfoTooltip>
+                    {logged && (
+                        <span className="ml-1 inline-flex items-center gap-1 text-leaf text-sm font-medium" role="status">
+                            <Icon name="check_circle" size={16} weight="fill" />{copy.done}
+                        </span>
+                    )}
                 </div>
                 {!logged && yesterday && (
                     <button
@@ -147,7 +150,7 @@ export const QuickCheckin: React.FC<{ state: TodayCheckinState; lang: Lang }> = 
                 )}
             </div>
 
-            <div className="flex flex-col gap-3">
+            <div className="grid grid-cols-2 gap-2">
                 <Row label={copy.energy} icon="bolt">
                     {copy.energyOpts.map((o, i) => (
                         <Chip key={o} selected={energyBucket(log.energyLevel) === i} onClick={() => set({ energyLevel: ENERGY_VALUES[i] })}>{o}</Chip>
@@ -170,14 +173,14 @@ export const QuickCheckin: React.FC<{ state: TodayCheckinState; lang: Lang }> = 
                     ))}
                 </Row>
                 {log.cravings.length > 0 && (
-                    <Row label={copy.intensity} icon="flame">
+                    <Row label={copy.intensity} icon="flame" wide>
                         {copy.intensityOpts.map((o, i) => (
                             <Chip key={o} selected={log.cravingIntensity === i + 1} onClick={() => set({ cravingIntensity: i + 1 })}>{o}</Chip>
                         ))}
                     </Row>
                 )}
                 {moreOpen && (
-                    <Row label={copy.more} icon="monitor_heart" multi>
+                    <Row label={copy.more} icon="monitor_heart" multi wide>
                         {Object.entries(copy.body).map(([key, label]) => (
                             <Chip key={key} role="checkbox" selected={log.symptoms.includes(key)} onClick={() => toggleSymptom(key)}>{label}</Chip>
                         ))}
@@ -190,14 +193,14 @@ export const QuickCheckin: React.FC<{ state: TodayCheckinState; lang: Lang }> = 
                     type="button"
                     onClick={() => setMoreOpen((v) => !v)}
                     aria-expanded={moreOpen}
-                    className="inline-flex items-center gap-1 min-h-10 text-sm font-semibold text-blossom hover:text-blossom/80 cursor-pointer"
+                    className="inline-flex items-center gap-1 min-h-8 text-[13px] font-semibold text-blossom hover:text-blossom/80 cursor-pointer"
                 >
                     <Icon name={moreOpen ? 'remove' : 'add'} size={14} />{moreOpen ? copy.less : copy.more}
                 </button>
                 <button
                     type="button"
                     onClick={() => (isGuest ? promptSignup() : router.push('/log'))}
-                    className="inline-flex items-center gap-1 min-h-10 text-sm font-semibold text-muted-foreground hover:text-foreground cursor-pointer"
+                    className="inline-flex items-center gap-1 min-h-8 text-[13px] font-semibold text-muted-foreground hover:text-foreground cursor-pointer"
                 >
                     {copy.full}<Icon name="arrow_forward" size={14} />
                 </button>

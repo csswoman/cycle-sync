@@ -5,7 +5,6 @@ import { useLanguage } from '@/i18n/LanguageContext';
 import { useCycleOverview } from '@/hooks/useCycleOverview';
 import { CycleHero } from './components/CycleHero';
 import { TodayRhythm } from './components/TodayRhythm';
-import { PhaseRecommendations } from './components/PhaseRecommendations';
 import { WeeklySummaryCard } from './components/WeeklySummaryCard';
 import { AppointmentBanner } from './components/AppointmentBanner';
 import { ProfileNudge } from './components/ProfileNudge';
@@ -38,7 +37,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userName }) => {
 
     return (
         <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide">
-            <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 pb-32">
+            <div className="max-w-page mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-6 pb-32">
                 <header className="flex flex-col gap-1">
                     <h1 className="text-foreground text-3xl sm:text-4xl font-semibold leading-tight tracking-tight text-balance">
                         {text.greeting(userName?.split(' ')[0])}
@@ -48,11 +47,14 @@ const Dashboard: React.FC<DashboardProps> = ({ userName }) => {
 
                 <AppointmentBanner />
                 <ProfileNudge overview={overview} lang={lang} />
-                {overview.paused
-                    ? <PregnancyHero overview={overview} lang={lang} />
-                    : <CycleHero overview={overview} />}
+                {/* Cycle and body side by side on wide screens; equal height so the row reads as one band. */}
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-stretch [&>*]:h-full">
+                    {overview.paused
+                        ? <PregnancyHero overview={overview} lang={lang} />
+                        : <CycleHero overview={overview} />}
+                    <HealthConnectWidget />
+                </div>
                 <FertilityWindowCard overview={overview} lang={lang} />
-                <HealthConnectWidget />
 
                 {explore ? (
                     <>
@@ -62,16 +64,9 @@ const Dashboard: React.FC<DashboardProps> = ({ userName }) => {
                 ) : (
                     <>
                         <TodayRhythm overview={overview} />
-                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                            {showPhase && (
-                                <div className="lg:col-span-8">
-                                    <PhaseRecommendations phase={overview.info!.phase} answers={overview.answers} />
-                                </div>
-                            )}
-                            <div className={`flex flex-col gap-6 ${showPhase ? 'lg:col-span-4' : 'lg:col-span-12'}`}>
-                                {showPhase && <CycleStatsCard overview={overview} lang={lang} />}
-                                <WeeklySummaryCard />
-                            </div>
+                        <div className={`grid grid-cols-1 ${showPhase ? 'lg:grid-cols-2' : ''} gap-6 items-start`}>
+                            {showPhase && <CycleStatsCard overview={overview} lang={lang} />}
+                            <WeeklySummaryCard />
                         </div>
                     </>
                 )}

@@ -5,6 +5,8 @@ import { useLanguage } from '@/i18n/LanguageContext';
 import { Bloom } from '@/components/ui/Bloom';
 import { GrowingBloom } from '@/components/ui/GrowingBloom';
 import { CardFlowers } from '@/components/ui/CardFlowers';
+import { Icon } from '@/components/ui/Icon';
+import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { bloomGrowth, bloomTone } from '@/lib/cycle/bloom';
 import { usesHormonalContraception } from '@/features/setup/onboarding';
 import { useGuest } from '@/hooks/useGuest';
@@ -106,7 +108,7 @@ export const CycleHero: React.FC<{ overview: CycleOverview }> = ({ overview }) =
             <div className="relative grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div className="bg-secondary/40 rounded-2xl p-4">
                     <p className="text-sm font-medium text-muted-foreground">{text.nextPeriod}</p>
-                    <p className="text-foreground font-bold text-xl mt-1">{periodText}</p>
+                    <p className="text-foreground font-bold text-xl xl:text-lg 2xl:text-xl mt-1">{periodText}</p>
                     {next && (
                         <p className="text-sm text-muted-foreground">
                             {next.periodEarliest.getTime() === next.periodLatest.getTime()
@@ -117,28 +119,37 @@ export const CycleHero: React.FC<{ overview: CycleOverview }> = ({ overview }) =
                 </div>
                 <div className="bg-secondary/40 rounded-2xl p-4">
                     <p className="text-sm font-medium text-muted-foreground">{text.ovulation}</p>
-                    <p className="text-foreground font-bold text-xl mt-1">{ovulationText}</p>
+                    <p className="text-foreground font-bold text-xl xl:text-lg 2xl:text-xl mt-1">{ovulationText}</p>
                 </div>
                 <div className="bg-secondary/40 rounded-2xl p-4">
                     <p className="text-sm font-medium text-muted-foreground">{text.fertileWindow}</p>
                     {next && (
-                        <p className="text-foreground font-bold text-xl mt-1">{overdue ? '-' : `${fmt(next.fertileStart)} – ${fmt(next.fertileEnd)}`}</p>
+                        <p className="text-foreground font-bold text-xl xl:text-lg 2xl:text-xl mt-1">{overdue ? '-' : `${fmt(next.fertileStart)} – ${fmt(next.fertileEnd)}`}</p>
                     )}
                 </div>
             </div>
             <div className="relative flex flex-col gap-1 text-sm">
                 {inFertile && !hormonal && answers.goal === 'fertility' && <p className="text-foreground font-semibold">{text.fertileNow} {text.fertileTip}</p>}
-                {hormonal && <p className="text-sun-ink">{text.hormonalNote}</p>}
                 {flags.includes('noPeriod90') && (
                     <p className="text-sun-ink font-semibold">
                         {text.noPeriod90}{' '}
                         <button onClick={() => router.push('/period-history')} className="underline font-bold">{text.logPeriodCta}</button>
                     </p>
                 )}
-                {estimate.irregular && <p className="text-sun-ink">{text.irregularNote}</p>}
-                <p className="text-sm text-muted-foreground">
-                    {text.approx} {text.confidence}: {text.confidenceLevels[estimate.confidence]}.
-                </p>
+                <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-muted-foreground">
+                    {(estimate.irregular || hormonal) && (
+                        <span className="inline-flex items-center gap-1.5 rounded-full bg-sun/15 px-2.5 py-0.5 font-medium text-sun-ink">
+                            <Icon name="info" size={14} />
+                            {estimate.irregular ? text.irregularShort : text.hormonalShort}
+                        </span>
+                    )}
+                    <span>{text.confidence}: <b className="font-semibold text-foreground">{text.confidenceLevels[estimate.confidence]}</b></span>
+                    <InfoTooltip label={text.estimateInfo}>
+                        {estimate.irregular && <p>{text.irregularNote}</p>}
+                        {hormonal && <p>{text.hormonalNote}</p>}
+                        <p className="text-muted-foreground">{text.approx}</p>
+                    </InfoTooltip>
+                </div>
             </div>
         </div>
     );

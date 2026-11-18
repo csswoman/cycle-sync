@@ -96,7 +96,7 @@ export const TodayChecklist: React.FC<{ embedded?: boolean }> = ({ embedded = fa
     const pendingTotal = (logged ? 0 : 1) + (totalDoses - takenDoses);
 
     return (
-        <div className={embedded ? 'flex flex-col gap-5' : 'bg-card rounded-3xl border border-border shadow-sm p-5 sm:p-6 flex flex-col gap-5'}>
+        <div className={embedded ? 'flex flex-col gap-3' : 'bg-card rounded-3xl border border-border shadow-sm p-5 sm:p-6 flex flex-col gap-5'}>
             <div className="flex items-baseline justify-between gap-3">
                 {embedded
                     ? <h3 className="text-foreground text-base font-semibold">{copy.section}</h3>
@@ -108,27 +108,33 @@ export const TodayChecklist: React.FC<{ embedded?: boolean }> = ({ embedded = fa
                 )}
             </div>
 
-            <Head
-                icon="edit_note"
-                title={text.logTitle}
-                detail={logged ? text.logDone : text.logPending}
-                done={logged}
-                cta={logged ? text.doneLabel : text.logCta}
-                onClick={() => router.push('/log')}
-            />
-
-            <div className="border-t border-border/60 pt-5 flex flex-col gap-3">
-                <Head
-                    icon="medication"
-                    title={text.medsTitle}
-                    detail={medsLoading ? '...' : totalDoses ? text.medsProgress(takenDoses, totalDoses) : text.medsNone}
-                    done={medsDone}
-                    cta={totalDoses ? text.medsCta : copy.addMed}
-                    onClick={() => router.push(totalDoses ? '/log?tab=meds' : '/medications')}
-                />
+            {/* Log and medication side by side as two tiles; the dose list spans both below. */}
+            <div className="flex flex-col gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div className="rounded-2xl bg-secondary/40 p-3">
+                        <Head
+                            icon="edit_note"
+                            title={text.logTitle}
+                            detail={logged ? text.logDone : text.logPending}
+                            done={logged}
+                            cta={logged ? text.doneLabel : text.logCta}
+                            onClick={() => router.push('/log')}
+                        />
+                    </div>
+                    <div className="rounded-2xl bg-secondary/40 p-3">
+                        <Head
+                            icon="medication"
+                            title={text.medsTitle}
+                            detail={medsLoading ? '...' : totalDoses ? text.medsProgress(takenDoses, totalDoses) : text.medsNone}
+                            done={medsDone}
+                            cta={totalDoses ? text.medsCta : copy.addMed}
+                            onClick={() => router.push(totalDoses ? '/log?tab=meds' : '/medications')}
+                        />
+                    </div>
+                </div>
 
                 {totalDoses > 0 && (
-                    <ul className="flex flex-col gap-1.5 pl-0 sm:pl-[34px]">
+                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                         {todayDoses.map(({ med, time }) => {
                             const taken = isTaken(med.id, time);
                             return (

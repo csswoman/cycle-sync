@@ -150,8 +150,8 @@ export const HabitsProgress: React.FC<{ embedded?: boolean }> = ({ embedded = fa
 
   return (
     <div className={embedded ? `flex flex-col gap-4 ${visible.length === 0 ? 'lg:h-full' : ''}` : 'bg-card rounded-3xl border border-border shadow-sm p-4 sm:p-5 flex flex-col gap-4'}>
-      <div className={`relative rounded-2xl bg-leaf-soft/70 overflow-hidden min-h-24 ${visible.length === 0 ? 'flex-1' : ''} p-4 flex flex-col justify-between gap-2`}>
-        <div className="relative z-10 flex flex-col">
+      <div className={`relative rounded-2xl bg-leaf-soft/70 overflow-hidden min-h-28 ${visible.length === 0 ? 'flex-1' : ''} p-5 pb-6 flex flex-col justify-between gap-4`}>
+        <div className="relative z-10 flex flex-col gap-0.5 pr-24">
           <h3 className="text-foreground text-lg font-semibold tracking-tight leading-snug text-balance">{visible.length === 0 && isGuest ? copy.guestTitle : copy.title}</h3>
           {visible.length > 0 ? (
             <p className="text-sm text-foreground/70 tabular-nums">{copy.count(doneCount, visible.length)}</p>
@@ -159,16 +159,16 @@ export const HabitsProgress: React.FC<{ embedded?: boolean }> = ({ embedded = fa
             <p className="text-sm text-foreground/80 text-pretty max-w-[16rem]">{isGuest ? copy.guestBody : copy.emptyBody}</p>
           )}
         </div>
-        <div className="relative z-10 flex items-end gap-3">
+        <div className="relative z-10 flex items-center gap-4">
           {visible.length > 0 && (
-            <span className="text-3xl font-semibold tracking-tight tabular-nums text-foreground leading-none">
-              {dailyProgress}<span className="text-sm font-medium text-foreground/70">%</span>
+            <span className="inline-flex items-baseline gap-0.5 text-4xl font-semibold tracking-tight tabular-nums text-foreground leading-none">
+              {dailyProgress}<span className="text-lg font-medium text-foreground/60">%</span>
             </span>
           )}
           <button
             type="button"
             onClick={() => (visible.length === 0 && isGuest ? promptSignup() : router.push('/habits'))}
-            className="-mb-2 px-2 min-h-10 text-blossom text-sm font-semibold hover:text-blossom/80 transition-colors flex items-center gap-1 cursor-pointer"
+            className="-mx-1 px-3 min-h-10 rounded-full text-blossom text-sm font-semibold hover:bg-card/60 transition-colors flex items-center gap-1 cursor-pointer"
           >
             {visible.length === 0 && isGuest ? (language === 'es' ? 'Crear cuenta' : 'Create account') : copy.all}
             <Icon name="arrow_forward" size={14} />
@@ -189,7 +189,7 @@ export const HabitsProgress: React.FC<{ embedded?: boolean }> = ({ embedded = fa
       </div>
 
       {visible.length === 0 ? null : (
-        <ul className="flex flex-col gap-2">
+        <ul className="flex flex-col gap-3">
           {visible.map((habit) => {
             const log = getLogForHabit(habit.id);
             const isComplete = log?.completed ?? false;
@@ -206,10 +206,10 @@ export const HabitsProgress: React.FC<{ embedded?: boolean }> = ({ embedded = fa
             return (
               <li
                 key={habit.id}
-                className="rounded-2xl p-3 flex flex-col gap-1 transition-colors duration-300"
+                className="rounded-2xl px-4 pt-3.5 pb-2.5 flex flex-col gap-1.5 transition-colors duration-300"
                 style={{ background: `color-mix(in srgb, ${fill} ${isComplete ? 26 : 14}%, transparent)` }}
               >
-                <div className="flex items-center gap-2.5">
+                <div className="flex items-center gap-3">
                   <Icon
                     name={isComplete ? 'check_circle' : (HABIT_ICONS[habit.type] ?? 'star')}
                     size={22}

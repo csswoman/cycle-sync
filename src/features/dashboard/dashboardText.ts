@@ -37,6 +37,9 @@ export interface DashboardText {
   fertileTip: string;
   hormonalNote: string;
   irregularNote: string;
+  irregularShort: string;
+  hormonalShort: string;
+  estimateInfo: string;
   approx: string;
   confidence: string;
   confidenceLevels: { low: string; medium: string; high: string };
@@ -92,6 +95,9 @@ const en: DashboardText = {
   fertileTip: 'Your chances are highest on the two days before ovulation and on ovulation day.',
   hormonalNote: 'You use hormonal contraception, so ovulation dates are only a reference.',
   irregularNote: 'Your cycles vary a lot, so these dates have a wide margin. With PMOS ovulation can come late or be skipped; body signs (cervical mucus, basal temperature) say more than the calendar, and LH strips can give false positives.',
+  irregularShort: 'Irregular cycles: wide margin',
+  hormonalShort: 'Hormonal contraception',
+  estimateInfo: 'How these dates are estimated',
   approx: 'Approximate estimates, not a contraceptive method or medical advice.',
   confidence: 'Confidence',
   confidenceLevels: { low: 'Low', medium: 'Medium', high: 'High' },
@@ -168,6 +174,9 @@ const es: DashboardText = {
   fertileTip: 'Tus probabilidades son mayores los dos días antes de la ovulación y el día de la ovulación.',
   hormonalNote: 'Usas anticoncepción hormonal, así que las fechas de ovulación son solo una referencia.',
   irregularNote: 'Tus ciclos varían bastante, así que estas fechas tienen un margen amplio. Con PMOS la ovulación puede retrasarse o no ocurrir; las señales del cuerpo (moco cervical, temperatura basal) dicen más que el calendario, y las tiras de LH pueden dar falsos positivos.',
+  irregularShort: 'Ciclos irregulares: margen amplio',
+  hormonalShort: 'Anticoncepción hormonal',
+  estimateInfo: 'Cómo se estiman estas fechas',
   approx: 'Estimaciones aproximadas, no son un método anticonceptivo ni consejo médico.',
   confidence: 'Confianza',
   confidenceLevels: { low: 'Baja', medium: 'Media', high: 'Alta' },
