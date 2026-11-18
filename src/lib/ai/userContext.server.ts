@@ -16,7 +16,7 @@ export interface UserContextData {
   phase?: string;
   cycleDay?: number;
   dietary: string[];
-  logs: { date: string; mood?: string | null; energy?: number | null; sleepHours?: number | null; symptoms: string[] }[];
+  logs: { date: string; mood?: string | null; energy?: number | null; sleepHours?: number | null; symptoms: string[]; cravings?: string[]; motivation?: number | null }[];
   pcos: { date: string; symptoms: Record<string, number> } | null;
   medications: { name: string; dose?: string | null; times: string[] }[];
   pantry: string[];
@@ -99,6 +99,8 @@ export function formatUserContext(d: UserContextData, language: 'en' | 'es'): st
         l.sleepHours != null ? `${es ? 'sueño' : 'sleep'} ${l.sleepHours}h` : '',
         l.mood ? `${es ? 'ánimo' : 'mood'} ${clip(l.mood, 30)}` : '',
         l.symptoms.length ? `${es ? 'síntomas' : 'symptoms'}: ${l.symptoms.map((s) => clip(s, 30)).join(', ')}` : '',
+        l.cravings?.length ? `${es ? 'antojos' : 'cravings'}: ${l.cravings.map((c) => clip(c, 12)).join(', ')}` : '',
+        l.motivation != null ? `${es ? 'ganas de moverse' : 'motivation to move'} ${l.motivation}/3` : '',
       ].filter(Boolean);
       if (bits.length) lines.push(`- ${l.date}: ${bits.join('; ')}`);
     }
@@ -364,7 +366,8 @@ export async function loadUserContext(
   };
   const [cfg, logs, pcos, meds, pantry, meals, workout, periods, bleedingRows, labRows, metricRows, wellbeingRows, fgRows, onboardingRow, medRows, medLogRows, pregnancyRows, displayRow] = await Promise.all([
     soft(supabase.from('cycle_config').select('dietary_prefs').eq('user_id', userId).maybeSingle()),
-    soft(supabase.from('daily_logs').select('date, mood, energy_level, sleep_hours, symptoms').eq('user_id', userId).order('date', { ascending: false }).limit(5)),
+    // '*' so the check-in columns (cravings, motivation) come along once their migration is applied.
+    soft(supabase.from('daily_logs').select('*').eq('user_id', userId).order('date', { ascending: false }).limit(5)),
     soft(supabase.from('pcos_symptoms').select('date, acne, fatigue, hirsutism, hair_loss, mood_swings, bloating').eq('user_id', userId).order('date', { ascending: false }).limit(1)),
     soft(supabase.from('medications').select('name, dose, times').eq('user_id', userId).eq('active', true).limit(20)),
     soft(supabase.from('pantry_items').select('name').eq('user_id', userId).order('name').limit(60)),
@@ -420,6 +423,8 @@ export async function loadUserContext(
       energy: l.energy_level,
       sleepHours: l.sleep_hours != null ? Number(l.sleep_hours) : null,
       symptoms: (l.symptoms ?? []) as string[],
+      cravings: (l.cravings ?? []) as string[],
+      motivation: (l.motivation ?? null) as number | null,
     })),
     pcos: pcosRow
       ? {

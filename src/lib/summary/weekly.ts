@@ -5,6 +5,8 @@ export interface SummaryLog {
   energy: number | null;
   sleepHours: number | null;
   symptoms: string[];
+  /** Quick check-in cravings ('sweet' | 'salty' | 'carbs'). */
+  cravings?: string[];
 }
 
 export interface Adherence {
@@ -42,9 +44,13 @@ export function buildWeeklySummary(params: {
   endDate: string;
   phaseOf: (date: string) => string;
   adherence?: Adherence;
+  /** Dates with any movement (logged workouts or completed planned ones). */
+  moveDates?: string[];
+  /** False with irregular cycles, hormonal contraception or low confidence: no phase patterns then. */
+  phaseReliable?: boolean;
   language: 'en' | 'es';
 }): WeeklySummary {
-  const { logs, endDate, phaseOf, adherence, language } = params;
+  const { logs, endDate, phaseOf, adherence, moveDates, phaseReliable = true, language } = params;
   const es = language === 'es';
   const phaseName = (p: string) => (es ? PHASE_ES : PHASE_EN)[p] ?? p;
 
@@ -68,14 +74,14 @@ export function buildWeeklySummary(params: {
     );
   }
 
-  // 2. Energy by cycle phase (only when the week spans phases)
+  // 2. Energy by cycle phase (only when the week spans phases and the phase is trustworthy)
   const byPhase = new Map<string, number[]>();
   for (const l of thisWeek) {
     if (l.energy == null) continue;
     const p = phaseOf(l.date);
     byPhase.set(p, [...(byPhase.get(p) ?? []), l.energy]);
   }
-  if (byPhase.size >= 2) {
+  if (phaseReliable && byPhase.size >= 2) {
     const rows = Array.from(byPhase.entries()).map(([p, v]) => ({ p, a: avg(v)!, n: v.length }));
     const low = rows.reduce((m, r) => (r.a < m.a ? r : m));
     const rest = avg(rows.filter((r) => r !== low).flatMap((r) => byPhase.get(r.p)!))!;
@@ -113,7 +119,61 @@ export function buildWeeklySummary(params: {
     insights.push(es ? `Síntomas que se repitieron: ${list}.` : `Symptoms that repeated: ${list}.`);
   }
 
-  // 5. Plan adherence
+  // 5. Cravings: phase concentration and short sleep, over both weeks for enough days
+  const cravingDay = (l: SummaryLog) => (l.cravings?.length ?? 0) > 0 || l.symptoms.includes('Sugar Cravings');
+  const twoWeeks = logs.filter((l) => l.date >= prevStart && l.date <= endDate);
+  const cravingDays = twoWeeks.filter(cravingDay);
+  if (phaseReliable && cravingDays.length >= 3) {
+    const perPhase = new Map<string, number>();
+    for (const l of cravingDays) { const p = phaseOf(l.date); perPhase.set(p, (perPhase.get(p) ?? 0) + 1); }
+    const [topPhase, topCount] = Array.from(perPhase.entries()).sort((a, b) => b[1] - a[1])[0];
+    if (topCount >= 2 && topCount / cravingDays.length >= 0.6) {
+      insights.push(
+        es
+          ? `De tus ${cravingDays.length} días con antojos en las últimas dos semanas, ${topCount} fueron en la fase ${phaseName(topPhase)}. Saberlo ayuda a tener a mano opciones con proteína y fibra esos días.`
+          : `Of your ${cravingDays.length} days with cravings in the last two weeks, ${topCount} were in the ${phaseName(topPhase)} phase. Knowing it helps to keep protein and fiber options at hand on those days.`,
+      );
+    }
+  }
+  const withSleep = twoWeeks.filter((l) => l.sleepHours != null);
+  const shortNights = withSleep.filter((l) => l.sleepHours! < SHORT_SLEEP_HOURS);
+  const longNights = withSleep.filter((l) => l.sleepHours! >= SHORT_SLEEP_HOURS);
+  const rate = (ls: SummaryLog[]) => Math.round((ls.filter(cravingDay).length / ls.length) * 100);
+  if (shortNights.length >= 2 && longNights.length >= 2 && rate(shortNights) - rate(longNights) >= 30) {
+    insights.push(
+      es
+        ? `Tuviste antojos el ${rate(shortNights)}% de los días con menos de ${SHORT_SLEEP_HOURS} h de sueño, frente al ${rate(longNights)}% cuando dormiste más. Dormir poco sube los antojos: no es falta de voluntad.`
+        : `You had cravings on ${rate(shortNights)}% of days after under ${SHORT_SLEEP_HOURS} h of sleep, versus ${rate(longNights)}% after longer nights. Short sleep raises cravings: it isn't a lack of willpower.`,
+    );
+  }
+
+  // 6. Movement: days moved this week and next-day energy
+  if (moveDates) {
+    const moved = new Set(moveDates);
+    const movedThisWeek = Array.from(moved).filter((d) => d >= weekStart && d <= endDate).length;
+    if (movedThisWeek > 0) {
+      insights.push(
+        es
+          ? `Te moviste ${movedThisWeek} de 7 días${movedThisWeek >= 3 ? '. Esa constancia es lo que más ayuda con la insulina.' : '. Cada sesión, aunque sea de 10 minutos, cuenta.'}`
+          : `You moved on ${movedThisWeek} of 7 days${movedThisWeek >= 3 ? '. That consistency is what helps insulin most.' : '. Every session, even 10 minutes, counts.'}`,
+      );
+    }
+    const energyLogs = twoWeeks.filter((l) => l.energy != null);
+    const after = energyLogs.filter((l) => moved.has(addDays(l.date, -1))).map((l) => l.energy!);
+    const notAfter = energyLogs.filter((l) => !moved.has(addDays(l.date, -1))).map((l) => l.energy!);
+    if (after.length >= 2 && notAfter.length >= 2) {
+      const a = avg(after)!, b = avg(notAfter)!;
+      if (a - b >= MIN_ENERGY_GAP) {
+        insights.push(
+          es
+            ? `El día después de moverte tu energía fue ${r1(a)} sobre 10, frente a ${r1(b)} los demás días.`
+            : `The day after moving, your energy was ${r1(a)} out of 10, versus ${r1(b)} on other days.`,
+        );
+      }
+    }
+  }
+
+  // 7. Plan adherence
   if (adherence && (adherence.mealsPlanned > 0 || adherence.workoutsPlanned > 0)) {
     const parts: string[] = [];
     if (adherence.mealsPlanned > 0) parts.push(es ? `${adherence.mealsDone}/${adherence.mealsPlanned} comidas` : `${adherence.mealsDone}/${adherence.mealsPlanned} meals`);
