@@ -5,6 +5,7 @@ import { Icon } from '@/components/ui/Icon';
 import { supabase } from '@/lib/supabase';
 import type { Medication } from '@/hooks/useMedications';
 import { daysOfStockLeft, medicationStart, parseLocalDate, toLocalISO } from '@/lib/medications/schedule';
+import { isMetformin } from '@/lib/pmos/metformin';
 
 type Lang = 'es' | 'en';
 
@@ -37,7 +38,6 @@ const T = {
   },
 };
 
-const METFORMIN = /metformin/i;
 const EARLY_WEEKS = 8;
 const B12_AFTER_MONTHS = 6;
 
@@ -65,7 +65,7 @@ export const MedicationCareTips: React.FC<Props> = ({ lang, medications, today, 
   const [units, setUnits] = useState('');
   const [hasRecentB12, setHasRecentB12] = useState<boolean | null>(null);
 
-  const metformin = medications.find((m) => METFORMIN.test(m.name));
+  const metformin = medications.find((m) => isMetformin(m.name));
   const metStart = metformin ? medicationStart(metformin) : null;
   const weeksOn = metStart ? Math.floor((parseLocalDate(today).getTime() - parseLocalDate(metStart).getTime()) / (7 * 86_400_000)) : null;
 

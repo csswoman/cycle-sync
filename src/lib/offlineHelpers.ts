@@ -10,24 +10,26 @@ export async function saveDailyLogOffline(data: {
   symptoms: string[];
   notes: string | null;
 }) {
-  const existing = await db.dailyLogs
-    .where('[userId+date]')
-    .equals([data.userId, data.date])
-    .first();
-
-  if (existing?.id != null) {
-    await db.dailyLogs.update(existing.id, {
-      ...data,
-      synced: false,
-      updatedAt: new Date().toISOString(),
-    });
-  } else {
-    await db.dailyLogs.add({
-      ...data,
-      synced: false,
-      updatedAt: new Date().toISOString(),
-    });
-  }
+  // transaction makes check+write atomic, avoiding duplicate rows
+  await db.transaction('rw', db.dailyLogs, async () => {
+    const existing = await db.dailyLogs
+      .where('[userId+date]')
+      .equals([data.userId, data.date])
+      .first();
+    if (existing?.id != null) {
+      await db.dailyLogs.update(existing.id, {
+        ...data,
+        synced: false,
+        updatedAt: new Date().toISOString(),
+      });
+    } else {
+      await db.dailyLogs.add({
+        ...data,
+        synced: false,
+        updatedAt: new Date().toISOString(),
+      });
+    }
+  });
 }
 
 export async function saveHabitLogOffline(data: {
@@ -37,24 +39,26 @@ export async function saveHabitLogOffline(data: {
   value: number | null;
   completed: boolean;
 }) {
-  const existing = await db.habitLogs
-    .where('[userId+habitId+date]')
-    .equals([data.userId, data.habitId, data.date])
-    .first();
-
-  if (existing?.id != null) {
-    await db.habitLogs.update(existing.id, {
-      ...data,
-      synced: false,
-      updatedAt: new Date().toISOString(),
-    });
-  } else {
-    await db.habitLogs.add({
-      ...data,
-      synced: false,
-      updatedAt: new Date().toISOString(),
-    });
-  }
+  // transaction makes check+write atomic, avoiding duplicate rows
+  await db.transaction('rw', db.habitLogs, async () => {
+    const existing = await db.habitLogs
+      .where('[userId+habitId+date]')
+      .equals([data.userId, data.habitId, data.date])
+      .first();
+    if (existing?.id != null) {
+      await db.habitLogs.update(existing.id, {
+        ...data,
+        synced: false,
+        updatedAt: new Date().toISOString(),
+      });
+    } else {
+      await db.habitLogs.add({
+        ...data,
+        synced: false,
+        updatedAt: new Date().toISOString(),
+      });
+    }
+  });
 }
 
 export async function savePMOSEntryOffline(data: {
@@ -67,24 +71,26 @@ export async function savePMOSEntryOffline(data: {
   moodSwings: number;
   bloating: number;
 }) {
-  const existing = await db.pcosEntries
-    .where('[userId+date]')
-    .equals([data.userId, data.date])
-    .first();
-
-  if (existing?.id != null) {
-    await db.pcosEntries.update(existing.id, {
-      ...data,
-      synced: false,
-      updatedAt: new Date().toISOString(),
-    });
-  } else {
-    await db.pcosEntries.add({
-      ...data,
-      synced: false,
-      updatedAt: new Date().toISOString(),
-    });
-  }
+  // transaction makes check+write atomic, avoiding duplicate rows
+  await db.transaction('rw', db.pcosEntries, async () => {
+    const existing = await db.pcosEntries
+      .where('[userId+date]')
+      .equals([data.userId, data.date])
+      .first();
+    if (existing?.id != null) {
+      await db.pcosEntries.update(existing.id, {
+        ...data,
+        synced: false,
+        updatedAt: new Date().toISOString(),
+      });
+    } else {
+      await db.pcosEntries.add({
+        ...data,
+        synced: false,
+        updatedAt: new Date().toISOString(),
+      });
+    }
+  });
 }
 
 export async function saveWorkoutLogOffline(data: {
@@ -124,13 +130,15 @@ export async function saveCycleSignOffline(data: {
   pain: number | null;
   deleted: boolean;
 }) {
-  const existing = await db.cycleSigns
-    .where('[userId+date]')
-    .equals([data.userId, data.date])
-    .first();
-  const record = { ...data, synced: false, updatedAt: new Date().toISOString() };
-  if (existing?.id != null) await db.cycleSigns.update(existing.id, record);
-  else await db.cycleSigns.add(record);
+  await db.transaction('rw', db.cycleSigns, async () => {
+    const existing = await db.cycleSigns
+      .where('[userId+date]')
+      .equals([data.userId, data.date])
+      .first();
+    const record = { ...data, synced: false, updatedAt: new Date().toISOString() };
+    if (existing?.id != null) await db.cycleSigns.update(existing.id, record);
+    else await db.cycleSigns.add(record);
+  });
 }
 export async function getPendingSyncCount(): Promise<number> {
   const [dailyCount, habitCount, pmosCount, workoutCount, signCount] = await Promise.all([

@@ -4,8 +4,8 @@ import { useEffect, useCallback, useRef } from 'react';
 import { db } from '@/lib/offlineDb';
 import { supabase } from '@/lib/supabase';
 
-async function syncDailyLogs() {
-  const pending = await db.dailyLogs.filter((r) => !r.synced).toArray();
+async function syncDailyLogs(uid: string) {
+  const pending = await db.dailyLogs.filter((r) => !r.synced && r.userId === uid).toArray();
   for (const log of pending) {
     const { error } = await supabase.from('daily_logs').upsert(
       {
@@ -26,8 +26,8 @@ async function syncDailyLogs() {
   }
 }
 
-async function syncHabitLogs() {
-  const pending = await db.habitLogs.filter((r) => !r.synced).toArray();
+async function syncHabitLogs(uid: string) {
+  const pending = await db.habitLogs.filter((r) => !r.synced && r.userId === uid).toArray();
   for (const log of pending) {
     const { error } = await supabase.from('habit_logs').upsert(
       {
@@ -45,8 +45,8 @@ async function syncHabitLogs() {
   }
 }
 
-async function syncPMOSEntries() {
-  const pending = await db.pcosEntries.filter((r) => !r.synced).toArray();
+async function syncPMOSEntries(uid: string) {
+  const pending = await db.pcosEntries.filter((r) => !r.synced && r.userId === uid).toArray();
   for (const entry of pending) {
     const { error } = await supabase.from('pcos_symptoms').upsert(
       {
@@ -67,8 +67,8 @@ async function syncPMOSEntries() {
   }
 }
 
-async function syncWorkoutLogs() {
-  const pending = await db.workoutLogs.filter((r) => !r.synced).toArray();
+async function syncWorkoutLogs(uid: string) {
+  const pending = await db.workoutLogs.filter((r) => !r.synced && r.userId === uid).toArray();
   for (const log of pending) {
     const { error } = await supabase.from('workout_logs').upsert(
       {
@@ -90,8 +90,8 @@ async function syncWorkoutLogs() {
     }
   }
 }
-async function syncCycleSigns() {
-  const pending = await db.cycleSigns.filter((r) => !r.synced).toArray();
+async function syncCycleSigns(uid: string) {
+  const pending = await db.cycleSigns.filter((r) => !r.synced && r.userId === uid).toArray();
   for (const sign of pending) {
     const base = {
       user_id: sign.userId,
@@ -123,7 +123,11 @@ async function syncCycleSigns() {
 }
 export async function syncAll() {
   try {
-    await Promise.all([syncDailyLogs(), syncHabitLogs(), syncPMOSEntries(), syncWorkoutLogs(), syncCycleSigns()]);
+    // Only the signed-in user's rows: RLS rejects other users' rows and they would retry forever.
+    const { data: { session } } = await supabase.auth.getSession();
+    const uid = session?.user.id;
+    if (!uid) return;
+    await Promise.all([syncDailyLogs(uid), syncHabitLogs(uid), syncPMOSEntries(uid), syncWorkoutLogs(uid), syncCycleSigns(uid)]);
   } catch {
     // Will retry on next online event
   }
