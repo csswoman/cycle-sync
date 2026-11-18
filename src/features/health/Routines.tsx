@@ -23,6 +23,8 @@ import AddToRoutineDialog, { type AddToRoutineRequest } from './components/AddTo
 import TodayHistory from './components/TodayHistory';
 import { usePmosToolsVisible } from '@/hooks/useOnboardingAnswers';
 import { OneRepMaxCalculator } from './components/OneRepMaxCalculator';
+import { exerciseNameEs } from '@/data/exerciseNamesEs';
+import { InfoTooltip } from '@/components/ui/InfoTooltip';
 
 const VIDEOS_PAGE = 9;
 
@@ -110,11 +112,11 @@ type RoutineTab = 'programs' | 'phase' | 'videos' | 'builder' | 'log';
 // Tabs that hold the user's own data: guests see them locked.
 const MEMBER_TABS: RoutineTab[] = ['builder', 'log'];
 
-const TABS: { id: RoutineTab; label: string; icon: string }[] = [
+const TABS: { id: RoutineTab; label: string; shortLabel?: string; icon: string }[] = [
   { id: 'programs', label: 'Programas', icon: 'fitness_center' },
-  { id: 'phase', label: 'Para tu fase', icon: 'auto_awesome' },
+  { id: 'phase', label: 'Para tu fase', shortLabel: 'Tu fase', icon: 'auto_awesome' },
   { id: 'videos', label: 'Videos', icon: 'videocam' },
-  { id: 'builder', label: 'Mis rutinas', icon: 'calendar_month' },
+  { id: 'builder', label: 'Mis rutinas', shortLabel: 'Rutinas', icon: 'calendar_month' },
   { id: 'log', label: 'Diario', icon: 'edit_note' },
 ];
 
@@ -295,22 +297,22 @@ const Routines: React.FC = () => {
 
   return (
     <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide">
-      <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-8 pb-32">
+      <div className="w-full max-w-page mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-8 pb-32">
 
         {/* Hero Section */}
         <section className="flex flex-col gap-4">
           {/* Compact header: the routines are the content, the header only orients */}
-          <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
+          <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
             <div className="flex flex-col gap-1 min-w-0">
               <h1 className="text-foreground text-2xl md:text-3xl font-bold tracking-tight text-balance">
                 <TitleSprig />Rutinas y Entrenamiento
               </h1>
               <p className="text-muted-foreground text-sm leading-relaxed text-pretty max-w-2xl">
-                Tu fase orienta y tu energía de hoy decide. La meta semanal{showPmos ? ' con PMOS' : ''}: 150 min de actividad y 2 días de fuerza.
+                {isGuest ? 'Programas por lugar y nivel. Con una cuenta, tu fase y tu energía ajustan la sugerencia.' : 'Tu fase orienta y tu energía de hoy decide.'}
               </p>
             </div>
             {!isGuest && !cycleLoading && !paused && (
-              <span data-phase={phaseKey} className="self-start sm:self-auto inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full bg-phase-soft text-phase shrink-0">
+              <span data-phase={phaseKey} className="self-start sm:mt-1 inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full bg-phase-soft text-phase shrink-0">
                 <span aria-hidden className="material-symbols-outlined text-base">{guidance.icon}</span>
                 {periodLate ? 'Regla con retraso' : phaseNameEs}{cycleInfo?.cycleDay ? ` · Día ${cycleInfo.cycleDay}` : ''}
               </span>
@@ -320,37 +322,44 @@ const Routines: React.FC = () => {
           {!isGuest && (
           <>
           {/* Status & Daily Activity Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 xl:grid-cols-5 gap-4">
             {/* Phase Status Card */}
-            <div data-phase={phaseKey} className="md:col-span-2 bg-card rounded-2xl border border-border p-4 sm:p-5 shadow-sm flex flex-col justify-between gap-3">
-              <div className="flex items-start gap-3">
-                <div className="size-11 rounded-xl bg-phase-soft flex items-center justify-center text-phase shrink-0">
+            <div data-phase={phaseKey} className="xl:col-span-2 bg-card rounded-2xl border border-border p-4 sm:p-5 shadow-sm flex flex-col gap-4">
+              <div className="flex items-start gap-3 sm:gap-4">
+                <div className="size-12 rounded-2xl bg-phase-soft flex items-center justify-center text-phase shrink-0">
                   <span aria-hidden className="material-symbols-outlined text-2xl">{paused ? 'pregnant_woman' : guidance.icon}</span>
                 </div>
-                <div className="min-w-0 text-sm">
-                  <h2 className="text-lg font-bold text-foreground text-balance">
+                <div className="min-w-0">
+                  <h2 className="text-xl font-bold leading-tight text-foreground text-balance">
                     {cycleLoading ? 'Cargando…' : paused ? 'Modo embarazo' : effort.label}
+                    {!paused && !cycleLoading && (
+                      <InfoTooltip label={`Sobre tu fase: ${guidance.title}`} className="ml-1.5 -translate-y-0.5">
+                        <p className="font-bold">{guidance.title}</p>
+                        <p className="text-muted-foreground">{guidance.desc}</p>
+                        <p className="flex flex-wrap gap-2 pt-1">
+                          <span className="text-xs font-bold px-3 py-1 rounded-full bg-phase-soft text-phase">Intensidad: {guidance.intensity}</span>
+                          <span className="text-xs font-semibold px-3 py-1 rounded-full bg-secondary text-foreground">{guidance.focus}</span>
+                        </p>
+                      </InfoTooltip>
+                    )}
                   </h2>
                   {paused ? (
-                    <p className="text-muted-foreground leading-relaxed">Consulta con tu médica qué tipo de ejercicio te conviene. Las recomendaciones por fase del ciclo están en pausa.</p>
+                    <p className="text-sm text-muted-foreground leading-relaxed mt-1 max-w-prose">Consulta con tu médica qué tipo de ejercicio te conviene. Las recomendaciones por fase del ciclo están en pausa.</p>
                   ) : (
                     <>
-                      <p className="font-semibold text-foreground">{effort.examples}</p>
-                      <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">
+                      <p className="text-base font-medium text-foreground mt-1">{effort.examples}</p>
+                      <p className="text-sm text-muted-foreground leading-relaxed mt-1 max-w-prose text-pretty">
                         {periodLate ? `Día ${cycleInfo?.cycleDay ?? '?'}. ` : ''}{effortReason(suggestion.reason, energyToday)}
                       </p>
                     </>
                   )}
                 </div>
               </div>
-              <div className="border-t border-border pt-3">
-                <TodayHistory compact logs={workoutLogs.logs} loading={workoutLogs.loading} onSeeAll={() => setActiveTab('log')} />
-              </div>
               {!paused && activeTab !== mainCtaTab && (
                 <button
                   type="button"
                   onClick={() => setActiveTab(mainCtaTab)}
-                  className="w-full sm:w-auto sm:self-start min-h-12 px-5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 bg-primary text-primary-foreground shadow-md hover:bg-primary/90 hover:shadow-lg transition-all cursor-pointer"
+                  className="w-full sm:w-auto sm:self-start max-w-full min-h-12 px-5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 bg-primary text-primary-foreground shadow-md hover:bg-primary/90 hover:shadow-lg transition-all cursor-pointer"
                 >
                   <span aria-hidden className="material-symbols-outlined text-lg">{todayRoutine ? 'event_available' : 'play_arrow'}</span>
                   <span className="truncate">{todayRoutine ? `Tu rutina de hoy: ${todayRoutine.name}` : 'Ver ejercicios de tu fase'}</span>
@@ -359,15 +368,20 @@ const Routines: React.FC = () => {
             </div>
 
             {/* Daily Movement Check-in (secondary) */}
-            <div className="bg-card rounded-2xl border border-border p-4 sm:p-5 shadow-sm flex flex-col justify-between gap-3">
-              <div>
-                <h3 className="text-base font-bold text-foreground">Registro de hoy</h3>
-                <div className="flex items-baseline gap-2 mt-2">
-                  <span className="text-2xl font-bold text-foreground tabular-nums">{streak.currentStreak}</span>
-                  <span className="text-xs text-muted-foreground font-medium">días activos seguidos</span>
+            <div className="xl:col-span-3 bg-card rounded-2xl border border-border p-4 sm:p-5 shadow-sm grid lg:grid-cols-2 gap-x-6 gap-y-4">
+              <div className="flex flex-col gap-3 min-w-0">
+                <div>
+                  <h3 className="text-base font-bold text-foreground">Registro de hoy</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">Meta semanal{showPmos ? ' PMOS' : ''}: 150 min y 2 días de fuerza</p>
+                  <div className="flex items-baseline gap-2 mt-1.5">
+                    <span className="text-2xl font-bold text-foreground tabular-nums">{streak.currentStreak}</span>
+                    <span className="text-sm text-muted-foreground font-medium">días activos seguidos</span>
+                  </div>
                 </div>
+                <WeeklyGoalCard compact pmos={showPmos} week={week} loading={workoutLogs.loading} />
               </div>
-              <WeeklyGoalCard compact pmos={showPmos} week={week} loading={workoutLogs.loading} />
+              <div className="flex flex-col justify-between gap-3 min-w-0 lg:border-l lg:border-border lg:pl-6">
+                <TodayHistory compact logs={workoutLogs.logs} loading={workoutLogs.loading} onSeeAll={() => setActiveTab('log')} />
               {isCompletedToday ? (
                 <div className="w-full py-2.5 px-4 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 bg-leaf/10 text-leaf border border-leaf/20">
                   <span aria-hidden className="material-symbols-outlined text-lg">check_circle</span>
@@ -415,12 +429,13 @@ const Routines: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setQuickOpen(true)}
-                  className="w-full min-h-11 px-4 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 bg-card text-foreground border border-border hover:border-primary/50 hover:bg-secondary/50 transition-all cursor-pointer"
+                  className="w-full min-h-11 px-3 whitespace-nowrap rounded-xl font-semibold text-sm flex items-center justify-center gap-2 bg-card text-foreground border border-border hover:border-primary/50 hover:bg-secondary/50 transition-all cursor-pointer"
                 >
                   <span aria-hidden className="material-symbols-outlined text-lg">task_alt</span>
                   <span>Registrar entrenamiento</span>
                 </button>
               )}
+              </div>
             </div>
           </div>
           </>
@@ -450,11 +465,13 @@ const Routines: React.FC = () => {
           </div>
         )}
         {/* Sticky Tab Navigation */}
-        <div data-phase={phaseKey} className="sticky top-0 z-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 bg-background/90 backdrop-blur-md border-b border-border">
+        {/* Opaque strip behind the card so scrolled content never shows around it */}
+        <div className="sticky top-0 z-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-2 bg-background">
+        <div data-phase={phaseKey} className="px-3 sm:px-4 rounded-2xl bg-card border border-border shadow-sm">
           <div
             role="tablist"
             aria-label="Secciones de rutinas"
-            className="flex overflow-x-auto scrollbar-hide gap-1 -mb-px"
+            className="flex overflow-x-auto scrollbar-hide gap-1 -mb-px [mask-image:linear-gradient(to_right,black_calc(100%-2rem),transparent)] xl:[mask-image:none]"
           >
             {TABS.map((tab) => {
               const isActive = activeTab === tab.id;
@@ -468,19 +485,20 @@ const Routines: React.FC = () => {
                   aria-selected={isActive}
                   aria-controls={`routines-panel-${tab.id}`}
                   onClick={() => (locked ? promptSignup() : setActiveTab(tab.id))}
-                  className={`flex items-center justify-center gap-1.5 px-3 sm:px-4 min-h-12 shrink-0 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors cursor-pointer ${
+                  className={`relative flex items-center justify-center gap-1.5 px-1.5 sm:px-3 lg:px-4 min-h-12 shrink-0 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors cursor-pointer ${
                     isActive
                       ? 'border-primary text-foreground'
                       : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
                   }`}
                 >
-                  <span aria-hidden className={`material-symbols-outlined text-lg shrink-0 ${isActive ? 'text-primary' : 'text-muted-foreground'}`}>
+                  <span aria-hidden className={`material-symbols-outlined text-lg shrink-0 max-lg:!hidden ${isActive ? 'text-primary' : 'text-muted-foreground'}`}>
                     {tab.icon}
                   </span>
-                  <span>{tab.label}</span>
+                  <span className="lg:hidden">{tab.shortLabel ?? tab.label}</span>
+                  <span className="max-lg:hidden">{tab.label}</span>
                   {locked && (
                     <>
-                      <span aria-hidden className="material-symbols-outlined text-sm text-muted-foreground shrink-0">lock</span>
+                      <span aria-hidden className="material-symbols-outlined text-sm text-muted-foreground shrink-0 max-lg:!absolute max-lg:top-1 max-lg:right-0 max-lg:!text-[11px]">lock</span>
                       <span className="sr-only">(requiere cuenta)</span>
                     </>
                   )}
@@ -495,6 +513,7 @@ const Routines: React.FC = () => {
               );
             })}
           </div>
+        </div>
         </div>
         {/* Tab 0: Programas Casa & Gym */}
         <div role="tabpanel" id="routines-panel-programs" aria-labelledby="routines-tab-programs" className={activeTab === 'programs' ? 'flex flex-col gap-6' : 'hidden'}>
@@ -522,7 +541,8 @@ const Routines: React.FC = () => {
         {/* Tab 1: Para tu Fase */}
         <div role="tabpanel" id="routines-panel-phase" aria-labelledby="routines-tab-phase" className={activeTab === 'phase' ? 'flex flex-col gap-10' : 'hidden'}>
           {/* Phase guidance (read-only: the phase comes from the cycle) */}
-          {!paused && (
+          {/* Members see this guidance inside the "Hoy" card at the top */}
+          {!paused && isGuest && (
             <div data-phase={phaseKey} className="bg-card rounded-2xl border border-border p-4 sm:p-5 shadow-sm flex items-start gap-3">
               <div className="size-11 rounded-xl bg-phase-soft flex items-center justify-center text-phase shrink-0">
                 <span aria-hidden className="material-symbols-outlined text-2xl">{guidance.icon}</span>
@@ -530,7 +550,7 @@ const Routines: React.FC = () => {
               <div className="min-w-0 flex flex-col gap-2">
                 <div>
                   <h2 className="text-lg font-bold text-foreground text-balance">{guidance.title}</h2>
-                  <p className="text-xs font-semibold text-muted-foreground">
+                  <p className="text-sm font-semibold text-muted-foreground">
                     {isGuest ? `Ejemplo: ${phaseNameEs}. Con una cuenta se adapta a tu ciclo.` : phaseNameEs}
                   </p>
                 </div>
@@ -544,7 +564,7 @@ const Routines: React.FC = () => {
           )}
           {/* Recommended Movements for Current Phase */}
           <RoutineSection
-            title={`Ejercicios Recomendados para ${phaseNameEs}`}
+            title={`Ejercicios recomendados para ${phaseNameEs.toLowerCase()}`}
             description={guidance.focus}
             icon="fitness_center"
           >
@@ -561,7 +581,7 @@ const Routines: React.FC = () => {
                     key={ex.id}
                     exercise={ex}
                     variant="horizontal"
-                    onSave={() => openAddToRoutine({ label: ex.name, suggestedName: `Rutina ${phaseNameEs}`, exercises: [ex] })}
+                    onSave={() => openAddToRoutine({ label: exerciseNameEs(ex), suggestedName: `Rutina ${phaseNameEs}`, exercises: [{ ...ex, name: exerciseNameEs(ex) }] })}
                   />
                 ))
               )}
@@ -570,7 +590,7 @@ const Routines: React.FC = () => {
 
           {/* Automatic phase playlists */}
           <RoutineSection
-            title="Playlists por Fase"
+            title="Playlists por fase"
             description="Sesiones de video curadas y organizadas según el momento de tu ciclo hormonal."
             icon="queue_music"
           >
@@ -584,7 +604,7 @@ const Routines: React.FC = () => {
         {/* Tab 2: Videos Guiados */}
         <div role="tabpanel" id="routines-panel-videos" aria-labelledby="routines-tab-videos" className={activeTab === 'videos' ? 'flex flex-col gap-10' : 'hidden'}>
           <RoutineSection
-            title="Catálogo de Videos de Entrenamiento"
+            title="Catálogo de videos de entrenamiento"
             description="Sesiones completas en video adaptadas para realizar en casa o en el gimnasio."
             icon="videocam"
             rightElement={
@@ -626,7 +646,7 @@ const Routines: React.FC = () => {
                     ))}
                   </select>
                 </label>
-                <label className="flex items-center gap-2 text-sm font-semibold text-foreground cursor-pointer sm:ml-auto min-h-10">
+                {!isGuest && <label className="flex items-center gap-2 text-sm font-semibold text-foreground cursor-pointer sm:ml-auto min-h-10">
                   <input
                     type="checkbox"
                     checked={onlyPhaseVideos}
@@ -634,7 +654,7 @@ const Routines: React.FC = () => {
                     className="size-4 accent-primary cursor-pointer"
                   />
                   <span>Solo ideales para mi fase</span>
-                </label>
+                </label>}
               </div>
             </div>
             {/* Videos Grid */}
@@ -667,7 +687,7 @@ const Routines: React.FC = () => {
                   <VideoCard
                     key={video.id}
                     video={video}
-                    isPhaseRecommended={video.phases.includes(phaseKey as any)}
+                    isPhaseRecommended={!isGuest && video.phases.includes(phaseKey as any)}
                     onPlay={(v) => setActiveVideo(v)}
                   />
                 ))
@@ -680,7 +700,7 @@ const Routines: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setVideosShown((n) => n + VIDEOS_PAGE)}
-                  className="px-6 py-2.5 rounded-xl text-xs font-bold border border-border bg-card text-foreground hover:border-primary/50 hover:bg-secondary/50 transition-all cursor-pointer shadow-sm"
+                  className="px-6 min-h-10 rounded-xl text-sm font-bold border border-border bg-card text-foreground hover:border-primary/50 hover:bg-secondary/50 transition-all cursor-pointer shadow-sm"
                 >
                   Cargar más videos ({visibleVideos.length - videosShown} restantes)
                 </button>

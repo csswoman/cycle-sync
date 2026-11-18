@@ -47,7 +47,7 @@ const TodayHistory: React.FC<Props> = ({ logs, loading, compact, onSeeAll }) => 
   return (
     <div className="flex flex-col gap-2">
       <div className="flex items-baseline justify-between gap-2">
-        <h3 className={`${compact ? 'text-sm' : 'text-base'} font-bold text-foreground`}>Hoy</h3>
+        <h3 className={`${compact ? 'text-sm' : 'text-base'} font-bold text-foreground`}>Actividad de hoy</h3>
         {items.length > 0 && (
           <span className="text-xs text-muted-foreground tabular-nums">
             {items.length} {items.length === 1 ? 'actividad' : 'actividades'}{minutes > 0 ? ` · ${minutes} min` : ''}
@@ -56,7 +56,7 @@ const TodayHistory: React.FC<Props> = ({ logs, loading, compact, onSeeAll }) => 
       </div>
       {items.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          Aún no hay actividad. Lo que completes en una rutina o video aparecerá aquí.
+          {compact ? 'Aún no hay actividad hoy.' : 'Aún no hay actividad. Lo que completes en una rutina o video aparecerá aquí.'}
         </p>
       ) : (
         <ol className="flex flex-col gap-1.5">

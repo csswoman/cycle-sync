@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { useLanguage } from '@/i18n/LanguageContext';
 import { STRENGTH_DAYS_GOAL, WEEKLY_MINUTES_GOAL, type WeeklyActivity } from '@/lib/exercise/weeklyActivity';
 
 interface Props {
@@ -41,8 +40,8 @@ function tip(week: WeeklyActivity): string {
  * for everyone (WHO 2020); `pmos` only changes the wording to cite the PMOS guideline.
  */
 const WeeklyGoalCard: React.FC<Props> = (props) => {
-  const { language } = useLanguage();
-  return <WeeklyGoalCardInner {...props} es={language !== 'en'} />;
+  // The routines page is Spanish-only, so the card ignores the app language.
+  return <WeeklyGoalCardInner {...props} es />;
 };
 
 const WeeklyGoalCardInner: React.FC<Props & { es: boolean }> = ({ week, loading, onLog, compact, pmos = true, es }) => compact ? (

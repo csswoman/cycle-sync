@@ -1,6 +1,7 @@
 import React from 'react';
 import { Exercise, Routine, WorkoutVideo } from '@/types/exercises';
 import { youtubeEmbedUrl, youtubeThumbnailUrl } from '@/lib/youtube';
+import { exerciseNameEs } from '@/data/exerciseNamesEs';
 import { BODY_PART_LABELS_ES, EQUIPMENT_LABELS_ES } from '@/services/exercisesService';
 
 export const TARGET_LABELS_ES: Record<string, string> = {
@@ -44,18 +45,18 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, onSave, sa
 
     if (variant === 'horizontal') {
         return (
-            <div className="flex flex-col md:flex-row items-stretch rounded-2xl shadow-sm bg-card overflow-hidden hover:shadow-md transition-all border border-border group h-full">
-                <div className="w-full md:w-48 h-48 md:h-auto overflow-hidden bg-muted shrink-0">
+            <div className="flex flex-row items-stretch rounded-2xl shadow-sm bg-card overflow-hidden hover:shadow-md transition-all border border-border group h-full">
+                <div className="w-28 sm:w-40 md:w-48 h-auto overflow-hidden bg-white dark:brightness-90 shrink-0">
                     <img
                         src={exercise.gifUrl || '/exercise-fallback.png'}
-                        alt={exercise.name}
+                        alt={exerciseNameEs(exercise)}
                         referrerPolicy="no-referrer"
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
                     />
                 </div>
-                <div className="flex flex-1 flex-col justify-between p-5 gap-4">
+                <div className="flex flex-1 min-w-0 flex-col justify-between p-3 sm:p-5 gap-3 sm:gap-4">
                     <div>
-                        <h3 className="text-foreground text-xl font-bold leading-tight capitalize line-clamp-1 mb-2">{exercise.name}</h3>
+                        <h3 className="text-foreground text-xl font-bold leading-tight line-clamp-2 mb-2">{exerciseNameEs(exercise)}</h3>
                         <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
                             {exercise.instructions[0] || `Enfócate en tu ${targetEs} usando ${equipmentEs}.`}
                         </p>
@@ -91,8 +92,8 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, onSave, sa
             <div className="aspect-video relative overflow-hidden bg-muted">
                 <img
                     src={exercise.gifUrl}
-                    alt={exercise.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    alt={exerciseNameEs(exercise)}
+                    className="w-full h-full object-cover sepia-[.12] dark:brightness-90 group-hover:scale-105 transition-transform duration-500"
                 />
                 <div className="absolute top-3 right-3 flex gap-2">
                     {onSave && (
@@ -118,8 +119,8 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, onSave, sa
                 </div>
             </div>
             <div className="p-5 flex flex-col flex-1 gap-2">
-                <h4 className="text-foreground font-black text-lg capitalize tracking-tight group-hover:text-primary transition-colors">
-                    {exercise.name}
+                <h4 className="text-foreground font-black text-lg tracking-tight group-hover:text-primary transition-colors">
+                    {exerciseNameEs(exercise)}
                 </h4>
                 <p className="text-muted-foreground text-xs leading-relaxed line-clamp-2 flex-1">
                     {exercise.instructions[0]}
@@ -251,8 +252,8 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video, isPhaseRecommended,
     };
 
     return (
-        <div className="flex flex-col gap-3 group bg-card rounded-2xl border border-border p-3.5 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
-            <div className="relative aspect-video rounded-xl overflow-hidden bg-black shadow-sm">
+        <div className="flex flex-row sm:flex-col gap-3 group bg-card rounded-2xl border border-border p-3 sm:p-3.5 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
+            <div className="relative aspect-video w-36 sm:w-full shrink-0 self-start rounded-xl overflow-hidden bg-black shadow-sm">
                 {playingInline ? (
                     <iframe
                         src={youtubeEmbedUrl(video.videoId, true)}
@@ -290,14 +291,14 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video, isPhaseRecommended,
 
                         {/* Play button */}
                         <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="w-12 h-12 rounded-full bg-white/95 text-primary shadow-xl flex items-center justify-center transition-all duration-300 group-hover/btn:scale-110 group-hover/btn:bg-primary group-hover/btn:text-primary-foreground">
+                            <div className="size-9 sm:size-12 rounded-full bg-white/95 text-primary shadow-xl flex items-center justify-center transition-all duration-300 group-hover/btn:scale-110 group-hover/btn:bg-primary group-hover/btn:text-primary-foreground">
                                 <span className="material-symbols-outlined text-2xl ml-0.5">play_arrow</span>
                             </div>
                         </div>
 
                         {/* Duration and intensity pill */}
-                        <div className="absolute bottom-2.5 left-2.5 right-2.5 flex items-center justify-between text-white text-xs">
-                            <span className={`px-2 py-0.5 rounded-md font-semibold backdrop-blur-sm ${
+                        <div className="absolute bottom-1.5 sm:bottom-2.5 left-1.5 sm:left-2.5 right-1.5 sm:right-2.5 flex items-center justify-between max-sm:justify-end text-white text-xs">
+                            <span className={`max-sm:hidden px-2 py-0.5 rounded-md font-semibold backdrop-blur-sm ${
                                 video.intensity === 'low'
                                     ? 'bg-leaf/90'
                                     : video.intensity === 'medium'
@@ -315,7 +316,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video, isPhaseRecommended,
                 )}
             </div>
 
-            <div className="flex flex-col gap-1.5 px-0.5">
+            <div className="flex flex-col max-sm:justify-center min-w-0 flex-1 gap-1.5 px-0.5">
                 <h4 
                     onClick={handlePlayClick}
                     className="text-foreground font-semibold text-sm line-clamp-2 leading-snug cursor-pointer group-hover:text-primary transition-colors"
@@ -323,8 +324,9 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video, isPhaseRecommended,
                 >
                     {video.title}
                 </h4>
-                <div className="flex items-center justify-between text-xs text-muted-foreground mt-0.5">
-                    <span className="truncate max-w-[65%]" title={video.channelName}>{video.channelName}</span>
+                <div className="flex items-center justify-between max-sm:flex-wrap max-sm:gap-y-1 gap-x-2 text-xs text-muted-foreground mt-0.5">
+                    <span className="truncate max-w-[65%] max-sm:max-w-full" title={video.channelName}>{video.channelName}</span>
+                    <span className="sm:hidden font-semibold text-foreground/80">{INTENSITY_LABEL[video.intensity]}</span>
                     <span className="px-2 py-0.5 rounded-md bg-secondary text-xs font-medium text-foreground/80">
                         {CATEGORY_LABEL[video.category] || video.category}
                     </span>
