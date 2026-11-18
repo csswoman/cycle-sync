@@ -49,7 +49,7 @@ const MemberContent: React.FC<{ lang: 'es' | 'en' }> = ({ lang }) => {
     const next = e.key === 'Home' ? 0 : e.key === 'End' ? TABS.length - 1
       : (i + (e.key === 'ArrowRight' ? 1 : -1) + TABS.length) % TABS.length;
     go(TABS[next].id);
-    document.getElementById(`pmos-tab-${TABS[next].id}`)?.focus();
+    document.getElementById(`pmos-tab-${TABS[next].id}`)?.focus({ preventScroll: true });
   };
 
   const pregnancy = data ? activePregnancy(data.pregnancies, data.today) : null;

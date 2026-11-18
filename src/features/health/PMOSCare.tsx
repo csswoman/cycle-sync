@@ -75,7 +75,7 @@ export const PMOSCare: React.FC = () => {
 
   return (
     <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide">
-      <div className="flex flex-col w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-8 gap-6 sm:gap-8 pb-32">
+      <div className="flex flex-col w-full max-w-page mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-8 gap-6 sm:gap-8 pb-32">
         <header className="relative overflow-hidden rounded-3xl garden-wash wash-leaf border border-border p-5 sm:p-8 grid gap-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
           <GardenCorner variant="leaf" className="size-40 sm:size-56 opacity-70" />
           <div className="relative flex flex-col gap-3 min-w-0">
