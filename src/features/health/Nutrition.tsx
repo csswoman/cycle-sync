@@ -319,7 +319,7 @@ const Nutrition: React.FC = () => {
 
   return (
     <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide">
-      <div className="flex flex-col items-center w-full max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 gap-8 pb-32">
+      <div className="flex flex-col items-center w-full max-w-page mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 gap-8 pb-32">
 
         {/* Hero */}
         <section className="w-full rounded-3xl overflow-hidden relative garden-wash wash-sun border border-border shadow-sm">
@@ -356,7 +356,9 @@ const Nutrition: React.FC = () => {
               aria-selected={shownTab === tab.id}
               aria-controls={`nutrition-panel-${tab.id}`}
               onClick={(e) => {
-                e.currentTarget.scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+                // Scroll only the tab strip: scrollIntoView also shifts overflow-hidden ancestors (the app shell/sidebar).
+                const btn = e.currentTarget, strip = btn.parentElement;
+                if (strip) strip.scrollTo({ left: btn.offsetLeft - (strip.clientWidth - btn.offsetWidth) / 2, behavior: 'smooth' });
                 if (isLocked(tab.id)) promptSignup();
                 else setActiveTab(tab.id);
               }}
