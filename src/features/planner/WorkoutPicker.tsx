@@ -2,14 +2,17 @@
 
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { youtubeThumbnailUrl } from '@/lib/youtube';
-import type { VideoCategory, VideoIntensity, VideoPhase, WorkoutVideo } from '@/types/exercises';
+import type { Routine, VideoCategory, VideoIntensity, VideoPhase, WorkoutVideo } from '@/types/exercises';
 import type { WorkoutEntry } from '@/services/plannerService';
+import { PROGRAMS, programEntryTitle } from '@/lib/planner/programs';
 
-type Category = VideoCategory | 'all';
+type Category = VideoCategory | 'all' | 'routines' | 'programs';
 type Duration = 'all' | 'short' | 'mid' | 'long' | 'xl';
 
 const CATEGORIES: { id: Category; label: string; icon: string }[] = [
     { id: 'all', label: 'Todos', icon: 'grid_view' },
+    { id: 'programs', label: 'Programas', icon: 'event_note' },
+    { id: 'routines', label: 'Mis rutinas', icon: 'checklist' },
     { id: 'dance', label: 'Baile', icon: 'music_note' },
     { id: 'gym', label: 'Fuerza', icon: 'fitness_center' },
     { id: 'yoga', label: 'Yoga', icon: 'self_improvement' },
@@ -48,10 +51,12 @@ export const Glyph: React.FC<{ name: string; className?: string }> = ({ name, cl
 
 interface PickerProps {
     videos: WorkoutVideo[];
+    /** The user's saved routines (Routines page). */
+    routines?: Routine[];
     entry: WorkoutEntry | undefined;
     phase: VideoPhase;
     disabled?: boolean;
-    /** '' clears the day, 'rest' / 'gym' are fixed options, anything else is a video id. */
+    /** '' clears the day, 'rest' / 'gym' are fixed options, 'routine:<id>' is a saved routine, anything else is a video id. */
     onChange: (value: string) => void;
 }
 
@@ -70,7 +75,7 @@ export const Chip: React.FC<{ active: boolean; onClick: () => void; children: Re
     </button>
 );
 
-const WorkoutPicker: React.FC<PickerProps> = ({ videos, entry, phase, disabled, onChange }) => {
+const WorkoutPicker: React.FC<PickerProps> = ({ videos, routines = [], entry, phase, disabled, onChange }) => {
     const [open, setOpen] = useState(false);
     const [query, setQuery] = useState('');
     const [category, setCategory] = useState<Category>('all');
@@ -81,6 +86,19 @@ const WorkoutPicker: React.FC<PickerProps> = ({ videos, entry, phase, disabled, 
 
     const selectedVideo = entry?.kind === 'video' ? videos.find((v) => v.id === entry.videoId) : undefined;
 
+    const [openProgram, setOpenProgram] = useState<string | null>(null);
+    const showVideos = category !== 'routines' && category !== 'programs';
+    const showPrograms = category === 'programs';
+    const programResults = useMemo(() => {
+        const q = fold(query.trim());
+        return PROGRAMS.filter((p) => !q || fold(p.name).includes(q) || p.routines.some((r) => fold(r.label).includes(q)));
+    }, [query]);
+    const showRoutines = (category === 'all' || category === 'routines') && routines.length > 0;
+    const noRoutinesYet = category === 'routines' && routines.length === 0;
+    const routineResults = useMemo(() => {
+        const q = fold(query.trim());
+        return routines.filter((r) => !q || fold(`${r.name} ${r.description ?? ''}`).includes(q));
+    }, [routines, query]);
     const results = useMemo(() => {
         const q = fold(query.trim());
         const test = DURATIONS.find((d) => d.id === duration)?.test ?? (() => true);
@@ -221,7 +239,7 @@ const WorkoutPicker: React.FC<PickerProps> = ({ videos, entry, phase, disabled, 
                                     </Chip>
                                 ))}
                             </div>
-                            <div className="flex gap-2 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 pb-0.5 scrollbar-hide" role="group" aria-label="Duración">
+                            <div hidden={!showVideos} className="flex gap-2 overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 pb-0.5 scrollbar-hide" role="group" aria-label="Duración">
                                 {DURATIONS.map((d) => (
                                     <Chip key={d.id} active={duration === d.id} onClick={() => setDuration(d.id)}>
                                         {d.id !== 'all' && <Glyph name="schedule" className="text-lg" />}
@@ -266,6 +284,115 @@ const WorkoutPicker: React.FC<PickerProps> = ({ videos, entry, phase, disabled, 
                                 )}
                             </div>
 
+                            {showPrograms && (
+                                <section className="flex flex-col gap-4" aria-label="Programas">
+                                    {programResults.length === 0 && (
+                                        <p className="text-sm text-muted-foreground">Ningún programa coincide con la búsqueda.</p>
+                                    )}
+                                    {(['home', 'gym'] as const).map((cat) => {
+                                        const list = programResults.filter((p) => p.category === cat);
+                                        if (list.length === 0) return null;
+                                        return (
+                                            <div key={cat} className="flex flex-col gap-2">
+                                                <h3 className="text-sm font-semibold text-foreground">{cat === 'home' ? 'En casa' : 'Gimnasio'}</h3>
+                                                <ul className="flex flex-col gap-2">
+                                                    {list.map((p) => {
+                                                        const expanded = openProgram === p.id || !!query.trim();
+                                                        return (
+                                                            <li key={p.id} className="rounded-2xl border border-border">
+                                                                <button
+                                                                    type="button"
+                                                                    aria-expanded={expanded}
+                                                                    onClick={() => setOpenProgram(openProgram === p.id ? null : p.id)}
+                                                                    className="w-full min-h-14 px-3 py-2 flex items-center gap-3 text-left cursor-pointer rounded-2xl hover:bg-muted/40 transition-colors"
+                                                                >
+                                                                    <span className="size-10 rounded-xl bg-blush text-primary flex items-center justify-center shrink-0">
+                                                                        <Glyph name="fitness_center" className="text-xl" />
+                                                                    </span>
+                                                                    <span className="min-w-0 flex-1 flex flex-col">
+                                                                        <span className="text-sm font-medium text-foreground leading-snug">{p.name}</span>
+                                                                        <span className="text-xs text-muted-foreground capitalize">
+                                                                            {p.difficulty} · {p.durationWeeks} semanas · {p.routines.length} {p.routines.length === 1 ? 'rutina' : 'rutinas'}
+                                                                        </span>
+                                                                    </span>
+                                                                    <Glyph name={expanded ? 'expand_less' : 'expand_more'} className="text-xl text-muted-foreground" />
+                                                                </button>
+                                                                {expanded && (
+                                                                    <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 p-3 pt-0">
+                                                                        {p.routines.map((r) => {
+                                                                            const title = programEntryTitle(p, r);
+                                                                            const selected = entry?.kind === 'gym' && entry.title === title;
+                                                                            return (
+                                                                                <li key={r.id}>
+                                                                                    <button
+                                                                                        type="button"
+                                                                                        aria-pressed={selected}
+                                                                                        onClick={() => choose(`program:${r.id}`)}
+                                                                                        className={`w-full min-h-12 px-3 py-2 rounded-xl border text-left flex flex-col cursor-pointer transition-colors ${
+                                                                                            selected ? 'border-primary ring-2 ring-primary/40' : 'border-border hover:border-primary/40'
+                                                                                        }`}
+                                                                                    >
+                                                                                        <span className="text-sm font-medium text-foreground leading-snug">{r.label}</span>
+                                                                                        <span className="text-xs text-muted-foreground tabular-nums">
+                                                                                            {r.minutes ? `${r.minutes} min · ` : ''}{r.exerciseCount} ejercicios
+                                                                                        </span>
+                                                                                    </button>
+                                                                                </li>
+                                                                            );
+                                                                        })}
+                                                                    </ul>
+                                                                )}
+                                                            </li>
+                                                        );
+                                                    })}
+                                                </ul>
+                                            </div>
+                                        );
+                                    })}
+                                </section>
+                            )}
+                            {noRoutinesYet && (
+                                <p className="text-sm text-muted-foreground text-pretty">Aún no tienes rutinas guardadas. Créalas en la página de Rutinas.</p>
+                            )}
+                            {showRoutines && (
+                                <section className="flex flex-col gap-2" aria-label="Mis rutinas">
+                                    <h3 className="text-sm font-semibold text-foreground">Mis rutinas</h3>
+                                    {routineResults.length === 0 ? (
+                                        <p className="text-sm text-muted-foreground">Ninguna rutina coincide con la búsqueda.</p>
+                                    ) : (
+                                        <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                            {routineResults.map((r) => {
+                                                const selected = entry?.kind === 'gym' && entry.title === r.name;
+                                                const count = r.exercises?.length ?? 0;
+                                                return (
+                                                    <li key={r.id}>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => choose(`routine:${r.id}`)}
+                                                            aria-pressed={selected}
+                                                            className={`w-full min-h-16 text-left flex items-center gap-3 rounded-2xl border p-3 transition-colors cursor-pointer ${
+                                                                selected ? 'border-primary ring-2 ring-primary/40' : 'border-border hover:border-primary/40'
+                                                            }`}
+                                                        >
+                                                            <span className="size-11 rounded-xl bg-blush text-primary flex items-center justify-center shrink-0">
+                                                                <Glyph name="fitness_center" className="text-2xl" />
+                                                            </span>
+                                                            <span className="min-w-0 flex flex-col gap-0.5">
+                                                                <span className="text-sm font-medium text-foreground leading-snug line-clamp-2">{r.name}</span>
+                                                                <span className="text-xs text-muted-foreground">
+                                                                    {count} {count === 1 ? 'ejercicio' : 'ejercicios'}
+                                                                </span>
+                                                            </span>
+                                                        </button>
+                                                    </li>
+                                                );
+                                            })}
+                                        </ul>
+                                    )}
+                                </section>
+                            )}
+                            {showVideos && (
+                                <>
                             <p className="text-sm text-muted-foreground" aria-live="polite">
                                 {results.length} {results.length === 1 ? 'vídeo' : 'vídeos'}
                             </p>
@@ -330,6 +457,8 @@ const WorkoutPicker: React.FC<PickerProps> = ({ videos, entry, phase, disabled, 
                                 >
                                     Ver más
                                 </button>
+                            )}
+                                </>
                             )}
                         </div>
                     </div>

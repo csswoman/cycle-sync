@@ -14,16 +14,19 @@ const fold = (s: string) => s.toLowerCase().normalize('NFD').replace(/[\u0300-\u
 
 interface Props {
     /** Which slot is being filled; null keeps the dialog closed. */
-    target: { slot: MealSlot; slotLabel: string; dayLabel: string; currentTitle?: string } | null;
+    target: { slot: MealSlot; slotLabel: string; dayLabel: string; currentTitle?: string; currentIngredients?: string[] } | null;
     recipes: LibraryRecipe[];
     onPick: (recipe: LibraryRecipe) => void;
     /** Opens the free-text editor (title + ingredients). */
     onCustom: () => void;
     onRemove?: () => void;
+    /** Other days of the week this dish can be copied to (same slot). */
+    copyDays?: { date: string; label: string; occupied: boolean }[];
+    onCopy?: (date: string) => void;
     onClose: () => void;
 }
 
-const MealPicker: React.FC<Props> = ({ target, recipes, onPick, onCustom, onRemove, onClose }) => {
+const MealPicker: React.FC<Props> = ({ target, recipes, onPick, onCustom, onRemove, copyDays, onCopy, onClose }) => {
     const [query, setQuery] = useState('');
     const [scope, setScope] = useState<Scope>('slot');
     const [visible, setVisible] = useState(PAGE);
@@ -79,6 +82,9 @@ const MealPicker: React.FC<Props> = ({ target, recipes, onPick, onCustom, onRemo
                                 {target.dayLabel}
                                 {target.currentTitle ? <span className="normal-case"> · ahora: {target.currentTitle}</span> : null}
                             </p>
+                            {target.currentIngredients && target.currentIngredients.length > 0 && (
+                                <p className="text-sm text-muted-foreground mt-1 text-pretty">{target.currentIngredients.join(', ')}</p>
+                            )}
                         </div>
                         <button
                             type="button"
@@ -141,6 +147,26 @@ const MealPicker: React.FC<Props> = ({ target, recipes, onPick, onCustom, onRemo
                         )}
                     </div>
 
+                    {onCopy && copyDays && copyDays.length > 0 && (
+                        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Copiar este plato a otro día">
+                            <span className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
+                                <Glyph name="content_copy" className="text-lg" />
+                                Copiar a
+                            </span>
+                            {copyDays.map((d) => (
+                                <button
+                                    key={d.date}
+                                    type="button"
+                                    disabled={d.occupied}
+                                    title={d.occupied ? 'Ya hay un plato en ese día' : undefined}
+                                    onClick={() => onCopy(d.date)}
+                                    className="min-h-10 px-3 rounded-xl border border-border text-sm font-medium capitalize text-foreground hover:border-primary/40 transition-colors cursor-pointer disabled:opacity-40 disabled:pointer-events-none"
+                                >
+                                    {d.label}
+                                </button>
+                            ))}
+                        </div>
+                    )}
                     <p className="text-sm text-muted-foreground" aria-live="polite">
                         {results.length} {results.length === 1 ? 'receta' : 'recetas'}
                     </p>
