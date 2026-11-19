@@ -9,6 +9,7 @@ import { useDisplayPrefs } from '@/hooks/useDisplayPrefs';
 import { MEAL_SLOTS, type MealSlot } from '@/lib/planner/week';
 import { buildMealColumns, type MealSelection } from '@/lib/pmos/mealGlucoseEntry';
 import { loadDay, type MealEntry } from '@/services/plannerService';
+import { Icon } from '@/components/ui/Icon';
 import { INPUT_CLASS, parseNum, todayLocal } from './shared';
 
 type Lang = 'es' | 'en';
@@ -18,7 +19,7 @@ const T = {
     title: 'Glucosa, presión y medidas', date: 'Fecha', glucose: 'Glucosa (mg/dL)', taken: 'Momento de la glucosa',
     ctx: { fasting: 'En ayunas', post_meal: 'Después de comer', random: 'Otro momento' } as Record<GlucoseContext, string>,
     insulin: 'Insulina en ayunas (µIU/mL)', sys: 'Presión sistólica', dia: 'Presión diastólica', weight: 'Peso (kg)', waist: 'Cintura (cm)', hip: 'Cadera (cm)',
-    save: 'Guardar', saving: 'Guardando…', errNone: 'Escribe al menos un valor.', errBp: 'Escribe las dos cifras de la presión (ej.: 118 / 76).',
+    save: 'Guardar medidas', addNew: 'Agregar medidas', close: 'Cerrar', gGlucose: 'Glucosa e insulina', gBp: 'Presión arterial', gBody: 'Cuerpo', noDataIn: 'Sin datos todavía en', undo: 'Deshacer', removed: 'Registro eliminado.', saving: 'Guardando…', errNone: 'Escribe al menos un valor.', errBp: 'Escribe las dos cifras de la presión (ej.: 118 / 76).',
     loading: 'Cargando…', latest: 'Último', noData: 'Sin datos todavía',
     cFasting: 'Glucosa en ayunas', cInsulin: 'Insulina en ayunas', cHoma: 'HOMA-IR (calculado)', cBp: 'Presión arterial (sistólica)', cWaist: 'Cintura', cWhr: 'Índice cintura-cadera', cWeight: 'Peso',
     homaNote: 'Necesita glucosa e insulina en ayunas del mismo día. Más de 2.5 sugiere resistencia a la insulina.',
@@ -36,7 +37,7 @@ const T = {
     title: 'Glucose, blood pressure and measurements', date: 'Date', glucose: 'Glucose (mg/dL)', taken: 'Glucose taken',
     ctx: { fasting: 'Fasting', post_meal: 'After a meal', random: 'Random' } as Record<GlucoseContext, string>,
     insulin: 'Fasting insulin (µIU/mL)', sys: 'Systolic BP', dia: 'Diastolic BP', weight: 'Weight (kg)', waist: 'Waist (cm)', hip: 'Hip (cm)',
-    save: 'Save', saving: 'Saving…', errNone: 'Enter at least one value.', errBp: 'Enter both blood pressure numbers (e.g. 118 / 76).',
+    save: 'Save measurements', addNew: 'Add measurements', close: 'Close', gGlucose: 'Glucose and insulin', gBp: 'Blood pressure', gBody: 'Body', noDataIn: 'No data yet for', undo: 'Undo', removed: 'Entry deleted.', saving: 'Saving…', errNone: 'Enter at least one value.', errBp: 'Enter both blood pressure numbers (e.g. 118 / 76).',
     loading: 'Loading…', latest: 'Latest', noData: 'No data yet',
     cFasting: 'Fasting glucose', cInsulin: 'Fasting insulin', cHoma: 'HOMA-IR (calculated)', cBp: 'Blood pressure (systolic)', cWaist: 'Waist', cWhr: 'Waist-to-hip ratio', cWeight: 'Weight',
     homaNote: 'Needs fasting glucose and insulin logged on the same day. Above about 2.5 suggests insulin resistance.',
@@ -69,11 +70,7 @@ const ChartCard: React.FC<{ title: string; unit: string; points: LinePoint[]; no
         </span>
       )}
     </div>
-    {points.length === 0 ? (
-      <p className="text-sm text-muted-foreground">{empty}</p>
-    ) : (
-      <LineChart points={points} unit={unit} refHigh={refHigh} />
-    )}
+    <LineChart points={points} unit={unit} refHigh={refHigh} />
     {note && <p className="text-sm text-muted-foreground">{note}</p>}
   </div>
 );
@@ -92,6 +89,8 @@ const BodyMetricsSection: React.FC<{ lang?: Lang }> = ({ lang = 'es' }) => {
   const [waist, setWaist] = useState('');
   const [hip, setHip] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
+  const [formOpen, setFormOpen] = useState<boolean | null>(null);
+  const [undoRow, setUndoRow] = useState<PMOSMetricEntry | null>(null);
   const [mealChoice, setMealChoice] = useState(''); // '' none, 'free', or a planner meal id
   const [freeText, setFreeText] = useState('');
   const [freeSlot, setFreeSlot] = useState<MealSlot | ''>('');
@@ -137,6 +136,26 @@ const BodyMetricsSection: React.FC<{ lang?: Lang }> = ({ lang = 'es' }) => {
     ? `${latestBp.systolic}/${latestBp.diastolic} · ${t.bpCat[bloodPressureCategory(Number(latestBp.systolic), Number(latestBp.diastolic))]}`
     : undefined;
 
+  const charts: { key: string; title: string; unit: string; points: LinePoint[]; note?: string; badge?: string; refHigh?: number }[] = [
+    { key: 'fasting', title: t.cFasting, unit: 'mg/dL', points: glucoseSeries, refHigh: 99 },
+    { key: 'insulin', title: t.cInsulin, unit: 'µIU/mL', points: insulinSeries },
+    { key: 'homa', title: t.cHoma, unit: '', points: homaSeries, note: t.homaNote, refHigh: 2.5 },
+    { key: 'bp', title: t.cBp, unit: 'mmHg', points: bpSeries, note: t.bpNote, badge: bpBadge, refHigh: 130 },
+    ...(hideNumbers ? [] : [
+      { key: 'waist', title: t.cWaist, unit: 'cm', points: waistSeries },
+      { key: 'whr', title: t.cWhr, unit: '', points: whrSeries, note: t.whrNote(latestWhr != null && latestWhr > WHR_RISK_THRESHOLD) },
+      { key: 'weight', title: t.cWeight, unit: 'kg', points: weightSeries, note: t.weightNote },
+    ]),
+  ];
+  const showForm = formOpen ?? (!loading && entries.length === 0);
+  const handleRemove = async (e: PMOSMetricEntry) => { await remove(e.id); setUndoRow(e); };
+  const handleUndo = async () => {
+    if (!undoRow) return;
+    const { id: _id, user_id: _u, ...rest } = undoRow as PMOSMetricEntry & { created_at?: string };
+    delete (rest as { created_at?: string }).created_at;
+    await add(rest as Parameters<typeof add>[0]);
+    setUndoRow(null);
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const g = parseNum(glucose);
@@ -190,88 +209,111 @@ const BodyMetricsSection: React.FC<{ lang?: Lang }> = ({ lang = 'es' }) => {
           </span>
           {t.title}
         </h2>
+        <button type="button" onClick={() => setFormOpen(!showForm)} aria-expanded={showForm} aria-controls="body-form"
+          className="inline-flex items-center gap-1.5 min-h-10 px-4 rounded-full text-sm font-semibold text-primary border border-primary/40 hover:bg-primary/10">
+          <Icon name={showForm ? 'close' : 'add'} size={18} />
+          {showForm ? t.close : t.addNew}
+        </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="px-5 sm:px-6 py-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-4 items-end bg-secondary/30 border-y border-border">
-        <label className="flex flex-col gap-1.5 text-sm font-medium text-muted-foreground">
+      {showForm && (
+      <form id="body-form" onSubmit={handleSubmit} className="px-5 sm:px-6 py-5 grid grid-cols-1 lg:grid-cols-3 gap-x-8 gap-y-6 bg-secondary/30 border-y border-border">
+        <label className="flex flex-col gap-1.5 text-sm font-medium text-muted-foreground sm:max-w-56 col-span-full">
           {t.date}
           <input type="date" value={date} max={todayLocal()} onChange={(ev) => setDate(ev.target.value)} className={INPUT_CLASS} required />
         </label>
-        {field(t.glucose, glucose, setGlucose)}
-        <label className="flex flex-col gap-1.5 text-sm font-medium text-muted-foreground">
-          {t.taken}
-          <select value={context} onChange={(ev) => setContext(ev.target.value as GlucoseContext)} className={INPUT_CLASS}>
-            {(Object.keys(t.ctx) as GlucoseContext[]).map((k) => <option key={k} value={k}>{t.ctx[k]}</option>)}
-          </select>
-        </label>
-        {showMeal && (
-          <>
-            <label className="flex flex-col gap-1.5 text-sm font-medium text-muted-foreground">
-              {t.meal}
-              <select value={mealChoice} onChange={(ev) => setMealChoice(ev.target.value)} className={INPUT_CLASS}>
-                <option value="">{t.mealNone}</option>
-                {plannerMeals.map((m) => <option key={m.id} value={m.id}>{t.slots[m.slot]}: {m.title}</option>)}
-                <option value="free">{t.mealFree}</option>
-              </select>
-            </label>
-            {mealChoice === 'free' && (
-              <>
-                <label className="flex flex-col gap-1.5 text-sm font-medium text-muted-foreground">
-                  {t.mealText}
-                  <input value={freeText} onChange={(ev) => setFreeText(ev.target.value)} className={INPUT_CLASS} />
-                </label>
-                <label className="flex flex-col gap-1.5 text-sm font-medium text-muted-foreground">
-                  {t.mealSlot}
-                  <select value={freeSlot} onChange={(ev) => setFreeSlot(ev.target.value as MealSlot | '')} className={INPUT_CLASS}>
-                    <option value="">{t.mealNone}</option>
-                    {MEAL_SLOTS.map((k) => <option key={k} value={k}>{t.slots[k]}</option>)}
-                  </select>
-                </label>
-              </>
-            )}
-            <label className="flex flex-col gap-1.5 text-sm font-medium text-muted-foreground">
-              {t.interval}
-              <select value={interval ?? ''} onChange={(ev) => setIntervalChoice(ev.target.value === '' ? null : (Number(ev.target.value) as 1 | 2))} className={INPUT_CLASS}>
-                <option value="">{t.mealNone}</option>
-                <option value="1">{t.oneHour}</option>
-                <option value="2">{t.twoHours}</option>
-              </select>
-            </label>
-          </>
+        <fieldset className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 content-start min-w-0">
+          <legend className="text-sm font-semibold text-foreground mb-3">{t.gGlucose}</legend>
+          {field(t.glucose, glucose, setGlucose)}
+          <label className="flex flex-col gap-1.5 text-sm font-medium text-muted-foreground">
+            {t.taken}
+            <select value={context} onChange={(ev) => setContext(ev.target.value as GlucoseContext)} className={INPUT_CLASS}>
+              {(Object.keys(t.ctx) as GlucoseContext[]).map((k) => <option key={k} value={k}>{t.ctx[k]}</option>)}
+            </select>
+          </label>
+          {showMeal && (
+            <>
+              <label className="flex flex-col gap-1.5 text-sm font-medium text-muted-foreground">
+                {t.meal}
+                <select value={mealChoice} onChange={(ev) => setMealChoice(ev.target.value)} className={INPUT_CLASS}>
+                  <option value="">{t.mealNone}</option>
+                  {plannerMeals.map((m) => <option key={m.id} value={m.id}>{t.slots[m.slot]}: {m.title}</option>)}
+                  <option value="free">{t.mealFree}</option>
+                </select>
+              </label>
+              <label className="flex flex-col gap-1.5 text-sm font-medium text-muted-foreground">
+                {t.interval}
+                <select value={interval ?? ''} onChange={(ev) => setIntervalChoice(ev.target.value === '' ? null : (Number(ev.target.value) as 1 | 2))} className={INPUT_CLASS}>
+                  <option value="">{t.mealNone}</option>
+                  <option value="1">{t.oneHour}</option>
+                  <option value="2">{t.twoHours}</option>
+                </select>
+              </label>
+              {mealChoice === 'free' && (
+                <>
+                  <label className="flex flex-col gap-1.5 text-sm font-medium text-muted-foreground">
+                    {t.mealText}
+                    <input value={freeText} onChange={(ev) => setFreeText(ev.target.value)} className={INPUT_CLASS} />
+                  </label>
+                  <label className="flex flex-col gap-1.5 text-sm font-medium text-muted-foreground">
+                    {t.mealSlot}
+                    <select value={freeSlot} onChange={(ev) => setFreeSlot(ev.target.value as MealSlot | '')} className={INPUT_CLASS}>
+                      <option value="">{t.mealNone}</option>
+                      {MEAL_SLOTS.map((k) => <option key={k} value={k}>{t.slots[k]}</option>)}
+                    </select>
+                  </label>
+                </>
+              )}
+            </>
+          )}
+          {field(t.insulin, insulin, setInsulin)}
+        </fieldset>
+        <fieldset className="grid grid-cols-2 gap-4 content-start min-w-0">
+          <legend className="text-sm font-semibold text-foreground mb-3">{t.gBp}</legend>
+          {field(t.sys, sys, setSys)}
+          {field(t.dia, dia, setDia)}
+        </fieldset>
+        {!hideNumbers && (
+          <fieldset className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-4 content-start min-w-0">
+            <legend className="text-sm font-semibold text-foreground mb-3">{t.gBody}</legend>
+            {field(t.waist, waist, setWaist)}
+            {field(t.hip, hip, setHip)}
+            {field(t.weight, weight, setWeight)}
+          </fieldset>
         )}
-        {field(t.insulin, insulin, setInsulin)}
-        {field(t.sys, sys, setSys)}
-        {field(t.dia, dia, setDia)}
-        {!hideNumbers && field(t.waist, waist, setWaist)}
-        {!hideNumbers && field(t.hip, hip, setHip)}
-        {!hideNumbers && field(t.weight, weight, setWeight)}
-        <div className="flex items-end sm:col-span-2 lg:col-span-1">
+        <div className="col-span-full flex flex-wrap items-center gap-4">
           <button type="submit" disabled={saving}
-            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold min-h-11 rounded-full disabled:opacity-60">
+            className="whitespace-nowrap bg-primary hover:bg-primary/90 text-primary-foreground font-semibold min-h-11 px-8 rounded-full disabled:opacity-60">
             {saving ? t.saving : t.save}
           </button>
+          {(formError || error) && <p className="text-sm text-destructive">{formError ?? error}</p>}
         </div>
-        {(formError || error) && <p className="col-span-full text-sm text-destructive">{formError ?? error}</p>}
       </form>
-
+      )}
       <div className="p-5 sm:p-6 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 items-start">
         {loading ? (
           <p className="text-muted-foreground text-sm">{t.loading}</p>
         ) : (
           <>
-            <ChartCard title={t.cFasting} unit="mg/dL" points={glucoseSeries} latestLabel={t.latest} empty={t.noData} refHigh={99} />
-            <ChartCard title={t.cInsulin} unit="µIU/mL" points={insulinSeries} latestLabel={t.latest} empty={t.noData} />
-            <ChartCard title={t.cHoma} unit="" points={homaSeries} note={t.homaNote} latestLabel={t.latest} empty={t.noData} refHigh={2.5} />
-            <ChartCard title={t.cBp} unit="mmHg" points={bpSeries} note={t.bpNote} latestLabel={t.latest} empty={t.noData} badge={bpBadge} refHigh={130} />
-            {!hideNumbers && <ChartCard title={t.cWaist} unit="cm" points={waistSeries} latestLabel={t.latest} empty={t.noData} />}
-            {!hideNumbers && <ChartCard title={t.cWhr} unit="" points={whrSeries} note={t.whrNote(latestWhr != null && latestWhr > WHR_RISK_THRESHOLD)} latestLabel={t.latest} empty={t.noData} />}
-            {!hideNumbers && <ChartCard title={t.cWeight} unit="kg" points={weightSeries} note={t.weightNote} latestLabel={t.latest} empty={t.noData} />}
+            {charts.filter((c) => c.points.length > 0).map(({ key, ...c }) => (
+              <ChartCard key={key} {...c} latestLabel={t.latest} empty={t.noData} />
+            ))}
+            {charts.some((c) => c.points.length === 0) && (
+              <p className="col-span-full text-sm text-muted-foreground">
+                {t.noDataIn}: {charts.filter((c) => c.points.length === 0).map((c) => c.title).map((n) => (/^[A-Z]{2}/.test(n) ? n : n.charAt(0).toLowerCase() + n.slice(1))).join(', ')}.
+              </p>
+            )}
           </>
         )}
       </div>
-
+      {undoRow && (
+        <div role="status" className="border-t border-border px-5 sm:px-6 py-2 flex items-center justify-between gap-3 text-sm text-muted-foreground">
+          {t.removed}
+          <button type="button" onClick={handleUndo} className="inline-flex items-center min-h-10 px-2 font-semibold text-primary hover:underline">{t.undo}</button>
+        </div>
+      )}
       {entries.length > 0 && (
-        <details className="border-t border-border px-5 sm:px-6 py-3">
+        <details open className="border-t border-border px-5 sm:px-6 py-3">
           <summary className="cursor-pointer min-h-10 flex items-center text-sm font-semibold text-foreground">{t.entries} ({entries.length})</summary>
           <ul className="mt-1 flex flex-col divide-y divide-border/60 max-h-64 overflow-y-auto">
             {[...entries].reverse().map((e) => (
@@ -285,7 +327,7 @@ const BodyMetricsSection: React.FC<{ lang?: Lang }> = ({ lang = 'es' }) => {
                   {!hideNumbers && e.hip_cm != null && ` · ${lang === 'es' ? 'cadera' : 'hip'} ${e.hip_cm}`}
                   {!hideNumbers && e.weight_kg != null && ` · ${e.weight_kg} kg`}
                 </span>
-                <button onClick={() => remove(e.id)} className="inline-flex items-center min-h-10 px-2 text-sm font-semibold text-destructive hover:underline shrink-0" aria-label={`${t.del} ${e.date}`}>
+                <button onClick={() => handleRemove(e)} className="inline-flex items-center min-h-10 px-2 text-sm font-semibold text-destructive hover:underline shrink-0" aria-label={`${t.del} ${e.date}`}>
                   {t.del}
                 </button>
               </li>
