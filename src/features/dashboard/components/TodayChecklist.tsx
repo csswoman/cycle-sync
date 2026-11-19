@@ -39,21 +39,18 @@ interface HeadProps {
 
 /** Section heading: status icon, title with one detail line, and a quiet link to the full page. */
 const Head: React.FC<HeadProps> = ({ icon, title, detail, done, cta, onClick }) => (
-    <div className="flex items-center gap-3">
-        <Icon
-            name={done ? 'check_circle' : icon}
-            size={22}
-            weight={done ? 'fill' : 'regular'}
-            className={`shrink-0 ${done ? 'text-leaf' : 'text-blossom'}`}
-        />
-        <div className="flex-1 min-w-0">
-            <p className="text-foreground font-semibold text-base leading-snug">{title}</p>
-            <p className="text-muted-foreground text-sm line-clamp-2">{detail}</p>
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+        <span className={`grid place-items-center size-6 rounded-lg shrink-0 ${done ? 'bg-leaf-soft text-leaf' : 'bg-blossom-soft text-blossom'}`}>
+            <Icon name={done ? 'check_circle' : icon} size={14} weight={done ? 'fill' : 'duotone'} />
+        </span>
+        <div className="flex-1 basis-36 min-w-0">
+            <p className="text-foreground font-semibold text-sm leading-snug">{title}</p>
+            <p className="text-muted-foreground text-sm leading-snug">{detail}</p>
         </div>
         <button
             type="button"
             onClick={onClick}
-            className={`shrink-0 inline-flex items-center gap-1 px-3.5 min-h-10 rounded-full text-sm font-semibold transition-colors cursor-pointer ${done ? 'text-muted-foreground hover:bg-secondary hover:text-foreground' : 'bg-primary text-primary-foreground hover:bg-primary/90'
+            className={`shrink-0 inline-flex items-center gap-1 px-3.5 min-h-11 sm:min-h-9 sm:px-3 rounded-full text-sm font-semibold transition-colors cursor-pointer ${done ? 'text-muted-foreground hover:bg-secondary hover:text-foreground' : 'bg-primary text-primary-foreground hover:bg-primary/90'
                 }`}
         >
             {cta}
@@ -96,22 +93,22 @@ export const TodayChecklist: React.FC<{ embedded?: boolean }> = ({ embedded = fa
     const pendingTotal = (logged ? 0 : 1) + (totalDoses - takenDoses);
 
     return (
-        <div className={embedded ? 'flex flex-col gap-3' : 'bg-card rounded-3xl border border-border shadow-sm p-5 sm:p-6 flex flex-col gap-5'}>
-            <div className="flex items-baseline justify-between gap-3">
-                {embedded
-                    ? <h3 className="text-foreground text-base font-semibold">{copy.section}</h3>
-                    : <h3 className="text-foreground text-lg font-semibold tracking-tight">{text.todayTitle}</h3>}
-                {!medsLoading && (
-                    <span className={`text-sm tabular-nums ${pendingTotal === 0 ? 'text-leaf font-medium' : 'text-muted-foreground'}`}>
-                        {pendingTotal === 0 ? copy.allDone : copy.pending(pendingTotal)}
-                    </span>
-                )}
-            </div>
+        <div className={embedded ? 'flex flex-col gap-2' : 'bg-card rounded-3xl border border-border shadow-sm p-5 sm:p-6 flex flex-col gap-5'}>
+            {!embedded && (
+                <div className="flex items-baseline justify-between gap-3">
+                    <h3 className="text-foreground text-lg font-semibold tracking-tight">{text.todayTitle}</h3>
+                    {!medsLoading && (
+                        <span className={`text-sm tabular-nums ${pendingTotal === 0 ? 'text-leaf font-medium' : 'text-muted-foreground'}`}>
+                            {pendingTotal === 0 ? copy.allDone : copy.pending(pendingTotal)}
+                        </span>
+                    )}
+                </div>
+            )}
 
             {/* Log and medication side by side as two tiles; the dose list spans both below. */}
-            <div className="flex flex-col gap-3">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div className="rounded-2xl bg-secondary/40 p-3">
+            <div className="flex flex-col gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div className="rounded-xl bg-secondary/30 p-3">
                         <Head
                             icon="edit_note"
                             title={text.logTitle}
@@ -121,7 +118,7 @@ export const TodayChecklist: React.FC<{ embedded?: boolean }> = ({ embedded = fa
                             onClick={() => router.push('/log')}
                         />
                     </div>
-                    <div className="rounded-2xl bg-secondary/40 p-3">
+                    <div className="rounded-xl bg-secondary/30 p-3">
                         <Head
                             icon="medication"
                             title={text.medsTitle}
@@ -145,7 +142,7 @@ export const TodayChecklist: React.FC<{ embedded?: boolean }> = ({ embedded = fa
                                         aria-checked={taken}
                                         aria-label={taken ? copy.unmarkTaken(med.name, time) : copy.markTaken(med.name, time)}
                                         onClick={() => void setTaken(med.id, time, !taken)}
-                                        className={`w-full min-h-12 px-3.5 rounded-2xl flex items-center gap-3 text-left transition-colors duration-200 cursor-pointer active:scale-[0.99] ${taken ? 'bg-leaf-soft/60' : 'bg-secondary/40 hover:bg-secondary/70'
+                                        className={`w-full min-h-11 px-3 rounded-xl flex items-center gap-3 text-left transition-colors duration-200 cursor-pointer active:scale-[0.99] ${taken ? 'bg-leaf-soft/60' : 'bg-secondary/30 hover:bg-secondary/60'
                                             }`}
                                     >
                                         <span
@@ -159,7 +156,7 @@ export const TodayChecklist: React.FC<{ embedded?: boolean }> = ({ embedded = fa
                                             <span className={`block text-sm font-medium truncate ${taken ? 'text-muted-foreground' : 'text-foreground'}`}>
                                                 {med.name}
                                             </span>
-                                            {med.dose && <span className="block text-xs text-muted-foreground truncate">{med.dose}</span>}
+                                            {med.dose && <span className="block text-sm text-muted-foreground truncate">{med.dose}</span>}
                                         </span>
                                         <span className="text-sm text-muted-foreground tabular-nums shrink-0">{time}</span>
                                     </button>

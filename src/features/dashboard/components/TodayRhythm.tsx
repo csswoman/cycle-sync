@@ -1,18 +1,18 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
+import { Icon } from '@/components/ui/Icon';
 import { useLanguage } from '@/i18n/LanguageContext';
-import { TodayChecklist } from './TodayChecklist';
-import { TodayPlanCard } from './TodayPlanCard';
-import { HabitsProgress, WeekActivity } from './HabitsProgress';
-import { QuickCheckin } from './QuickCheckin';
-import { DailyGuide } from './DailyGuide';
+import { TodayTabs } from './DashboardGroups';
+import { DailyGuide, PhaseSubtitle } from './DailyGuide';
+import { CycleStatsCard } from './CycleStatsCard';
 import { useTodayCheckin } from '@/hooks/useTodayCheckin';
 import type { CycleOverview } from '@/hooks/useCycleOverview';
 
 const COPY = {
-    es: { title: 'Ritmo de hoy', subtitle: 'Cuéntanos cómo vas y tu día se ajusta a ti.' },
-    en: { title: "Today's rhythm", subtitle: 'Tell us how you are and your day adapts to you.' },
+    es: { planTitle: 'Tu plan de hoy', planLink: 'Ver plan semanal', planSub: 'Tus comidas y entrenamiento de hoy.', title: 'Ritmo de hoy', subtitle: 'Tu guía, tu plan y tus pendientes de hoy.' },
+    en: { planTitle: "Today's plan", planLink: 'Open planner', planSub: 'Your meals and workout for today.', title: "Today's rhythm", subtitle: 'Your guide, plan and to-dos for today.' },
 };
 
 /**
@@ -29,46 +29,35 @@ export const TodayRhythm: React.FC<{ overview: CycleOverview }> = ({ overview })
     return (
         <section
             aria-labelledby="today-rhythm-title"
-            className="relative isolate overflow-hidden bg-card rounded-3xl border border-border shadow-sm p-5 sm:p-6 flex flex-col gap-4"
+            className="relative isolate overflow-hidden bg-card rounded-2xl sm:rounded-3xl border border-border shadow-sm p-4 sm:p-6"
         >
-            <header className="flex flex-col gap-0.5">
-                <h2 id="today-rhythm-title" className="text-foreground text-xl font-semibold tracking-tight">{copy.title}</h2>
-                <p className="text-muted-foreground text-sm text-pretty">{copy.subtitle}</p>
-            </header>
-
-            {/*
-              Two independent columns on desktop so neither leaves a gap waiting for the other row:
-              left = check-in, meals, log/meds, week; right = today's guide, habits.
-              On mobile the columns dissolve (`contents`) and `order` puts the guide right after
-              the check-in, since it adapts to it. Pregnancy mode drops the guide.
-            */}
-            <div className="flex flex-col gap-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,24rem)] xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:items-start">
-                <div className="contents lg:flex lg:flex-col lg:gap-4 lg:min-w-0">
-                    {/* The check-in drives the rest of the card, so it gets its own soft panel. */}
-                    <div className="order-1 min-w-0 rounded-2xl bg-secondary/30 border border-border/50 p-3">
-                        <QuickCheckin state={checkin} lang={lang} />
-                    </div>
-                    {/* Plan right after the check-in: it is what the day is built around. Without a plan it shows empty slots that open the planner. */}
-                    <div className="order-3 min-w-0 empty:hidden border-t border-border/60 pt-4">
-                        <TodayPlanCard embedded />
-                    </div>
-                    <div className="order-4 min-w-0 border-t border-border/60 pt-4">
-                        <TodayChecklist embedded />
-                    </div>
-                    <div className="order-5 min-w-0">
-                        <WeekActivity />
-                    </div>
+            {/* Left: title + Hoy/Plan/Registro tabs. Right: cycle numbers as a compact side column. */}
+            <div className="flex flex-col gap-5 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:gap-6 lg:items-start">
+                <div className="min-w-0">
+                    <TodayTabs
+                        header={(id) => (
+                            <div className="flex flex-col gap-0.5 min-w-0">
+                                <div className="flex items-baseline gap-x-4 gap-y-0 flex-wrap">
+                                    <h2 id="today-rhythm-title" className="text-foreground text-lg sm:text-xl font-semibold tracking-tight">{id === 'plan' ? copy.planTitle : copy.title}</h2>
+                                    {id === 'plan' && (
+                                        <Link href="/planner" className="text-blossom text-sm font-semibold inline-flex items-center gap-1 py-2.5 -my-2.5 sm:py-0 sm:my-0 hover:text-blossom/80 transition-colors">
+                                            {copy.planLink}<Icon name="arrow_forward" size={14} />
+                                        </Link>
+                                    )}
+                                </div>
+                                {id === 'plan' && !overview.paused
+                                    ? <PhaseSubtitle overview={overview} lang={lang} fallback={copy.planSub} />
+                                    : <p className="text-muted-foreground text-sm text-pretty">{id === 'plan' ? copy.planSub : copy.subtitle}</p>}
+                            </div>
+                        )}
+                        guide={!overview.paused ? <DailyGuide state={checkin} overview={overview} lang={lang} /> : undefined}
+                    />
                 </div>
-                <div className="contents lg:flex lg:flex-col lg:gap-6 lg:min-w-0 lg:border-l lg:border-border/60 lg:pl-6">
-                    {!overview.paused && (
-                        <div className="order-2 min-w-0 border-t border-border/60 pt-4 lg:border-t-0 lg:pt-0">
-                            <DailyGuide state={checkin} overview={overview} lang={lang} />
-                        </div>
-                    )}
-                    <div className="order-6 min-w-0 border-t border-border/60 pt-4 lg:mt-2 lg:pt-8">
-                        <HabitsProgress embedded />
+                {overview.estimate && (
+                    <div className="min-w-0 border-t border-border/60 pt-4 lg:border-t-0 lg:pt-0 lg:border-l lg:pl-6">
+                        <CycleStatsCard overview={overview} lang={lang} embedded />
                     </div>
-                </div>
+                )}
             </div>
         </section>
     );

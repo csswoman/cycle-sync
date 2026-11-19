@@ -33,7 +33,7 @@ const COPY = {
 };
 
 /** Typical cycle and period length, how many cycles back them, and a small bar for each recent cycle. */
-export const CycleStatsCard: React.FC<{ overview: CycleOverview; lang: 'es' | 'en' }> = ({ overview, lang }) => {
+export const CycleStatsCard: React.FC<{ overview: CycleOverview; lang: 'es' | 'en'; embedded?: boolean }> = ({ overview, lang, embedded = false }) => {
     const { estimate } = overview;
     if (!estimate) return null;
     const c = COPY[lang];
@@ -49,8 +49,8 @@ export const CycleStatsCard: React.FC<{ overview: CycleOverview; lang: 'es' | 'e
     ];
 
     return (
-        <section aria-labelledby="cycle-stats-title" className="relative isolate overflow-hidden bg-card rounded-3xl border border-border shadow-sm p-5 flex flex-col gap-4">
-            <CardFlowers variant="stats" />
+        <section aria-labelledby="cycle-stats-title" className={embedded ? 'flex flex-col gap-4' : 'relative isolate overflow-hidden bg-card rounded-3xl border border-border shadow-sm p-5 flex flex-col gap-4'}>
+            {!embedded && <CardFlowers variant="stats" />}
             <div className="flex items-center justify-between gap-2">
                 <h3 id="cycle-stats-title" className="flex items-center gap-2 text-foreground text-base font-semibold">
                     <Icon name="insights" size={20} className="text-blossom" />{c.title}
@@ -60,11 +60,11 @@ export const CycleStatsCard: React.FC<{ overview: CycleOverview; lang: 'es' | 'e
                 </Link>
             </div>
 
-            <dl className="grid grid-cols-2 gap-2">
+            <dl className={embedded ? 'grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-2' : 'grid grid-cols-2 gap-2'}>
                 {stats.map((s) => (
-                    <div key={s.label} className="rounded-2xl bg-secondary/40 p-3">
+                    <div key={s.label} className={`rounded-xl bg-secondary/40 ${embedded ? 'px-3 py-2' : 'p-3'}`}>
                         <dt className="text-sm font-medium text-muted-foreground">{s.label}</dt>
-                        <dd className="mt-0.5 text-foreground text-2xl font-semibold tabular-nums leading-tight">
+                        <dd className={`text-foreground font-semibold tabular-nums leading-tight ${embedded ? 'text-xl' : 'text-2xl'}`}>
                             {s.value}{s.unit && <span className="text-sm font-medium text-muted-foreground ml-1">{s.unit}</span>}
                         </dd>
                     </div>
@@ -74,7 +74,7 @@ export const CycleStatsCard: React.FC<{ overview: CycleOverview; lang: 'es' | 'e
             {lengths.length > 1 ? (
                 <div>
                     <p className="text-sm font-semibold text-muted-foreground mb-2">{c.recent}</p>
-                    <ul className="flex items-end gap-1.5 h-20" aria-label={c.recent}>
+                    <ul className={`flex items-end gap-1.5 ${embedded ? 'h-16' : 'h-20'}`} aria-label={c.recent}>
                         {lengths.map((len, i) => {
                             const out = len < 21 || len > 35;
                             const h = 25 + 75 * ((len - min) / Math.max(1, max - min));

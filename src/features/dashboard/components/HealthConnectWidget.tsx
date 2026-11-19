@@ -95,8 +95,12 @@ const COPY = {
   },
 };
 
-/** `quiet`: renders as an open section (top rule, no card) for secondary placement. */
-const HealthConnectWidget: React.FC<{ quiet?: boolean }> = ({ quiet = false }) => {
+/** `quiet`: renders as an open section (top rule, no card) for secondary placement. `bare`: no chrome at all, to sit inside another card or tab. */
+/**
+ * Bare-only slots for the dashboard: `footerAction` sits before the sync button, `footerStart` replaces
+ * the connect hint, and `swap` is shown in place of the three tiles (e.g. the check-in).
+ */
+const HealthConnectWidget: React.FC<{ quiet?: boolean; bare?: boolean; footerAction?: React.ReactNode; footerStart?: React.ReactNode; swap?: React.ReactNode }> = ({ quiet = false, bare = false, footerAction, footerStart, swap }) => {
   const { t, language } = useLanguage();
   const { hideNumbers } = useDisplayPrefs();
   const { isGuest, promptSignup } = useGuest();
@@ -200,19 +204,30 @@ const HealthConnectWidget: React.FC<{ quiet?: boolean }> = ({ quiet = false }) =
   return (
     <section
       className={
-        quiet
+        bare
+          ? 'flex flex-col gap-3'
+          : quiet
           ? 'flex flex-col gap-5 pt-6 border-t border-border/60'
           : 'bg-card rounded-3xl border border-border/80 shadow-sm p-5 sm:p-6 flex flex-col gap-5'
       }
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
+      {/* Inside a tab the title is redundant, so the sync controls share the bottom row with the connect hint. */}
+      <div className={`flex gap-3 justify-between ${bare ? 'order-last items-center -my-1' : 'items-start'}`}>
+        {bare && (footerStart ?? (tokenConfigured === false ? (
+          <Link href="/settings" title={t.bodyConnectHint} className="inline-flex items-center gap-1.5 text-sm font-semibold text-blossom hover:underline min-h-9 min-w-0">
+            <Icon name="watch" size={16} className="shrink-0" />
+            <span className="truncate">{es ? 'Conecta tu reloj' : 'Connect your watch'}</span>
+            <Icon name="arrow_forward" size={14} className="shrink-0" />
+          </Link>
+        ) : <span />))}
+        <div className={`min-w-0 ${bare ? 'sr-only' : ''}`}>
           <h2 className="text-foreground text-lg sm:text-xl font-semibold tracking-tight leading-snug text-balance">{t.bodyTodayTitle}</h2>
           <p className="text-sm text-muted-foreground mt-0.5 text-pretty">
             {es ? 'Pasos, sueño y actividad de hoy' : "Today's steps, sleep and activity"}
           </p>
         </div>
-        <div className="flex items-center gap-2 shrink-0">
+        <div className={`flex items-center gap-2 shrink-0 ${bare ? 'ml-auto' : ''}`}>
+          {bare && footerAction}
           {showSync && (
             <span className="flex items-center gap-1.5 text-xs text-leaf font-medium bg-leaf/10 px-2.5 py-1 rounded-full tabular-nums">
               <span className="size-1.5 rounded-full bg-leaf animate-pulse" />
@@ -225,7 +240,7 @@ const HealthConnectWidget: React.FC<{ quiet?: boolean }> = ({ quiet = false }) =
             disabled={syncing}
             aria-label={t.fitbitSync}
             title={t.fitbitSync}
-            className="flex items-center justify-center size-10 rounded-full text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors disabled:opacity-50 cursor-pointer"
+            className="flex items-center justify-center size-8 rounded-lg text-muted-foreground hover:bg-secondary hover:text-foreground transition-colors disabled:opacity-50 cursor-pointer"
           >
             <Icon name="sync" size={18} className={syncing ? 'animate-spin' : ''} />
           </button>
@@ -249,7 +264,9 @@ const HealthConnectWidget: React.FC<{ quiet?: boolean }> = ({ quiet = false }) =
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      {/* `swap` sits in the same grid cell as the tiles, so showing it never makes the card taller. */}
+      <div className="grid">
+      <div className={`col-start-1 row-start-1 min-w-0 grid grid-cols-1 sm:grid-cols-3 gap-3 ${swap ? 'invisible' : ''}`} aria-hidden={swap ? true : undefined}>
         <MetricCard
           icon="directions_walk"
           label={t.fitbitSteps}
@@ -259,6 +276,7 @@ const HealthConnectWidget: React.FC<{ quiet?: boolean }> = ({ quiet = false }) =
           accent={{ text: 'text-leaf', fill: 'var(--leaf-fresh)' }}
           kind="steps"
           lang={es ? 'es' : 'en'}
+          dense={bare}
           locked={isGuest}
           onLocked={promptSignup}
           onSave={(raw) => saveEntry('steps', raw)}
@@ -272,6 +290,7 @@ const HealthConnectWidget: React.FC<{ quiet?: boolean }> = ({ quiet = false }) =
           accent={{ text: 'text-blossom', fill: 'var(--petal)' }}
           kind="sleep"
           lang={es ? 'es' : 'en'}
+          dense={bare}
           locked={isGuest}
           onLocked={promptSignup}
           onSave={(raw) => saveEntry('sleep', raw)}
@@ -285,10 +304,13 @@ const HealthConnectWidget: React.FC<{ quiet?: boolean }> = ({ quiet = false }) =
           accent={{ text: 'text-coral', fill: 'var(--coral)' }}
           kind="activity"
           lang={es ? 'es' : 'en'}
+          dense={bare}
           locked={isGuest}
           onLocked={promptSignup}
           onSave={(raw) => saveEntry('activity', raw)}
         />
+      </div>
+      {swap && <div className="col-start-1 row-start-1 min-w-0">{swap}</div>}
       </div>
 
       {summary && (heartRate || summary.distance_meters > 0 || (!hideNumbers && (summary.weight_kg ?? 0) > 0)) && (
@@ -327,7 +349,7 @@ const HealthConnectWidget: React.FC<{ quiet?: boolean }> = ({ quiet = false }) =
         </div>
       )}
 
-      {tokenConfigured === false && (
+      {!bare && tokenConfigured === false && (
         <Link
           href="/settings"
           className="inline-flex items-center gap-1.5 text-sm font-semibold text-blossom hover:underline self-start min-h-10"
@@ -357,6 +379,8 @@ interface MetricCardProps {
   accent: { text: string; fill: string };
   kind: EntryType;
   lang: 'es' | 'en';
+  /** Tighter padding and a smaller value, for the dashboard tab. */
+  dense?: boolean;
   /** Saves what was typed; resolves to an error message or null. */
   onSave: (raw: string) => Promise<string | null>;
   /** Guests see sample values and cannot edit: tapping asks them to sign up. */
@@ -364,7 +388,7 @@ interface MetricCardProps {
   onLocked?: () => void;
 }
 
-function MetricCard({ icon, label, parts, progress, goalText, accent, kind, lang, onSave, locked, onLocked }: MetricCardProps) {
+function MetricCard({ icon, label, parts, progress, goalText, accent, kind, lang, onSave, locked, onLocked, dense }: MetricCardProps) {
   const copy = COPY[lang];
   const field = copy[kind];
   const [editing, setEditing] = useState(false);
@@ -428,7 +452,7 @@ function MetricCard({ icon, label, parts, progress, goalText, accent, kind, lang
         }
       }}
       className={
-        'group rounded-2xl border p-4 flex flex-col gap-4 transition-colors duration-200 ' +
+        `group rounded-2xl border flex flex-col transition-colors duration-200 ${dense ? 'px-3.5 py-3 gap-2.5' : 'p-3 gap-2.5'} ` +
         (editing
           ? 'border-primary/60 bg-card'
           : 'border-border/70 bg-secondary/40 hover:bg-secondary/60 hover:border-border select-none ' + (locked ? 'cursor-pointer' : 'cursor-text'))
@@ -442,6 +466,7 @@ function MetricCard({ icon, label, parts, progress, goalText, accent, kind, lang
         )}
       </div>
 
+      {/* Value, bar and goal stacked. */}
       <div className="flex flex-col gap-2.5">
         {editing ? (
           <form
@@ -473,7 +498,7 @@ function MetricCard({ icon, label, parts, progress, goalText, accent, kind, lang
                   cancel();
                 }
               }}
-              className="w-full min-w-0 bg-transparent outline-none text-3xl font-semibold tracking-tight tabular-nums leading-none text-foreground placeholder:text-muted-foreground/40 disabled:opacity-60"
+              className={`w-full min-w-0 bg-transparent outline-none text-3xl font-semibold tracking-tight tabular-nums leading-none text-foreground placeholder:text-muted-foreground/40 disabled:opacity-60`}
             />
             <span className="text-sm font-medium text-muted-foreground shrink-0">{saving ? '…' : field.unit}</span>
           </form>
@@ -487,7 +512,7 @@ function MetricCard({ icon, label, parts, progress, goalText, accent, kind, lang
             ))}
           </p>
         ) : (
-          <p className="text-3xl font-semibold tracking-tight leading-none text-muted-foreground/50" aria-label={lang === 'es' ? 'Sin datos' : 'No data'}>
+          <p className={`text-3xl font-semibold tracking-tight leading-none text-muted-foreground/50`} aria-label={lang === 'es' ? 'Sin datos' : 'No data'}>
             —
           </p>
         )}

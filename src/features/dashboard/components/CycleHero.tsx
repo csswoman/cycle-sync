@@ -79,9 +79,9 @@ export const CycleHero: React.FC<{ overview: CycleOverview }> = ({ overview }) =
     const growth = bloomGrowth(info.cycleDay, estimate.ovulationDay, overdue);
 
     return (
-        <div data-phase={tone} className="phase-wash relative isolate overflow-hidden rounded-3xl border border-border/80 shadow-sm p-6 sm:p-7 flex flex-col gap-5">
+        <div data-phase={tone} className="phase-wash relative isolate overflow-hidden rounded-3xl border border-border/80 shadow-sm p-4 sm:p-5 flex flex-col gap-3">
             <CardFlowers variant="heroData" />
-            <Bloom growth={growth} tone={tone} className="absolute -top-2 right-0 h-32 sm:h-44 w-auto opacity-90" />
+            <Bloom growth={growth} tone={tone} className="absolute -top-2 right-0 h-24 sm:h-28 w-auto opacity-90" />
             <div className="relative flex flex-col gap-1 pr-20 sm:pr-32">
                 <h2 className="text-foreground text-2xl sm:text-3xl font-semibold tracking-tight text-balance">{late ? text.lateTitle : phase.focus}</h2>
                 <p className="text-sm sm:text-base font-semibold text-phase">
@@ -106,7 +106,7 @@ export const CycleHero: React.FC<{ overview: CycleOverview }> = ({ overview }) =
                 />
             </div>
             <div className="relative grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="bg-secondary/40 rounded-2xl p-4">
+                <div className="bg-secondary/40 rounded-2xl px-3 py-2.5">
                     <p className="text-sm font-medium text-muted-foreground">{text.nextPeriod}</p>
                     <p className="text-foreground font-bold text-xl xl:text-lg 2xl:text-xl mt-1">{periodText}</p>
                     {next && (
@@ -117,11 +117,11 @@ export const CycleHero: React.FC<{ overview: CycleOverview }> = ({ overview }) =
                         </p>
                     )}
                 </div>
-                <div className="bg-secondary/40 rounded-2xl p-4">
+                <div className="bg-secondary/40 rounded-2xl px-3 py-2.5">
                     <p className="text-sm font-medium text-muted-foreground">{text.ovulation}</p>
                     <p className="text-foreground font-bold text-xl xl:text-lg 2xl:text-xl mt-1">{ovulationText}</p>
                 </div>
-                <div className="bg-secondary/40 rounded-2xl p-4">
+                <div className="bg-secondary/40 rounded-2xl px-3 py-2.5">
                     <p className="text-sm font-medium text-muted-foreground">{text.fertileWindow}</p>
                     {next && (
                         <p className="text-foreground font-bold text-xl xl:text-lg 2xl:text-xl mt-1">{overdue ? '-' : `${fmt(next.fertileStart)} – ${fmt(next.fertileEnd)}`}</p>

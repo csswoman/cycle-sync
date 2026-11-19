@@ -31,6 +31,10 @@ const COPY = {
         more: 'Algo más en el cuerpo',
         less: 'Ocultar',
         full: 'Registro completo',
+        step: (n: number, total: number) => `Pregunta ${n} de ${total}`,
+        prev: 'Pregunta anterior',
+        next: 'Siguiente pregunta',
+        close: 'Volver a tus datos',
         body: { Bloating: 'Hinchazón', 'Mild Cramps': 'Cólicos', Headache: 'Dolor de cabeza', Anxiety: 'Ansiedad', 'Energy Crash After Meals': 'Bajón después de comer', 'Acne Flare': 'Brote de acné' } as Record<string, string>,
     },
     en: {
@@ -53,6 +57,10 @@ const COPY = {
         more: 'Anything else in your body',
         less: 'Hide',
         full: 'Full log',
+        step: (n: number, total: number) => `Question ${n} of ${total}`,
+        prev: 'Previous question',
+        next: 'Next question',
+        close: 'Back to your data',
         body: { Bloating: 'Bloating', 'Mild Cramps': 'Cramps', Headache: 'Headache', Anxiety: 'Anxiety', 'Energy Crash After Meals': 'Crash after meals', 'Acne Flare': 'Acne flare' } as Record<string, string>,
     },
 };
@@ -76,7 +84,7 @@ const Chip: React.FC<ChipProps> = ({ selected, onClick, children, role = 'radio'
         role={role}
         aria-checked={selected}
         onClick={onClick}
-        className={`min-h-8 px-2.5 rounded-full text-[13px] font-medium border transition-colors cursor-pointer active:scale-[0.98] ${selected
+        className={`min-h-8 px-2.5 rounded-full text-[13px] font-medium whitespace-nowrap border transition-colors cursor-pointer active:scale-[0.98] ${selected
             ? 'bg-primary/15 border-primary/40 text-primary'
             : 'bg-card border-border/60 text-muted-foreground hover:border-border hover:text-foreground'
             }`}
@@ -96,12 +104,16 @@ const Row: React.FC<{ label: string; icon: string; children: React.ReactNode; mu
         <div role={multi ? 'group' : 'radiogroup'} aria-label={label} className="flex flex-wrap gap-1.5">{children}</div>
     </div>
 );
-/** One-tap daily check-in: energy, motivation, sleep, cravings and a few body signals. */
-export const QuickCheckin: React.FC<{ state: TodayCheckinState; lang: Lang }> = ({ state, lang }) => {
+/**
+ * One-tap daily check-in: energy, motivation, sleep, cravings and a few body signals.
+ * `paged` shows one question at a time (for the dashboard's body tab); picking a single answer moves on.
+ */
+export const QuickCheckin: React.FC<{ state: TodayCheckinState; lang: Lang; paged?: boolean; onClose?: () => void }> = ({ state, lang, paged = false, onClose }) => {
     const copy = COPY[lang];
     const router = useRouter();
     const { isGuest, promptSignup } = useGuest();
     const [moreOpen, setMoreOpen] = useState(false);
+    const [page, setPage] = useState(0);
     const { log, logged, yesterday, save } = state;
 
     const set = (patch: Partial<StoredLog>) => {
@@ -124,7 +136,124 @@ export const QuickCheckin: React.FC<{ state: TodayCheckinState; lang: Lang }> = 
     };
 
     if (state.loading) {
-        return <div className="h-40 rounded-2xl bg-secondary/40 animate-pulse" aria-hidden />;
+        return <div className={`${paged ? 'h-28' : 'h-40'} rounded-2xl bg-secondary/40 animate-pulse`} aria-hidden />;
+    }
+
+    if (paged) {
+        const signedIn = !isGuest && !!state.userId;
+        const last = 4;
+        /** Saves a single-choice answer and, when it saved, moves to the next question. */
+        const pick = (patch: Partial<StoredLog>) => {
+            set(patch);
+            if (signedIn) setPage((p) => Math.min(p + 1, last));
+        };
+        const steps: { id: string; label: string; icon: string; multi?: boolean; body: React.ReactNode }[] = [
+            {
+                id: 'energy', label: copy.energy, icon: 'bolt',
+                body: copy.energyOpts.map((o, i) => (
+                    <Chip key={o} selected={energyBucket(log.energyLevel) === i} onClick={() => pick({ energyLevel: ENERGY_VALUES[i] })}>{o}</Chip>
+                )),
+            },
+            {
+                id: 'motivation', label: copy.motivation, icon: 'walk',
+                body: copy.motivationOpts.map((o, i) => (
+                    <Chip key={o} selected={log.motivation === i + 1} onClick={() => pick({ motivation: i + 1 })}>{o}</Chip>
+                )),
+            },
+            {
+                id: 'sleep', label: copy.sleep, icon: 'bedtime',
+                body: copy.sleepOpts.map((o, i) => (
+                    <Chip key={o} selected={sleepBucket(log.sleepHours) === i} onClick={() => pick({ sleepHours: SLEEP_VALUES[i] })}>{o}</Chip>
+                )),
+            },
+            {
+                id: 'cravings', label: copy.cravings, icon: 'local_fire_department', multi: true,
+                body: (
+                    <>
+                        <Chip role="checkbox" selected={logged && log.cravings.length === 0} onClick={() => pick({ cravings: [], cravingIntensity: null })}>{copy.none}</Chip>
+                        {CRAVINGS.map((k) => (
+                            <Chip key={k} role="checkbox" selected={log.cravings.includes(k)} onClick={() => toggleCraving(k)}>{copy.cravingOpts[k]}</Chip>
+                        ))}
+                        {log.cravings.length > 0 && (
+                            <span role="radiogroup" aria-label={copy.intensity} className="flex items-center gap-1.5 pl-2 ml-0.5 border-l border-border">
+                                <span className="text-[13px] text-muted-foreground mr-0.5 whitespace-nowrap">{copy.intensity}</span>
+                                {copy.intensityOpts.map((o, i) => (
+                                    <Chip key={o} selected={log.cravingIntensity === i + 1} onClick={() => pick({ cravingIntensity: i + 1 })}>{o}</Chip>
+                                ))}
+                            </span>
+                        )}
+                    </>
+                ),
+            },
+            {
+                id: 'body', label: copy.more, icon: 'monitor_heart', multi: true,
+                body: Object.entries(copy.body).map(([key, label]) => (
+                    <Chip key={key} role="checkbox" selected={log.symptoms.includes(key)} onClick={() => toggleSymptom(key)}>{label}</Chip>
+                )),
+            },
+        ];
+        const at = Math.min(page, steps.length - 1);
+        const current = steps[at];
+        const go = (d: number) => setPage((p) => Math.max(0, Math.min(last, p + d)));
+        const navBtn = 'grid place-items-center size-8 rounded-lg text-muted-foreground hover:bg-card hover:text-foreground transition-colors cursor-pointer disabled:opacity-30 disabled:pointer-events-none';
+        // Compact panel the size of the three body tiles: question + steps on top, answers below.
+        return (
+            <section aria-labelledby="quick-checkin-title" className="h-full rounded-2xl border border-border/70 bg-secondary/40 px-3 py-2.5 flex flex-col justify-center gap-2.5">
+                <div className="flex items-center gap-2 min-w-0">
+                    <span className="grid place-items-center size-7 rounded-lg bg-blossom/10 text-blossom shrink-0">
+                        <Icon name={current.icon} size={16} weight="duotone" />
+                    </span>
+                    <p className="min-w-0 flex-1 truncate leading-tight" aria-live="polite">
+                        <span id="quick-checkin-title" className="block text-xs text-muted-foreground">
+                            {copy.title} · {at + 1}/{steps.length}
+                            {logged && <span className="text-leaf font-medium"> · {copy.done}</span>}
+                        </span>
+                        <span className="block text-sm font-semibold text-foreground truncate">{current.label}</span>
+                    </p>
+                    {!logged && yesterday && (
+                        <button
+                            type="button"
+                            onClick={sameAsYesterday}
+                            title={copy.same}
+                            className="shrink-0 inline-flex items-center gap-1 px-2.5 min-h-8 rounded-full text-xs font-semibold bg-card hover:bg-card/70 text-foreground transition-colors cursor-pointer"
+                        >
+                            <Icon name="history" size={14} /><span className="hidden sm:inline">{copy.same}</span>
+                        </button>
+                    )}
+                    <div className="flex items-center shrink-0">
+                        <button type="button" onClick={() => go(-1)} disabled={at === 0} aria-label={copy.prev} className={navBtn}>
+                            <Icon name="chevron_left" size={16} />
+                        </button>
+                        <div className="flex items-center gap-1" aria-hidden>
+                            {steps.map((st, i) => (
+                                <span
+                                    key={st.id}
+                                    onClick={() => setPage(i)}
+                                    className={`h-1.5 rounded-full transition-all duration-300 cursor-pointer ${i === at ? 'w-4 bg-blossom' : 'w-1.5 bg-foreground/20 hover:bg-foreground/40'}`}
+                                />
+                            ))}
+                        </div>
+                        <button type="button" onClick={() => go(1)} disabled={at === last} aria-label={copy.next} className={navBtn}>
+                            <Icon name="chevron_right" size={16} />
+                        </button>
+                    </div>
+                    {onClose && (
+                        <button type="button" onClick={onClose} aria-label={copy.close} title={copy.close} className={`${navBtn} -mr-1`}>
+                            <Icon name="close" size={16} />
+                        </button>
+                    )}
+                </div>
+
+                <div
+                    key={current.id}
+                    role={current.multi ? 'group' : 'radiogroup'}
+                    aria-label={current.label}
+                    className="flex flex-nowrap items-center gap-1.5 overflow-x-auto scrollbar-hide [&>*]:shrink-0"
+                >
+                    {current.body}
+                </div>
+            </section>
+        );
     }
 
     return (

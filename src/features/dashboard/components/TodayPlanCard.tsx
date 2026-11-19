@@ -209,8 +209,8 @@ export const TodayPlanCard: React.FC<{ embedded?: boolean }> = ({ embedded = fal
         const open = () => (isGuest ? promptSignup() : router.push('/planner'));
         return (
             <div className={embedded ? 'flex flex-col gap-3' : 'bg-card rounded-3xl border border-border shadow-sm p-5 sm:p-6 flex flex-col gap-3'}>
-                <div className="flex items-center justify-between gap-2">
-                    <h3 className={`text-foreground font-semibold ${embedded ? 'text-base' : 'text-lg'}`}>{copy.title}</h3>
+                <div className={`flex items-center gap-2 ${embedded ? "justify-start" : "justify-between"}`}>
+                    {!embedded && <h3 className={`text-foreground font-semibold ${embedded ? 'text-sm' : 'text-lg'}`}>{copy.title}</h3>}
                     <button
                         onClick={open}
                         className="shrink-0 inline-flex items-center gap-1 px-3.5 min-h-10 rounded-full text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer"
@@ -227,15 +227,17 @@ export const TodayPlanCard: React.FC<{ embedded?: boolean }> = ({ embedded = fal
 
     return (
         <div className={embedded ? '' : 'bg-card rounded-3xl border border-border shadow-sm p-5 sm:p-6'}>
-            <div className="flex items-center justify-between mb-1">
-                <h3 className={`text-foreground font-semibold ${embedded ? 'text-base' : 'text-lg'}`}>{copy.title}</h3>
-                <button
-                    onClick={() => router.push('/planner')}
-                    className="text-blossom text-sm font-semibold flex items-center gap-1 min-h-10 px-2 -mr-2 hover:text-blossom/80 transition-colors"
-                >
-                    {copy.open}<Icon name="arrow_forward" size={14} />
-                </button>
-            </div>
+            {!embedded && (
+                <div className="flex items-center justify-between mb-1">
+                    <h3 className="text-foreground font-semibold text-lg">{copy.title}</h3>
+                    <button
+                        onClick={() => router.push('/planner')}
+                        className="text-blossom text-sm font-semibold flex items-center gap-1 min-h-10 px-2 -mr-2 hover:text-blossom/80 transition-colors"
+                    >
+                        {copy.open}<Icon name="arrow_forward" size={14} />
+                    </button>
+                </div>
+            )}
             {workout && (
                 <div className="divide-y divide-border/60">
                     <Item

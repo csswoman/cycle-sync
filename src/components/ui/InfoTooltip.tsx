@@ -88,7 +88,7 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({ label, children, class
                 onMouseLeave={hide}
                 onFocus={(e) => e.currentTarget.matches(':focus-visible') && show()}
                 onBlur={hide}
-                className={`relative inline-flex items-center justify-center size-6 rounded-full align-middle text-muted-foreground transition-colors hover:text-foreground hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring before:absolute before:-inset-2 before:content-[''] ${open ? 'bg-secondary text-foreground' : ''} ${className}`}
+                className={`relative inline-flex shrink-0 items-center justify-center size-6 rounded-full align-middle text-muted-foreground transition-colors hover:text-foreground hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring before:absolute before:-inset-2 before:content-[''] ${open ? 'bg-secondary text-foreground' : ''} ${className}`}
             >
                 <Icon name="help" size={16} />
             </button>

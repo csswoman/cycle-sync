@@ -5,13 +5,11 @@ import { useLanguage } from '@/i18n/LanguageContext';
 import { useCycleOverview } from '@/hooks/useCycleOverview';
 import { CycleHero } from './components/CycleHero';
 import { TodayRhythm } from './components/TodayRhythm';
-import { WeeklySummaryCard } from './components/WeeklySummaryCard';
+import { InsightsCard, TrackingCard } from './components/DashboardGroups';
 import { AppointmentBanner } from './components/AppointmentBanner';
 import { ProfileNudge } from './components/ProfileNudge';
-import HealthConnectWidget from './components/HealthConnectWidget';
 import { FertilityWindowCard, PregnancyHero } from '@/features/pregnancy/PregnancyCards';
 import { PhaseExplorer } from './components/PhaseExplorer';
-import { CycleStatsCard } from './components/CycleStatsCard';
 import { dashboardText } from './dashboardText';
 
 interface DashboardProps {
@@ -20,7 +18,7 @@ interface DashboardProps {
 }
 
 /**
- * Hierarchy: the cycle hero leads, then today's body data. With data, today's ritual follows, then phase
+ * Hierarchy: the cycle hero leads, then today's ritual, then a Tracking card (habits/body/week tabs), then phase
  * suggestions beside the cycle numbers and the weekly summary. Without data
  * (guests, new accounts) a phase explorer takes the place of the personal
  * sections so the page still teaches something. Catalog content
@@ -31,7 +29,6 @@ const Dashboard: React.FC<DashboardProps> = ({ userName }) => {
     const lang = language === 'es' ? 'es' : 'en';
     const text = dashboardText[lang];
     const overview = useCycleOverview();
-    const showPhase = !!overview.info && !overview.paused;
     const explore = !overview.loading && !overview.paused && !overview.info;
     const today = new Intl.DateTimeFormat(lang, { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
 
@@ -47,32 +44,19 @@ const Dashboard: React.FC<DashboardProps> = ({ userName }) => {
 
                 <AppointmentBanner />
                 <ProfileNudge overview={overview} lang={lang} />
-                {/* Cycle and body side by side on wide screens; equal height so the row reads as one band. */}
-                <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-stretch [&>*]:h-full">
-                    {overview.paused
-                        ? <PregnancyHero overview={overview} lang={lang} />
-                        : <CycleHero overview={overview} />}
-                    <HealthConnectWidget />
+                <div className="grid gap-6 lg:grid-cols-2">
+                    <div className="flex flex-col gap-6 min-w-0 [&>*:first-child]:flex-1 [&>*:first-child]:justify-between">
+                        {overview.paused
+                            ? <PregnancyHero overview={overview} lang={lang} />
+                            : <CycleHero overview={overview} />}
+                        <FertilityWindowCard overview={overview} lang={lang} />
+                    </div>
+                    <TrackingCard />
                 </div>
-                <FertilityWindowCard overview={overview} lang={lang} />
-
-                {explore ? (
-                    <>
-                        <TodayRhythm overview={overview} />
-                        <PhaseExplorer answers={overview.answers} />
-                    </>
-                ) : (
-                    <>
-                        <TodayRhythm overview={overview} />
-                        <div className={`grid grid-cols-1 ${showPhase ? 'lg:grid-cols-2' : ''} gap-6 items-start`}>
-                            {showPhase && <CycleStatsCard overview={overview} lang={lang} />}
-                            <WeeklySummaryCard />
-                        </div>
-                    </>
-                )}
-
-
-
+                <TodayRhythm overview={overview} />
+                {explore
+                    ? <PhaseExplorer answers={overview.answers} />
+                    : <InsightsCard overview={overview} showCycle={false} />}
                 <footer className="pt-4 border-t border-border/60 text-center">
                     <p className="text-sm text-muted-foreground max-w-lg mx-auto leading-relaxed text-pretty">{text.disclaimer}</p>
                 </footer>
