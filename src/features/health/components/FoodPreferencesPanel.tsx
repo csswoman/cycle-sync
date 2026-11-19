@@ -171,10 +171,10 @@ export const FoodPreferencesPanel: React.FC<Props> = ({
     }`;
 
   return (
-    <section className="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-6 items-start">
+    <section className="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-4 sm:gap-6 items-start">
       {/* Foods */}
-      <div className="bg-card rounded-2xl border border-border p-6 shadow-sm flex flex-col gap-5">
-        <div className="flex items-start justify-between gap-3">
+      <div className="bg-card rounded-2xl sm:rounded-3xl border border-border p-4 sm:p-6 shadow-sm flex flex-col gap-5">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-1 sm:gap-3 -mb-2 sm:mb-0">
           <div>
             <h3 className="text-foreground text-lg font-bold">{t('Mis gustos', 'My tastes')}</h3>
             <p className="text-muted-foreground text-sm mt-1">
@@ -185,16 +185,16 @@ export const FoodPreferencesPanel: React.FC<Props> = ({
             </p>
           </div>
           {hasFoods && (
-            <div className="flex items-center gap-4 shrink-0">
+            <div className="flex items-center justify-between sm:justify-start gap-4 shrink-0">
               <button
                 onClick={() => setCompact((c) => !c)}
                 aria-expanded={!compact}
-                className="min-h-10 flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-primary"
+                className="min-h-11 sm:min-h-10 flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-primary"
               >
                 <Icon name="chevron_right" size={16} weight="bold" className={`text-muted-foreground transition-transform ${compact ? '' : 'rotate-90'}`} />
                 {compact ? t('Editar', 'Edit') : t('Compactar', 'Collapse')}
               </button>
-              <button onClick={onClearFoods} className="min-h-10 text-sm text-muted-foreground hover:text-foreground underline">
+              <button onClick={onClearFoods} className="min-h-11 sm:min-h-10 text-sm text-muted-foreground hover:text-foreground underline">
                 {t('Borrar todo', 'Clear all')}
               </button>
             </div>
@@ -258,7 +258,7 @@ export const FoodPreferencesPanel: React.FC<Props> = ({
             </div>
           </div>
           {customEntries.length > 0 && <div className="flex flex-wrap gap-2 mt-3">{customEntries.map(renderChip)}</div>}
-          <p className="text-xs text-muted-foreground mt-2">
+          <p className="text-sm text-muted-foreground mt-2">
             {t(
               'Si escribes dos palabras, como "pescado hervido", solo se descartan las recetas que mencionen las dos.',
               'If you type two words, like "boiled fish", only recipes that mention both are filtered out.'
@@ -284,9 +284,9 @@ export const FoodPreferencesPanel: React.FC<Props> = ({
         </div>
       </div>
 
-      <div className="flex flex-col gap-6 min-w-0">
+      <div className="flex flex-col gap-4 sm:gap-6 min-w-0">
       {/* Habits */}
-      <div className="bg-card rounded-2xl border border-border p-6 shadow-sm flex flex-col gap-5">
+      <div className="bg-card rounded-2xl sm:rounded-3xl border border-border p-4 sm:p-6 shadow-sm flex flex-col gap-5">
         <div>
           <h3 className="text-foreground text-lg font-bold">{t('Tus hábitos', 'Your habits')}</h3>
           <p className="text-muted-foreground text-sm mt-1">
@@ -323,7 +323,7 @@ export const FoodPreferencesPanel: React.FC<Props> = ({
 
       {/* Dish upgrades */}
       {dishTips.length > 0 && (
-        <div className="bg-card rounded-2xl border border-border p-6 shadow-sm flex flex-col gap-5">
+        <div className="bg-card rounded-2xl sm:rounded-3xl border border-border p-4 sm:p-6 shadow-sm flex flex-col gap-5">
           <div>
             <h3 className="text-foreground text-lg font-semibold text-balance">{t('Cómo mejorar tus platos favoritos', 'How to upgrade your favorite dishes')}</h3>
             <p className="text-muted-foreground text-sm mt-1">
@@ -355,7 +355,7 @@ export const FoodPreferencesPanel: React.FC<Props> = ({
                     {d.portion}
                   </p>
                   <details className="group">
-                    <summary className="flex items-center gap-1.5 min-h-10 cursor-pointer list-none [&::-webkit-details-marker]:hidden text-sm font-medium text-foreground">
+                    <summary className="flex items-center gap-1.5 min-h-11 sm:min-h-10 cursor-pointer list-none [&::-webkit-details-marker]:hidden text-sm font-medium text-foreground">
                       <Icon name="chevron_right" size={16} weight="bold" className="text-muted-foreground transition-transform group-open:rotate-90" />
                       {t(`Cómo mejorarlo (${d.upgrades.length})`, `How to improve it (${d.upgrades.length})`)}
                     </summary>
@@ -373,7 +373,7 @@ export const FoodPreferencesPanel: React.FC<Props> = ({
             <button
               onClick={() => setAllTips((v) => !v)}
               aria-expanded={allTips}
-              className="min-h-10 self-start text-sm font-medium text-foreground hover:text-primary underline"
+              className="min-h-11 sm:min-h-10 self-start text-sm font-medium text-foreground hover:text-primary underline"
             >
               {allTips
                 ? t('Ver menos', 'Show less')
@@ -383,7 +383,7 @@ export const FoodPreferencesPanel: React.FC<Props> = ({
         </div>
       )}
       {/* Suggestions */}
-      <div className="bg-card rounded-2xl border border-border p-6 shadow-sm flex flex-col gap-5">
+      <div className="bg-card rounded-2xl sm:rounded-3xl border border-border p-4 sm:p-6 shadow-sm flex flex-col gap-5">
         <div>
           <h3 className="text-foreground text-lg font-semibold text-balance">{t('Sugerencias para completar tu dieta', 'Ideas to round out your diet')}</h3>
           <p className="text-muted-foreground text-sm mt-1">
@@ -443,7 +443,7 @@ export const FoodPreferencesPanel: React.FC<Props> = ({
                   </div>
                 )}
                 <details className="group">
-                  <summary className="flex items-center gap-1.5 min-h-10 cursor-pointer list-none [&::-webkit-details-marker]:hidden text-sm font-medium text-foreground">
+                  <summary className="flex items-center gap-1.5 min-h-11 sm:min-h-10 cursor-pointer list-none [&::-webkit-details-marker]:hidden text-sm font-medium text-foreground">
                     <Icon name="chevron_right" size={16} weight="bold" className="text-muted-foreground transition-transform group-open:rotate-90" />
                     {t('Equivalencias y suplemento', 'Equivalents and supplement')}
                   </summary>

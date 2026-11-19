@@ -18,9 +18,12 @@ import {
   ProteinMealPlan,
 } from '@/lib/nutrition/targets';
 import { Icon } from '@/components/ui/Icon';
+import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { useDisplayPrefs } from '@/hooks/useDisplayPrefs';
 import { useLanguage } from '@/i18n/LanguageContext';
 import type { NewRecipe, LibraryRecipe } from '@/types/recipes';
+
+const FOODS_PER_PAGE = 5;
 
 interface PlateBuilderProps {
   weightKg: number;
@@ -31,6 +34,8 @@ interface PlateBuilderProps {
   /** Recipes from the catalog suggested as a starting point. */
   suggestedRecipes?: LibraryRecipe[];
   onOpenRecipe?: (recipe: LibraryRecipe) => void;
+  /** Opens the targets tab; shown next to the daily-goal line. */
+  onAdjustTargets?: () => void;
   /** Daily protein split into meals; the plate is rated as one of those meals. */
   mealPlan?: ProteinMealPlan;
 }
@@ -42,6 +47,7 @@ export const PlateBuilder: React.FC<PlateBuilderProps> = ({
   language = 'es',
   suggestedRecipes = [],
   onOpenRecipe,
+  onAdjustTargets,
   mealPlan,
 }) => {
   const { language: contextLang } = useLanguage();
@@ -56,6 +62,7 @@ export const PlateBuilder: React.FC<PlateBuilderProps> = ({
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<FoodCategory | 'all'>('all');
+  const [page, setPage] = useState(0);
   const [saveSuccessMsg, setSaveSuccessMsg] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -187,17 +194,21 @@ export const PlateBuilder: React.FC<PlateBuilderProps> = ({
     'dairy_alternatives',
   ];
 
+  const pageCount = Math.max(1, Math.ceil(filteredFoods.length / FOODS_PER_PAGE));
+  const currentPage = Math.min(page, pageCount - 1);
+  const pageFoods = filteredFoods.slice(currentPage * FOODS_PER_PAGE, (currentPage + 1) * FOODS_PER_PAGE);
+
   return (
-    <div className="w-full flex flex-col gap-6">
+    <div className="w-full flex flex-col gap-4 sm:gap-6">
       {/* Ideas desde las recetas */}
       {suggestedRecipes.length > 0 && onOpenRecipe && (
         <section aria-labelledby="plate-presets" className="flex flex-col gap-3">
-          <h3 id="plate-presets" className="text-foreground text-lg font-semibold text-balance">
+          <h3 id="plate-presets" className="text-foreground text-lg sm:text-xl font-semibold text-balance">
             {isEn ? 'Start with an idea' : 'Empieza con una idea'}
           </h3>
           <ul className="flex gap-3 overflow-x-auto scroll-rail snap-x snap-mandatory pb-3 -mx-1 px-1">
             {suggestedRecipes.map((r) => (
-              <li key={r.id} className="snap-start shrink-0 w-72">
+              <li key={r.id} className="snap-start shrink-0 w-72 max-w-[85vw]">
                 <button
                   type="button"
                   onClick={() => onOpenRecipe(r)}
@@ -221,13 +232,13 @@ export const PlateBuilder: React.FC<PlateBuilderProps> = ({
         </section>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-start">
         {/* Tu plato (sticky on desktop) */}
         <section aria-labelledby="plate-current" className="lg:col-span-5 lg:sticky lg:top-4">
-          <div className="bg-card rounded-3xl border border-border p-5 shadow-sm flex flex-col gap-5">
+          <div className="bg-card rounded-2xl sm:rounded-3xl border border-border p-4 sm:p-5 shadow-sm flex flex-col gap-4 sm:gap-5">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h3 id="plate-current" className="font-semibold text-foreground text-lg text-balance">
+                <h3 id="plate-current" className="font-semibold text-foreground text-lg sm:text-xl text-balance">
                   {isEn ? 'Your plate' : 'Tu plato'}
                 </h3>
                 <p className="text-sm text-muted-foreground">
@@ -236,35 +247,36 @@ export const PlateBuilder: React.FC<PlateBuilderProps> = ({
                     : (isEn ? `${plate.length} ${plate.length === 1 ? 'food' : 'foods'}, ${plateTotals.totalWeightGrams} g total` : `${plate.length} ${plate.length === 1 ? 'alimento' : 'alimentos'}, ${plateTotals.totalWeightGrams} g en total`)}
                 </p>
               </div>
-              {plate.length > 0 && (
+              {!hideNumbers && canFit && (
                 <button
                   type="button"
-                  onClick={handleClearPlate}
-                  className="min-h-10 px-3 rounded-full text-sm text-muted-foreground hover:text-destructive hover:bg-secondary transition-colors"
+                  onClick={handleFitToMeal}
+                  className="shrink-0 inline-flex items-center gap-2 min-h-11 sm:min-h-10 px-4 rounded-full bg-secondary hover:bg-accent text-sm font-medium text-foreground transition-colors"
                 >
-                  {isEn ? 'Clear' : 'Vaciar'}
+                  <Icon name="auto_fix_high" size={16} weight="bold" />
+                  {isEn ? `Fit to ${plan.perMealGrams} g` : `Ajustar a ${plan.perMealGrams} g`}
                 </button>
               )}
             </div>
 
             {!hideNumbers && plate.length > 0 && (
               <div className="flex flex-col gap-4">
-                <dl className="grid grid-cols-4 divide-x divide-border rounded-2xl bg-secondary/60 py-3">
+                <dl className="grid grid-cols-4 divide-x divide-border rounded-xl sm:rounded-2xl bg-secondary/60 py-3">
                   {[
                     { label: 'kcal', value: plateTotals.calories, strong: false },
                     { label: isEn ? 'Protein' : 'Proteína', value: `${plateTotals.protein} g`, strong: true },
                     { label: isEn ? 'Carbs' : 'Carbos', value: `${plateTotals.carbohydrates} g`, strong: false },
                     { label: isEn ? 'Fats' : 'Grasas', value: `${plateTotals.fat} g`, strong: false },
                   ].map((m) => (
-                    <div key={m.label} className="px-2 text-center">
-                      <dd className={`text-lg font-semibold tabular-nums ${m.strong ? 'text-primary' : 'text-foreground'}`}>{m.value}</dd>
+                    <div key={m.label} className="px-1 sm:px-2 text-center min-w-0">
+                      <dd className={`text-base sm:text-lg font-semibold tabular-nums ${m.strong ? 'text-primary' : 'text-foreground'}`}>{m.value}</dd>
                       <dt className="text-sm text-muted-foreground">{m.label}</dt>
                     </div>
                   ))}
                 </dl>
 
                 <div className="flex flex-col gap-2">
-                  <div className="flex justify-between items-baseline gap-3 text-sm">
+                  <div className="flex flex-wrap justify-between items-baseline gap-x-3 gap-y-1 text-sm">
                     <span className="text-foreground">
                       {isEn
                         ? `Protein for one meal, target ${plan.perMealRange[0]} to ${plan.perMealRange[1]} g`
@@ -294,35 +306,30 @@ export const PlateBuilder: React.FC<PlateBuilderProps> = ({
                   <p role="status" className="text-sm text-muted-foreground text-pretty">
                     {verdict.status === 'low' && (
                       isEn
-                        ? <>You need about <strong className="text-foreground">{verdict.missingGrams} g</strong> of protein for this meal to properly support muscle recovery.</>
-                        : <>Te faltan unos <strong className="text-foreground">{verdict.missingGrams} g</strong> de proteína para que esta comida active bien tu músculo.</>
+                        ? <>About <strong className="text-foreground">{verdict.missingGrams} g</strong> short of this meal's target.</>
+                        : <>Te faltan unos <strong className="text-foreground">{verdict.missingGrams} g</strong> para la meta de esta comida.</>
                     )}
                     {verdict.status === 'good' && (
                       isEn
-                        ? <>Solid amount for a meal. Repeat something similar every {plan.spacingHours} hours, {plan.mealsPerDay} times a day, to hit your {targets.proteinGrams} g.</>
-                        : <>Buena cantidad para una comida. Repite algo parecido cada {plan.spacingHours} horas, {plan.mealsPerDay} veces al día, y llegas a tus {targets.proteinGrams} g.</>
+                        ? <>Good amount for one meal.</>
+                        : <>Buena cantidad para una comida.</>
                     )}
                     {verdict.status === 'high' && (
                       isEn
-                        ? <>This plate equals about <strong className="text-foreground">{verdict.mealsCovered} meals</strong> of protein. It isn’t wasted, but your body utilizes it better spaced across the day.</>
-                        : <>Este plato equivale a unas <strong className="text-foreground">{verdict.mealsCovered} comidas</strong> de proteína. No se desperdicia, pero tu músculo aprovecha más si pasas parte a otra comida del día.</>
+                        ? <>About <strong className="text-foreground">{verdict.mealsCovered} meals</strong> of protein. Move some to another meal.</>
+                        : <>Equivale a unas <strong className="text-foreground">{verdict.mealsCovered} comidas</strong> de proteína. Pasa parte a otra comida.</>
                     )}
                   </p>
                   <p className="text-sm text-muted-foreground tabular-nums">
                     {isEn
                       ? `${plateTotals.proteinPercentOfDaily ?? 0}% of your daily ${targets.proteinGrams} g goal.`
                       : `${plateTotals.proteinPercentOfDaily ?? 0}% de tu meta diaria de ${targets.proteinGrams} g.`}
+                    {onAdjustTargets && (
+                      <button type="button" onClick={onAdjustTargets} className="ml-1.5 inline-flex items-center min-h-11 sm:min-h-0 font-medium text-foreground underline underline-offset-4 hover:text-primary">
+                        {isEn ? 'Edit targets' : 'Editar metas'}
+                      </button>
+                    )}
                   </p>
-                  {canFit && (
-                    <button
-                      type="button"
-                      onClick={handleFitToMeal}
-                      className="self-start inline-flex items-center gap-2 min-h-10 px-4 rounded-full bg-secondary hover:bg-accent text-sm font-medium text-foreground transition-colors"
-                    >
-                      <Icon name="auto_fix_high" size={16} weight="bold" />
-                      {isEn ? `Fit protein to ${plan.perMealGrams} g` : `Ajustar proteína a ${plan.perMealGrams} g`}
-                    </button>
-                  )}
                 </div>
               </div>
             )}
@@ -351,10 +358,10 @@ export const PlateBuilder: React.FC<PlateBuilderProps> = ({
                   const factor = item.grams / 100;
                   const itemCals = Math.round(item.food.calories * factor);
                   const itemProt = (item.food.protein * factor).toFixed(1);
-                  const stepBtn = 'size-10 shrink-0 rounded-full bg-secondary hover:bg-accent text-foreground inline-flex items-center justify-center transition-colors';
+                  const stepBtn = 'size-11 sm:size-10 shrink-0 rounded-full bg-secondary hover:bg-accent text-foreground inline-flex items-center justify-center transition-colors';
 
                   return (
-                    <li key={item.food.id} className="py-3 flex items-center gap-3">
+                    <li key={item.food.id} className="py-3 flex flex-wrap items-center gap-x-3 gap-y-2">
                       {item.food.imageUrl && (
                         <div className="size-11 shrink-0 rounded-xl overflow-hidden bg-secondary/80 border border-border/60">
                           <img
@@ -367,13 +374,13 @@ export const PlateBuilder: React.FC<PlateBuilderProps> = ({
                           />
                         </div>
                       )}
-                      <div className="flex-1 min-w-0">
+                      <div className="flex-1 basis-32 min-w-0">
                         <span className="text-sm font-semibold text-foreground block text-balance">{item.food.name}</span>
                         <span className="text-sm text-muted-foreground tabular-nums">
                           {hideNumbers ? `${item.grams} g` : <>{itemCals} kcal, <span className="text-primary font-medium">{itemProt} g {isEn ? 'protein' : 'proteína'}</span></>}
                         </span>
                       </div>
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center justify-between sm:justify-end gap-1 w-full sm:w-auto">
                         <button
                           type="button"
                           onClick={() => handleUpdateGrams(item.food.id, item.grams - 25)}
@@ -391,7 +398,7 @@ export const PlateBuilder: React.FC<PlateBuilderProps> = ({
                             step="5"
                             value={item.grams}
                             onChange={(e) => handleUpdateGrams(item.food.id, parseInt(e.target.value) || 0)}
-                            className="w-11 text-center text-sm font-semibold tabular-nums bg-transparent text-foreground focus:outline-none focus:ring-2 focus:ring-primary rounded"
+                            className="w-12 text-center text-base sm:text-sm font-semibold tabular-nums bg-transparent text-foreground focus:outline-none focus:ring-2 focus:ring-primary rounded"
                           />
                           <span className="text-sm text-muted-foreground">g</span>
                         </label>
@@ -407,7 +414,7 @@ export const PlateBuilder: React.FC<PlateBuilderProps> = ({
                           type="button"
                           onClick={() => handleRemoveFood(item.food.id)}
                           aria-label={isEn ? `Delete ${item.food.name}` : `Eliminar ${item.food.name}`}
-                          className="size-10 shrink-0 rounded-full text-muted-foreground hover:text-destructive hover:bg-secondary inline-flex items-center justify-center transition-colors"
+                          className="size-11 sm:size-10 shrink-0 rounded-full text-muted-foreground hover:text-destructive hover:bg-secondary inline-flex items-center justify-center transition-colors"
                         >
                           <Icon name="close" size={16} weight="bold" />
                         </button>
@@ -416,6 +423,16 @@ export const PlateBuilder: React.FC<PlateBuilderProps> = ({
                   );
                 })}
               </ul>
+            )}
+
+            {plate.length > 0 && (
+              <button
+                type="button"
+                onClick={handleClearPlate}
+                className="self-end -mt-2 min-h-11 sm:min-h-10 px-3 rounded-full text-sm font-medium text-muted-foreground hover:text-destructive hover:bg-secondary transition-colors"
+              >
+                {isEn ? 'Clear plate' : 'Vaciar plato'}
+              </button>
             )}
 
             {onSaveAsRecipe && (
@@ -439,9 +456,9 @@ export const PlateBuilder: React.FC<PlateBuilderProps> = ({
 
         {/* Catálogo */}
         <section aria-labelledby="plate-catalog" className="lg:col-span-7">
-          <div className="bg-card rounded-3xl border border-border p-5 shadow-sm flex flex-col gap-4">
+          <div className="bg-card rounded-2xl sm:rounded-3xl border border-border p-4 sm:p-5 shadow-sm flex flex-col gap-4">
             <div>
-              <h3 id="plate-catalog" className="font-semibold text-foreground text-lg text-balance">
+              <h3 id="plate-catalog" className="font-semibold text-foreground text-lg sm:text-xl text-balance">
                 {isEn ? 'Food catalog' : 'Catálogo de alimentos'}
               </h3>
               <p className="text-sm text-muted-foreground">
@@ -458,7 +475,7 @@ export const PlateBuilder: React.FC<PlateBuilderProps> = ({
               <input
                 type="search"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => { setSearchQuery(e.target.value); setPage(0); }}
                 aria-label={isEn ? "Search food" : "Buscar alimento"}
                 placeholder={isEn ? "Search food, e.g. chicken or oats" : "Buscar alimento, por ejemplo pollo o avena"}
                 className="w-full pl-11 pr-11 min-h-11 bg-background border border-border rounded-full text-base text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
@@ -466,9 +483,9 @@ export const PlateBuilder: React.FC<PlateBuilderProps> = ({
               {searchQuery && (
                 <button
                   type="button"
-                  onClick={() => setSearchQuery('')}
+                  onClick={() => { setSearchQuery(''); setPage(0); }}
                   aria-label={isEn ? "Clear search" : "Borrar búsqueda"}
-                  className="absolute right-1 top-1/2 -translate-y-1/2 size-10 inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 size-11 sm:size-10 inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-foreground"
                 >
                   <Icon name="close" size={16} weight="bold" />
                 </button>
@@ -483,9 +500,9 @@ export const PlateBuilder: React.FC<PlateBuilderProps> = ({
                   <button
                     key={cat}
                     type="button"
-                    onClick={() => setSelectedCategory(cat)}
+                    onClick={() => { setSelectedCategory(cat); setPage(0); }}
                     aria-pressed={isSelected}
-                    className={`shrink-0 px-4 min-h-10 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
+                    className={`shrink-0 px-4 min-h-11 sm:min-h-10 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
                       isSelected
                         ? 'bg-primary text-primary-foreground'
                         : 'bg-secondary text-muted-foreground hover:text-foreground hover:bg-accent'
@@ -502,13 +519,13 @@ export const PlateBuilder: React.FC<PlateBuilderProps> = ({
                 {isEn ? 'No foods found matching that term.' : 'No hay alimentos con ese término.'}
               </p>
             ) : (
-              <ul className="divide-y divide-border border-y border-border max-h-[620px] overflow-y-auto scroll-hover">
-                {filteredFoods.map((food) => {
+              <ul className="divide-y divide-border border-y border-border">
+                {pageFoods.map((food) => {
                   const inPlate = plate.find((p) => p.food.id === food.id);
                   return (
                     <li key={food.id} className="py-3 flex items-center gap-3">
                       {food.imageUrl && (
-                        <div className="size-14 shrink-0 rounded-2xl overflow-hidden bg-secondary/80 border border-border/60">
+                        <div className="size-12 sm:size-14 shrink-0 rounded-xl sm:rounded-2xl overflow-hidden bg-secondary/80 border border-border/60">
                           <img
                             src={food.imageUrl}
                             alt={food.name}
@@ -526,7 +543,11 @@ export const PlateBuilder: React.FC<PlateBuilderProps> = ({
                         )}
                         {!hideNumbers && (
                           <p className="text-sm text-muted-foreground tabular-nums">
-                            {food.calories} kcal · <span className="text-primary font-medium">{food.protein} g {isEn ? 'protein' : 'proteína'}</span> · {food.carbohydrates} g {isEn ? 'carbs' : 'carbos'} · {food.fat} g {isEn ? 'fat' : 'grasa'}
+                            {food.calories} kcal · <span className="text-primary font-medium">{food.protein} g {isEn ? 'protein' : 'proteína'}</span>
+                            <span className="max-sm:hidden"> · {food.carbohydrates} g {isEn ? 'carbs' : 'carbos'} · {food.fat} g {isEn ? 'fat' : 'grasa'}</span>
+                            <InfoTooltip label={isEn ? `Nutrition of ${food.name}` : `Nutrición de ${food.name}`} className="sm:hidden ml-1">
+                              {food.carbohydrates} g {isEn ? 'carbs' : 'carbos'} · {food.fat} g {isEn ? 'fat' : 'grasa'} {isEn ? 'per 100 g' : 'por cada 100 g'}
+                            </InfoTooltip>
                           </p>
                         )}
                       </div>
@@ -534,7 +555,7 @@ export const PlateBuilder: React.FC<PlateBuilderProps> = ({
                         type="button"
                         onClick={() => handleAddFood(food)}
                         aria-label={inPlate ? (isEn ? `Add ${food.defaultServingGrams} g more of ${food.name}` : `Añadir ${food.defaultServingGrams} g más de ${food.name}`) : (isEn ? `Add ${food.name} to plate` : `Agregar ${food.name} al plato`)}
-                        className={`shrink-0 min-h-10 px-4 rounded-full text-sm font-medium transition-colors inline-flex items-center gap-1.5 ${
+                        className={`shrink-0 min-h-11 sm:min-h-10 px-3 sm:px-4 rounded-full text-sm font-medium transition-colors inline-flex items-center gap-1.5 ${
                           inPlate
                             ? 'bg-primary/10 text-primary hover:bg-primary/20'
                             : 'bg-secondary text-foreground hover:bg-accent'
@@ -547,6 +568,31 @@ export const PlateBuilder: React.FC<PlateBuilderProps> = ({
                   );
                 })}
               </ul>
+            )}
+            {pageCount > 1 && (
+              <nav aria-label={isEn ? 'Catalog pages' : 'Páginas del catálogo'} className="flex items-center justify-between gap-3">
+                <button
+                  type="button"
+                  onClick={() => setPage(currentPage - 1)}
+                  disabled={currentPage === 0}
+                  aria-label={isEn ? 'Previous page' : 'Página anterior'}
+                  className="size-11 sm:size-10 rounded-full bg-secondary hover:bg-accent text-foreground inline-flex items-center justify-center transition-colors disabled:opacity-40"
+                >
+                  <Icon name="chevron_left" size={18} weight="bold" />
+                </button>
+                <span className="text-sm text-muted-foreground tabular-nums" aria-live="polite">
+                  {isEn ? `Page ${currentPage + 1} of ${pageCount}` : `Página ${currentPage + 1} de ${pageCount}`}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setPage(currentPage + 1)}
+                  disabled={currentPage >= pageCount - 1}
+                  aria-label={isEn ? 'Next page' : 'Página siguiente'}
+                  className="size-11 sm:size-10 rounded-full bg-secondary hover:bg-accent text-foreground inline-flex items-center justify-center transition-colors disabled:opacity-40"
+                >
+                  <Icon name="chevron_right" size={18} weight="bold" />
+                </button>
+              </nav>
             )}
           </div>
         </section>

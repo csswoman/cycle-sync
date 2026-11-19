@@ -117,9 +117,10 @@ export const BodyProgress: React.FC<BodyProgressProps> = ({
   }[rate.pace]);
 
   return (
-    <div className="w-full flex flex-col gap-6">
+    <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 items-start">
+      <div className="flex flex-col gap-4 sm:gap-6 min-w-0">
       {/* Summary */}
-      <section aria-labelledby="progress-title" className="bg-card rounded-3xl border border-border p-5 sm:p-6 shadow-sm flex flex-col gap-5">
+      <section aria-labelledby="progress-title" className="bg-card rounded-2xl sm:rounded-3xl border border-border p-4 sm:p-6 shadow-sm flex flex-col gap-5">
         <div>
           <h3 id="progress-title" className="text-foreground text-lg font-semibold text-balance">
             {isEn ? 'My progress' : 'Mi progreso'}
@@ -134,8 +135,8 @@ export const BodyProgress: React.FC<BodyProgressProps> = ({
         {loading ? (
           <p className="text-sm text-muted-foreground">{isEn ? 'Loading…' : 'Cargando…'}</p>
         ) : (
-          <dl className="grid grid-cols-2 md:grid-cols-4 gap-y-5 md:gap-y-0 md:divide-x md:divide-border border-t border-border pt-5">
-            <div className="flex flex-col gap-0.5 md:px-5 md:first:pl-0 md:last:pr-0">
+          <dl className="grid grid-cols-2 gap-x-4 gap-y-5 border-t border-border pt-5">
+            <div className="flex flex-col gap-0.5">
               <dt className="text-sm text-muted-foreground">{isEn ? 'Starting weight' : 'Peso inicial'}</dt>
               <dd className="text-2xl font-semibold text-foreground tabular-nums">
                 {weightSummary ? `${weightSummary.start.value} kg` : profile.startWeightKg ? `${profile.startWeightKg} kg` : '—'}
@@ -144,12 +145,12 @@ export const BodyProgress: React.FC<BodyProgressProps> = ({
                 {weightSummary ? fmtDate(weightSummary.start.date, isEn) : profile.startDate ? fmtDate(profile.startDate, isEn) : (isEn ? 'No records yet' : 'Aún sin registro')}
               </dd>
             </div>
-            <div className="flex flex-col gap-0.5 md:px-5 md:first:pl-0 md:last:pr-0">
+            <div className="flex flex-col gap-0.5">
               <dt className="text-sm text-muted-foreground">{isEn ? 'Current weight' : 'Peso actual'}</dt>
               <dd className="text-2xl font-semibold text-foreground tabular-nums">{weightSummary ? `${weightSummary.latest.value} kg` : '—'}</dd>
               <dd className="text-sm text-muted-foreground">{weightSummary ? fmtDate(weightSummary.latest.date, isEn) : (isEn ? 'No records yet' : 'Aún sin registro')}</dd>
             </div>
-            <div className="flex flex-col gap-0.5 md:px-5 md:first:pl-0 md:last:pr-0">
+            <div className="flex flex-col gap-0.5">
               <dt className="text-sm text-muted-foreground">{isEn ? 'Weight change' : 'Cambio de peso'}</dt>
               <dd className={`text-2xl font-semibold tabular-nums ${weightSummary && weightSummary.change < 0 ? 'text-leaf' : 'text-foreground'}`}>
                 {weightSummary && weightSummary.days > 0 ? `${signed(weightSummary.change)} kg` : '—'}
@@ -164,7 +165,7 @@ export const BodyProgress: React.FC<BodyProgressProps> = ({
               const key: MeasureKey = series.abdomen_cm.length ? 'abdomen_cm' : 'waist_cm';
               const s = progressSummary(series[key]);
               return (
-                <div className="flex flex-col gap-0.5 md:px-5 md:first:pl-0 md:last:pr-0">
+                <div className="flex flex-col gap-0.5">
                   <dt className="text-sm text-muted-foreground">
                     {key === 'abdomen_cm' ? (isEn ? 'Abdomen' : 'Abdomen') : (isEn ? 'Waist' : 'Cintura')}
                   </dt>
@@ -216,13 +217,14 @@ export const BodyProgress: React.FC<BodyProgressProps> = ({
                 setStartDraft({ kg: String(profile.startWeightKg ?? weightSummary?.start.value ?? ''), date: profile.startDate ?? weightSummary?.start.date ?? todayLocal() });
                 setEditStart(true);
               }}
-              className="self-start min-h-10 text-sm font-medium text-foreground underline underline-offset-4 hover:text-primary"
+              className="self-start min-h-11 sm:min-h-10 text-sm font-medium text-foreground underline underline-offset-4 hover:text-primary"
             >
               {profile.startWeightKg ? (isEn ? 'Change my starting weight' : 'Cambiar mi peso inicial') : (isEn ? 'Set an earlier starting weight' : 'Indicar un peso inicial anterior')}
             </button>
           )
         )}
       </section>
+
 
       {!loading && (
         <BodyGoals
@@ -233,10 +235,10 @@ export const BodyProgress: React.FC<BodyProgressProps> = ({
           currentKg={weightSummary?.latest.value ?? null}
         />
       )}
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+      </div>
+      <div className="flex flex-col gap-4 sm:gap-6 min-w-0">
         {/* Charts */}
-        <section aria-labelledby="progress-chart" className="bg-card rounded-3xl border border-border p-5 sm:p-6 shadow-sm flex flex-col gap-4">
+        <section aria-labelledby="progress-chart" className="bg-card rounded-2xl sm:rounded-3xl border border-border p-4 sm:p-6 shadow-sm flex flex-col gap-4">
           <h3 id="progress-chart" className="text-foreground text-lg font-semibold">
             {isEn ? 'Evolution' : 'Evolución'}
           </h3>
@@ -253,7 +255,7 @@ export const BodyProgress: React.FC<BodyProgressProps> = ({
                     type="button"
                     aria-pressed={selected === m.key}
                     onClick={() => setSelected(m.key)}
-                    className={`shrink-0 min-h-10 px-4 rounded-full text-sm font-medium transition-colors ${
+                    className={`shrink-0 min-h-11 sm:min-h-10 px-4 rounded-full text-sm font-medium transition-colors ${
                       selected === m.key ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:text-foreground hover:bg-accent'
                     }`}
                   >
@@ -321,7 +323,7 @@ export const BodyProgress: React.FC<BodyProgressProps> = ({
 
           {bodyEntries.length > 0 && (
             <details className="border-t border-border pt-3">
-              <summary className="cursor-pointer min-h-10 flex items-center text-sm font-semibold text-foreground">
+              <summary className="cursor-pointer min-h-11 sm:min-h-10 flex items-center text-sm font-semibold text-foreground">
                 {isEn ? `Entries (${bodyEntries.length})` : `Registros (${bodyEntries.length})`}
               </summary>
               <ul className="mt-2 flex flex-col divide-y divide-border max-h-64 overflow-y-auto">
@@ -333,14 +335,14 @@ export const BodyProgress: React.FC<BodyProgressProps> = ({
                     </span>
                     {e.glucose_mg_dl != null || e.insulin_uiu_ml != null || e.systolic != null ? (
                       // The same row holds glucose or blood pressure: delete it from PMOS care, not here.
-                      <span className="shrink-0 text-xs text-muted-foreground">
+                      <span className="shrink-0 text-sm text-muted-foreground">
                         {isEn ? 'Includes glucose or BP' : 'Con glucosa o presión'}
                       </span>
                     ) : (
                       <button
                         type="button"
                         onClick={() => remove(e.id)}
-                        className="shrink-0 min-h-10 px-3 rounded-full text-destructive hover:bg-secondary"
+                        className="shrink-0 min-h-11 sm:min-h-10 px-3 rounded-full text-destructive hover:bg-secondary"
                         aria-label={isEn ? `Delete entry from ${fmtDate(e.date, isEn)}` : `Eliminar registro del ${fmtDate(e.date, isEn)}`}
                       >
                         {isEn ? 'Delete' : 'Eliminar'}
@@ -358,7 +360,7 @@ export const BodyProgress: React.FC<BodyProgressProps> = ({
           </p>
         </section>
         {/* Log form */}
-        <section aria-labelledby="progress-log" className="bg-card rounded-3xl border border-border p-5 sm:p-6 shadow-sm flex flex-col gap-4">
+        <section aria-labelledby="progress-log" className="bg-card rounded-2xl sm:rounded-3xl border border-border p-4 sm:p-6 shadow-sm flex flex-col gap-4">
           <h3 id="progress-log" className="text-foreground text-lg font-semibold">
             {isEn ? 'Log measurements' : 'Registrar medidas'}
           </h3>
@@ -394,7 +396,7 @@ export const BodyProgress: React.FC<BodyProgressProps> = ({
             )}
           </form>
           <details className="group border-t border-border pt-3">
-            <summary className="flex items-center gap-2 min-h-10 cursor-pointer list-none [&::-webkit-details-marker]:hidden text-sm font-medium text-foreground">
+            <summary className="flex items-center gap-2 min-h-11 sm:min-h-10 cursor-pointer list-none [&::-webkit-details-marker]:hidden text-sm font-medium text-foreground">
               <Icon name="chevron_right" size={16} weight="bold" className="text-muted-foreground transition-transform group-open:rotate-90" />
               {isEn ? 'How to measure so numbers stay consistent' : 'Cómo medirte para que los números sean comparables'}
             </summary>

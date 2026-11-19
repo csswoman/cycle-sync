@@ -99,19 +99,17 @@ const point = (p: any): MealPoint | null => (str(p?.title) || str(p?.detail) ? {
  */
 export function parseMealAnalysis(text: string, hideNumbers = false): MealAnalysis | null {
   const cleaned = text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
-  let data: any;
-  try {
-    data = JSON.parse(cleaned);
-  } catch {
-    const start = cleaned.indexOf('{');
-    const end = cleaned.lastIndexOf('}');
-    if (start < 0 || end <= start) return null;
-    try {
-      data = JSON.parse(cleaned.slice(start, end + 1));
-    } catch {
-      return null;
+  // The model sometimes drops a comma between array items or leaves a trailing one.
+  const repair = (t: string) => t.replace(/\}\s*\{/g, '},{').replace(/\]\s*\[/g, '],[').replace(/,\s*([}\]])/g, '$1');
+  const tryParse = (t: string) => {
+    for (const candidate of [t, repair(t)]) {
+      try { return JSON.parse(candidate); } catch { /* try the next form */ }
     }
-  }
+    return undefined;
+  };
+  const start = cleaned.indexOf('{');
+  const end = cleaned.lastIndexOf('}');
+  const data: any = tryParse(cleaned) ?? (start >= 0 && end > start ? tryParse(cleaned.slice(start, end + 1)) : undefined);
   if (!data || typeof data !== 'object') return null;
 
   const foods = list<MealFood>(data.foods, (f) => {

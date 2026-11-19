@@ -7,7 +7,8 @@ import { useMealAnalyses, makeThumbnail } from '@/hooks/useMealAnalyses';
 import { SavedMealAnalyses } from './components/SavedMealAnalyses';
 import { useFoodPreferences } from '@/hooks/useFoodPreferences';
 import { entriesToNames, avoidedIn } from '@/lib/nutrition/foodPreferences';
-import { toPhaseKey, rankRecipesForPhase, FOOD_FOCUS } from '@/lib/cycle/phaseSuggestions';
+import { toPhaseKey, rankRecipesForPhase, FOOD_FOCUS, normalize } from '@/lib/cycle/phaseSuggestions';
+import { FOOD_DATABASE } from '@/data/nutritionFoods';
 import { PhaseRecipePicks } from './components/PhaseRecipePicks';
 import { useCycleInfo } from '@/hooks/useCycleInfo';
 import { useLanguage } from '@/i18n/LanguageContext';
@@ -35,7 +36,7 @@ import GuestPreviewBanner from '@/components/layout/GuestPreviewBanner';
 import { usePmosToolsVisible } from '@/hooks/useOnboardingAnswers';
 
 const TAGS_COLLAPSED = 8;
-type ActiveTab = 'plate' | 'calculator' | 'progress' | 'tastes' | 'recipes' | 'analyze' | 'generate';
+type ActiveTab = 'plate' | 'calculator' | 'progress' | 'tastes' | 'recipes' | 'analyze';
 
 // Guests can browse recipes and try the calculators; tabs that save data or call the AI are locked.
 const GUEST_TABS: ActiveTab[] = ['recipes', 'plate', 'calculator'];
@@ -55,6 +56,7 @@ const Nutrition: React.FC = () => {
 
   const [openRecipeId, setOpenRecipeId] = useState<string | null>(null);
   const [showRecipeForm, setShowRecipeForm] = useState(false);
+  const [showGenerator, setShowGenerator] = useState(false);
   const [generation, setGeneration] = useState<{ loading: boolean; error: string | null; result: GenerateResult | null }>({
     loading: false,
     error: null,
@@ -64,7 +66,9 @@ const Nutrition: React.FC = () => {
   // Deep link such as /nutrition?tab=tastes
   useEffect(() => {
     const requested = new URLSearchParams(window.location.search).get('tab');
-    if (requested && ['plate', 'calculator', 'progress', 'tastes', 'recipes', 'analyze', 'generate'].includes(requested)) setActiveTab(requested as ActiveTab);
+    // ?tab=generate is the old AI tab: it now opens the generator modal over the recipes.
+    if (requested === 'generate') { setActiveTab('recipes'); setShowGenerator(true); }
+    else if (requested && ['plate', 'calculator', 'progress', 'tastes', 'recipes', 'analyze'].includes(requested)) setActiveTab(requested as ActiveTab);
   }, []);
   // Guests land on the recipe catalog, the part of this page they can fully use.
   useEffect(() => {
@@ -254,6 +258,12 @@ const Nutrition: React.FC = () => {
     />
   );
   const [showAllTags, setShowAllTags] = useState(false);
+  const RECIPES_PER_PAGE = 12;
+  const [recipePage, setRecipePage] = useState(1);
+  useEffect(() => setRecipePage(1), [library.filters]);
+  const recipePages = Math.max(1, Math.ceil(library.filtered.length / RECIPES_PER_PAGE));
+  const currentRecipePage = Math.min(recipePage, recipePages);
+  const pagedRecipes = library.filtered.slice((currentRecipePage - 1) * RECIPES_PER_PAGE, currentRecipePage * RECIPES_PER_PAGE);
   // Show the most used tags; selected ones always stay visible.
   const visibleTags = showAllTags
     ? library.tagOptions
@@ -289,8 +299,16 @@ const Nutrition: React.FC = () => {
   };
   // Phase foods to add with one tap, skipping what is already added or avoided.
   const avoidedNames = entriesToNames(avoid, language).map((n) => n.toLowerCase());
-  const ingredientIdeas = [...new Set(phaseFocus.foods.map((fd) => fd.label[language === 'en' ? 'en' : 'es']))]
-    .filter((n) => !ingredients.includes(n) && !avoidedNames.includes(n.toLowerCase()))
+  // Photo from the plate catalog: a catalog food whose Spanish name has a word starting with the stem or label.
+  const ideaImage = (stem: string, labelEs: string) => {
+    const keys = [normalize(stem), normalize(labelEs)];
+    return FOOD_DATABASE.find((fd) => fd.imageUrl && keys.some((k) => (' ' + normalize(fd.name)).includes(' ' + k)))?.imageUrl;
+  };
+  const ideaSeen = new Set<string>();
+  const ingredientIdeas = phaseFocus.foods
+    .map((fd) => ({ name: fd.label[language === 'en' ? 'en' : 'es'], img: ideaImage(fd.stem, fd.label.es) }))
+    .filter(({ name }) => !ideaSeen.has(name) && ideaSeen.add(name))
+    .filter(({ name }) => !ingredients.includes(name) && !avoidedNames.includes(name.toLowerCase()))
     .slice(0, 8);
 
   const removeIngredient = (ing: string) => {
@@ -331,7 +349,6 @@ const Nutrition: React.FC = () => {
     { id: 'tastes', label: isEs ? 'Mis gustos' : 'My Tastes', icon: 'favorite' },
     { id: 'recipes', label: isEs ? 'Recetas' : 'Recipes', icon: 'restaurant' },
     { id: 'analyze', label: isEs ? 'Analizar plato' : 'Analyze plate', icon: 'photo_camera' },
-    { id: 'generate', label: isEs ? 'Recetas con IA' : 'AI recipes', icon: 'auto_awesome' },
   ];
   // The weight-based targets tab is all numbers: it is not shown in no-numbers mode.
   const visibleTabs = hideNumbers ? allTabs.filter((tab) => tab.id !== 'calculator' && tab.id !== 'progress') : allTabs;
@@ -347,16 +364,16 @@ const Nutrition: React.FC = () => {
 
   return (
     <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide">
-      <div className="flex flex-col items-center w-full max-w-page mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 gap-8 pb-32">
+      <div className="flex flex-col items-center w-full max-w-page mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 gap-4 sm:gap-8 pb-32">
 
         {/* Hero */}
-        <section className="w-full rounded-3xl overflow-hidden relative garden-wash wash-sun border border-border shadow-sm">
+        <section className="w-full rounded-2xl sm:rounded-3xl overflow-hidden relative garden-wash wash-sun border border-border shadow-sm">
           <GardenCorner variant="sun" className="size-28 md:size-52 opacity-75" />
-          <div data-phase={phaseKey} className="flex flex-col gap-3 items-start justify-center px-6 py-6 md:px-10 md:py-8 relative z-20">
-            <h1 className="text-3xl md:text-4xl font-semibold leading-tight tracking-tight text-foreground text-balance max-w-2xl">
+          <div data-phase={phaseKey} className="flex flex-col gap-3 items-start justify-center px-4 py-4 sm:px-6 sm:py-6 md:px-10 md:py-8 relative z-20">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-semibold leading-tight tracking-tight text-foreground text-balance max-w-2xl">
               {isEs ? 'Nutrición para tu ciclo' : 'Nutrition for your cycle'}
             </h1>
-            <p className="text-muted-foreground text-base leading-relaxed max-w-prose text-pretty">
+            <p className="text-muted-foreground text-sm sm:text-base leading-relaxed max-w-prose text-pretty">
               {hideNumbers
                 ? 'Diseña tus platos, explora recetas antiinflamatorias y cuida tu energía y tu glucosa.'
                 : 'Calcula tu proteína y tu agua, diseña tus platos en gramos y explora recetas antiinflamatorias para cuidar tu músculo, tu energía y tu glucosa.'}
@@ -406,18 +423,9 @@ const Nutrition: React.FC = () => {
 
         {/* === TAB 1: PLATE BUILDER & FOODS === */}
         {shownTab === 'plate' && (
-          <section role="tabpanel" id="nutrition-panel-plate" aria-labelledby="nutrition-tab-plate" tabIndex={0} className="w-full flex flex-col gap-6">
-            {!hideNumbers && (
-              <MacroWaterCalculator
-                weightKg={userWeightKg}
-                onWeightChange={handleWeightChange}
-                heightCm={userHeightCm}
-                onHeightChange={handleHeightChange}
-                compact
-              />
-            )}
-            {!hideNumbers && weightBar}
-            {mealPlanCard}
+          <section role="tabpanel" id="nutrition-panel-plate" aria-labelledby="nutrition-tab-plate" tabIndex={0} className="w-full flex flex-col gap-4 sm:gap-6">
+            {/* Targets, meal split and ideas live in the targets tab; with numbers hidden that tab is unavailable, so they stay here. */}
+            {hideNumbers && mealPlanCard}
             <PlateBuilder
               weightKg={userWeightKg}
               heightCm={userHeightCm}
@@ -425,17 +433,20 @@ const Nutrition: React.FC = () => {
               language={language}
               suggestedRecipes={phasePicks.map((m) => m.recipe)}
               onOpenRecipe={(r) => setOpenRecipeId(r.id)}
+              onAdjustTargets={hideNumbers ? undefined : () => setActiveTab('calculator')}
               onSaveAsRecipe={isGuest ? undefined : async (recipe) => {
                 await library.addCustom(recipe);
               }}
             />
-            {ideasCard}
+            {hideNumbers && ideasCard}
           </section>
         )}
 
         {/* === TAB 2: WEIGHT TARGETS & SCIENCE === */}
         {shownTab === 'calculator' && (
-          <section role="tabpanel" id="nutrition-panel-calculator" aria-labelledby="nutrition-tab-calculator" tabIndex={0} className="w-full max-w-4xl mx-auto flex flex-col gap-6">
+          <section role="tabpanel" id="nutrition-panel-calculator" aria-labelledby="nutrition-tab-calculator" tabIndex={0} className="w-full flex flex-col gap-4 sm:gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 items-start">
+            <div className="flex flex-col gap-4 sm:gap-6 min-w-0">
             <MacroWaterCalculator
               weightKg={userWeightKg}
               onWeightChange={handleWeightChange}
@@ -455,14 +466,13 @@ const Nutrition: React.FC = () => {
             />
 
             {weightBar}
-
+            </div>
+            <div className="flex flex-col gap-4 sm:gap-6 min-w-0">
             {mealPlanCard}
 
-            {ideasCard}
-
             {/* Why these targets: short answer visible, detail on demand */}
-            <section aria-labelledby="targets-why" className="bg-card rounded-3xl border border-border p-5 sm:p-6 shadow-sm flex flex-col gap-2">
-              <h3 id="targets-why" className="text-foreground text-lg font-semibold text-balance">
+            <section aria-labelledby="targets-why" className="bg-card rounded-2xl sm:rounded-3xl border border-border p-4 sm:p-6 shadow-sm flex flex-col gap-2">
+              <h3 id="targets-why" className="text-foreground text-lg sm:text-xl font-semibold text-balance">
                 {isEs ? 'Por qué estas metas' : 'Why these targets'}
               </h3>
               <div className="divide-y divide-border">
@@ -559,6 +569,9 @@ const Nutrition: React.FC = () => {
                   : 'Based on guidelines from the International Society of Sports Nutrition (ISSN) and McMaster University.'}
               </p>
             </section>
+            </div>
+            </div>
+            {ideasCard}
           </section>
         )}
 
@@ -597,39 +610,47 @@ const Nutrition: React.FC = () => {
               });
               setActiveTab('recipes');
             }}
-            onGenerate={() => setActiveTab('generate')}
+            onGenerate={() => { setActiveTab('recipes'); setShowGenerator(true); }}
           />
           </div>
         )}
 
         {/* === RECIPES TAB === */}
         {shownTab === 'recipes' && (
-          <section role="tabpanel" id="nutrition-panel-recipes" aria-labelledby="nutrition-tab-recipes" tabIndex={0} className="w-full flex flex-col gap-6">
-            <div className="bg-card rounded-xl p-5 border border-border shadow-sm flex flex-col gap-4">
+          <section role="tabpanel" id="nutrition-panel-recipes" aria-labelledby="nutrition-tab-recipes" tabIndex={0} className="w-full flex flex-col gap-4 sm:gap-6">
+            <div className="bg-card rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-border shadow-sm flex flex-col gap-4">
               <div className="flex flex-col sm:flex-row gap-3">
                 <div className="relative flex-1">
                   <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">search</span>
                   <input
                     value={library.filters.text}
                     onChange={(e) => library.setFilters({ ...library.filters, text: e.target.value })}
-                    className="w-full pl-10 pr-4 py-3 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full pl-10 pr-4 min-h-11 bg-background border border-border rounded-lg text-base sm:text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     placeholder={isEs ? 'Buscar por título, etiqueta o ingrediente...' : 'Search by title, tag or ingredient...'}
                   />
                 </div>
+                <button
+                  onClick={() => (isGuest ? promptSignup() : setShowGenerator(true))}
+                  className="bg-secondary hover:bg-accent text-foreground font-semibold px-5 min-h-11 rounded-xl border border-border transition-colors flex items-center justify-center gap-2"
+                >
+                  <span className="material-symbols-outlined text-primary" aria-hidden="true">auto_awesome</span>
+                  {isEs ? 'Generar con IA' : 'Generate with AI'}
+                  {isGuest && <span className="material-symbols-outlined text-[14px] opacity-70" aria-hidden="true">lock</span>}
+                </button>
                 {!isGuest && <button
                   onClick={() => setShowRecipeForm(true)}
-                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-5 py-3 rounded-xl transition-all flex items-center justify-center gap-2"
+                  className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold px-5 min-h-11 rounded-xl transition-all flex items-center justify-center gap-2"
                 >
                   <span className="material-symbols-outlined">add</span>
                   {isEs ? 'Nueva receta' : 'New recipe'}
                 </button>}
               </div>
-              <div className="flex flex-wrap gap-2 items-center">
+              <div className={`flex gap-1.5 items-center ${showAllTags ? 'flex-wrap' : 'flex-nowrap overflow-x-auto scrollbar-hide'}`}>
                 {!isGuest && <>
                 <button
                   onClick={() => library.setFilters({ ...library.filters, favoritesOnly: !library.filters.favoritesOnly })}
                   aria-pressed={library.filters.favoritesOnly}
-                  className={`inline-flex items-center justify-center gap-1.5 px-4 min-h-10 rounded-full text-sm font-medium transition-colors ${
+                  className={`inline-flex items-center justify-center gap-1.5 px-3 min-h-11 sm:min-h-9 shrink-0 whitespace-nowrap rounded-full text-sm font-medium transition-colors ${
                     library.filters.favoritesOnly ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:bg-accent'
                   }`}
                 >
@@ -638,7 +659,7 @@ const Nutrition: React.FC = () => {
                 <button
                   onClick={() => library.setFilters({ ...library.filters, mineOnly: !library.filters.mineOnly })}
                   aria-pressed={library.filters.mineOnly}
-                  className={`inline-flex items-center justify-center gap-1.5 px-4 min-h-10 rounded-full text-sm font-medium transition-colors ${
+                  className={`inline-flex items-center justify-center gap-1.5 px-3 min-h-11 sm:min-h-9 shrink-0 whitespace-nowrap rounded-full text-sm font-medium transition-colors ${
                     library.filters.mineOnly ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:bg-accent'
                   }`}
                 >
@@ -648,7 +669,7 @@ const Nutrition: React.FC = () => {
                   <button
                     onClick={() => library.setFilters({ ...library.filters, skipAvoided: !library.filters.skipAvoided })}
                     aria-pressed={library.filters.skipAvoided}
-                    className={`inline-flex items-center justify-center gap-1.5 px-4 min-h-10 rounded-full text-sm font-medium transition-colors ${
+                    className={`inline-flex items-center justify-center gap-1.5 px-3 min-h-11 sm:min-h-9 shrink-0 whitespace-nowrap rounded-full text-sm font-medium transition-colors ${
                       library.filters.skipAvoided ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:bg-accent'
                     }`}
                   >
@@ -659,7 +680,7 @@ const Nutrition: React.FC = () => {
                   <button
                     onClick={() => library.setFilters({ ...library.filters, withLiked: !library.filters.withLiked })}
                     aria-pressed={library.filters.withLiked}
-                    className={`inline-flex items-center justify-center gap-1.5 px-4 min-h-10 rounded-full text-sm font-medium transition-colors ${
+                    className={`inline-flex items-center justify-center gap-1.5 px-3 min-h-11 sm:min-h-9 shrink-0 whitespace-nowrap rounded-full text-sm font-medium transition-colors ${
                       library.filters.withLiked ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:bg-accent'
                     }`}
                   >
@@ -669,7 +690,7 @@ const Nutrition: React.FC = () => {
                 {likes.length === 0 && avoid.length === 0 && (
                   <button
                     onClick={() => setActiveTab('tastes')}
-                    className="inline-flex items-center px-4 min-h-10 rounded-full text-sm font-medium bg-secondary text-muted-foreground hover:bg-accent transition-colors"
+                    className="inline-flex items-center px-3 min-h-11 sm:min-h-9 shrink-0 whitespace-nowrap rounded-full text-sm font-medium bg-secondary text-muted-foreground hover:bg-accent transition-colors"
                   >
                     {isEs ? 'Elegir mis gustos' : 'Set my tastes'}
                   </button>
@@ -687,7 +708,7 @@ const Nutrition: React.FC = () => {
                         })
                       }
                       aria-pressed={active}
-                      className={`inline-flex items-center justify-center gap-1.5 px-4 min-h-10 rounded-full text-sm font-medium transition-colors ${
+                      className={`inline-flex items-center justify-center gap-1.5 px-3 min-h-11 sm:min-h-9 shrink-0 whitespace-nowrap rounded-full text-sm font-medium transition-colors ${
                         active ? 'bg-primary text-primary-foreground' : 'bg-secondary text-muted-foreground hover:bg-accent'
                       }`}
                     >
@@ -699,7 +720,7 @@ const Nutrition: React.FC = () => {
                   <button
                     onClick={() => setShowAllTags((v) => !v)}
                     aria-expanded={showAllTags}
-                    className="inline-flex items-center gap-1 px-3 min-h-10 rounded-full text-sm font-medium text-foreground underline underline-offset-4 hover:text-primary"
+                    className="inline-flex items-center gap-1 px-2 min-h-11 sm:min-h-9 shrink-0 whitespace-nowrap rounded-full text-sm font-medium text-foreground underline underline-offset-4 hover:text-primary"
                   >
                     {showAllTags
                       ? (isEs ? 'Ver menos' : 'Show fewer')
@@ -709,7 +730,7 @@ const Nutrition: React.FC = () => {
                 {(library.filters.favoritesOnly || library.filters.mineOnly || library.filters.skipAvoided || library.filters.withLiked || library.filters.tags.length > 0 || library.filters.text) && (
                   <button
                     onClick={() => library.setFilters(EMPTY_RECIPE_FILTERS)}
-                    className="min-h-10 px-2 text-sm text-muted-foreground hover:text-foreground underline underline-offset-4"
+                    className="min-h-11 sm:min-h-10 px-2 shrink-0 whitespace-nowrap text-sm text-muted-foreground hover:text-foreground underline underline-offset-4"
                   >
                     {isEs ? 'Limpiar filtros' : 'Clear filters'}
                   </button>
@@ -718,20 +739,22 @@ const Nutrition: React.FC = () => {
             </div>
 
             {!filtersActive && !cycleInfo?.paused && phasePicks.length > 0 && (
-              <div data-phase={phaseKey} className="bg-card rounded-xl p-5 border border-border shadow-sm flex flex-col gap-4">
-                <div className="flex flex-col gap-2">
-                  <h3 className="text-foreground text-lg font-semibold flex items-center gap-2">
-                    <span className="material-symbols-outlined text-phase">auto_awesome</span>
-                    {isGuest
-                      ? (isEs ? `Ejemplo: recetas para la fase ${phaseDisplay}` : `Example: recipes for the ${phase} phase`)
-                      : (isEs ? `Para tu fase ${phaseDisplay}` : `For your ${phase} phase`)}
-                  </h3>
-                  <p className="text-muted-foreground text-sm">{phaseFocus.why[isEs ? 'es' : 'en']}</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {phaseFocus.nutrients.map((n) => (
-                      <span key={n.en} className="text-xs font-bold px-2.5 py-1 rounded-full bg-phase-soft text-phase">{n[isEs ? 'es' : 'en']}</span>
-                    ))}
+              <div data-phase={phaseKey} className="bg-card rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-border shadow-sm flex flex-col gap-4">
+                <div className="flex flex-col gap-1.5">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                    <h3 className="text-foreground text-lg font-semibold flex items-center gap-2">
+                      <span className="material-symbols-outlined text-phase">auto_awesome</span>
+                      {isGuest
+                        ? (isEs ? `Ejemplo: recetas para la fase ${phaseDisplay}` : `Example: recipes for the ${phase} phase`)
+                        : (isEs ? `Para tu fase ${phaseDisplay}` : `For your ${phase} phase`)}
+                    </h3>
+                    <div className="flex flex-wrap gap-1.5">
+                      {phaseFocus.nutrients.map((n) => (
+                        <span key={n.en} title={phaseFocus.why[isEs ? 'es' : 'en']} className="text-xs font-semibold px-2 py-0.5 rounded-full bg-phase-soft text-phase cursor-help">{n[isEs ? 'es' : 'en']}</span>
+                      ))}
+                    </div>
                   </div>
+                  <p className="text-muted-foreground text-sm">{phaseFocus.why[isEs ? 'es' : 'en']}</p>
                 </div>
                 <PhaseRecipePicks matches={phasePicks} onOpen={(r) => setOpenRecipeId(r.id)} />
               </div>
@@ -744,8 +767,9 @@ const Nutrition: React.FC = () => {
             {library.loading ? (
               <p className="text-muted-foreground text-center py-12">{isEs ? 'Cargando tus recetas...' : 'Loading your recipes...'}</p>
             ) : library.filtered.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {library.filtered.map((r) => (
+              <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                {pagedRecipes.map((r) => (
                   <RecipeCard
                     key={r.id}
                     recipe={r}
@@ -754,6 +778,28 @@ const Nutrition: React.FC = () => {
                   />
                 ))}
               </div>
+              {recipePages > 1 && (
+                <nav aria-label={isEs ? 'Paginación de recetas' : 'Recipe pagination'} className="flex items-center justify-center gap-3 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setRecipePage(currentRecipePage - 1)}
+                    disabled={currentRecipePage === 1}
+                    className="min-h-11 px-4 rounded-xl bg-secondary text-foreground text-sm font-medium disabled:opacity-40 hover:bg-accent"
+                  >
+                    {isEs ? 'Anterior' : 'Previous'}
+                  </button>
+                  <span className="text-sm text-muted-foreground tabular-nums" aria-live="polite">{currentRecipePage} / {recipePages}</span>
+                  <button
+                    type="button"
+                    onClick={() => setRecipePage(currentRecipePage + 1)}
+                    disabled={currentRecipePage === recipePages}
+                    className="min-h-11 px-4 rounded-xl bg-secondary text-foreground text-sm font-medium disabled:opacity-40 hover:bg-accent"
+                  >
+                    {isEs ? 'Siguiente' : 'Next'}
+                  </button>
+                </nav>
+              )}
+              </>
             ) : (
               <div className="text-center py-12">
                 <span className="material-symbols-outlined text-6xl text-muted-foreground opacity-50">bookmark</span>
@@ -769,14 +815,15 @@ const Nutrition: React.FC = () => {
 
         {/* === ANALYZE PLATE TAB === */}
         {shownTab === 'analyze' && (
-          <section role="tabpanel" id="nutrition-panel-analyze" aria-labelledby="nutrition-tab-analyze" tabIndex={0} className="w-full max-w-3xl mx-auto flex flex-col gap-6">
-            <div className="bg-card rounded-xl border border-border p-6 flex flex-col gap-6">
+          <section role="tabpanel" id="nutrition-panel-analyze" aria-labelledby="nutrition-tab-analyze" tabIndex={0} className="w-full grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 items-start">
+            <div className="flex flex-col gap-4 sm:gap-6 min-w-0">
+            <div className="bg-card rounded-2xl sm:rounded-3xl border border-border p-4 sm:p-6 flex flex-col gap-6">
               <div className="flex items-center gap-3">
                 <div className="p-3 bg-primary/10 rounded-xl">
                   <span className="material-symbols-outlined text-primary text-2xl">photo_camera</span>
                 </div>
                 <div>
-                  <h3 className="text-foreground text-lg font-semibold text-balance">{isEs ? 'Analiza tu plato' : 'Analyze your plate'}</h3>
+                  <h3 className="text-foreground text-lg sm:text-xl font-semibold text-balance">{isEs ? 'Analiza tu plato' : 'Analyze your plate'}</h3>
                   <p className="text-muted-foreground text-sm">{isEs ? 'Sube una foto de tu comida para obtener un análisis nutricional con IA' : 'Upload a photo of your meal for AI-powered nutritional analysis'}</p>
                 </div>
               </div>
@@ -803,18 +850,18 @@ const Nutrition: React.FC = () => {
               ) : (
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="border-2 border-dashed border-border rounded-xl p-12 flex flex-col items-center gap-4 hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer"
+                  className="border-2 border-dashed border-border rounded-xl p-6 sm:p-12 flex flex-col items-center gap-4 hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer"
                 >
                   <span className="material-symbols-outlined text-5xl text-muted-foreground">add_a_photo</span>
                   <p className="text-muted-foreground font-medium">{isEs ? 'Haz clic para subir una foto de tu comida' : 'Click to upload a photo of your meal'}</p>
-                  <p className="text-muted-foreground text-xs">{isEs ? 'JPG, PNG hasta 10MB' : 'JPG, PNG up to 10MB'}</p>
+                  <p className="text-muted-foreground text-sm">{isEs ? 'JPG, PNG hasta 10MB' : 'JPG, PNG up to 10MB'}</p>
                 </button>
               )}
 
               <button
                 onClick={handleAnalyze}
                 disabled={!previewImage || analysis.loading}
-                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg shadow-primary/20"
+                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold min-h-12 py-3 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg shadow-primary/20"
               >
                 <span className="material-symbols-outlined">{analysis.loading ? 'hourglass_empty' : 'auto_awesome'}</span>
                 {analysis.loading ? (isEs ? 'Analizando con IA...' : 'Analyzing with AI...') : (isEs ? 'Analizar nutrición' : 'Analyze nutrition')}
@@ -840,31 +887,58 @@ const Nutrition: React.FC = () => {
 
             {/* Fallback when the reply could not be read as structured data. */}
             {analysis.raw && (
-              <div className="bg-card rounded-xl border border-border p-6">
+              <div className="bg-card rounded-2xl sm:rounded-3xl border border-border p-4 sm:p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <span className="material-symbols-outlined text-primary">analytics</span>
-                  <h3 className="text-foreground text-lg font-semibold text-balance">{isEs ? 'Resultados del análisis' : 'Analysis results'}</h3>
+                  <h3 className="text-foreground text-lg sm:text-xl font-semibold text-balance">{isEs ? 'Resultados del análisis' : 'Analysis results'}</h3>
                 </div>
                 <p className="text-sm text-muted-foreground whitespace-pre-line text-pretty">{analysis.raw}</p>
               </div>
             )}
 
+            </div>
             {!isGuest && savedAnalyses.available && (
               <SavedMealAnalyses items={savedAnalyses.items} isEs={isEs} pmos={showPmos} onRemove={savedAnalyses.remove} />
             )}
           </section>
         )}
 
-        {/* === AI RECIPE GENERATOR TAB === */}
-        {shownTab === 'generate' && (
-          <section role="tabpanel" id="nutrition-panel-generate" aria-labelledby="nutrition-tab-generate" data-phase={phaseKey} tabIndex={0} className="w-full max-w-3xl mx-auto flex flex-col gap-6">
-            <div className="bg-card rounded-xl border border-border p-6 flex flex-col gap-6">
+      </div>
+
+      {openRecipe && (
+        <RecipeDetailModal
+          recipe={openRecipe}
+          onClose={() => setOpenRecipeId(null)}
+          onToggleFavorite={isGuest ? undefined : library.toggleFavorite}
+          onSetTags={isGuest ? undefined : library.setMyTags}
+          onDelete={openRecipe.ownerId && !isGuest ? library.removeOwn : undefined}
+          suggestions={suggestions}
+        />
+      )}
+      {showGenerator && !isGuest && (
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center sm:p-4"
+          onClick={() => setShowGenerator(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="ai-recipe-title"
+          data-phase={phaseKey}
+        >
+          <div onClick={(e) => e.stopPropagation()} className="relative bg-card w-full sm:max-w-3xl max-h-[92dvh] overflow-y-auto rounded-t-3xl sm:rounded-3xl border border-border p-4 sm:p-6 flex flex-col gap-4 sm:gap-6">
+            <button
+              onClick={() => setShowGenerator(false)}
+              aria-label={isEs ? 'Cerrar' : 'Close'}
+              className="absolute top-3 right-3 min-h-11 min-w-11 inline-flex items-center justify-center rounded-full text-muted-foreground hover:bg-secondary"
+            >
+              <span className="material-symbols-outlined" aria-hidden="true">close</span>
+            </button>
+            <div className="flex flex-col gap-6">
               <div className="flex items-center gap-3">
                 <div className="p-3 bg-primary/10 rounded-xl">
                   <span className="material-symbols-outlined text-primary text-2xl">auto_awesome</span>
                 </div>
                 <div>
-                  <h3 className="text-foreground text-lg font-semibold text-balance">{isEs ? 'Generador de recetas con IA' : 'AI recipe generator'}</h3>
+                  <h3 id="ai-recipe-title" className="text-foreground text-lg sm:text-xl font-semibold text-balance">{isEs ? 'Generador de recetas con IA' : 'AI recipe generator'}</h3>
                   <p className="text-muted-foreground text-sm text-pretty">
                     {isEs
                       ? 'Dinos qué tienes en casa y creamos 3 recetas que respetan tus gustos y tu fase.'
@@ -885,7 +959,7 @@ const Nutrition: React.FC = () => {
                     value={ingredientInput}
                     onChange={(e) => setIngredientInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && addIngredient()}
-                    className="flex-1 px-4 py-3 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="flex-1 min-w-0 px-4 min-h-11 bg-background border border-border rounded-lg text-base sm:text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     placeholder={isEs ? 'Escribe un ingrediente y presiona Enter...' : 'Type an ingredient and press Enter...'}
                   />
                   <button
@@ -900,13 +974,15 @@ const Nutrition: React.FC = () => {
                   <div className="mt-3">
                     <p className="text-sm text-muted-foreground mb-2">{isEs ? 'Ideas para tu fase, toca para añadir' : 'Ideas for your phase, tap to add'}</p>
                     <div className="flex flex-wrap gap-2">
-                      {ingredientIdeas.map((idea) => (
+                      {ingredientIdeas.map(({ name: idea, img }) => (
                         <button
                           key={idea}
                           onClick={() => addIngredient(idea)}
-                          className="text-sm bg-secondary text-muted-foreground px-3.5 min-h-10 rounded-full hover:bg-accent transition-colors inline-flex items-center gap-1.5"
+                          className={`text-sm bg-secondary text-muted-foreground pr-3.5 min-h-11 sm:min-h-10 rounded-full hover:bg-accent transition-colors inline-flex items-center gap-2 ${img ? 'pl-1.5' : 'pl-3.5'}`}
                         >
-                          <span className="material-symbols-outlined text-[14px]" aria-hidden="true">add</span>
+                          {img
+                            ? <img src={img} alt="" loading="lazy" width={32} height={32} className="size-8 rounded-full object-cover" />
+                            : <span className="material-symbols-outlined text-[14px]" aria-hidden="true">add</span>}
                           {idea}
                         </button>
                       ))}
@@ -919,7 +995,7 @@ const Nutrition: React.FC = () => {
                       <button
                         key={ing}
                         onClick={() => removeIngredient(ing)}
-                        className="text-sm bg-primary/10 text-primary px-3.5 min-h-10 rounded-full hover:bg-primary/20 transition-colors inline-flex items-center gap-1.5 font-medium"
+                        className="text-sm bg-primary/10 text-primary px-3.5 min-h-11 sm:min-h-10 rounded-full hover:bg-primary/20 transition-colors inline-flex items-center gap-1.5 font-medium"
                       >
                         {ing}
                         <span className="material-symbols-outlined text-[14px]">close</span>
@@ -945,12 +1021,12 @@ const Nutrition: React.FC = () => {
                       {entriesToNames(avoid, language).join(', ')}
                     </p>
                   )}
-                  <button onClick={() => setActiveTab('tastes')} className="self-start text-xs text-muted-foreground hover:text-foreground underline">
+                  <button onClick={() => { setShowGenerator(false); setActiveTab('tastes'); }} className="self-start min-h-11 sm:min-h-0 inline-flex items-center text-sm text-muted-foreground hover:text-foreground underline">
                     {isEs ? 'Editar mis gustos' : 'Edit my tastes'}
                   </button>
                 </div>
               ) : (
-                <button onClick={() => setActiveTab('tastes')} className="self-start text-sm text-muted-foreground hover:text-foreground underline">
+                <button onClick={() => { setShowGenerator(false); setActiveTab('tastes'); }} className="self-start min-h-11 sm:min-h-0 text-left text-sm text-muted-foreground hover:text-foreground underline">
                   {isEs ? 'Elige tus alimentos favoritos y los que evitas para que las recetas se ajusten a ti' : 'Pick your favorite foods and the ones you avoid so recipes fit you'}
                 </button>
               )}
@@ -971,7 +1047,7 @@ const Nutrition: React.FC = () => {
                     <button
                       key={pref.id}
                       onClick={() => toggleDietary(pref.id)}
-                      className={`px-4 min-h-10 rounded-full text-sm font-medium transition-colors ${
+                      className={`px-4 min-h-11 sm:min-h-10 rounded-full text-sm font-medium transition-colors ${
                         dietaryPrefs.includes(pref.id)
                           ? 'bg-primary text-primary-foreground'
                           : 'bg-secondary text-muted-foreground hover:bg-accent'
@@ -986,7 +1062,7 @@ const Nutrition: React.FC = () => {
               <button
                 onClick={handleGenerate}
                 disabled={(ingredients.length === 0 && likes.length === 0) || generation.loading}
-                className="w-full bg-bloom hover:brightness-105 text-primary-foreground font-bold py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg shadow-primary/20"
+                className="w-full bg-bloom hover:brightness-105 text-primary-foreground font-semibold min-h-12 py-3 rounded-xl transition-all flex items-center justify-center gap-2 disabled:opacity-50 shadow-lg shadow-primary/20"
               >
                 <span className={`material-symbols-outlined ${generation.loading ? 'animate-spin' : ''}`} aria-hidden="true">{generation.loading ? 'progress_activity' : 'auto_awesome'}</span>
                 {generation.loading ? (isEs ? 'Creando recetas, puede tardar unos segundos...' : 'Creating recipes, this can take a few seconds...') : (isEs ? `Generar recetas para la fase ${phaseDisplay}` : `Generate ${phase}-Phase Recipes`)}
@@ -1000,17 +1076,17 @@ const Nutrition: React.FC = () => {
             )}
 
             {generation.result && (
-              <div className="bg-card rounded-xl border border-border p-6 flex flex-col gap-4">
+              <div className="bg-card rounded-2xl sm:rounded-3xl border border-border p-4 sm:p-6 flex flex-col gap-4">
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-primary">menu_book</span>
-                  <h3 className="text-foreground text-lg font-semibold text-balance">
+                  <h3 className="text-foreground text-lg sm:text-xl font-semibold text-balance">
                     {isEs
                       ? (generation.result.saved.length > 0 ? 'Nuevas recetas añadidas al catálogo' : 'Sin recetas nuevas esta vez')
                       : (generation.result.saved.length > 0 ? 'New recipes added to the catalog' : 'No new recipes this time')}
                   </h3>
                 </div>
                 {generation.result.saved.length > 0 && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                     {generation.result.saved
                       .map((s) => library.recipes.find((r) => r.id === s.id))
                       .filter((r): r is NonNullable<typeof r> => !!r)
@@ -1033,19 +1109,8 @@ const Nutrition: React.FC = () => {
                 )}
               </div>
             )}
-          </section>
-        )}
-      </div>
-
-      {openRecipe && (
-        <RecipeDetailModal
-          recipe={openRecipe}
-          onClose={() => setOpenRecipeId(null)}
-          onToggleFavorite={isGuest ? undefined : library.toggleFavorite}
-          onSetTags={isGuest ? undefined : library.setMyTags}
-          onDelete={openRecipe.ownerId && !isGuest ? library.removeOwn : undefined}
-          suggestions={suggestions}
-        />
+          </div>
+        </div>
       )}
       {showRecipeForm && !isGuest && (
         <RecipeForm

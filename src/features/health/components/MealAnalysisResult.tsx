@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { Icon } from '@/components/ui/Icon';
+import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { formatRange, type MealAnalysis, type Range } from '@/lib/nutrition/mealAnalysis';
 
 interface MealAnalysisResultProps {
@@ -19,10 +20,11 @@ function scoreTone(value: number) {
   return { text: 'text-coral', ring: 'var(--coral)', soft: 'bg-coral/15' };
 }
 
-const CardTitle: React.FC<{ icon: string; children: React.ReactNode }> = ({ icon, children }) => (
+const CardTitle: React.FC<{ icon: string; children: React.ReactNode; tip?: { label: string; text: string } }> = ({ icon, children, tip }) => (
   <h4 className="flex items-center gap-2 text-foreground text-base font-semibold text-balance">
     <Icon name={icon} size={20} className="text-primary shrink-0" />
     {children}
+    {tip && <InfoTooltip label={tip.label}><p>{tip.text}</p></InfoTooltip>}
   </h4>
 );
 
@@ -64,7 +66,20 @@ export const MealAnalysisResult: React.FC<MealAnalysisResultProps> = ({ result, 
                 </span>
               </div>
             </div>
-            <span className="text-sm font-medium text-muted-foreground">{scoreLabel}</span>
+            <span className="inline-flex items-center gap-1 text-sm font-medium text-muted-foreground">
+              {scoreLabel}
+              <InfoTooltip label={isEs ? 'Qué significa la puntuación' : 'What the score means'}>
+                <p>
+                  {pmos
+                    ? (isEs
+                        ? 'De 0 a 10, qué tan bien ayuda este plato a mantener estable la glucosa y la insulina, algo clave con PMOS. 7 o más es buena, 4 a 6 es regular y menos de 4 conviene mejorarla.'
+                        : 'From 0 to 10, how well this plate keeps blood sugar and insulin steady, which matters with PCOS. 7 or more is good, 4 to 6 is fair, below 4 is worth improving.')
+                    : (isEs
+                        ? 'De 0 a 10, qué tan equilibrado es este plato para mantener estable la glucosa. 7 o más es buena, 4 a 6 es regular y menos de 4 conviene mejorarla.'
+                        : 'From 0 to 10, how well balanced this plate is for steady blood sugar. 7 or more is good, 4 to 6 is fair, below 4 is worth improving.')}
+                </p>
+              </InfoTooltip>
+            </span>
           </div>
         )}
         <div className="flex flex-col gap-3 min-w-0">
@@ -74,9 +89,12 @@ export const MealAnalysisResult: React.FC<MealAnalysisResultProps> = ({ result, 
           </h3>
           {summary && <p className="text-foreground/90 text-sm leading-relaxed text-pretty">{summary}</p>}
           {calories && (
-            <span className="self-start inline-flex items-center gap-1.5 rounded-full bg-secondary px-3 py-1.5 text-sm font-medium text-foreground tabular-nums">
+            <span className="self-start inline-flex items-center gap-1.5 rounded-full bg-secondary pl-3 pr-1.5 py-1 text-sm font-medium text-foreground tabular-nums">
               <Icon name="local_fire_department" size={16} className="text-coral" />
               ~{formatRange(calories)} kcal
+              <InfoTooltip label={isEs ? 'Cómo se estiman las calorías' : 'How calories are estimated'}>
+                <p>{isEs ? 'Es un rango estimado a partir de la foto y las porciones que se ven. No es una medición exacta.' : 'A range estimated from the photo and the portions visible. It is not an exact measurement.'}</p>
+              </InfoTooltip>
             </span>
           )}
         </div>
@@ -85,7 +103,7 @@ export const MealAnalysisResult: React.FC<MealAnalysisResultProps> = ({ result, 
       {/* Macros and protein per meal */}
       {macros && (
         <section className={card}>
-          <CardTitle icon="bolt">{isEs ? 'Macronutrientes' : 'Macronutrients'}</CardTitle>
+          <CardTitle icon="bolt" tip={{ label: isEs ? 'Cómo leer los macros' : 'How to read macros', text: isEs ? 'Gramos estimados de cada macronutriente. El porcentaje es la parte de las calorías del plato que aporta cada uno (proteína y carbohidratos 4 kcal/g, grasas 9 kcal/g).' : 'Estimated grams of each macronutrient. The percentage is the share of the plate’s calories each one provides (protein and carbs 4 kcal/g, fat 9 kcal/g).' }}>{isEs ? 'Macronutrientes' : 'Macronutrients'}</CardTitle>
           <div className="flex h-2.5 rounded-full overflow-hidden bg-secondary" aria-hidden="true">
             {macroItems.map((m) => (
               <div key={m.key} className={m.color} style={{ width: `${(m.kcal / macroTotal) * 100}%` }} />
@@ -99,7 +117,7 @@ export const MealAnalysisResult: React.FC<MealAnalysisResultProps> = ({ result, 
                   {m.label}
                 </span>
                 <span className="text-base sm:text-lg font-semibold text-foreground tabular-nums">{formatRange(m.range)} g</span>
-                <span className="text-xs text-muted-foreground tabular-nums">{Math.round((m.kcal / macroTotal) * 100)}%</span>
+                <span className="text-xs text-muted-foreground tabular-nums">{Math.round((m.kcal / macroTotal) * 100)}% {isEs ? 'de las kcal' : 'of kcal'}</span>
               </li>
             ))}
           </ul>
@@ -107,7 +125,12 @@ export const MealAnalysisResult: React.FC<MealAnalysisResultProps> = ({ result, 
             <div className={`rounded-xl px-4 py-3 flex gap-3 ${proteinTone.cls}`}>
               <Icon name={proteinTone.icon} size={20} className="shrink-0 mt-0.5" />
               <div className="flex flex-col gap-0.5">
-                <span className="text-sm font-semibold">{isEs ? 'Proteína por comida' : 'Protein per meal'}</span>
+                <span className="inline-flex items-center gap-1 text-sm font-semibold">
+                  {isEs ? 'Proteína por comida' : 'Protein per meal'}
+                  <InfoTooltip label={isEs ? 'Por qué importa la proteína' : 'Why protein matters'}>
+                    <p>{isEs ? 'Repartir la proteína en cada comida ayuda a la saciedad y a estabilizar la glucosa. Se compara con tu meta por comida.' : 'Spreading protein across meals helps fullness and steadier blood sugar. It is compared with your per-meal target.'}</p>
+                  </InfoTooltip>
+                </span>
                 <p className="text-sm text-foreground/90 text-pretty">{protein.message}</p>
               </div>
             </div>
@@ -118,7 +141,7 @@ export const MealAnalysisResult: React.FC<MealAnalysisResultProps> = ({ result, 
       {/* Why the score */}
       {score && score.reasons.length > 0 && (
         <section className={card}>
-          <CardTitle icon="monitor_heart">{isEs ? `Por qué tiene ${score.value}/10` : `Why it scores ${score.value}/10`}</CardTitle>
+          <CardTitle icon="monitor_heart" tip={{ label: isEs ? 'Cómo se calcula la puntuación' : 'How the score is built', text: isEs ? 'Cada punto verde suma a la puntuación y cada advertencia la baja. Son los factores que más pesaron en este plato.' : 'Each green check adds to the score and each warning lowers it. These are the factors that weighed most on this plate.' }}>{isEs ? `Por qué tiene ${score.value}/10` : `Why it scores ${score.value}/10`}</CardTitle>
           <ul className="flex flex-col gap-3">
             {score.reasons.map((r, i) => (
               <li key={i} className="flex gap-3">
@@ -135,7 +158,7 @@ export const MealAnalysisResult: React.FC<MealAnalysisResultProps> = ({ result, 
         </section>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="flex flex-col gap-4">
         {/* Foods on the plate */}
         {foods.length > 0 && (
           <section className={card}>
@@ -157,14 +180,14 @@ export const MealAnalysisResult: React.FC<MealAnalysisResultProps> = ({ result, 
         {/* Micronutrients */}
         {micronutrients.length > 0 && (
           <section className={card}>
-            <CardTitle icon="science">{isEs ? 'Micronutrientes destacados' : 'Micronutrient highlights'}</CardTitle>
-            <ul className="flex flex-col gap-3">
+            <CardTitle icon="science" tip={{ label: isEs ? 'Qué son los micronutrientes' : 'What micronutrients are', text: isEs ? 'Vitaminas y minerales que aporta el plato, junto con el alimento que los contiene.' : 'Vitamins and minerals the plate provides, with the food that supplies them.' }}>{isEs ? 'Micronutrientes destacados' : 'Micronutrient highlights'}</CardTitle>
+            <ul className="flex flex-col divide-y divide-border">
               {micronutrients.map((m, i) => (
-                <li key={i} className="flex flex-col gap-0.5">
-                  <span className="text-sm font-semibold text-foreground">
-                    {m.nutrient}
-                    {m.sources && <span className="font-normal text-muted-foreground"> · {m.sources}</span>}
-                  </span>
+                <li key={i} className="flex flex-col gap-1 py-3 first:pt-0 last:pb-0">
+                  <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                    <span className="text-sm font-semibold text-foreground">{m.nutrient}</span>
+                    {m.sources && <span className="text-xs rounded-full bg-secondary px-2 py-0.5 text-muted-foreground">{m.sources}</span>}
+                  </div>
                   {m.benefit && <p className="text-sm text-muted-foreground text-pretty">{m.benefit}</p>}
                 </li>
               ))}

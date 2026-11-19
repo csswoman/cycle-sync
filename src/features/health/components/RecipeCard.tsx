@@ -39,7 +39,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe: r, onToggleFavor
               e.stopPropagation();
               onToggleFavorite(r);
             }}
-            className={`absolute bottom-3 right-3 z-10 h-9 w-9 flex items-center justify-center rounded-full backdrop-blur-sm transition-colors ${r.isFavorite ? 'bg-primary text-primary-foreground' : 'bg-black/60 text-white hover:bg-black/80'}`}
+            className={`absolute bottom-3 right-3 z-10 h-11 w-11 sm:h-9 sm:w-9 flex items-center justify-center rounded-full backdrop-blur-sm transition-colors ${r.isFavorite ? 'bg-primary text-primary-foreground' : 'bg-black/60 text-white hover:bg-black/80'}`}
             aria-label={r.isFavorite ? (isEs ? 'Quitar de favoritos' : 'Remove from favorites') : (isEs ? 'Añadir a favoritos' : 'Add to favorites')}
             aria-pressed={r.isFavorite}
           >
