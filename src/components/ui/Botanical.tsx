@@ -223,7 +223,8 @@ export const PetalFall: React.FC<{ colors?: string[]; count?: number; className?
 );
 
 /** A few loose petals gently floating in place, for empty corners and section ends. */
-export const PetalDrift: React.FC<{ color?: string; className?: string; style?: React.CSSProperties }> = ({
+export const PetalDrift: React.FC<{ color?: string; className?: string; style?: React.CSSProperties; falling?: boolean }> = ({
+    falling = false,
     color = 'var(--petal)',
     className = '',
     style,
@@ -238,7 +239,7 @@ export const PetalDrift: React.FC<{ color?: string; className?: string; style?: 
         <svg viewBox="0 0 100 60" overflow="visible" className={`pointer-events-none select-none ${className}`} style={style} aria-hidden="true" focusable="false">
             {petals.map((p, i) => (
                 <g key={i} transform={`translate(${p.x} ${p.y}) rotate(${p.r}) scale(${p.s})`}>
-                    <g className="anim-float" style={{ '--delay': `${-i * 1.3}s` } as Vars}>
+                    <g className={falling ? 'anim-petal-fall' : 'anim-float'} style={{ '--delay': `${-i * 2}s`, '--dur': `${7 + i}s`, '--dx': `${i % 2 ? -12 : 14}px` } as Vars}>
                         <ellipse rx="4.5" ry="8" fill={color} stroke={ink(color)} strokeWidth="1.2" />
                         <path d="M0 -5 Q -1 0 0 5" fill="none" stroke="#ffffff" strokeOpacity="0.5" strokeWidth="1.2" strokeLinecap="round" />
                     </g>

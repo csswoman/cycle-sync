@@ -22,7 +22,7 @@ export interface LandingTips {
 
 export interface LandingText {
   tips: LandingTips;
-  nav: { features: string; pmos: string; privacy: string; login: string; signUp: string };
+  nav: { features: string; pmos: string; privacy: string; login: string; signUp: string; menu: string };
   toggleLanguage: string;
   toggleTheme: string;
   hero: {
@@ -47,7 +47,7 @@ export interface LandingText {
     subtitle: string;
     items: Record<PhaseKey, { name: string; season: string; desc: string }>;
   };
-  features: { title: string; subtitle: string; items: LandingFeature[] };
+  features: { title: string; subtitle: string; items: LandingFeature[]; more: string; less: string };
   pmos: {
     title: string;
     body: string;
@@ -79,15 +79,15 @@ const es: LandingText = {
     },
     more: 'Más información',
   },
-  nav: { features: 'Funciones', pmos: 'PMOS', privacy: 'Privacidad', login: 'Iniciar sesión', signUp: 'Crear cuenta' },
+  nav: { features: 'Funciones', pmos: 'PMOS', privacy: 'Privacidad', login: 'Iniciar sesión', signUp: 'Crear cuenta', menu: 'Menú' },
   toggleLanguage: 'Switch to English',
   toggleTheme: 'Cambiar tema claro u oscuro',
   hero: {
-    eyebrow: 'Registro diario para tu ciclo, con PMOS en el centro',
+    eyebrow: 'Registro diario hecho para PMOS',
     title: 'Tu ciclo, tu cuerpo y tus rutinas,',
     titleAccent: 'en sincronía.',
     subtitle:
-      'CycleSync une el seguimiento del ciclo con nutrición, ejercicio y bienestar según cada fase. Pensada para mujeres con PMOS y útil para cualquiera que quiera entender su ciclo.',
+      'Seguimiento del ciclo con nutrición, ejercicio y bienestar para cada fase. Pensada para PMOS, útil para cualquiera.',
     primaryCta: 'Crear cuenta',
     secondaryCta: 'Probar sin cuenta',
     note: 'Funciona sin conexión. Tus datos son tuyos.',
@@ -112,6 +112,8 @@ const es: LandingText = {
   },
   features: {
     title: 'Todo lo que registras, en un solo lugar',
+    more: 'Ver más funciones',
+    less: 'Ver menos',
     subtitle: 'Cada pantalla te ayuda a anotar rápido y a ver tu avance con el tiempo.',
     items: [
       {
@@ -215,15 +217,15 @@ const en: LandingText = {
     },
     more: 'More information',
   },
-  nav: { features: 'Features', pmos: 'PMOS', privacy: 'Privacy', login: 'Log in', signUp: 'Sign up' },
+  nav: { features: 'Features', pmos: 'PMOS', privacy: 'Privacy', login: 'Log in', signUp: 'Sign up', menu: 'Menu' },
   toggleLanguage: 'Cambiar a español',
   toggleTheme: 'Toggle light or dark theme',
   hero: {
-    eyebrow: 'A daily log for your cycle, built around PMOS',
+    eyebrow: 'A daily log built for PMOS',
     title: 'Your cycle, your body and your routines,',
     titleAccent: 'in sync.',
     subtitle:
-      'CycleSync brings cycle tracking together with nutrition, training and wellbeing for each phase. Designed for women with PMOS, and useful for anyone who wants to understand their cycle.',
+      'Cycle tracking with nutrition, training and wellbeing for each phase. Built for PMOS, useful for anyone.',
     primaryCta: 'Create account',
     secondaryCta: 'Try it without an account',
     note: 'Works offline. Your data stays yours.',
@@ -248,6 +250,8 @@ const en: LandingText = {
   },
   features: {
     title: 'Everything you log, in one place',
+    more: 'Show more features',
+    less: 'Show less',
     subtitle: 'Every screen helps you record quickly and see your progress over time.',
     items: [
       {
