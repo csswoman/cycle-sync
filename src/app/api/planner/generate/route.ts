@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { requireUser, missingKey } from '@/lib/api/requireUser';
+import { requireAiUser, missingKey } from '@/lib/api/requireUser';
 import { createClient } from '@/lib/supabase/server';
 import { generateJson } from '@/lib/ai/gemini.server';
 import { buildPlanPrompt, parsePlanJson, type CandidateVideo } from '@/lib/planner/plan';
@@ -20,7 +20,7 @@ const cleanList = (v: unknown, max: number, limit: number) =>
  * The full recipes the AI writes for the meals are added to the shared catalog (deduplicated) so they can be reused without the AI.
  */
 export async function POST(request: Request) {
-  const auth = await requireUser();
+  const auth = await requireAiUser();
   if (auth.response) return auth.response;
   if (!process.env.GEMINI_API_KEY) return missingKey('GEMINI_API_KEY');
 
@@ -90,6 +90,6 @@ export async function POST(request: Request) {
     });
   } catch (error: any) {
     console.error('Plan generation error:', error);
-    return NextResponse.json({ error: error?.message || 'Plan generation failed' }, { status: 502 });
+    return NextResponse.json({ error: 'Plan generation failed' }, { status: 502 });
   }
 }

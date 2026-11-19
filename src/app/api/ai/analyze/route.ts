@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
-import { requireUser, missingKey } from '@/lib/api/requireUser';
-import { analyzeMedia } from '@/lib/ai/gemini.server';
+import { requireAiUser, missingKey } from '@/lib/api/requireUser';
+import { analyzeMedia, generateJson } from '@/lib/ai/gemini.server';
 
 export const dynamic = 'force-dynamic';
 // Video analysis can take a while.
 export const maxDuration = 60;
 
 export async function POST(request: Request) {
-  const auth = await requireUser();
+  const auth = await requireAiUser();
   if (auth.response) return auth.response;
   if (!process.env.GEMINI_API_KEY) return missingKey('GEMINI_API_KEY');
 
@@ -26,10 +26,10 @@ export async function POST(request: Request) {
   }
 
   try {
-    const text = await analyzeMedia(media, prompt);
+    const text = body?.format === 'json' ? await generateJson(prompt, media) : await analyzeMedia(media, prompt);
     return NextResponse.json({ text });
   } catch (error: any) {
     console.error(`AI ${kind} analysis error:`, error);
-    return NextResponse.json({ error: error?.message || 'AI request failed' }, { status: 502 });
+    return NextResponse.json({ error: 'AI request failed' }, { status: 502 });
   }
 }

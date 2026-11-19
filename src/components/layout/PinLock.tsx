@@ -1,7 +1,7 @@
 'use client';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useLanguage } from '@/i18n/LanguageContext';
-import { supabase } from '@/lib/supabase';
+import { signOutAndClearDevice } from '@/lib/signOut';
 import { Icon } from '@/components/ui/Icon';
 import {
   PIN_PATTERN, clearPinRecord, isIdleExpired, loadPinRecord, retryDelaySeconds, verifyPin, type PinRecord,
@@ -65,8 +65,8 @@ export default function PinLock() {
   if (!record || !locked) return null;
 
   const signOutAndClear = async () => {
+    if (!(await signOutAndClearDevice(es))) return;
     clearPinRecord();
-    await supabase.auth.signOut();
     refresh(false);
   };
 

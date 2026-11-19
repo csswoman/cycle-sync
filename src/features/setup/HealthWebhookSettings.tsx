@@ -57,7 +57,7 @@ export default function HealthWebhookSettings() {
       if (!res.ok) throw new Error(friendly(res.status, data.error || 'Error'));
       setWebhookUrl(data.webhookUrl);
       setConfigured(true);
-      setSecretPrefix(null);
+      setSecretPrefix(data.secretPrefix ?? null);
       setMessage({ type: 'success', text: t.healthWebhookTokenCreated });
       await navigator.clipboard.writeText(data.webhookUrl).catch(() => {});
     } catch (e: any) {
@@ -117,6 +117,14 @@ export default function HealthWebhookSettings() {
             </p>
           )}
         </div>
+      )}
+
+      {configured && !webhookUrl && (
+        <p className="text-sm text-muted-foreground">
+          {language === 'es'
+            ? `Tu reloj ya está conectado${secretPrefix ? ` (token ${secretPrefix})` : ''}. Por seguridad, la URL completa solo se muestra al crearla. Si necesitas copiarla otra vez, genera una nueva y pégala en HC Webhook.`
+            : `Your watch is already connected${secretPrefix ? ` (token ${secretPrefix})` : ''}. For security, the full URL is only shown when it is created. If you need to copy it again, generate a new one and paste it in HC Webhook.`}
+        </p>
       )}
 
       <div className="flex flex-wrap gap-2">

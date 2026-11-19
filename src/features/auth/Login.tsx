@@ -19,7 +19,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSignUp, onUnconfirmedEmail, on
   const [magicLinkLoading, setMagicLinkLoading] = useState(false);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [error, setError] = useState('');
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -188,7 +188,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSignUp, onUnconfirmedEmail, on
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
                   className="absolute right-3 top-3 text-muted-foreground hover:text-primary transition-colors"
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-label={showPassword ? (language === 'es' ? 'Ocultar contraseña' : 'Hide password') : (language === 'es' ? 'Mostrar contraseña' : 'Show password')}
                 >
                   <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
                     {showPassword ? 'visibility_off' : 'visibility'}

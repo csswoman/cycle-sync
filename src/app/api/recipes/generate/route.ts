@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { requireUser, missingKey } from '@/lib/api/requireUser';
+import { requireAiUser, missingKey } from '@/lib/api/requireUser';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { generateJson } from '@/lib/ai/gemini.server';
 import { buildGeneratePrompt } from '@/lib/recipes/prompts';
@@ -13,7 +13,7 @@ export const maxDuration = 60;
 const clean = (v: unknown, max: number) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
 
 export async function POST(request: Request) {
-  const auth = await requireUser();
+  const auth = await requireAiUser();
   if (auth.response) return auth.response;
   if (!process.env.GEMINI_API_KEY) return missingKey('GEMINI_API_KEY');
   if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return missingKey('SUPABASE_SERVICE_ROLE_KEY');
@@ -57,6 +57,6 @@ export async function POST(request: Request) {
     return NextResponse.json(result);
   } catch (error: any) {
     console.error('Recipe generation error:', error);
-    return NextResponse.json({ error: error?.message || 'Recipe generation failed' }, { status: 502 });
+    return NextResponse.json({ error: 'Recipe generation failed' }, { status: 502 });
   }
 }

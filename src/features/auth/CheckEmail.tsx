@@ -9,7 +9,7 @@ interface CheckEmailProps {
 }
 
 const CheckEmail: React.FC<CheckEmailProps> = ({ onBackToLogin, isDarkMode, toggleDarkMode }) => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   return (
     <AuthLayout 
@@ -37,7 +37,9 @@ const CheckEmail: React.FC<CheckEmailProps> = ({ onBackToLogin, isDarkMode, togg
               <span className="material-symbols-outlined text-primary" style={{ fontSize: '32px' }}>local_florist</span>
             </div>
             <p className="text-sm font-medium text-foreground italic">
-              "Every cycle is a new beginning. We're excited to have you with us."
+              {language === 'es'
+                ? '«Cada ciclo es un nuevo comienzo. Nos alegra tenerte aquí.»'
+                : '"Every cycle is a new beginning. We\'re excited to have you with us."'}
             </p>
           </div>
 
@@ -52,7 +54,7 @@ const CheckEmail: React.FC<CheckEmailProps> = ({ onBackToLogin, isDarkMode, togg
         <div className="flex flex-col items-center gap-2">
           <div className="flex items-center gap-2 text-muted-foreground text-xs font-medium bg-secondary/50 px-3 py-1.5 rounded-full">
             <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>info</span>
-            <span>Didn't receive the email? Check your spam folder.</span>
+            <span>{t.checkSpamFolder}</span>
           </div>
         </div>
       </div>

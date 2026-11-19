@@ -1,5 +1,7 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { serverError } from '@/lib/api/requireUser';
+import { hashWebhookSecret } from '@/lib/health/webhookToken';
 import { isValidTimezone, normalizePayload, recomputeDays, upsertRecords } from '@/lib/health/records';
 
 export const dynamic = 'force-dynamic';
@@ -49,7 +51,7 @@ export async function POST(request: NextRequest) {
   const { data: tokenRow, error: tokenErr } = await admin
     .from('health_webhook_tokens')
     .select('user_id, timezone')
-    .eq('secret', token)
+    .eq('secret_hash', hashWebhookSecret(token))
     .maybeSingle();
 
   if (tokenErr || !tokenRow?.user_id) {
@@ -83,14 +85,14 @@ export async function POST(request: NextRequest) {
   const saved = await upsertRecords(admin, userId, records);
   if (saved.error) {
     console.error('Failed to save health records:', saved.error);
-    return NextResponse.json({ error: saved.error }, { status: 500 });
+    return serverError('health', saved.error, 'Could not save health data');
   }
 
   const dates = Array.from(new Set(records.map((r) => r.local_date)));
   const recomputed = await recomputeDays(admin, userId, dates);
   if (recomputed.error) {
     console.error('Failed to recompute health data:', recomputed.error);
-    return NextResponse.json({ error: recomputed.error }, { status: 500 });
+    return serverError('health', recomputed.error, 'Could not save health data');
   }
 
   return NextResponse.json({ success: true, records: records.length, dates, timezone: tz });

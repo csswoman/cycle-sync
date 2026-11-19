@@ -1,8 +1,9 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { supabase } from '@/lib/supabase';
 import { db } from '@/lib/offlineDb';
+import { hasAiConsent, revokeAiConsent } from '@/lib/ai/consent';
 import { SettingsSection } from './components/SettingsComponents';
 import { PIN_CHANGED_EVENT } from '@/components/layout/PinLock';
 import { EXPORT_TABLES, buildExport } from '@/lib/privacy/export';
@@ -35,6 +36,15 @@ const PrivacySettings: React.FC = () => {
   const [word, setWord] = useState('');
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const confirmWord = es ? 'BORRAR' : 'DELETE';
+  const [aiConsent, setAiConsent] = useState<boolean | null>(null);
+  useEffect(() => { void hasAiConsent().then(setAiConsent).catch(() => setAiConsent(false)); }, []);
+  const withdrawAi = async () => {
+    const ok = await revokeAiConsent();
+    if (ok) setAiConsent(false);
+    setMsg(ok
+      ? { ok: true, text: es ? 'Permiso de IA retirado.' : 'AI permission withdrawn.' }
+      : { ok: false, text: es ? 'No se pudo retirar el permiso. Inténtalo de nuevo.' : 'Could not withdraw the permission. Try again.' });
+  };
 
   const savePin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,6 +139,24 @@ const PrivacySettings: React.FC = () => {
               </label>
             </div>
           </form>
+        </div>
+
+        <div className="flex flex-col gap-3">
+          <h3 className="text-foreground font-semibold">{es ? 'Funciones de IA (Google Gemini)' : 'AI features (Google Gemini)'}</h3>
+          <p className="text-sm text-muted-foreground">
+            {es ? 'El asistente, la lectura de análisis, el análisis de fotos y videos, y la generación de recetas y planes envían a Google Gemini tus mensajes, archivos y un resumen de tus registros de salud. Si retiras el permiso, se te preguntará otra vez antes de usar la IA.'
+              : 'The assistant, lab report reading, photo and video analysis, and recipe and plan generation send Google Gemini your messages, files and a summary of your health records. If you withdraw permission, you will be asked again before AI is used.'}
+          </p>
+          <p className="text-sm text-foreground">
+            {aiConsent === null ? '...' : aiConsent
+              ? (es ? 'Estado: permitido.' : 'Status: allowed.')
+              : (es ? 'Estado: no permitido.' : 'Status: not allowed.')}
+          </p>
+          {aiConsent && (
+            <button type="button" onClick={() => void withdrawAi()} className="w-fit px-6 h-11 rounded-xl border border-border text-foreground font-bold">
+              {es ? 'Retirar permiso' : 'Withdraw permission'}
+            </button>
+          )}
         </div>
 
         <div className="flex flex-col gap-3">

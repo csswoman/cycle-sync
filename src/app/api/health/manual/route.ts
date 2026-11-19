@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { serverError } from '@/lib/api/requireUser';
 import {
   isValidDateString,
   recomputeDays,
@@ -39,7 +40,7 @@ export async function GET(request: NextRequest) {
     .order('local_date', { ascending: false })
     .order('start_time', { ascending: false });
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return serverError('health', error.message, 'Could not load health data');
   return NextResponse.json({ entries: data ?? [] }, { headers: { 'Cache-Control': 'no-store' } });
 }
 
@@ -121,14 +122,14 @@ export async function POST(request: NextRequest) {
       .eq('source', 'manual')
       .eq('metric', record.metric)
       .eq('local_date', date);
-    if (delErr) return NextResponse.json({ error: delErr.message }, { status: 500 });
+    if (delErr) return serverError('health', delErr.message, 'Could not save health data');
   }
 
   const saved = await upsertRecords(supabase, user.id, [record]);
-  if (saved.error) return NextResponse.json({ error: saved.error }, { status: 500 });
+  if (saved.error) return serverError('health', saved.error, 'Could not save health data');
 
   const recomputed = await recomputeDays(supabase, user.id, [date]);
-  if (recomputed.error) return NextResponse.json({ error: recomputed.error }, { status: 500 });
+  if (recomputed.error) return serverError('health', recomputed.error, 'Could not save health data');
 
   return NextResponse.json({ ok: true });
 }
@@ -150,11 +151,11 @@ export async function DELETE(request: NextRequest) {
     .eq('source', 'manual')
     .select('local_date')
     .maybeSingle();
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  if (error) return serverError('health', error.message, 'Could not save health data');
   if (!data) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
   const recomputed = await recomputeDays(supabase, user.id, [data.local_date as string]);
-  if (recomputed.error) return NextResponse.json({ error: recomputed.error }, { status: 500 });
+  if (recomputed.error) return serverError('health', recomputed.error, 'Could not save health data');
 
   return NextResponse.json({ ok: true });
 }

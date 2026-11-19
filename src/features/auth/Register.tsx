@@ -18,7 +18,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onBackToLogin, isDarkMo
     confirmPassword: ''
   });
   const [error, setError] = useState('');
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -82,7 +82,7 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onBackToLogin, isDarkMo
                   className="w-full bg-secondary border border-border rounded-xl py-2.5 pl-10 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-body"
                   id="fullName"
                   name="fullName"
-                  placeholder="Jane Doe"
+                  placeholder={language === 'es' ? 'María González' : 'Jane Doe'}
                   type="text"
                   value={formData.fullName}
                   onChange={handleChange}

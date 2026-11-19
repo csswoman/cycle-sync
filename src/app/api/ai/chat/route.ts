@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { requireUser, missingKey } from '@/lib/api/requireUser';
+import { requireAiUser, missingKey } from '@/lib/api/requireUser';
 import { chat, type ChatHistory } from '@/lib/ai/gemini.server';
 import { createClient } from '@/lib/supabase/server';
 import { formatUserContext, loadUserContext, validCycleDay, validDate, validPhase } from '@/lib/ai/userContext.server';
@@ -7,7 +7,7 @@ import { formatUserContext, loadUserContext, validCycleDay, validDate, validPhas
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: Request) {
-  const auth = await requireUser();
+  const auth = await requireAiUser();
   if (auth.response) return auth.response;
   if (!process.env.GEMINI_API_KEY) return missingKey('GEMINI_API_KEY');
 
@@ -38,6 +38,6 @@ export async function POST(request: Request) {
     return NextResponse.json({ text });
   } catch (error: any) {
     console.error('AI chat error:', error);
-    return NextResponse.json({ error: error?.message || 'AI request failed' }, { status: 502 });
+    return NextResponse.json({ error: 'AI request failed' }, { status: 502 });
   }
 }

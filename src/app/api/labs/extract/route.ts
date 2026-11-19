@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { requireUser, missingKey } from '@/lib/api/requireUser';
+import { requireAiUser, missingKey } from '@/lib/api/requireUser';
 import { generateJson } from '@/lib/ai/gemini.server';
 import { normalizeExtractedLabs } from '@/lib/pmos/labExtract';
 
@@ -19,7 +19,7 @@ Return a JSON array. Each item: {"label": string, "value": string, "unit": strin
 Do not include reference ranges, patient data or interpretation. Return [] if the file is not a lab report.`;
 
 export async function POST(request: Request) {
-  const auth = await requireUser();
+  const auth = await requireAiUser();
   if (auth.response) return auth.response;
   if (!process.env.GEMINI_API_KEY) return missingKey('GEMINI_API_KEY');
 
