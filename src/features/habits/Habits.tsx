@@ -169,10 +169,10 @@ const Habits: React.FC = () => {
 
   return (
     <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide">
-      <div className="w-full max-w-page mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-8 pb-32">
+      <div className="w-full max-w-page mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 flex flex-col gap-4 sm:gap-8 pb-32">
 
         {/* Header */}
-        <div className="relative overflow-hidden rounded-3xl garden-wash wash-leaf border border-border/80 shadow-sm p-6 sm:p-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl garden-wash wash-leaf border border-border/80 shadow-sm p-4 sm:p-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
           {/* Petals celebrate once every habit of the day is done. */}
           {dailyProgress >= 100 && <PetalFall count={8} className="absolute inset-0 h-full w-full" />}
           <Bloom
@@ -181,16 +181,16 @@ const Habits: React.FC = () => {
             className="absolute bottom-0 right-4 md:right-48 h-28 sm:h-36 w-auto opacity-90"
           />
           <div className="relative flex flex-col gap-2 pr-20 md:pr-0">
-            <h1 className="text-foreground text-3xl md:text-4xl font-semibold leading-tight tracking-tight">
+            <h1 className="text-foreground text-2xl sm:text-3xl md:text-4xl font-semibold leading-tight tracking-tight">
               <TitleSprig bud={null} />{tx.title}
             </h1>
-            <p className="text-muted-foreground text-base">
+            <p className="text-muted-foreground text-sm sm:text-base">
               {tx.subtitle}
             </p>
           </div>
           <button
             onClick={() => setShowAddModal(true)}
-            className="cta-bloom self-start md:self-auto flex items-center gap-2 px-5 py-2.5 rounded-full font-bold text-sm transition-transform hover:scale-[1.02] active:scale-95"
+            className="cta-bloom self-start md:self-auto flex items-center justify-center gap-2 px-5 min-h-11 sm:min-h-10 rounded-full font-bold text-sm transition-transform hover:scale-[1.02] active:scale-95"
           >
             <span className="material-symbols-outlined text-[18px]">add</span>
             {tx.addHabit}
@@ -198,8 +198,8 @@ const Habits: React.FC = () => {
         </div>
 
         {/* Daily Progress Ring */}
-        <div className="bg-card rounded-2xl border border-border p-6 flex items-center gap-6">
-          <div className="relative w-24 h-24 shrink-0">
+        <div className="bg-card rounded-2xl sm:rounded-3xl border border-border p-4 sm:p-6 flex items-center gap-4 sm:gap-6">
+          <div className="relative w-20 h-20 sm:w-24 sm:h-24 shrink-0">
             <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
               <circle cx="50" cy="50" r="42" fill="none" stroke="currentColor" strokeWidth="8" className="text-secondary" />
               <circle
@@ -216,7 +216,7 @@ const Habits: React.FC = () => {
             </div>
           </div>
           <div className="flex flex-col gap-1">
-            <h3 className="text-foreground text-lg font-bold">{tx.todayProgress}</h3>
+            <h3 className="text-foreground text-lg sm:text-xl font-semibold">{tx.todayProgress}</h3>
             <p className="text-muted-foreground text-sm">
               {dailyProgress === 100
                 ? tx.allComplete
@@ -227,7 +227,7 @@ const Habits: React.FC = () => {
             {dailyProgress === 100 && (
               <div className="flex items-center gap-1 mt-1 text-sun-ink">
                 <span className="material-symbols-outlined text-sm">star</span>
-                <span className="text-xs font-bold">{tx.perfectDay}</span>
+                <span className="text-sm font-semibold">{tx.perfectDay}</span>
               </div>
             )}
           </div>
@@ -235,9 +235,9 @@ const Habits: React.FC = () => {
 
         {/* Phase suggestions */}
         {phaseKey && !loading && (
-          <section data-phase={phaseKey} className="bg-card rounded-2xl border border-border p-5 sm:p-6 flex flex-col gap-4">
+          <section data-phase={phaseKey} className="bg-card rounded-2xl sm:rounded-3xl border border-border p-4 sm:p-6 flex flex-col gap-4">
             <div className="flex flex-col gap-1">
-              <h3 className="text-foreground text-lg font-semibold flex items-center gap-2">
+              <h3 className="text-foreground text-lg sm:text-xl font-semibold flex items-start gap-2">
                 <span className="material-symbols-outlined text-phase">auto_awesome</span>
                 {tx.phaseTitle(tx.phaseNames[phaseKey])}
               </h3>
@@ -248,14 +248,14 @@ const Habits: React.FC = () => {
             ) : (
               <ul className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {phaseSuggestions.map((s) => (
-                  <li key={s.id} className="rounded-xl bg-phase-soft/60 p-4 flex flex-col gap-2">
+                  <li key={s.id} className="rounded-xl sm:rounded-2xl bg-phase-soft/60 p-4 flex flex-col gap-2">
                     <div className="flex items-center gap-2">
                       <span className="material-symbols-outlined text-phase">{s.icon}</span>
                       <p className="text-foreground font-semibold text-sm">{s.name[lang]}</p>
                     </div>
-                    <p className="text-muted-foreground text-xs leading-relaxed flex-1">{s.why[lang]}</p>
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-xs text-muted-foreground">{tx.goalPrefix} {s.goal} {s.unit[lang]}</span>
+                    <p className="text-muted-foreground text-sm leading-relaxed flex-1">{s.why[lang]}</p>
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <span className="text-sm text-muted-foreground basis-36 grow">{tx.goalPrefix} {s.goal} {s.unit[lang]}</span>
                       <button
                         type="button"
                         disabled={adding === s.id}
@@ -263,7 +263,7 @@ const Habits: React.FC = () => {
                           setAdding(s.id);
                           try { await addCustomHabit(s.name[lang], s.goal, s.unit[lang]); } finally { setAdding(null); }
                         }}
-                        className="flex items-center gap-1 text-xs font-bold px-3 py-1.5 rounded-full bg-primary text-primary-foreground disabled:opacity-60"
+                        className="flex items-center gap-1 text-sm font-semibold px-4 min-h-11 sm:min-h-9 rounded-full bg-primary text-primary-foreground disabled:opacity-60"
                       >
                         <span className="material-symbols-outlined text-[16px]">add</span>{tx.phaseAdd}
                       </button>
@@ -279,7 +279,7 @@ const Habits: React.FC = () => {
         {loading ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-40 rounded-xl bg-card animate-pulse border border-border" />
+              <div key={i} className="h-40 rounded-2xl bg-card animate-pulse border border-border" />
             ))}
           </div>
         ) : (
@@ -298,26 +298,26 @@ const Habits: React.FC = () => {
               return (
                 <div
                   key={habit.id}
-                  className={`bg-card rounded-xl border transition-all p-5 flex flex-col gap-4 ${
+                  className={`bg-card rounded-2xl sm:rounded-3xl border transition-all p-4 sm:p-5 flex flex-col gap-4 ${
                     isComplete ? 'border-leaf/30 bg-leaf/5' : 'border-border'
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2.5 rounded-xl ${bg}`}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={`p-2.5 rounded-xl shrink-0 ${bg}`}>
                         <span className={`material-symbols-outlined ${color}`}>{icon}</span>
                       </div>
                       <div>
-                        <h4 className="text-foreground font-bold text-sm">{habitDisplayName(habit)}</h4>
-                        <p className="text-muted-foreground text-xs">
+                        <h4 className="text-foreground font-semibold text-base sm:text-sm">{habitDisplayName(habit)}</h4>
+                        <p className="text-muted-foreground text-sm">
                           {tx.goalPrefix} {goal} {habitDisplayUnit(habit)}
                         </p>
                       </div>
                     </div>
                     {streak > 0 && (
-                      <div className="flex items-center gap-1 px-2 py-1 rounded-lg bg-coral/10 text-sun-ink">
+                      <div className="flex shrink-0 items-center gap-1 px-2 py-1 rounded-lg bg-coral/10 text-sun-ink">
                         <span className="material-symbols-outlined text-sm">local_fire_department</span>
-                        <span className="text-xs font-bold">{streak}d</span>
+                        <span className="text-sm font-semibold">{streak}d</span>
                       </div>
                     )}
                   </div>
@@ -330,24 +330,26 @@ const Habits: React.FC = () => {
                         style={{ width: `${pct}%` }}
                       />
                     </div>
-                    <span className="text-xs font-bold text-foreground w-16 text-right">
+                    <span className="text-sm font-semibold text-foreground w-14 text-right tabular-nums">
                       {currentVal}/{goal}
                     </span>
                   </div>
 
                   {/* Controls */}
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
                       <button
+                        aria-label="-1"
                         onClick={() => handleDecrement(habit)}
-                        className="w-9 h-9 rounded-lg bg-secondary hover:bg-accent flex items-center justify-center transition-colors border border-border"
+                        className="w-11 h-11 sm:w-9 sm:h-9 rounded-lg bg-secondary hover:bg-accent flex items-center justify-center transition-colors border border-border"
                       >
                         <span className="material-symbols-outlined text-[18px] text-foreground">remove</span>
                       </button>
                       <span className="text-foreground font-bold text-lg w-10 text-center">{currentVal}</span>
                       <button
+                        aria-label="+1"
                         onClick={() => handleIncrement(habit)}
-                        className="w-9 h-9 rounded-lg bg-primary/10 hover:bg-primary/20 flex items-center justify-center transition-colors border border-primary/20"
+                        className="w-11 h-11 sm:w-9 sm:h-9 rounded-lg bg-primary/10 hover:bg-primary/20 flex items-center justify-center transition-colors border border-primary/20"
                       >
                         <span className="material-symbols-outlined text-[18px] text-primary">add</span>
                       </button>
@@ -355,7 +357,7 @@ const Habits: React.FC = () => {
 
                     <button
                       onClick={() => handleToggle(habit)}
-                      className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
+                      className={`flex items-center justify-center gap-1.5 px-4 min-h-11 sm:min-h-9 rounded-lg text-sm font-semibold transition-all ${
                         isComplete
                           ? 'bg-leaf text-card'
                           : 'bg-secondary hover:bg-accent text-muted-foreground border border-border'
@@ -375,9 +377,9 @@ const Habits: React.FC = () => {
 
         {/* Add Habit Modal */}
         {showAddModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowAddModal(false)}>
-            <div className="bg-card border border-border rounded-2xl p-6 max-w-md w-full mx-4 animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
-              <h3 className="text-foreground text-xl font-bold mb-4 flex items-center gap-2">
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm" onClick={() => setShowAddModal(false)}>
+            <div className="bg-card border border-border rounded-t-2xl sm:rounded-2xl p-4 sm:p-6 pb-[max(1rem,env(safe-area-inset-bottom))] max-w-md w-full sm:mx-4 max-h-[90dvh] overflow-y-auto animate-in zoom-in-95 duration-200" onClick={(e) => e.stopPropagation()}>
+              <h3 className="text-foreground text-lg sm:text-xl font-semibold mb-4 flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary">add_circle</span>
                 {tx.modalTitle}
               </h3>
@@ -388,11 +390,11 @@ const Habits: React.FC = () => {
                   <input
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
-                    className="w-full px-4 py-3 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full px-4 min-h-11 bg-background border border-border rounded-lg text-base sm:text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     placeholder={tx.namePlaceholder}
                   />
                 </div>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 min-[400px]:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">{tx.dailyGoal}</label>
                     <input
@@ -400,7 +402,7 @@ const Habits: React.FC = () => {
                       onChange={(e) => setNewGoal(e.target.value)}
                       type="number"
                       min="1"
-                      className="w-full px-4 py-3 bg-background border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-4 min-h-11 bg-background border border-border rounded-lg text-base sm:text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
                   <div>
@@ -408,7 +410,7 @@ const Habits: React.FC = () => {
                     <input
                       value={newUnit}
                       onChange={(e) => setNewUnit(e.target.value)}
-                      className="w-full px-4 py-3 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full px-4 min-h-11 bg-background border border-border rounded-lg text-base sm:text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                       placeholder={tx.unitPlaceholder}
                     />
                   </div>
@@ -418,14 +420,14 @@ const Habits: React.FC = () => {
               <div className="flex gap-3 mt-6">
                 <button
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 py-3 rounded-xl border border-border text-foreground font-medium hover:bg-secondary transition-colors"
+                  className="flex-1 min-h-11 rounded-xl border border-border text-foreground font-medium hover:bg-secondary transition-colors"
                 >
                   {tx.cancel}
                 </button>
                 <button
                   onClick={handleAddHabit}
                   disabled={!newName.trim()}
-                  className="flex-1 py-3 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-colors disabled:opacity-50"
+                  className="flex-1 min-h-11 rounded-xl bg-primary text-primary-foreground font-bold hover:bg-primary/90 transition-colors disabled:opacity-50"
                 >
                   {tx.addHabit}
                 </button>
