@@ -1,4 +1,4 @@
-import { db } from './offlineDb';
+import { db, type SetDetail, type WorkoutSource } from './offlineDb';
 
 export async function saveDailyLogOffline(data: {
   userId: string;
@@ -106,6 +106,11 @@ export async function saveWorkoutLogOffline(data: {
   feeling: number;
   notes: string | null;
   phase: string | null;
+  source?: WorkoutSource | null;
+  refId?: string | null;
+  refName?: string | null;
+  sessionId?: string | null;
+  setDetails?: SetDetail[] | null;
 }) {
   const remoteId = crypto.randomUUID();
   await db.workoutLogs.add({

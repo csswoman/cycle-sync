@@ -5,6 +5,8 @@ import programsData from '@/data/programsDataset.json';
 import { Icon } from '@/components/ui/Icon';
 import type { Exercise } from '@/types/exercises';
 import type { AddToRoutineRequest } from './AddToRoutineDialog';
+import { useLanguage } from '@/i18n/LanguageContext';
+import { programExerciseDisplayName } from '@/data/exerciseNamesEs';
 const SESSION_KEY = 'cyclesync.routines.session.v1';
 const PROGRAM_ICONS: Record<string, string> = {
   'home-abdomen': 'local_fire_department',
@@ -50,13 +52,30 @@ const MUSCLES_ES: Record<string, string> = {
   shoulders: 'Hombros', back: 'Espalda', lats: 'Dorsales', 'upper back': 'Espalda alta', traps: 'Trapecio',
   biceps: 'Bíceps', flexibility: 'Flexibilidad', neck: 'Cuello', 'cardiovascular system': 'Cardio', adductors: 'Aductores',
 };
-const musclesEs = (list?: string[]) => Array.from(new Set((list ?? []).map((m) => MUSCLES_ES[m] ?? m)));
+const MUSCLES_EN: Record<string, string> = {
+  abs: 'Abs', obliques: 'Obliques', glutes: 'Glutes', quads: 'Quads', hamstrings: 'Hamstrings',
+  calves: 'Calves', pectorals: 'Chest', triceps: 'Triceps', deltoids: 'Shoulders', delts: 'Shoulders',
+  shoulders: 'Shoulders', back: 'Back', lats: 'Lats', 'upper back': 'Upper back', traps: 'Traps',
+  biceps: 'Biceps', flexibility: 'Flexibility', neck: 'Neck', 'cardiovascular system': 'Cardio', adductors: 'Adductors',
+};
+const musclesI18n = (list?: string[], isEn = false) => {
+  const dict = isEn ? MUSCLES_EN : MUSCLES_ES;
+  return Array.from(new Set((list ?? []).map((m) => dict[m.toLowerCase()] ?? m)));
+};
+const formatDifficulty = (d: string, isEn: boolean) => {
+  const norm = d?.toLowerCase() ?? '';
+  if (!isEn) return norm;
+  if (norm === 'principiante') return 'beginner';
+  if (norm === 'intermedio') return 'intermediate';
+  if (norm === 'avanzado') return 'advanced';
+  return norm;
+};
 // Routine names look like "Abdomen - Rutina 1". When every day of a program shares the prefix,
 // the prefix tells nothing apart, so the label uses the part after it ("Rutina 1").
 // Program exercises have a video and sets × reps instead of the catalog's GIF: they are saved with those fields.
-const toSavedExercise = (ex: ExerciseItem): Exercise => ({
+const toSavedExercise = (ex: ExerciseItem, lang: 'es' | 'en' = 'es'): Exercise => ({
   id: `program:${ex.id}`,
-  name: ex.nameEs || ex.name,
+  name: programExerciseDisplayName(ex, lang),
   bodyPart: ex.category ?? '',
   equipment: '',
   gifUrl: '',
@@ -131,6 +150,8 @@ interface ExerciseVideoPlayerProps {
 }
 
 const ExerciseVideoPlayer: React.FC<ExerciseVideoPlayerProps> = ({ exercise, onExpand }) => {
+  const { language } = useLanguage();
+  const displayName = programExerciseDisplayName(exercise, language);
   const [videoSrc, setVideoSrc] = useState<string | null>(exercise.videoUrl || null);
   const [hasError, setHasError] = useState(false);
 
@@ -156,9 +177,9 @@ const ExerciseVideoPlayer: React.FC<ExerciseVideoPlayerProps> = ({ exercise, onE
           <Icon name="barbell" size={22} weight="duotone" />
         </div>
         <span className="text-xs font-bold text-foreground">
-          {exercise.nameEs || exercise.name}
+          {displayName}
         </span>
-        <span className="text-xs text-muted-foreground">Demostración técnica</span>
+        <span className="text-xs text-muted-foreground">{language === 'en' ? 'Technical demonstration' : 'Demostración técnica'}</span>
       </div>
     );
   }
@@ -174,14 +195,14 @@ const ExerciseVideoPlayer: React.FC<ExerciseVideoPlayerProps> = ({ exercise, onE
         playsInline
         onError={handleError}
         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-        aria-label={exercise.nameEs || exercise.name}
+        aria-label={displayName}
       />
       {onExpand && (
         <button
           type="button"
           onClick={onExpand}
           className="absolute bottom-2 right-2 bg-black/70 hover:bg-black/90 text-white p-1.5 rounded-lg opacity-80 hover:opacity-100 transition-opacity flex items-center justify-center shadow-md cursor-pointer"
-          aria-label="Ver video en grande"
+          aria-label={language === 'en' ? 'Watch larger video' : 'Ver video en grande'}
         >
           <span className="material-symbols-outlined text-[16px]">fullscreen</span>
         </button>
@@ -197,13 +218,24 @@ export interface ProgramLogEntry {
   weightKg: number | null;
   durationMinutes: number | null;
   notes: string | null;
+  source: 'program';
+  /** Program day id ("home-abs-r1"), so the journal can suggest the next day. */
+  refId: string;
+  refName: string;
+  sessionId: string;
+  setDetails: { reps: number | null; weight: number | null }[];
 }
 export interface ProgramSessionSummary {
+  sessionId: string;
+  refId: string;
   label: string;
   durationMinutes: number;
   exercisesLogged: number;
 }
 const ExercisePreviewCard: React.FC<{ exercise: ExerciseItem; index: number; onOpen: () => void }> = ({ exercise, index, onOpen }) => {
+  const { language } = useLanguage();
+  const isEn = language === 'en';
+  const displayName = programExerciseDisplayName(exercise, language);
   const btnRef = React.useRef<HTMLButtonElement>(null);
   const videoRef = React.useRef<HTMLVideoElement>(null);
   const [near, setNear] = useState(false);
@@ -271,12 +303,12 @@ const ExercisePreviewCard: React.FC<{ exercise: ExerciseItem; index: number; onO
         </span>
       </span>
       <span className="p-3 flex flex-col gap-1.5">
-        <span className="text-sm font-bold text-foreground leading-snug line-clamp-2 min-h-[2.5rem]">{exercise.nameEs || exercise.name}</span>
+        <span className="text-sm font-bold text-foreground leading-snug line-clamp-2 min-h-[2.5rem]">{displayName}</span>
         <span className="flex flex-wrap items-center justify-between gap-x-2 gap-y-0.5 tabular-nums">
           <span className="text-sm font-bold text-primary">{exercise.sets} × {exercise.reps}</span>
           <span className="inline-flex items-center gap-1 text-xs text-foreground/70">
             <span aria-hidden className="material-symbols-outlined text-sm">hourglass_empty</span>
-            Descanso {exercise.restSeconds}s
+            {isEn ? 'Rest' : 'Descanso'} {exercise.restSeconds}s
           </span>
         </span>
       </span>
@@ -308,6 +340,8 @@ interface ExerciseLogPanelProps {
   onUndo: () => Promise<boolean>;
 }
 const ExerciseLogPanel: React.FC<ExerciseLogPanelProps> = ({ exercise, sessionActive, saved, canLog, lastSets, onSave, onUndo }) => {
+  const { language } = useLanguage();
+  const isEn = language === 'en';
   const [expanded, setExpanded] = useState(false);
   const [rows, setRows] = useState<SetRow[]>(() =>
     Array.from({ length: Math.min(Math.max(exercise.sets || 3, 1), 10) }, () => ({ reps: '', weight: '' })),
@@ -330,7 +364,7 @@ const ExerciseLogPanel: React.FC<ExerciseLogPanelProps> = ({ exercise, sessionAc
     setError(null);
     const ok = await onUndo();
     if (ok) setExpanded(true);
-    else setError('No se pudo deshacer el registro. Inténtalo de nuevo.');
+    else setError(isEn ? 'Could not undo log. Try again.' : 'No se pudo deshacer el registro. Inténtalo de nuevo.');
   };
   const useLast = () => {
     if (!lastSets) return;
@@ -343,7 +377,7 @@ const ExerciseLogPanel: React.FC<ExerciseLogPanelProps> = ({ exercise, sessionAc
     const parsed = rows
       .map((r) => ({ reps: toNum(r.reps), weight: toNum(r.weight) }))
       .filter((r) => r.reps != null || r.weight != null);
-    if (parsed.length === 0) return setError('Anota las repeticiones o el peso de al menos una serie.');
+    if (parsed.length === 0) return setError(isEn ? 'Enter reps or weight for at least one set.' : 'Anota las repeticiones o el peso de al menos una serie.');
     setError(null);
     setSaving(true);
     const ok = await onSave(parsed);
@@ -351,7 +385,7 @@ const ExerciseLogPanel: React.FC<ExerciseLogPanelProps> = ({ exercise, sessionAc
     if (ok) {
       setExpanded(false);
     } else {
-      setError('No se pudo guardar. Inicia sesión e inténtalo de nuevo.');
+      setError(isEn ? 'Could not save. Sign in and try again.' : 'No se pudo guardar. Inicia sesión e inténtalo de nuevo.');
     }
   };
   return (
@@ -359,7 +393,7 @@ const ExerciseLogPanel: React.FC<ExerciseLogPanelProps> = ({ exercise, sessionAc
       <div className="flex items-center justify-between gap-2">
         <span className="text-muted-foreground flex items-center gap-1.5 text-sm font-semibold">
           <span aria-hidden className="material-symbols-outlined text-base text-sun">hourglass_empty</span>
-          Descanso {exercise.restSeconds}s
+          {isEn ? 'Rest' : 'Descanso'} {exercise.restSeconds}s
         </span>
         {canLog && (
           <div className="flex items-center gap-2">
@@ -367,7 +401,7 @@ const ExerciseLogPanel: React.FC<ExerciseLogPanelProps> = ({ exercise, sessionAc
               <>
                 <span className="inline-flex items-center gap-1 text-sm font-semibold text-leaf">
                   <span aria-hidden className="material-symbols-outlined text-lg">check_circle</span>
-                  Guardado
+                  {isEn ? 'Saved' : 'Guardado'}
                 </span>
                 <button
                   type="button"
@@ -375,7 +409,7 @@ const ExerciseLogPanel: React.FC<ExerciseLogPanelProps> = ({ exercise, sessionAc
                   className="min-h-11 px-3.5 rounded-xl bg-secondary hover:bg-accent text-foreground text-sm font-semibold flex items-center gap-1.5 transition-colors border border-border cursor-pointer"
                 >
                   <span aria-hidden className="material-symbols-outlined text-lg">edit</span>
-                  Editar
+                  {isEn ? 'Edit' : 'Editar'}
                 </button>
               </>
             ) : (
@@ -386,7 +420,7 @@ const ExerciseLogPanel: React.FC<ExerciseLogPanelProps> = ({ exercise, sessionAc
                 className="min-h-11 px-3.5 rounded-xl bg-secondary hover:bg-accent text-foreground text-sm font-semibold flex items-center gap-1.5 transition-colors border border-border cursor-pointer"
               >
                 <span aria-hidden className="material-symbols-outlined text-lg">{open ? 'expand_less' : 'edit_note'}</span>
-                {open ? 'Cerrar' : 'Registrar series'}
+                {open ? (isEn ? 'Close' : 'Cerrar') : (isEn ? 'Log sets' : 'Registrar series')}
               </button>
             )}
           </div>
@@ -397,14 +431,14 @@ const ExerciseLogPanel: React.FC<ExerciseLogPanelProps> = ({ exercise, sessionAc
         <div className="flex flex-col gap-2.5 rounded-xl bg-secondary/40 border border-border/60 p-3">
           {lastLabel && (
             <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
-              <p className="text-muted-foreground tabular-nums">Última vez: <span className="font-semibold text-foreground">{lastLabel}</span></p>
-              <button type="button" onClick={useLast} className="min-h-9 px-2.5 font-semibold text-primary hover:underline cursor-pointer">Usar estos valores</button>
+              <p className="text-muted-foreground tabular-nums">{isEn ? 'Last time:' : 'Última vez:'} <span className="font-semibold text-foreground">{lastLabel}</span></p>
+              <button type="button" onClick={useLast} className="min-h-9 px-2.5 font-semibold text-primary hover:underline cursor-pointer">{isEn ? 'Use these values' : 'Usar estos valores'}</button>
             </div>
           )}
           <div className="grid grid-cols-[3.5rem_1fr_1fr] gap-2 text-xs font-semibold text-muted-foreground px-0.5">
-            <span>Serie</span>
-            <span>Repeticiones</span>
-            <span>Peso (kg)</span>
+            <span>{isEn ? 'Set' : 'Serie'}</span>
+            <span>{isEn ? 'Reps' : 'Repeticiones'}</span>
+            <span>{isEn ? 'Weight (kg)' : 'Peso (kg)'}</span>
           </div>
           {rows.map((row, i) => (
             <div key={i} className="grid grid-cols-[3.5rem_1fr_1fr] gap-2 items-center">
@@ -412,7 +446,7 @@ const ExerciseLogPanel: React.FC<ExerciseLogPanelProps> = ({ exercise, sessionAc
               <input
                 className={logInputClass}
                 inputMode="numeric"
-                aria-label={`Repeticiones de la serie ${i + 1}`}
+                aria-label={isEn ? `Reps for set ${i + 1}` : `Repeticiones de la serie ${i + 1}`}
                 placeholder={exercise.reps}
                 value={row.reps}
                 onChange={(e) => update(i, 'reps', e.target.value)}
@@ -420,7 +454,7 @@ const ExerciseLogPanel: React.FC<ExerciseLogPanelProps> = ({ exercise, sessionAc
               <input
                 className={logInputClass}
                 inputMode="decimal"
-                aria-label={`Peso de la serie ${i + 1} en kilos`}
+                aria-label={isEn ? `Weight for set ${i + 1} in kg` : `Peso de la serie ${i + 1} en kilos`}
                 placeholder="0"
                 value={row.weight}
                 onChange={(e) => update(i, 'weight', e.target.value)}
@@ -436,7 +470,7 @@ const ExerciseLogPanel: React.FC<ExerciseLogPanelProps> = ({ exercise, sessionAc
               className="min-h-11 px-3 rounded-lg text-sm font-semibold text-primary hover:underline disabled:opacity-40 flex items-center gap-1 cursor-pointer"
             >
               <span aria-hidden className="material-symbols-outlined text-lg">add</span>
-              Añadir serie
+              {isEn ? 'Add set' : 'Añadir serie'}
             </button>
             <button
               type="button"
@@ -444,7 +478,7 @@ const ExerciseLogPanel: React.FC<ExerciseLogPanelProps> = ({ exercise, sessionAc
               disabled={saving}
               className="min-h-11 px-5 rounded-xl bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 disabled:opacity-60 transition-colors cursor-pointer"
             >
-              {saving ? 'Guardando…' : 'Guardar ejercicio'}
+              {saving ? (isEn ? 'Saving…' : 'Guardando…') : (isEn ? 'Save exercise' : 'Guardar ejercicio')}
             </button>
           </div>
         </div>
@@ -454,6 +488,8 @@ const ExerciseLogPanel: React.FC<ExerciseLogPanelProps> = ({ exercise, sessionAc
 };
 
 export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout, onUndoLog, onFinishSession, getLastSets, phaseKey, onAddToRoutine }) => {
+  const { language } = useLanguage();
+  const isEn = language === 'en';
   const [activeCategory, setActiveCategory] = useState<'home' | 'gym'>('home');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('all');
   const stripRef = useRef<HTMLOListElement>(null);
@@ -463,7 +499,7 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
   const [selectedRoutineIndex, setSelectedRoutineIndex] = useState<number>(0);
   const [videoModalExercise, setVideoModalExercise] = useState<ExerciseItem | null>(null);
   const [loggedMsg, setLoggedMsg] = useState<string | null>(null);
-  const [session, setSession] = useState<{ label: string; startedAt: number } | null>(null);
+  const [session, setSession] = useState<{ label: string; startedAt: number; sessionId: string } | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [savedKeys, setSavedKeys] = useState<Set<string>>(() => new Set());
@@ -486,7 +522,7 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
           setSavedKeys(new Set(Array.isArray(d.savedKeys) ? d.savedKeys : []));
           setSavedIds(d.savedIds && typeof d.savedIds === 'object' ? d.savedIds : {});
           setCurrentIdx(Number(d.currentIdx) || 0);
-          setSession({ label: String(d.label ?? ''), startedAt: d.startedAt });
+          setSession({ label: String(d.label ?? ''), startedAt: d.startedAt, sessionId: typeof d.sessionId === 'string' ? d.sessionId : crypto.randomUUID() });
           setElapsed(Math.floor((Date.now() - d.startedAt) / 1000));
           setPlayerOpen(true);
         }
@@ -561,8 +597,8 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
   };
   const exerciseKey = (ex: ExerciseItem, idx: number) => `${activeProgram?.id}:${activeRoutine?.id}:${ex.id || idx}`;
   const handleSaveExercise = async (ex: ExerciseItem, idx: number, rows: ParsedSet[]): Promise<boolean> => {
-    if (!onLogWorkout || !activeProgram || !activeRoutine) return false;
-    const name = ex.nameEs || ex.name;
+    if (!onLogWorkout || !activeProgram || !activeRoutine || !session) return false;
+    const name = programExerciseDisplayName(ex, language);
     const weights = rows.map((r) => r.weight).filter((w): w is number => w != null);
     const detail = rows
       .map((r) => `${r.reps ?? '–'}${r.weight != null ? ` × ${r.weight} kg` : ''}`)
@@ -573,13 +609,18 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
       weightKg: weights.length ? Math.max(...weights) : null,
       durationMinutes: null,
       notes: `${detail} — ${activeProgram.name}, ${routineLabel(activeRoutine, activeProgram.routines)}`.slice(0, 300),
+      source: 'program',
+      refId: activeRoutine.id,
+      refName: `${activeProgram.name} · ${routineLabel(activeRoutine, activeProgram.routines)}`,
+      sessionId: session.sessionId,
+      setDetails: rows,
     });
     if (!id) return false;
     const key = exerciseKey(ex, idx);
     setSavedKeys((prev) => new Set(prev).add(key));
     setSavedIds((prev) => ({ ...prev, [key]: id }));
     setCurrentIdx((cur) => (cur === idx ? Math.min(idx + 1, activeRoutine.exercises.length - 1) : cur));
-    flash(`"${name}" guardado en tu diario.`);
+    flash(isEn ? `"${name}" saved to your journal.` : `"${name}" guardado en tu diario.`);
     return true;
   };
   const handleUndoExercise = async (ex: ExerciseItem, idx: number): Promise<boolean> => {
@@ -591,7 +632,7 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
     setSavedKeys((prev) => { const n = new Set(prev); n.delete(key); return n; });
     setSavedIds((prev) => { const n = { ...prev }; delete n[key]; return n; });
     setCurrentIdx(idx);
-    flash('Registro eliminado. Corrige los números y guarda de nuevo.');
+    flash(isEn ? 'Log removed. Correct numbers and save again.' : 'Registro eliminado. Corrige los números y guarda de nuevo.');
     return true;
   };
   const startSession = () => {
@@ -599,7 +640,7 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
     setSavedKeys(new Set());
     setElapsed(0);
     setCurrentIdx(0);
-    setSession({ label: `${activeProgram.name}: ${routineLabel(activeRoutine, activeProgram.routines)}`, startedAt: Date.now() });
+    setSession({ label: `${activeProgram.name}: ${routineLabel(activeRoutine, activeProgram.routines)}`, startedAt: Date.now(), sessionId: crypto.randomUUID() });
     setPlayerOpen(true);
   };
   const savedInRoutine = activeRoutine ? activeRoutine.exercises.filter((ex, i) => savedKeys.has(exerciseKey(ex, i))).length : 0;
@@ -616,12 +657,12 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
     if (!session) return;
     const typed = Math.round(Number(finishMinutes.replace(',', '.')));
     const minutes = Number.isFinite(typed) && typed >= 1 ? Math.min(typed, 300) : 1;
-    onFinishSession?.({ label: session.label, durationMinutes: minutes, exercisesLogged: savedKeys.size });
-    flash(`Sesión guardada: ${minutes} min.`);
+    onFinishSession?.({ sessionId: session.sessionId, refId: activeRoutine?.id ?? '', label: session.label, durationMinutes: minutes, exercisesLogged: savedKeys.size });
+    flash(isEn ? `Session saved: ${minutes} min.` : `Sesión guardada: ${minutes} min.`);
     endSession();
   };
   const exitWithoutCredit = () => {
-    if (onLogWorkout) flash('Sesión cerrada sin registrar: no suma a tu racha ni a tus minutos.');
+    if (onLogWorkout) flash(isEn ? 'Session closed without saving: does not count toward your streak or minutes.' : 'Sesión cerrada sin registrar: no suma a tu racha ni a tus minutos.');
     endSession();
   };
   // A session only counts when something was logged, and its length is confirmed (and capped) before saving.
@@ -631,7 +672,7 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
     const raw = Math.max(1, Math.round((Date.now() - session.startedAt) / 60000));
     const cap = Math.ceil((activeRoutine.estimatedMinutes || 30) * 1.5);
     setFinishMinutes(String(Math.min(raw, cap)));
-    setFinishNote(raw > cap ? `El cronómetro marcó ${raw} min. Lo ajustamos a ${cap}: corrígelo si hace falta.` : null);
+    setFinishNote(raw > cap ? (isEn ? `Timer marked ${raw} min. Capped to ${cap}: adjust if needed.` : `El cronómetro marcó ${raw} min. Lo ajustamos a ${cap}: corrígelo si hace falta.`) : null);
     if (savedInRoutine === 0) return setConfirmFinish('empty');
     setConfirmFinish(savedInRoutine * 2 < activeRoutine.exercises.length ? 'partial' : 'ready');
   };
@@ -654,18 +695,13 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
                           <div className="flex items-start justify-between gap-2">
                             <div>
                               <h4 className="text-base sm:text-lg font-bold text-foreground leading-snug">
-                                {ex.nameEs || ex.name}
+                                {programExerciseDisplayName(ex, language)}
                               </h4>
-                              {ex.nameEs && ex.name !== ex.nameEs && (
-                                <p className="text-xs text-muted-foreground italic">
-                                  {ex.name}
-                                </p>
-                              )}
                             </div>
 
                             {/* Sets x Reps Pill */}
                             <div className="bg-primary/10 border border-primary/20 text-primary px-4 py-2 rounded-xl text-base font-bold text-center shrink-0 tabular-nums">
-                              {ex.sets} series × {ex.reps}
+                              {ex.sets} {isEn ? 'sets' : 'series'} × {ex.reps}
                             </div>
                           </div>
 
@@ -673,12 +709,12 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
                           <div className="mt-2.5 flex flex-col gap-1.5 text-sm">
                             {ex.notes && (
                               <p className="text-muted-foreground leading-relaxed">
-                                <strong>Ejecución:</strong> {ex.notes}
+                                <strong>{isEn ? 'Execution:' : 'Ejecución:'}</strong> {ex.notes}
                               </p>
                             )}
                             {ex.formTip && (
                               <p className="text-leaf leading-relaxed bg-leaf/5 p-2 rounded-lg border border-leaf/15">
-                                <span aria-hidden className="material-symbols-outlined text-base align-text-bottom mr-1">lightbulb</span><strong>Consejo de postura:</strong> {ex.formTip}
+                                <span aria-hidden className="material-symbols-outlined text-base align-text-bottom mr-1">lightbulb</span><strong>{isEn ? 'Form tip:' : 'Consejo de postura:'}</strong> {ex.formTip}
                               </p>
                             )}
                           </div>
@@ -690,7 +726,7 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
                           sessionActive={!!session}
                           saved={savedKeys.has(exerciseKey(ex, idx))}
                           canLog={!!onLogWorkout}
-                          lastSets={getLastSets ? getLastSets((ex.nameEs || ex.name).slice(0, 80)) : null}
+                          lastSets={getLastSets ? getLastSets(programExerciseDisplayName(ex, language).slice(0, 80)) : null}
                           onSave={(rows) => handleSaveExercise(ex, idx, rows)}
                           onUndo={() => handleUndoExercise(ex, idx)}
                         />
@@ -703,10 +739,10 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
       <div className="flex flex-col xl:flex-row gap-2.5 xl:items-center">
         <div className="flex flex-wrap gap-2.5 xl:contents">
         {/* Home vs Gym: neutral segments, so pink stays reserved for the main action */}
-        <div role="group" aria-label="Lugar de entrenamiento" className="flex bg-secondary/60 p-1 rounded-xl border border-border gap-1 shrink-0">
+        <div role="group" aria-label={isEn ? 'Training location' : 'Lugar de entrenamiento'} className="flex bg-secondary/60 p-1 rounded-xl border border-border gap-1 shrink-0">
           {([
-            { id: 'home', label: 'En casa', first: 'home-abdomen' },
-            { id: 'gym', label: 'Gimnasio', first: 'gym-ppl' },
+            { id: 'home', label: isEn ? 'At home' : 'En casa', first: 'home-abdomen' },
+            { id: 'gym', label: isEn ? 'Gym' : 'Gimnasio', first: 'gym-ppl' },
           ] as const).map((opt) => {
             const active = activeCategory === opt.id;
             return (
@@ -734,14 +770,22 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
           })}
         </div>
         <select
-          aria-label="Nivel"
+          aria-label={isEn ? 'Level' : 'Nivel'}
           value={selectedDifficulty}
           onChange={(e) => setSelectedDifficulty(e.target.value)}
           className="xl:hidden flex-1 min-w-[9.5rem] min-h-11 px-3 bg-card border border-border rounded-xl text-sm font-semibold text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
         >
-          {['all', 'principiante', 'intermedio', 'avanzado'].map((d) => (
-            <option key={d} value={d}>{'Nivel: '}{d === 'all' ? 'Todos' : d.charAt(0).toUpperCase() + d.slice(1)}</option>
-          ))}
+          {['all', 'principiante', 'intermedio', 'avanzado'].map((d) => {
+            const label = d === 'all'
+              ? (isEn ? 'All' : 'Todos')
+              : formatDifficulty(d, isEn);
+            const capLabel = label.charAt(0).toUpperCase() + label.slice(1);
+            return (
+              <option key={d} value={d}>
+                {(isEn ? 'Level: ' : 'Nivel: ') + capLabel}
+              </option>
+            );
+          })}
         </select>
         </div>
         <div className="relative flex-1 min-w-0">
@@ -750,16 +794,17 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
           </span>
           <input
             type="search"
-            aria-label="Buscar programas"
+            aria-label={isEn ? 'Search programs' : 'Buscar programas'}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Buscar: glúteos, abdomen, pecho…"
+            placeholder={isEn ? 'Search: glutes, abs, chest…' : 'Buscar: glúteos, abdomen, pecho…'}
             className="w-full pl-10 pr-4 min-h-11 py-2 bg-card border border-border rounded-xl text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
-        <div role="group" aria-label="Nivel" className="hidden xl:flex bg-secondary/60 p-1 rounded-xl border border-border gap-1 overflow-x-auto scrollbar-hide shrink-0">
+        <div role="group" aria-label={isEn ? 'Level' : 'Nivel'} className="hidden xl:flex bg-secondary/60 p-1 rounded-xl border border-border gap-1 overflow-x-auto scrollbar-hide shrink-0">
           {['all', 'principiante', 'intermedio', 'avanzado'].map((diff) => {
             const active = selectedDifficulty === diff;
+            const label = diff === 'all' ? (isEn ? 'All' : 'Todos') : formatDifficulty(diff, isEn);
             return (
               <button
                 key={diff}
@@ -770,7 +815,7 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
                   active ? 'bg-card text-foreground shadow-sm border border-border' : 'text-muted-foreground hover:text-foreground border border-transparent'
                 }`}
               >
-                {diff === 'all' ? 'Todos' : diff}
+                {label}
               </button>
             );
           })}
@@ -786,11 +831,14 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
       <div className="flex flex-col gap-5">
         <div className="flex flex-col gap-2">
           <div className="flex items-baseline justify-between gap-3 px-0.5">
-            <h2 className="text-sm font-bold text-foreground">Programas</h2>
+            <h2 className="text-sm font-bold text-foreground">{isEn ? 'Programs' : 'Programas'}</h2>
             <span className="flex items-center gap-3 text-xs text-muted-foreground tabular-nums">
-              {filteredPrograms.length} disponibles<span className="md:hidden"> · desliza para ver más</span>
+              {filteredPrograms.length} {isEn ? 'available' : 'disponibles'}<span className="md:hidden"> {isEn ? '· swipe for more' : '· desliza para ver más'}</span>
               <span className="hidden md:flex gap-2">
-                {([['Programas anteriores', 'chevron_left', -1], ['Programas siguientes', 'chevron_right', 1]] as const).map(([label, icon, dir]) => (
+                {([
+                  [isEn ? 'Previous programs' : 'Programas anteriores', 'chevron_left', -1],
+                  [isEn ? 'Next programs' : 'Programas siguientes', 'chevron_right', 1],
+                ] as const).map(([label, icon, dir]) => (
                   <button key={icon} type="button" aria-label={label} onClick={() => scrollStrip(dir)} className="size-10 -my-2 rounded-full border border-border bg-card text-foreground flex items-center justify-center hover:border-primary/50 cursor-pointer">
                     <span aria-hidden className="material-symbols-outlined text-xl">{icon}</span>
                   </button>
@@ -800,7 +848,7 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
           </div>
           {filteredPrograms.length === 0 ? (
             <div className="bg-card rounded-xl p-8 text-center text-muted-foreground text-sm border border-border">
-              No se encontraron programas con ese criterio.
+              {isEn ? 'No programs found matching criteria.' : 'No se encontraron programas con ese criterio.'}
             </div>
           ) : (
             <ol ref={stripRef} className="flex gap-3 overflow-x-auto snap-x scroll-px-3 py-3 -my-1.5 px-3 scrollbar-hide">
@@ -808,6 +856,7 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
                 const isSelected = activeProgram?.id === program.id;
                 const totalExercises = program.routines.reduce((sum, r) => sum + r.exercises.length, 0);
                 const diff = difficultyStyle(program.difficulty);
+                const formattedDiff = formatDifficulty(program.difficulty, isEn);
                 return (
                   <li key={program.id} className="snap-start shrink-0 w-56 lg:w-60 first:ml-0.5">
                     <button
@@ -827,8 +876,10 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
                         <span className="font-bold text-sm text-foreground leading-snug line-clamp-2 text-balance">{program.name}</span>
                       </span>
                       <span className="flex items-center justify-between gap-2 text-xs text-muted-foreground tabular-nums">
-                        <span className="whitespace-nowrap" title={`${totalExercises} ejercicios · ${program.durationWeeks} semanas`}>{totalExercises} ej. · {program.durationWeeks} sem</span>
-                        <span className={`font-semibold px-2 py-0.5 rounded-full capitalize ${diff.chip}`}>{program.difficulty}</span>
+                        <span className="whitespace-nowrap" title={isEn ? `${totalExercises} exercises · ${program.durationWeeks} weeks` : `${totalExercises} ejercicios · ${program.durationWeeks} semanas`}>
+                          {totalExercises} {isEn ? 'ex.' : 'ej.'} · {program.durationWeeks} {isEn ? 'wks' : 'sem'}
+                        </span>
+                        <span className={`font-semibold px-2 py-0.5 rounded-full capitalize ${diff.chip}`}>{formattedDiff}</span>
                       </span>
                     </button>
                   </li>
@@ -838,7 +889,7 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
           )}
         </div>
         {/* Selected program */}
-        <section aria-label="Programa seleccionado" className="bg-card rounded-3xl border border-border shadow-sm overflow-hidden">
+        <section aria-label={isEn ? 'Selected program' : 'Programa seleccionado'} className="bg-card rounded-3xl border border-border shadow-sm overflow-hidden">
           {activeProgram && (
             <div className="flex flex-col">
               {/* Program Overview */}
@@ -849,8 +900,8 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
                 <div className="min-w-0 flex-1">
                   <h3 className="text-xl sm:text-2xl font-bold text-foreground text-balance leading-tight">{activeProgram.name}</h3>
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 mt-2.5 text-sm text-muted-foreground tabular-nums">
-                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold capitalize ${difficultyStyle(activeProgram.difficulty).chip}`}>{activeProgram.difficulty}</span>
-                    <span>{activeCategory === 'home' ? 'En casa' : 'Gimnasio'} · {activeProgram.durationWeeks} semanas · {activeProgram.routines.length} {activeProgram.routines.length === 1 ? 'rutina' : 'rutinas'}</span>
+                    <span className={`px-2.5 py-1 rounded-full text-xs font-semibold capitalize ${difficultyStyle(activeProgram.difficulty).chip}`}>{formatDifficulty(activeProgram.difficulty, isEn)}</span>
+                    <span>{activeCategory === 'home' ? (isEn ? 'At home' : 'En casa') : (isEn ? 'Gym' : 'Gimnasio')} · {activeProgram.durationWeeks} {isEn ? 'weeks' : 'semanas'} · {activeProgram.routines.length} {activeProgram.routines.length === 1 ? (isEn ? 'routine' : 'rutina') : (isEn ? 'routines' : 'rutinas')}</span>
                   </div>
                   <p className="text-sm sm:text-base text-muted-foreground mt-3 text-pretty max-w-prose leading-relaxed">{activeProgram.description}</p>
                 </div>
@@ -859,7 +910,7 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
               <div className="flex flex-col gap-5 p-4 sm:p-6">
               {/* Routine days: a real tab list with distinguishable names */}
               {activeProgram.routines.length > 1 && (
-                <div role="tablist" aria-label="Rutinas del programa" className="grid grid-flow-col auto-cols-fr gap-1.5 overflow-x-auto scrollbar-hide -mx-1 px-1 -mb-2">
+                <div role="tablist" aria-label={isEn ? 'Program routines' : 'Rutinas del programa'} className="grid grid-flow-col auto-cols-fr gap-1.5 overflow-x-auto scrollbar-hide -mx-1 px-1 -mb-2">
                   {activeProgram.routines.map((rot, idx) => {
                     const active = selectedRoutineIndex === idx;
                     return (
@@ -877,7 +928,7 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
                             : 'bg-secondary/50 border-transparent text-muted-foreground hover:text-foreground hover:bg-secondary'
                         }`}
                       >
-                        <span className={`text-xs font-bold tabular-nums ${active ? 'text-primary' : ''}`}>Día {idx + 1}</span>
+                        <span className={`text-xs font-bold tabular-nums ${active ? 'text-primary' : ''}`}>{isEn ? 'Day' : 'Día'} {idx + 1}</span>
                         <span className="text-sm font-semibold whitespace-nowrap">{routineLabel(rot, activeProgram.routines)}</span>
                       </button>
                     );
@@ -901,9 +952,9 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
                         </span>
                         <span className="inline-flex items-center gap-1 text-muted-foreground mr-1">
                           <span aria-hidden className="material-symbols-outlined text-base text-primary">format_list_numbered</span>
-                          {activeRoutine.exercises.length} ejercicios
+                          {activeRoutine.exercises.length} {isEn ? 'exercises' : 'ejercicios'}
                         </span>
-                        {musclesEs(activeRoutine.targetMuscles).map((m) => (
+                        {musclesI18n(activeRoutine.targetMuscles, isEn).map((m) => (
                           <span key={m} className="px-2.5 py-1 rounded-full bg-leaf-soft text-leaf text-xs">{m}</span>
                         ))}
                       </div>
@@ -915,13 +966,13 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
                           onClick={() => onAddToRoutine({
                             label: activeRoutine.name,
                             suggestedName: `${activeProgram.name}: ${routineLabel(activeRoutine, activeProgram.routines)}`,
-                            exercises: activeRoutine.exercises.map(toSavedExercise),
+                            exercises: activeRoutine.exercises.map((e) => toSavedExercise(e, language)),
                           })}
-                          aria-label="Guardar en mis rutinas"
+                          aria-label={isEn ? 'Save to my routines' : 'Guardar en mis rutinas'}
                           className="min-h-12 px-4 rounded-xl border border-border bg-card text-foreground text-sm font-semibold flex items-center justify-center gap-2 hover:border-primary/50 transition-colors cursor-pointer"
                         >
                           <span aria-hidden className="material-symbols-outlined text-xl">playlist_add</span>
-                          <span className="max-md:hidden whitespace-nowrap">Guardar en mis rutinas</span>
+                          <span className="max-md:hidden whitespace-nowrap">{isEn ? 'Save to my routines' : 'Guardar en mis rutinas'}</span>
                         </button>
                       )}
                       <button
@@ -930,7 +981,7 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
                         className="max-md:flex-1 min-h-12 px-6 rounded-xl bg-primary text-primary-foreground text-sm font-bold flex items-center justify-center gap-2 shadow-md hover:bg-primary/90 hover:shadow-lg transition-all cursor-pointer"
                       >
                         <span aria-hidden className="material-symbols-outlined text-xl">{session ? 'resume' : 'play_arrow'}</span>
-                        <span className="whitespace-nowrap">{session ? 'Volver a la sesión' : onLogWorkout ? 'Comenzar rutina' : 'Ver guía paso a paso'}</span>
+                        <span className="whitespace-nowrap">{session ? (isEn ? 'Back to session' : 'Volver a la sesión') : onLogWorkout ? (isEn ? 'Start routine' : 'Comenzar rutina') : (isEn ? 'Step-by-step guide' : 'Ver guía paso a paso')}</span>
                       </button>
                     </div>
                   </div>
@@ -940,8 +991,8 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
               {activeRoutine && (
                 <div className="flex flex-col gap-3">
                   <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-                    <h4 className="text-base font-bold text-foreground">Ejercicios de la rutina</h4>
-                    <p className="text-xs text-foreground/70">Toca un ejercicio para ver la demostración.</p>
+                    <h4 className="text-base font-bold text-foreground">{isEn ? 'Routine exercises' : 'Ejercicios de la rutina'}</h4>
+                    <p className="text-xs text-foreground/70">{isEn ? 'Tap an exercise to view demonstration.' : 'Toca un ejercicio para ver la demostración.'}</p>
                   </div>
                   <ol className="grid grid-cols-2 xl:grid-cols-4 gap-3">
                     {activeRoutine.exercises.map((ex, idx) => (
@@ -960,13 +1011,13 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
 
       {/* ── WORKOUT PLAYER: training happens on its own screen, away from the catalog ── */}
       {session && playerOpen && activeProgram && activeRoutine && (
-        <div role="dialog" aria-modal="true" aria-label={`Sesión: ${session.label}`} className="fixed inset-0 z-50 bg-background overflow-y-auto">
+        <div role="dialog" aria-modal="true" aria-label={isEn ? `Session: ${session.label}` : `Sesión: ${session.label}`} className="fixed inset-0 z-50 bg-background overflow-y-auto">
           <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-md border-b border-border">
             <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
               <button
                 type="button"
                 onClick={() => setPlayerOpen(false)}
-                aria-label="Volver al catálogo (la sesión sigue en curso)"
+                aria-label={isEn ? 'Back to catalog (session stays in progress)' : 'Volver al catálogo (la sesión sigue en curso)'}
                 className="size-11 rounded-full bg-secondary text-foreground flex items-center justify-center shrink-0 cursor-pointer"
               >
                 <span aria-hidden className="material-symbols-outlined text-xl">arrow_back</span>
@@ -986,11 +1037,11 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
                           {/* The clock is decorative: a live region ticking every second would flood screen readers. */}
                           <span aria-hidden className="text-2xl font-bold text-phase tabular-nums">{fmtClock(elapsed)}</span>
                           <div className="text-sm">
-                            <p className="font-semibold text-foreground">Ejercicio {currentIdx + 1} de {activeRoutine.exercises.length}</p>
+                            <p className="font-semibold text-foreground">{isEn ? `Exercise ${currentIdx + 1} of ${activeRoutine.exercises.length}` : `Ejercicio ${currentIdx + 1} de ${activeRoutine.exercises.length}`}</p>
                             <p role="status" className="text-xs text-muted-foreground tabular-nums">
                               {onLogWorkout
-                                ? `${savedInRoutine} de ${activeRoutine.exercises.length} ejercicios guardados`
-                                : 'Crea una cuenta para registrar tus series.'}
+                                ? (isEn ? `${savedInRoutine} of ${activeRoutine.exercises.length} exercises saved` : `${savedInRoutine} de ${activeRoutine.exercises.length} ejercicios guardados`)
+                                : (isEn ? 'Create an account to log sets.' : 'Crea una cuenta para registrar tus series.')}
                             </p>
                           </div>
                         </div>
@@ -1001,7 +1052,7 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
                             className="min-h-11 px-5 rounded-xl bg-primary text-primary-foreground text-sm font-bold flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors cursor-pointer"
                           >
                             <span aria-hidden className="material-symbols-outlined text-lg">flag</span>
-                            {onLogWorkout ? 'Finalizar sesión' : 'Salir de la guía'}
+                            {onLogWorkout ? (isEn ? 'Finish session' : 'Finalizar sesión') : (isEn ? 'Exit guide' : 'Salir de la guía')}
                           </button>
                         )}
                       </div>
@@ -1009,15 +1060,15 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
                         <div role="alert" className="flex flex-col gap-3 border-t border-phase/20 pt-3">
                           <p className="text-sm text-foreground text-pretty">
                             {confirmFinish === 'empty'
-                              ? 'No has guardado ningún ejercicio. Si sales ahora, la sesión no suma a tu racha ni a tus minutos.'
+                              ? (isEn ? 'You haven’t saved any exercises. If you exit now, this session won’t count toward your streak or minutes.' : 'No has guardado ningún ejercicio. Si sales ahora, la sesión no suma a tu racha ni a tus minutos.')
                               : confirmFinish === 'partial'
-                                ? `Guardaste ${savedInRoutine} de ${activeRoutine.exercises.length} ejercicios. Se registrará la sesión con los que guardaste.`
-                                : 'Confirma cuánto duró la sesión antes de guardarla.'}
+                                ? (isEn ? `You saved ${savedInRoutine} of ${activeRoutine.exercises.length} exercises. The session will be recorded with the ones you saved.` : `Guardaste ${savedInRoutine} de ${activeRoutine.exercises.length} ejercicios. Se registrará la sesión con los que guardaste.`)
+                                : (isEn ? 'Confirm how long the session lasted before saving.' : 'Confirma cuánto duró la sesión antes de guardarla.')}
                           </p>
                           {confirmFinish !== 'empty' && (
                             <div className="flex flex-col gap-1.5">
                               <label className="flex items-center gap-3 text-sm font-semibold text-foreground">
-                                Minutos
+                                {isEn ? 'Minutes' : 'Minutos'}
                                 <input
                                   inputMode="numeric"
                                   value={finishMinutes}
@@ -1034,14 +1085,14 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
                               onClick={() => setConfirmFinish(null)}
                               className="min-h-11 px-4 rounded-xl border border-border bg-card text-sm font-semibold hover:border-primary/50 cursor-pointer"
                             >
-                              Seguir entrenando
+                              {isEn ? 'Keep training' : 'Seguir entrenando'}
                             </button>
                             <button
                               type="button"
                               onClick={confirmFinish === 'empty' ? exitWithoutCredit : commitFinish}
                               className="min-h-11 px-4 rounded-xl bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 cursor-pointer"
                             >
-                              {confirmFinish === 'empty' ? 'Salir sin registrar' : 'Guardar sesión'}
+                              {confirmFinish === 'empty' ? (isEn ? 'Exit without saving' : 'Salir sin registrar') : (isEn ? 'Save session' : 'Guardar sesión')}
                             </button>
                           </div>
                         </div>
@@ -1050,7 +1101,7 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
                   )}
               {activeRoutine.exercises[currentIdx] && (
                 <div className="flex flex-col gap-4">
-                  <ol className="flex gap-2 overflow-x-auto pb-1" aria-label="Progreso de la rutina">
+                  <ol className="flex gap-2 overflow-x-auto pb-1" aria-label={isEn ? 'Routine progress' : 'Progreso de la rutina'}>
                     {activeRoutine.exercises.map((ex, idx) => {
                       const done = savedKeys.has(exerciseKey(ex, idx));
                       const current = idx === currentIdx;
@@ -1060,7 +1111,7 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
                             type="button"
                             onClick={() => setCurrentIdx(idx)}
                             aria-current={current ? 'step' : undefined}
-                            aria-label={`Ejercicio ${idx + 1}: ${ex.nameEs || ex.name}${done ? ', guardado' : ''}`}
+                            aria-label={`${isEn ? 'Exercise' : 'Ejercicio'} ${idx + 1}: ${programExerciseDisplayName(ex, language)}${done ? (isEn ? ', saved' : ', guardado') : ''}`}
                             className={`size-11 rounded-full text-sm font-bold flex items-center justify-center border transition-all cursor-pointer tabular-nums ${
                               current
                                 ? 'bg-primary text-primary-foreground border-primary shadow-sm'
@@ -1084,7 +1135,7 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
                       className="min-h-11 px-4 rounded-xl border border-border bg-card text-sm font-semibold flex items-center gap-1.5 disabled:opacity-40 hover:border-primary/50 transition-colors cursor-pointer"
                     >
                       <span aria-hidden className="material-symbols-outlined text-lg">arrow_back</span>
-                      Anterior
+                      {isEn ? 'Previous' : 'Anterior'}
                     </button>
                     {currentIdx < activeRoutine.exercises.length - 1 ? (
                       <button
@@ -1092,11 +1143,11 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
                         onClick={() => setCurrentIdx((i) => Math.min(activeRoutine.exercises.length - 1, i + 1))}
                         className="min-h-11 px-4 rounded-xl border border-border bg-card text-sm font-semibold flex items-center gap-1.5 hover:border-primary/50 transition-colors cursor-pointer"
                       >
-                        Siguiente
+                        {isEn ? 'Next' : 'Siguiente'}
                         <span aria-hidden className="material-symbols-outlined text-lg">arrow_forward</span>
                       </button>
                     ) : (
-                      <span className="text-xs text-muted-foreground">Último ejercicio: finaliza la sesión.</span>
+                      <span className="text-xs text-muted-foreground">{isEn ? 'Last exercise: finish the session.' : 'Último ejercicio: finaliza la sesión.'}</span>
                     )}
                   </div>
                 </div>
@@ -1120,10 +1171,10 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
             <div className="p-4 flex items-center justify-between border-b border-border">
               <div>
                 <h3 className="font-bold text-foreground text-base">
-                  {videoModalExercise.nameEs || videoModalExercise.name}
+                  {programExerciseDisplayName(videoModalExercise, language)}
                 </h3>
                 <span className="text-xs text-muted-foreground">
-                  {videoModalExercise.sets} series × {videoModalExercise.reps} · {videoModalExercise.restSeconds}s descanso
+                  {videoModalExercise.sets} {isEn ? 'sets' : 'series'} × {videoModalExercise.reps} · {videoModalExercise.restSeconds}s {isEn ? 'rest' : 'descanso'}
                 </span>
               </div>
               <button
@@ -1146,13 +1197,13 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
                   className="w-full h-full object-contain"
                 />
               ) : (
-                <p className="text-muted-foreground text-sm">Video no disponible</p>
+                <p className="text-muted-foreground text-sm">{isEn ? 'Video not available' : 'Video no disponible'}</p>
               )}
             </div>
 
             {videoModalExercise.formTip && (
               <div className="p-4 bg-secondary/50 border-t border-border text-xs text-muted-foreground">
-                <span aria-hidden className="material-symbols-outlined text-base align-text-bottom mr-1">lightbulb</span><strong>Consejo biomecánico:</strong> {videoModalExercise.formTip}
+                <span aria-hidden className="material-symbols-outlined text-base align-text-bottom mr-1">lightbulb</span><strong>{isEn ? 'Form tip:' : 'Consejo biomecánico:'}</strong> {videoModalExercise.formTip}
               </div>
             )}
             {onAddToRoutine && (
@@ -1162,12 +1213,16 @@ export const ProgramsExplorer: React.FC<ProgramsExplorerProps> = ({ onLogWorkout
                   onClick={() => {
                     const ex = videoModalExercise;
                     setVideoModalExercise(null);
-                    onAddToRoutine({ label: ex.nameEs || ex.name, suggestedName: 'Mi rutina', exercises: [toSavedExercise(ex)] });
+                    onAddToRoutine({
+                      label: programExerciseDisplayName(ex, language),
+                      suggestedName: isEn ? 'My routine' : 'Mi rutina',
+                      exercises: [toSavedExercise(ex, language)],
+                    });
                   }}
                   className="min-h-11 px-4 rounded-xl border border-border bg-card text-sm font-semibold flex items-center gap-2 hover:border-primary/50 cursor-pointer"
                 >
                   <span aria-hidden className="material-symbols-outlined text-lg">playlist_add</span>
-                  Agregar a mi rutina
+                  {isEn ? 'Add to my routine' : 'Agregar a mi rutina'}
                 </button>
               </div>
             )}

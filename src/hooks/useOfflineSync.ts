@@ -74,21 +74,30 @@ async function syncPMOSEntries(uid: string) {
 async function syncWorkoutLogs(uid: string) {
   const pending = await db.workoutLogs.filter((r) => !r.synced && r.userId === uid).toArray();
   for (const log of pending) {
-    const { error } = await supabase.from('workout_logs').upsert(
-      {
-        id: log.remoteId,
-        user_id: log.userId,
-        date: log.date,
-        exercise: log.exercise,
-        sets: log.sets,
-        weight_kg: log.weightKg,
-        duration_minutes: log.durationMinutes,
-        feeling: log.feeling,
-        notes: log.notes,
-        phase: log.phase,
-      },
-      { onConflict: 'id' },
-    );
+    const base = {
+      id: log.remoteId,
+      user_id: log.userId,
+      date: log.date,
+      exercise: log.exercise,
+      sets: log.sets,
+      weight_kg: log.weightKg,
+      duration_minutes: log.durationMinutes,
+      feeling: log.feeling,
+      notes: log.notes,
+      phase: log.phase,
+    };
+    const journal = {
+      source: log.source ?? null,
+      ref_id: log.refId ?? null,
+      ref_name: log.refName ?? null,
+      session_id: log.sessionId ?? null,
+      set_details: log.setDetails ?? null,
+    };
+    let { error } = await supabase.from('workout_logs').upsert({ ...base, ...journal }, { onConflict: 'id' });
+    // Database without the journal migration yet: save the core row so the log is never lost.
+    if (error && (error.code === 'PGRST204' || error.code === '42703')) {
+      ({ error } = await supabase.from('workout_logs').upsert(base, { onConflict: 'id' }));
+    }
     if (!error && log.id != null) {
       await db.workoutLogs.update(log.id, { synced: true });
     }

@@ -51,9 +51,68 @@ export interface EssentialExercise {
   category: 'lower' | 'upper' | 'posterior';
   musclesEs: string;
   tipEs: string;
+  /** How the load is measured, so the number she types matches what she sees in the gym. */
+  loadType: LoadType;
+  /** Beginner-friendly starting load in kg, used as the calculator's default. */
+  startingWeightKg: number;
+  /** Common gym loads in kg (dumbbell pairs, plate steps, machine stack) from beginner to advanced. */
+  suggestedWeightsKg: number[];
 }
 
-export const ESSENTIAL_EXERCISES: EssentialExercise[] = [
+export type LoadType = 'barbell' | 'dumbbell' | 'machine' | 'assisted';
+
+export const LOAD_TYPE_NOTE_ES: Record<LoadType, string> = {
+  barbell: 'Peso total: barra + discos (barra olímpica 20 kg, barra ligera 10-15 kg).',
+  dumbbell: 'Peso de una sola mancuerna.',
+  machine: 'Peso marcado en la máquina o la pila de placas.',
+  assisted: 'Tu peso corporal menos la asistencia de la máquina.',
+};
+
+type ExerciseBase = Omit<EssentialExercise, 'loadType' | 'startingWeightKg' | 'suggestedWeightsKg'>;
+
+const LOAD_GUIDE: Record<string, Pick<EssentialExercise, 'loadType' | 'startingWeightKg' | 'suggestedWeightsKg'>> = {
+  'hip-thrust': { loadType: 'barbell', startingWeightKg: 20, suggestedWeightsKg: [10, 20, 30, 40, 50, 60, 80] },
+  squat: { loadType: 'barbell', startingWeightKg: 15, suggestedWeightsKg: [10, 15, 20, 25, 30, 40, 50] },
+  deadlift: { loadType: 'barbell', startingWeightKg: 20, suggestedWeightsKg: [15, 20, 30, 40, 50, 60, 70] },
+  'bench-press': { loadType: 'barbell', startingWeightKg: 15, suggestedWeightsKg: [10, 15, 20, 25, 30, 35] },
+  row: { loadType: 'dumbbell', startingWeightKg: 6, suggestedWeightsKg: [4, 6, 8, 10, 12, 15] },
+  'overhead-press': { loadType: 'barbell', startingWeightKg: 10, suggestedWeightsKg: [7.5, 10, 12.5, 15, 20, 25] },
+  'front-squat': { loadType: 'barbell', startingWeightKg: 15, suggestedWeightsKg: [10, 15, 20, 25, 30, 40] },
+  'leg-press': { loadType: 'machine', startingWeightKg: 30, suggestedWeightsKg: [20, 30, 40, 50, 60, 80, 100] },
+  bulgarian: { loadType: 'dumbbell', startingWeightKg: 4, suggestedWeightsKg: [2, 4, 6, 8, 10, 12] },
+  lunge: { loadType: 'dumbbell', startingWeightKg: 4, suggestedWeightsKg: [2, 4, 6, 8, 10, 12] },
+  rdl: { loadType: 'barbell', startingWeightKg: 15, suggestedWeightsKg: [10, 15, 20, 25, 30, 40, 50] },
+  'sumo-deadlift': { loadType: 'barbell', startingWeightKg: 20, suggestedWeightsKg: [15, 20, 30, 40, 50, 60] },
+  'glute-bridge': { loadType: 'barbell', startingWeightKg: 10, suggestedWeightsKg: [5, 10, 15, 20, 30, 40] },
+  'leg-curl': { loadType: 'machine', startingWeightKg: 10, suggestedWeightsKg: [5, 10, 15, 20, 25, 30] },
+  'incline-press': { loadType: 'dumbbell', startingWeightKg: 4, suggestedWeightsKg: [2, 4, 6, 8, 10, 12] },
+  'lat-pulldown': { loadType: 'machine', startingWeightKg: 20, suggestedWeightsKg: [10, 15, 20, 25, 30, 35, 40] },
+  pullup: { loadType: 'assisted', startingWeightKg: 25, suggestedWeightsKg: [15, 20, 25, 30, 40, 50] },
+  'dumbbell-shoulder': { loadType: 'dumbbell', startingWeightKg: 4, suggestedWeightsKg: [2, 3, 4, 5, 6, 8, 10] },
+  'biceps-curl': { loadType: 'dumbbell', startingWeightKg: 4, suggestedWeightsKg: [2, 3, 4, 5, 6, 8, 10] },
+  triceps: { loadType: 'machine', startingWeightKg: 10, suggestedWeightsKg: [5, 7.5, 10, 12.5, 15, 20] },
+};
+
+const KG_TO_LB = 2.20462;
+
+/**
+ * Converts a kg load to the unit shown, rounded to a weight you can actually load:
+ * kg to 0.5, lb to 1 under 20 lb (light dumbbells) and to 5 above.
+ */
+export function toGymLoad(kg: number, unit: 'kg' | 'lb'): number {
+  if (unit === 'kg') return Math.round(kg * 2) / 2;
+  const lb = kg * KG_TO_LB;
+  const step = lb < 20 ? 1 : 5;
+  return Math.max(1, Math.round(lb / step) * step);
+}
+
+/** Converts a value already shown in one unit to the other, rounded like {@link toGymLoad}. */
+export function convertLoad(value: number, from: 'kg' | 'lb', to: 'kg' | 'lb'): number {
+  if (from === to) return value;
+  return to === 'lb' ? toGymLoad(value, 'lb') : Math.round((value / KG_TO_LB) * 2) / 2;
+}
+
+const BASE_EXERCISES: ExerciseBase[] = [
   {
     id: 'hip-thrust',
     nameEs: 'Hip Thrust con barra',
@@ -102,7 +161,137 @@ export const ESSENTIAL_EXERCISES: EssentialExercise[] = [
     musclesEs: 'Hombros (deltoides), tríceps y core',
     tipEs: 'Aprieta glúteos y abdomen para mantener la vertical sin arquear la zona lumbar.',
   },
+  {
+    id: 'front-squat',
+    nameEs: 'Sentadilla frontal',
+    nameEn: 'Front Squat',
+    category: 'lower',
+    musclesEs: 'Cuádriceps y core',
+    tipEs: 'Codos altos y torso erguido; la barra descansa sobre los deltoides.',
+  },
+  {
+    id: 'leg-press',
+    nameEs: 'Prensa de piernas',
+    nameEn: 'Leg Press',
+    category: 'lower',
+    musclesEs: 'Cuádriceps y glúteos',
+    tipEs: 'No bloquees las rodillas arriba y mantén la zona lumbar apoyada.',
+  },
+  {
+    id: 'bulgarian',
+    nameEs: 'Sentadilla búlgara',
+    nameEn: 'Bulgarian Split Squat',
+    category: 'lower',
+    musclesEs: 'Glúteos y cuádriceps',
+    tipEs: 'Calcula el peso por cada pierna; el torso ligeramente inclinado carga más el glúteo.',
+  },
+  {
+    id: 'lunge',
+    nameEs: 'Zancadas con mancuernas',
+    nameEn: 'Dumbbell Lunge',
+    category: 'lower',
+    musclesEs: 'Cuádriceps, glúteos e isquiotibiales',
+    tipEs: 'Da pasos largos y empuja con el talón de la pierna delantera.',
+  },
+  {
+    id: 'rdl',
+    nameEs: 'Peso muerto rumano',
+    nameEn: 'Romanian Deadlift',
+    category: 'posterior',
+    musclesEs: 'Isquiotibiales y glúteos',
+    tipEs: 'Lleva la cadera hacia atrás con las rodillas casi rectas; baja hasta sentir el estiramiento.',
+  },
+  {
+    id: 'sumo-deadlift',
+    nameEs: 'Peso muerto sumo',
+    nameEn: 'Sumo Deadlift',
+    category: 'posterior',
+    musclesEs: 'Aductores, glúteos y espalda baja',
+    tipEs: 'Pies anchos, rodillas hacia fuera y pecho arriba antes de tirar.',
+  },
+  {
+    id: 'glute-bridge',
+    nameEs: 'Puente de glúteo',
+    nameEn: 'Glute Bridge',
+    category: 'posterior',
+    musclesEs: 'Glúteo mayor',
+    tipEs: 'Sube hasta alinear rodillas, cadera y hombros, y aprieta arriba un segundo.',
+  },
+  {
+    id: 'leg-curl',
+    nameEs: 'Curl femoral',
+    nameEn: 'Leg Curl',
+    category: 'posterior',
+    musclesEs: 'Isquiotibiales',
+    tipEs: 'Controla la bajada en 2 a 3 segundos sin despegar la cadera.',
+  },
+  {
+    id: 'incline-press',
+    nameEs: 'Press inclinado con mancuernas',
+    nameEn: 'Incline Dumbbell Press',
+    category: 'upper',
+    musclesEs: 'Pectoral superior y hombros',
+    tipEs: 'Banco a 30° o 45°; no subas los hombros hacia las orejas.',
+  },
+  {
+    id: 'lat-pulldown',
+    nameEs: 'Jalón al pecho',
+    nameEn: 'Lat Pulldown',
+    category: 'upper',
+    musclesEs: 'Dorsal ancho y bíceps',
+    tipEs: 'Lleva la barra a la clavícula con el pecho arriba y sin balancear el torso.',
+  },
+  {
+    id: 'pullup',
+    nameEs: 'Dominadas asistidas',
+    nameEn: 'Assisted Pull-up',
+    category: 'upper',
+    musclesEs: 'Dorsal ancho, bíceps y core',
+    tipEs: 'Si usas máquina, el peso asistido resta: anota tu peso corporal menos la asistencia.',
+  },
+  {
+    id: 'dumbbell-shoulder',
+    nameEs: 'Press de hombros con mancuernas',
+    nameEn: 'Dumbbell Shoulder Press',
+    category: 'upper',
+    musclesEs: 'Deltoides y tríceps',
+    tipEs: 'Mancuernas a la altura de las orejas; sube sin arquear la espalda.',
+  },
+  {
+    id: 'biceps-curl',
+    nameEs: 'Curl de bíceps',
+    nameEn: 'Biceps Curl',
+    category: 'upper',
+    musclesEs: 'Bíceps y antebrazos',
+    tipEs: 'Codos pegados al torso; evita impulsarte con la espalda.',
+  },
+  {
+    id: 'triceps',
+    nameEs: 'Extensión de tríceps en polea',
+    nameEn: 'Triceps Pushdown',
+    category: 'upper',
+    musclesEs: 'Tríceps',
+    tipEs: 'Codos fijos a los lados y extiende hasta bloquear sin mover los hombros.',
+  },
 ];
+
+export const ESSENTIAL_EXERCISES: EssentialExercise[] = BASE_EXERCISES.map((ex) => ({
+  ...ex,
+  ...(LOAD_GUIDE[ex.id] ?? { loadType: 'barbell', startingWeightKg: 10, suggestedWeightsKg: [5, 10, 15, 20, 30] }),
+}));
+
+/**
+ * Inverse Brzycki: the load (and % of 1RM) she could lift for `reps` repetitions
+ * to near failure. Rounded to 0.5 so it maps to real plates/dumbbells.
+ */
+export function loadForReps(oneRepMax: number, reps: number): { load: number; percentage: number } {
+  const r = Math.max(1, Math.min(30, Math.round(reps)));
+  const fraction = r === 1 ? 1 : 1.0278 - 0.0278 * r;
+  return {
+    load: Math.round(oneRepMax * fraction * 2) / 2,
+    percentage: Math.round(fraction * 100),
+  };
+}
 
 /**
  * Calculates indirect 1RM using the Brzycki formula:
@@ -166,7 +355,7 @@ export function estimate1RM(weight: number, reps: number, unit: 'kg' | 'lb' = 'k
       follicular: {
         percentage: 85,
         load: roundLoad(0.85),
-        reps: '5 a 8 reps',
+        reps: '4 a 6 reps',
         guidance: 'Ventana óptima por pico de estrógenos; busca sobrecarga progresiva y descansos de 2-3 min.',
       },
       luteal: {

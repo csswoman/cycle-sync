@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { estimate1RM, ESSENTIAL_EXERCISES } from './oneRepMax';
+import { estimate1RM, convertLoad, loadForReps, toGymLoad, ESSENTIAL_EXERCISES } from './oneRepMax';
 
 describe('oneRepMax', () => {
   it('returns exact weight for 1 rep', () => {
@@ -42,6 +42,28 @@ describe('oneRepMax', () => {
     const result = estimate1RM(120, 5, 'lb');
     expect(result.unit).toBe('lb');
     expect(result.oneRepMax).toBeGreaterThan(130);
+  });
+
+  it('gives every exercise a starting weight within its suggested loads', () => {
+    for (const ex of ESSENTIAL_EXERCISES) {
+      expect(ex.suggestedWeightsKg.length).toBeGreaterThan(0);
+      expect(ex.suggestedWeightsKg).toContain(ex.startingWeightKg);
+    }
+  });
+
+  it('rounds loads to plates/dumbbells you can actually use', () => {
+    expect(toGymLoad(20, 'kg')).toBe(20);
+    expect(toGymLoad(20, 'lb')).toBe(45);
+    expect(toGymLoad(4, 'lb')).toBe(9);
+    expect(convertLoad(45, 'lb', 'kg')).toBe(20.5);
+    expect(convertLoad(20, 'kg', 'kg')).toBe(20);
+  });
+
+  it('loadForReps inverts Brzycki so her own set maps back to its weight', () => {
+    const { oneRepMax } = estimate1RM(20, 5, 'kg');
+    expect(loadForReps(oneRepMax, 1)).toEqual({ load: oneRepMax, percentage: 100 });
+    expect(loadForReps(oneRepMax, 5).load).toBe(20);
+    expect(loadForReps(oneRepMax, 10).percentage).toBe(75);
   });
 
   it('includes core essential exercises', () => {

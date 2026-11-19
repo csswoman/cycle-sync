@@ -12,6 +12,8 @@ export interface Exercise {
     sets?: number;
     reps?: string;
     restSeconds?: number;
+    /** Working weight in kg, set by the user in the routine builder. */
+    weight?: number;
 }
 
 export type VideoCategory = 'gym' | 'dance' | 'yoga' | 'pilates';

@@ -4,6 +4,7 @@ import { parseYouTubeId } from '@/lib/youtube';
 import workoutVideosData from '@/data/workoutVideos.json';
 import { displayVideoTitle } from '@/data/videoTitleOverrides';
 import dataset from '@/data/exercisesDataset.json';
+import { exerciseDisplayName, cleanEnglishExerciseName } from '@/data/exerciseNamesEs';
 
 // Exercise data comes from https://github.com/hasaneyldrm/exercises-dataset (bundled JSON).
 // GIFs are loaded from our fork. Media © Gym visual — https://gymvisual.com/
@@ -22,21 +23,21 @@ interface DatasetExercise {
     steps: { en: string[]; es: string[] };
 }
 
-type Lang = 'en' | 'es';
+export type Lang = 'en' | 'es';
 
-const getLang = (): Lang => {
-    if (typeof window === 'undefined') return 'en';
-    return localStorage.getItem('language') === 'es' ? 'es' : 'en';
+export const getLang = (): Lang => {
+    if (typeof window === 'undefined') return 'es';
+    return localStorage.getItem('language') === 'en' ? 'en' : 'es';
 };
 
-const toExercise = (ex: DatasetExercise, lang: Lang): Exercise => ({
+export const toExercise = (ex: DatasetExercise, lang: Lang = getLang()): Exercise => ({
     id: ex.id,
-    name: ex.name,
+    name: lang === 'es' ? exerciseDisplayName(ex, 'es') : cleanEnglishExerciseName(ex.name),
     bodyPart: ex.bodyPart,
     equipment: ex.equipment,
     gifUrl: EXERCISE_MEDIA_BASE + ex.gif,
     target: ex.target,
-    instructions: ex.steps[lang],
+    instructions: ex.steps[lang] || ex.steps.en || [],
     secondaryMuscles: ex.secondaryMuscles,
 });
 
@@ -73,6 +74,26 @@ export const searchExercises = async (query: string, limit: number = 10): Promis
         .filter((ex) => ex.name.toLowerCase().includes(q))
         .slice(0, limit)
         .map((ex) => toExercise(ex, lang));
+};
+
+const fold = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+let nameIndex: { ex: DatasetExercise; es: string; en: string; key: string }[] | null = null;
+
+/** Search by Spanish or English name, ignoring accents. Names that start with the query come first. */
+export const searchExercisesByName = (query: string, limit: number = 8): Exercise[] => {
+    const q = fold(query.trim());
+    if (q.length < 2) return [];
+    nameIndex ??= all.map((ex) => {
+        const es = exerciseDisplayName(ex, 'es');
+        const en = cleanEnglishExerciseName(ex.name);
+        return { ex, es, en, key: `${fold(es)} | ${fold(en)}` };
+    });
+    const lang = getLang();
+    return nameIndex
+        .filter((e) => e.key.includes(q))
+        .sort((a, b) => Number(!fold(a.es).startsWith(q)) - Number(!fold(b.es).startsWith(q)) || a.es.length - b.es.length)
+        .slice(0, limit)
+        .map((e) => toExercise(e.ex, lang));
 };
 
 /**
@@ -124,8 +145,7 @@ const getFallbackVideos = (): WorkoutVideo[] =>
     });
 
 /** Exercises for the given dataset ids, in the same order. Unknown ids are skipped. */
-export const getExercisesByIds = (ids: string[]): Exercise[] => {
-    const lang = getLang();
+export const getExercisesByIds = (ids: string[], lang: Lang = getLang()): Exercise[] => {
     const byId = new Map(all.map((ex) => [ex.id, ex]));
     return ids.flatMap((id) => {
         const ex = byId.get(id);
@@ -172,6 +192,7 @@ export interface ExerciseQuery {
     text?: string;
     offset?: number;
     limit?: number;
+    lang?: Lang;
 }
 
 /** Filtered, paginated browse of the whole dataset. `total` ignores offset/limit. */
@@ -181,15 +202,18 @@ export const queryExercises = ({
     text,
     offset = 0,
     limit = 24,
+    lang = getLang(),
 }: ExerciseQuery): { items: Exercise[]; total: number } => {
-    const lang = getLang();
     const q = text?.trim().toLowerCase();
-    const matches = all.filter(
-        (ex) =>
-            (!bodyPart || ex.bodyPart === bodyPart) &&
-            (!equipment || ex.equipment === equipment) &&
-            (!q || ex.name.toLowerCase().includes(q) || ex.target.toLowerCase().includes(q)),
-    );
+    const matches = all.filter((ex) => {
+        if (bodyPart && ex.bodyPart !== bodyPart) return false;
+        if (equipment && ex.equipment !== equipment) return false;
+        if (!q) return true;
+        const nameEs = exerciseDisplayName(ex, 'es').toLowerCase();
+        const nameEn = ex.name.toLowerCase();
+        const target = ex.target.toLowerCase();
+        return nameEs.includes(q) || nameEn.includes(q) || target.includes(q);
+    });
     return {
         items: matches.slice(offset, offset + limit).map((ex) => toExercise(ex, lang)),
         total: matches.length,

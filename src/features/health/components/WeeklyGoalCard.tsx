@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { STRENGTH_DAYS_GOAL, WEEKLY_MINUTES_GOAL, type WeeklyActivity } from '@/lib/exercise/weeklyActivity';
+import { useLanguage } from '@/i18n/LanguageContext';
 
 interface Props {
   week: WeeklyActivity;
@@ -25,14 +26,24 @@ const Bar: React.FC<{ label: string; value: string; pct: number; done: boolean }
   </div>
 );
 
-function tip(week: WeeklyActivity): string {
-  if (week.strengthDaysConsecutive) return 'Deja al menos un día de descanso entre tus sesiones de fuerza para recuperar bien.';
-  if (!week.strengthGoalMet) {
-    const left = STRENGTH_DAYS_GOAL - week.strengthDays;
-    return `Te ${left === 1 ? 'falta 1 día' : `faltan ${left} días`} de fuerza esta semana. Vale con peso corporal, bandas o pesas.`;
+function tip(week: WeeklyActivity, es: boolean): string {
+  if (es) {
+    if (week.strengthDaysConsecutive) return 'Deja al menos un día de descanso entre tus sesiones de fuerza para recuperar bien.';
+    if (!week.strengthGoalMet) {
+      const left = STRENGTH_DAYS_GOAL - week.strengthDays;
+      return `Te ${left === 1 ? 'falta 1 día' : `faltan ${left} días`} de fuerza esta semana. Vale con peso corporal, bandas o pesas.`;
+    }
+    if (!week.minutesGoalMet) return `Te faltan ${WEEKLY_MINUTES_GOAL - week.minutes} min. Una caminata rápida de 30 minutos cuenta.`;
+    return 'Meta de la semana cumplida. Si buscas más beneficio metabólico, el siguiente escalón son 250 min.';
+  } else {
+    if (week.strengthDaysConsecutive) return 'Leave at least one rest day between your strength sessions to recover well.';
+    if (!week.strengthGoalMet) {
+      const left = STRENGTH_DAYS_GOAL - week.strengthDays;
+      return `You need ${left === 1 ? '1 more day' : `${left} more days`} of strength this week. Bodyweight, bands, or weights all count.`;
+    }
+    if (!week.minutesGoalMet) return `You need ${WEEKLY_MINUTES_GOAL - week.minutes} more minutes. A 30-minute brisk walk counts.`;
+    return 'Weekly goal achieved! If you seek more metabolic benefits, the next tier is 250 min.';
   }
-  if (!week.minutesGoalMet) return `Te faltan ${WEEKLY_MINUTES_GOAL - week.minutes} min. Una caminata rápida de 30 minutos cuenta.`;
-  return 'Meta de la semana cumplida. Si buscas más beneficio metabólico, el siguiente escalón son 250 min.';
 }
 
 /**
@@ -40,8 +51,8 @@ function tip(week: WeeklyActivity): string {
  * for everyone (WHO 2020); `pmos` only changes the wording to cite the PMOS guideline.
  */
 const WeeklyGoalCard: React.FC<Props> = (props) => {
-  // The routines page is Spanish-only, so the card ignores the app language.
-  return <WeeklyGoalCardInner {...props} es />;
+  const { language } = useLanguage();
+  return <WeeklyGoalCardInner {...props} es={language === 'es'} />;
 };
 
 const WeeklyGoalCardInner: React.FC<Props & { es: boolean }> = ({ week, loading, onLog, compact, pmos = true, es }) => compact ? (
@@ -67,12 +78,14 @@ const WeeklyGoalCardInner: React.FC<Props & { es: boolean }> = ({ week, loading,
   <div className="bg-card rounded-2xl border border-border p-5 sm:p-6 shadow-sm flex flex-col gap-4">
     <div className="flex items-start justify-between gap-3">
       <div>
-        <h2 className="text-lg font-bold text-foreground">{pmos ? 'Meta semanal para PMOS' : 'Meta semanal de actividad'}</h2>
+        <h2 className="text-lg font-bold text-foreground">
+          {pmos ? (es ? 'Meta semanal para PMOS' : 'Weekly PMOS activity goal') : (es ? 'Meta semanal de actividad' : 'Weekly activity goal')}
+        </h2>
       </div>
       {onLog && (
         <button type="button" onClick={onLog} className="text-xs font-bold text-primary hover:underline flex items-center gap-1 cursor-pointer shrink-0">
           <span className="material-symbols-outlined text-sm">add</span>
-          <span>Registrar</span>
+          <span>{es ? 'Registrar' : 'Log'}</span>
         </button>
       )}
     </div>
@@ -95,14 +108,23 @@ const WeeklyGoalCardInner: React.FC<Props & { es: boolean }> = ({ week, loading,
             done={week.strengthGoalMet}
           />
         </div>
-        <p className="text-sm text-foreground">{tip(week)}</p>
+        <p className="text-sm text-foreground">{tip(week, es)}</p>
       </>
     )}
 
     <p className="text-xs text-muted-foreground leading-relaxed">
-      {pmos ? 'Meta de la guía internacional de SOP/PMOS (2023)' : 'Meta de la Organización Mundial de la Salud (2020)'}: 150 min a la semana de actividad moderada, o 75 min intensos, más fuerza 2 días no
-      consecutivos. Ningún tipo de ejercicio es claramente mejor que otro: el que mantienes es el que funciona. Se calcula con tu diario de
-      entrenamiento, de lunes a domingo.
+      {es ? (
+        <>
+          {pmos ? 'Meta de la guía internacional de SOP/PMOS (2023)' : 'Meta de la Organización Mundial de la Salud (2020)'}: 150 min a la semana de actividad moderada, o 75 min intensos, más fuerza 2 días no
+          consecutivos. Ningún tipo de ejercicio es claramente mejor que otro: el que mantienes es el que funciona. Se calcula con tu diario de
+          entrenamiento, de lunes a domingo.
+        </>
+      ) : (
+        <>
+          {pmos ? '2023 International PCOS/PMOS guideline target' : 'World Health Organization (2020) target'}: 150 min/week of moderate activity or 75 min vigorous, plus strength on 2 non-consecutive
+          days. No single workout style is clearly superior: consistency is what works. Calculated with your workout journal, Monday to Sunday.
+        </>
+      )}
     </p>
   </div>
 );

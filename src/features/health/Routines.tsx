@@ -6,10 +6,12 @@ import { Exercise, WorkoutVideo, Routine, VideoCategory, VideoIntensity } from '
 import phaseData from '@/data/phaseExercises.json';
 import { supabase } from '@/lib/supabase';
 import { useCycleInfo } from '@/hooks/useCycleInfo';
-import { localDay, useRoutineStore } from '@/stores/routineStore';
+import { localDay } from '@/stores/routineStore';
 import { useWorkoutLogs } from '@/hooks/useWorkoutLogs';
 import { suggestEffort, summarizeWeek, type Effort, type EffortReason } from '@/lib/exercise/weeklyActivity';
-import WorkoutLogSection, { FEELINGS } from './components/WorkoutLogSection';
+import { FEELINGS } from './components/journal/shared';
+import WorkoutJournal from './components/journal/WorkoutJournal';
+import { computeStreak, dayTotals, lastSetsFor } from '@/lib/exercise/trainingStats';
 import WeeklyGoalCard from './components/WeeklyGoalCard';
 import PhasePlaylists from './components/PhasePlaylists';
 import RoutineBuilder from './components/RoutineBuilder';
@@ -23,7 +25,7 @@ import AddToRoutineDialog, { type AddToRoutineRequest } from './components/AddTo
 import TodayHistory from './components/TodayHistory';
 import { usePmosToolsVisible } from '@/hooks/useOnboardingAnswers';
 import { OneRepMaxCalculator } from './components/OneRepMaxCalculator';
-import { exerciseNameEs } from '@/data/exerciseNamesEs';
+import { exerciseDisplayName } from '@/data/exerciseNamesEs';
 import { InfoTooltip } from '@/components/ui/InfoTooltip';
 
 const VIDEOS_PAGE = 9;
@@ -42,90 +44,139 @@ const PHASE_NAMES_ES: Record<string, string> = {
   luteal: 'Fase Lútea',
 };
 
+const PHASE_NAMES_EN: Record<string, string> = {
+  menstrual: 'Menstrual Phase',
+  follicular: 'Follicular Phase',
+  ovulation: 'Ovulatory Phase',
+  luteal: 'Luteal Phase',
+};
+
 // The phase is a starting point, not a rule: studies find its effect on performance small and very
 // individual, so the copy suggests and never forbids. suggestEffort() adjusts it to today's energy.
-const PHASE_GUIDANCE: Record<string, { title: string; desc: string; intensity: string; focus: string; icon: string }> = {
+const PHASE_GUIDANCE: Record<string, {
+  title: { es: string; en: string };
+  desc: { es: string; en: string };
+  intensity: { es: string; en: string };
+  focus: { es: string; en: string };
+  icon: string;
+}> = {
   menstrual: {
-    title: 'Muévete según tus síntomas',
-    desc: 'Con cólicos o poca energía, caminar, la movilidad y el yoga suave ayudan a aliviar el dolor. Si te sientes bien puedes entrenar con normalidad: la regla no obliga a parar.',
-    intensity: 'Suave a moderada',
-    focus: 'Alivio y movilidad',
+    title: { es: 'Muévete según tus síntomas', en: 'Move according to your symptoms' },
+    desc: {
+      es: 'Con cólicos o poca energía, caminar, la movilidad y el yoga suave ayudan a aliviar el dolor. Si te sientes bien puedes entrenar con normalidad: la regla no obliga a parar.',
+      en: 'With cramps or low energy, walking, mobility, and gentle yoga help relieve pain. If you feel good you can train normally: your period does not force you to stop.',
+    },
+    intensity: { es: 'Suave a moderada', en: 'Gentle to moderate' },
+    focus: { es: 'Alivio y movilidad', en: 'Relief & mobility' },
     icon: 'water_drop',
   },
   follicular: {
-    title: 'Buen momento para progresar',
-    desc: 'Muchas mujeres notan más energía después de la regla. Aprovecha para tus sesiones de fuerza con más carga o para el cardio más exigente de la semana.',
-    intensity: 'Moderada a alta',
-    focus: 'Fuerza progresiva y cardio',
+    title: { es: 'Buen momento para progresar', en: 'Great time to make progress' },
+    desc: {
+      es: 'Muchas mujeres notan más energía después de la regla. Aprovecha para tus sesiones de fuerza con más carga o para el cardio más exigente de la semana.',
+      en: 'Many women notice higher energy after their period. Take advantage for heavier strength sessions or your most demanding cardio of the week.',
+    },
+    intensity: { es: 'Moderada a alta', en: 'Moderate to high' },
+    focus: { es: 'Fuerza progresiva y cardio', en: 'Progressive strength & cardio' },
     icon: 'fitness_center',
   },
   ovulation: {
-    title: 'Sesiones exigentes si te sientes fuerte',
-    desc: 'Suele ser una ventana de buena energía. Fuerza, intervalos o circuitos encajan bien; calienta con calma y cuida la técnica.',
-    intensity: 'Alta',
-    focus: 'Fuerza e intervalos',
+    title: { es: 'Sesiones exigentes si te sientes fuerte', en: 'Challenging sessions if you feel strong' },
+    desc: {
+      es: 'Suele ser una ventana de buena energía. Fuerza, intervalos o circuitos encajan bien; calienta con calma y cuida la técnica.',
+      en: 'Usually a window of peak energy. Strength, intervals, or circuits fit well; warm up carefully and mind your form.',
+    },
+    intensity: { es: 'Alta', en: 'High' },
+    focus: { es: 'Fuerza e intervalos', en: 'Strength & intervals' },
     icon: 'bolt',
   },
   luteal: {
-    title: 'Mantén la constancia',
-    desc: 'Al acercarse la regla pueden aparecer cansancio, hinchazón o peor sueño. Mantén la fuerza con cargas que controles y baja la intensidad los días que lo necesites, sin dejar de moverte.',
-    intensity: 'Moderada',
-    focus: 'Fuerza controlada y bajo impacto',
+    title: { es: 'Mantén la constancia', en: 'Maintain consistency' },
+    desc: {
+      es: 'Al acercarse la regla pueden aparecer cansancio, hinchazón o peor sueño. Mantén la fuerza con cargas que controles y baja la intensidad los días que lo necesites, sin dejar de moverte.',
+      en: 'As your period nears, fatigue, bloating, or poorer sleep may appear. Maintain strength with controlled loads and lower intensity when needed, without stopping movement.',
+    },
+    intensity: { es: 'Moderada', en: 'Moderate' },
+    focus: { es: 'Fuerza controlada y bajo impacto', en: 'Controlled strength & low impact' },
     icon: 'self_improvement',
   },
 };
 
-const EFFORT_COPY: Record<Effort, { label: string; examples: string }> = {
-  gentle: { label: 'Hoy: sesión suave', examples: 'Caminata, movilidad, yoga o pilates suave.' },
-  moderate: { label: 'Hoy: sesión moderada', examples: 'Fuerza con cargas cómodas, pilates o cardio a ritmo de conversación.' },
-  strong: { label: 'Hoy: sesión exigente', examples: 'Fuerza con más carga, intervalos o un circuito.' },
+const EFFORT_COPY: Record<Effort, { label: { es: string; en: string }; examples: { es: string; en: string } }> = {
+  gentle: {
+    label: { es: 'Hoy: sesión suave', en: 'Today: gentle session' },
+    examples: { es: 'Caminata, movilidad, yoga o pilates suave.', en: 'Walking, mobility, gentle yoga or pilates.' },
+  },
+  moderate: {
+    label: { es: 'Hoy: sesión moderada', en: 'Today: moderate session' },
+    examples: { es: 'Fuerza con cargas cómodas, pilates o cardio a ritmo de conversación.', en: 'Strength with comfortable weights, pilates, or conversational cardio.' },
+  },
+  strong: {
+    label: { es: 'Hoy: sesión exigente', en: 'Today: demanding session' },
+    examples: { es: 'Fuerza con más carga, intervalos o un circuito.', en: 'Heavier strength, intervals, or a circuit.' },
+  },
 };
 
-function effortReason(reason: EffortReason, energy: number | null): string {
-  switch (reason) {
-    case 'lowEnergy': return `Registraste energía ${energy}/10: prioriza recuperarte, aunque tu fase invite a más.`;
-    case 'highEnergy': return `Registraste energía ${energy}/10: buen día para fuerza o intervalos, sea cual sea tu fase.`;
-    case 'latePeriod': return 'Tu regla va con retraso, así que la fase es incierta: guíate por tu energía.';
-    default: return energy == null
-      ? 'Según tu fase. Registra tu energía en el diario de hoy para ajustar la sugerencia.'
-      : `Según tu fase y tu energía de hoy (${energy}/10).`;
+function effortReason(reason: EffortReason, energy: number | null, isEs: boolean): string {
+  if (isEs) {
+    switch (reason) {
+      case 'lowEnergy': return `Registraste energía ${energy}/10: prioriza recuperarte, aunque tu fase invite a más.`;
+      case 'highEnergy': return `Registraste energía ${energy}/10: buen día para fuerza o intervalos, sea cual sea tu fase.`;
+      case 'latePeriod': return 'Tu regla va con retraso, así que la fase es incierta: guíate por tu energía.';
+      default: return energy == null
+        ? 'Según tu fase. Registra tu energía en el diario de hoy para ajustar la sugerencia.'
+        : `Según tu fase y tu energía de hoy (${energy}/10).`;
+    }
+  } else {
+    switch (reason) {
+      case 'lowEnergy': return `You logged ${energy}/10 energy: prioritize recovery, even if your phase suggests more.`;
+      case 'highEnergy': return `You logged ${energy}/10 energy: great day for strength or intervals, whatever your phase.`;
+      case 'latePeriod': return 'Your period is late, so the phase is uncertain: guide yourself by your energy.';
+      default: return energy == null
+        ? 'Based on your phase. Log your energy in today’s journal to personalize the suggestion.'
+        : `Based on your phase and today's energy (${energy}/10).`;
+    }
   }
 }
 
-const CATEGORIES: { id: VideoCategory | 'all'; label: string; icon: string }[] = [
-  { id: 'all', label: 'Todos', icon: 'grid_view' },
+const getCategories = (isEs: boolean): { id: VideoCategory | 'all'; label: string; icon: string }[] => [
+  { id: 'all', label: isEs ? 'Todos' : 'All', icon: 'grid_view' },
   { id: 'yoga', label: 'Yoga', icon: 'self_improvement' },
   { id: 'pilates', label: 'Pilates', icon: 'accessibility_new' },
-  { id: 'gym', label: 'Fuerza', icon: 'fitness_center' },
-  { id: 'dance', label: 'Danza', icon: 'music_note' },
+  { id: 'gym', label: isEs ? 'Fuerza' : 'Strength', icon: 'fitness_center' },
+  { id: 'dance', label: isEs ? 'Danza' : 'Dance', icon: 'music_note' },
 ];
 
-const INTENSITIES: { id: VideoIntensity | 'all'; label: string }[] = [
-  { id: 'all', label: 'Cualquier intensidad' },
-  { id: 'low', label: 'Suave' },
-  { id: 'medium', label: 'Moderada' },
-  { id: 'high', label: 'Intensa' },
+const getIntensities = (isEs: boolean): { id: VideoIntensity | 'all'; label: string }[] => [
+  { id: 'all', label: isEs ? 'Cualquier intensidad' : 'Any intensity' },
+  { id: 'low', label: isEs ? 'Suave' : 'Gentle' },
+  { id: 'medium', label: isEs ? 'Moderada' : 'Moderate' },
+  { id: 'high', label: isEs ? 'Intensa' : 'Intense' },
 ];
 
-type RoutineTab = 'programs' | 'phase' | 'videos' | 'builder' | 'log';
+type RoutineTab = 'programs' | 'phase' | 'videos' | 'builder' | 'create' | 'log';
 
 // Tabs that hold the user's own data: guests see them locked.
-const MEMBER_TABS: RoutineTab[] = ['builder', 'log'];
+const MEMBER_TABS: RoutineTab[] = ['builder', 'create', 'log'];
 
-const TABS: { id: RoutineTab; label: string; shortLabel?: string; icon: string }[] = [
-  { id: 'programs', label: 'Programas', icon: 'fitness_center' },
-  { id: 'phase', label: 'Para tu fase', shortLabel: 'Tu fase', icon: 'auto_awesome' },
-  { id: 'videos', label: 'Videos', icon: 'videocam' },
-  { id: 'builder', label: 'Mis rutinas', shortLabel: 'Rutinas', icon: 'calendar_month' },
-  { id: 'log', label: 'Diario', icon: 'edit_note' },
+const getTabs = (isEs: boolean): { id: RoutineTab; label: string; shortLabel?: string; icon: string }[] => [
+  { id: 'programs', label: isEs ? 'Programas' : 'Programs', icon: 'fitness_center' },
+  { id: 'phase', label: isEs ? 'Para tu fase' : 'For your phase', shortLabel: isEs ? 'Tu fase' : 'Your phase', icon: 'auto_awesome' },
+  { id: 'videos', label: isEs ? 'Videos' : 'Videos', icon: 'videocam' },
+  { id: 'builder', label: isEs ? 'Mis rutinas' : 'My routines', shortLabel: isEs ? 'Rutinas' : 'Routines', icon: 'calendar_month' },
+  { id: 'create', label: isEs ? 'Crear rutina' : 'Create routine', shortLabel: isEs ? 'Crear' : 'Create', icon: 'edit_calendar' },
+  { id: 'log', label: isEs ? 'Diario' : 'Journal', icon: 'edit_note' },
 ];
 
 const Routines: React.FC = () => {
   const { cycleInfo, loading: cycleLoading } = useCycleInfo();
   const { isGuest, promptSignup } = useGuest();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const isEs = language === 'es';
+  const TABS = useMemo(() => getTabs(isEs), [isEs]);
+  const CATEGORIES = useMemo(() => getCategories(isEs), [isEs]);
+  const INTENSITIES = useMemo(() => getIntensities(isEs), [isEs]);
   const showPmos = usePmosToolsVisible();
-  const { streak, completeWorkout } = useRoutineStore();
   const workoutLogs = useWorkoutLogs();
   const [energyToday, setEnergyToday] = useState<number | null>(null);
 
@@ -134,7 +185,7 @@ const Routines: React.FC = () => {
   useEffect(() => {
     const requested = new URLSearchParams(window.location.search).get('tab') as RoutineTab | null;
     if (requested && TABS.some((tab) => tab.id === requested)) setActiveTab(requested);
-  }, []);
+  }, [TABS]);
   const [recommendedExercises, setRecommendedExercises] = useState<Exercise[]>([]);
   const [workoutVideos, setWorkoutVideos] = useState<WorkoutVideo[]>([]);
   const [videoCategory, setVideoCategory] = useState<VideoCategory | 'all'>('all');
@@ -152,16 +203,30 @@ const Routines: React.FC = () => {
   // The phase comes from the cycle and is never picked by hand. Guests have no cycle, so they see
   // the follicular phase as an example.
   const phaseKey = !isGuest && cycleInfo ? PHASE_KEY_MAP[cycleInfo.phase] || 'follicular' : 'follicular';
-  const phaseNameEs = PHASE_NAMES_ES[phaseKey] || 'Fase Folicular';
-  const guidance = PHASE_GUIDANCE[phaseKey] || PHASE_GUIDANCE.follicular;
+  const phaseName = isEs ? (PHASE_NAMES_ES[phaseKey] || 'Fase Folicular') : (PHASE_NAMES_EN[phaseKey] || 'Follicular Phase');
+  const g = PHASE_GUIDANCE[phaseKey] || PHASE_GUIDANCE.follicular;
+  const guidance = {
+    title: isEs ? g.title.es : g.title.en,
+    desc: isEs ? g.desc.es : g.desc.en,
+    intensity: isEs ? g.intensity.es : g.intensity.en,
+    focus: isEs ? g.focus.es : g.focus.en,
+    icon: g.icon,
+  };
 
   const today = localDay();
-  const isCompletedToday = streak.lastCompletedDate === today;
+  // Streak and today's status come from the workout log in the database, the same on every device.
+  const trainingDays = useMemo(() => dayTotals(workoutLogs.logs), [workoutLogs.logs]);
+  const streak = useMemo(() => computeStreak(trainingDays.keys(), today), [trainingDays, today]);
+  const isCompletedToday = trainingDays.has(today);
   const paused = !!cycleInfo?.paused;
   const periodLate = (cycleInfo?.daysLate ?? 0) > 0;
   const week = useMemo(() => summarizeWeek(workoutLogs.logs), [workoutLogs.logs]);
   const suggestion = suggestEffort(phaseKey, energyToday, periodLate);
-  const effort = EFFORT_COPY[suggestion.effort];
+  const eff = EFFORT_COPY[suggestion.effort];
+  const effort = {
+    label: isEs ? eff.label.es : eff.label.en,
+    examples: isEs ? eff.examples.es : eff.examples.en,
+  };
   // Saved routines carry a weekday (0 = Monday): the one for today is the real answer to "what do I do today".
   const todayWeekday = (new Date().getDay() + 6) % 7;
   const todayRoutine = userRoutines.find((r) => r.weekday === todayWeekday) ?? null;
@@ -231,6 +296,13 @@ const Routines: React.FC = () => {
     }
   };
 
+  // The training day is set from "Mis rutinas", not while building the routine.
+  const updateRoutineWeekday = async (routine: Routine, weekday: number | null) => {
+    const { error } = await supabase.from('routines').update({ weekday }).eq('id', routine.id);
+    if (error) throw error;
+    setUserRoutines((prev) => prev.map((r) => (r.id === routine.id ? { ...r, weekday } : r)));
+  };
+
   // Guests get the sign-up prompt: routines are saved to the account.
   const openAddToRoutine = (request: AddToRoutineRequest) => (isGuest ? promptSignup() : setAddRequest(request));
   const closeAddToRoutine = React.useCallback(() => setAddRequest(null), []);
@@ -246,17 +318,8 @@ const Routines: React.FC = () => {
     (l) => l.date === today && l.notes === 'Video guiado' && l.exercise === videoLogName(activeVideo),
   );
 
-  // Reads the sets of the last log of an exercise back from its note ("10 × 20 kg · 8 × 22.5 kg — Programa, Día").
-  const lastSetsFor = (exerciseName: string) => {
-    const log = workoutLogs.logs.find((l) => l.exercise === exerciseName && l.notes && l.notes.includes(' — '));
-    if (!log?.notes) return null;
-    const sets = log.notes.split(' — ')[0].split(' · ').map((part) => {
-      const m = part.trim().match(/^(\d+|–)(?: × ([\d.,]+) kg)?$/);
-      if (!m) return null;
-      return { reps: m[1] === '–' ? null : Number(m[1]), weight: m[2] ? Number(m[2].replace(',', '.')) : null };
-    });
-    return sets.length > 0 && sets.every(Boolean) ? (sets as { reps: number | null; weight: number | null }[]) : null;
-  };
+  // Sets of the last log of an exercise, to prefill the program guide.
+  const getLastSets = (exerciseName: string) => lastSetsFor(workoutLogs.logs, exerciseName);
   // Free-form check-in: it only counts for the streak once minutes and how it felt are recorded.
   const submitQuick = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -272,16 +335,15 @@ const Routines: React.FC = () => {
       feeling: quickFeeling,
       notes: 'Registro rápido',
       phase: phaseKey,
+      source: 'quick',
     });
     if (!ok) return setQuickError('No se pudo guardar. Inicia sesión e inténtalo de nuevo.');
-    completeWorkout();
     setQuickOpen(false);
     setQuickMinutes('');
     setQuickFeeling(0);
   };
   const handleCompleteWorkout = () => {
-    completeWorkout();
-    // A finished video also goes to the workout log so its minutes count toward the weekly goal.
+    // A finished video goes to the workout log so it counts for the streak and the weekly goal.
     if (activeVideo) {
       void workoutLogs.addLog({
         exercise: videoLogName(activeVideo),
@@ -291,6 +353,9 @@ const Routines: React.FC = () => {
         feeling: 3,
         notes: 'Video guiado',
         phase: phaseKey,
+        source: 'video',
+        refId: activeVideo.id,
+        refName: activeVideo.title.slice(0, 120),
       });
     }
   };
@@ -305,16 +370,18 @@ const Routines: React.FC = () => {
           <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
             <div className="flex flex-col gap-1 min-w-0">
               <h1 className="text-foreground text-2xl md:text-3xl font-bold tracking-tight text-balance">
-                <TitleSprig />Rutinas y Entrenamiento
+                <TitleSprig />{isEs ? 'Rutinas y Entrenamiento' : 'Workouts & Training'}
               </h1>
               <p className="text-muted-foreground text-sm leading-relaxed text-pretty max-w-2xl">
-                {isGuest ? 'Programas por lugar y nivel. Con una cuenta, tu fase y tu energía ajustan la sugerencia.' : 'Tu fase orienta y tu energía de hoy decide.'}
+                {isGuest
+                  ? (isEs ? 'Programas por lugar y nivel. Con una cuenta, tu fase y tu energía ajustan la sugerencia.' : 'Programs by location and level. With an account, your phase and energy adjust suggestions.')
+                  : (isEs ? 'Tu fase orienta y tu energía de hoy decide.' : 'Your phase guides and today’s energy decides.')}
               </p>
             </div>
             {!isGuest && !cycleLoading && !paused && (
               <span data-phase={phaseKey} className="self-start sm:mt-1 inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full bg-phase-soft text-phase shrink-0">
                 <span aria-hidden className="material-symbols-outlined text-base">{guidance.icon}</span>
-                {periodLate ? 'Regla con retraso' : phaseNameEs}{cycleInfo?.cycleDay ? ` · Día ${cycleInfo.cycleDay}` : ''}
+                {periodLate ? (isEs ? 'Regla con retraso' : 'Late period') : phaseName}{cycleInfo?.cycleDay ? ` · ${isEs ? 'Día' : 'Day'} ${cycleInfo.cycleDay}` : ''}
               </span>
             )}
           </header>
@@ -331,25 +398,27 @@ const Routines: React.FC = () => {
                 </div>
                 <div className="min-w-0">
                   <h2 className="text-xl font-bold leading-tight text-foreground text-balance">
-                    {cycleLoading ? 'Cargando…' : paused ? 'Modo embarazo' : effort.label}
+                    {cycleLoading ? (isEs ? 'Cargando…' : 'Loading…') : paused ? (isEs ? 'Modo embarazo' : 'Pregnancy mode') : effort.label}
                     {!paused && !cycleLoading && (
-                      <InfoTooltip label={`Sobre tu fase: ${guidance.title}`} className="ml-1.5 -translate-y-0.5">
+                      <InfoTooltip label={`${isEs ? 'Sobre tu fase' : 'About your phase'}: ${guidance.title}`} className="ml-1.5 -translate-y-0.5">
                         <p className="font-bold">{guidance.title}</p>
                         <p className="text-muted-foreground">{guidance.desc}</p>
                         <p className="flex flex-wrap gap-2 pt-1">
-                          <span className="text-xs font-bold px-3 py-1 rounded-full bg-phase-soft text-phase">Intensidad: {guidance.intensity}</span>
+                          <span className="text-xs font-bold px-3 py-1 rounded-full bg-phase-soft text-phase">{isEs ? 'Intensidad' : 'Intensity'}: {guidance.intensity}</span>
                           <span className="text-xs font-semibold px-3 py-1 rounded-full bg-secondary text-foreground">{guidance.focus}</span>
                         </p>
                       </InfoTooltip>
                     )}
                   </h2>
                   {paused ? (
-                    <p className="text-sm text-muted-foreground leading-relaxed mt-1 max-w-prose">Consulta con tu médica qué tipo de ejercicio te conviene. Las recomendaciones por fase del ciclo están en pausa.</p>
+                    <p className="text-sm text-muted-foreground leading-relaxed mt-1 max-w-prose">
+                      {isEs ? 'Consulta con tu médica qué tipo de ejercicio te conviene. Las recomendaciones por fase del ciclo están en pausa.' : 'Consult your doctor on what exercise is right for you. Phase recommendations are paused.'}
+                    </p>
                   ) : (
                     <>
                       <p className="text-base font-medium text-foreground mt-1">{effort.examples}</p>
                       <p className="text-sm text-muted-foreground leading-relaxed mt-1 max-w-prose text-pretty">
-                        {periodLate ? `Día ${cycleInfo?.cycleDay ?? '?'}. ` : ''}{effortReason(suggestion.reason, energyToday)}
+                        {periodLate ? `${isEs ? 'Día' : 'Day'} ${cycleInfo?.cycleDay ?? '?'}. ` : ''}{effortReason(suggestion.reason, energyToday, isEs)}
                       </p>
                     </>
                   )}
@@ -362,7 +431,7 @@ const Routines: React.FC = () => {
                   className="w-full sm:w-auto sm:self-start max-w-full min-h-12 px-5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 bg-primary text-primary-foreground shadow-md hover:bg-primary/90 hover:shadow-lg transition-all cursor-pointer"
                 >
                   <span aria-hidden className="material-symbols-outlined text-lg">{todayRoutine ? 'event_available' : 'play_arrow'}</span>
-                  <span className="truncate">{todayRoutine ? `Tu rutina de hoy: ${todayRoutine.name}` : 'Ver ejercicios de tu fase'}</span>
+                  <span className="truncate">{todayRoutine ? `${isEs ? 'Tu rutina de hoy' : "Today's routine"}: ${todayRoutine.name}` : (isEs ? 'Ver ejercicios de tu fase' : 'See phase exercises')}</span>
                 </button>
               )}
             </div>
@@ -371,11 +440,11 @@ const Routines: React.FC = () => {
             <div className="xl:col-span-3 bg-card rounded-2xl border border-border p-4 sm:p-5 shadow-sm grid lg:grid-cols-2 gap-x-6 gap-y-4">
               <div className="flex flex-col gap-3 min-w-0">
                 <div>
-                  <h3 className="text-base font-bold text-foreground">Registro de hoy</h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">Meta semanal{showPmos ? ' PMOS' : ''}: 150 min y 2 días de fuerza</p>
+                  <h3 className="text-base font-bold text-foreground">{isEs ? 'Registro de hoy' : "Today's log"}</h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">{isEs ? 'Meta semanal' : 'Weekly goal'}{showPmos ? ' PMOS' : ''}: {isEs ? '150 min y 2 días de fuerza' : '150 min & 2 strength days'}</p>
                   <div className="flex items-baseline gap-2 mt-1.5">
-                    <span className="text-2xl font-bold text-foreground tabular-nums">{streak.currentStreak}</span>
-                    <span className="text-sm text-muted-foreground font-medium">días activos seguidos</span>
+                    <span className="text-2xl font-bold text-foreground tabular-nums">{streak.current}</span>
+                    <span className="text-sm text-muted-foreground font-medium">{isEs ? 'días activos seguidos' : 'active days streak'}</span>
                   </div>
                 </div>
                 <WeeklyGoalCard compact pmos={showPmos} week={week} loading={workoutLogs.loading} />
@@ -385,12 +454,12 @@ const Routines: React.FC = () => {
               {isCompletedToday ? (
                 <div className="w-full py-2.5 px-4 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 bg-leaf/10 text-leaf border border-leaf/20">
                   <span aria-hidden className="material-symbols-outlined text-lg">check_circle</span>
-                  <span>Entrenamiento de hoy listo</span>
+                  <span>{isEs ? 'Entrenamiento de hoy listo' : "Today's workout completed"}</span>
                 </div>
               ) : quickOpen ? (
                 <form onSubmit={submitQuick} className="flex flex-col gap-3">
                   <label className="flex flex-col gap-1 text-sm font-semibold text-foreground">
-                    Minutos entrenados
+                    {isEs ? 'Minutos entrenados' : 'Minutes trained'}
                     <input
                       inputMode="numeric"
                       value={quickMinutes}
@@ -399,7 +468,7 @@ const Routines: React.FC = () => {
                       className="min-h-11 rounded-xl border border-border bg-card px-3 text-sm font-normal tabular-nums placeholder:text-muted-foreground focus-visible:outline-2 focus-visible:outline-primary"
                     />
                   </label>
-                  <div role="radiogroup" aria-label="Cómo te sentiste" className="flex gap-1.5">
+                  <div role="radiogroup" aria-label={isEs ? 'Cómo te sentiste' : 'How you felt'} className="flex gap-1.5">
                     {FEELINGS.map((f) => (
                       <button
                         key={f.value}
@@ -419,9 +488,9 @@ const Routines: React.FC = () => {
                   </div>
                   {quickError && <p role="alert" className="text-xs font-semibold text-destructive">{quickError}</p>}
                   <div className="flex gap-2">
-                    <button type="button" onClick={() => { setQuickOpen(false); setQuickError(null); }} className="min-h-11 px-4 rounded-xl border border-border bg-card text-sm font-semibold hover:border-primary/50 cursor-pointer">Cancelar</button>
+                    <button type="button" onClick={() => { setQuickOpen(false); setQuickError(null); }} className="min-h-11 px-4 rounded-xl border border-border bg-card text-sm font-semibold hover:border-primary/50 cursor-pointer">{isEs ? 'Cancelar' : 'Cancel'}</button>
                     <button type="submit" disabled={workoutLogs.saving} className="flex-1 min-h-11 px-4 rounded-xl bg-primary text-primary-foreground text-sm font-bold hover:bg-primary/90 disabled:opacity-60 cursor-pointer">
-                      {workoutLogs.saving ? 'Guardando…' : 'Guardar'}
+                      {workoutLogs.saving ? (isEs ? 'Guardando…' : 'Saving…') : (isEs ? 'Guardar' : 'Save')}
                     </button>
                   </div>
                 </form>
@@ -432,7 +501,7 @@ const Routines: React.FC = () => {
                   className="w-full min-h-11 px-3 whitespace-nowrap rounded-xl font-semibold text-sm flex items-center justify-center gap-2 bg-card text-foreground border border-border hover:border-primary/50 hover:bg-secondary/50 transition-all cursor-pointer"
                 >
                   <span aria-hidden className="material-symbols-outlined text-lg">task_alt</span>
-                  <span>Registrar entrenamiento</span>
+                  <span>{isEs ? 'Registrar entrenamiento' : 'Log workout'}</span>
                 </button>
               )}
               </div>
@@ -453,7 +522,7 @@ const Routines: React.FC = () => {
               onClick={() => setReloadKey((k) => k + 1)}
               className="px-4 min-h-10 rounded-xl text-sm font-semibold border border-border bg-card hover:border-primary/50 cursor-pointer shrink-0"
             >
-              Reintentar
+              {isEs ? 'Reintentar' : 'Retry'}
             </button>
           </div>
         )}
@@ -520,11 +589,10 @@ const Routines: React.FC = () => {
           <ProgramsExplorer
             onAddToRoutine={openAddToRoutine}
             phaseKey={phaseKey}
-            getLastSets={isGuest ? undefined : lastSetsFor}
+            getLastSets={isGuest ? undefined : getLastSets}
             onLogWorkout={isGuest ? undefined : (entry) => workoutLogs.addLogWithId({ ...entry, feeling: 3, phase: phaseKey })}
             onUndoLog={isGuest ? undefined : workoutLogs.removeLog}
-            onFinishSession={isGuest ? undefined : ({ label, durationMinutes, exercisesLogged }) => {
-              completeWorkout();
+            onFinishSession={isGuest ? undefined : ({ sessionId, refId, label, durationMinutes, exercisesLogged }) => {
               void workoutLogs.addLog({
                 exercise: label.slice(0, 80),
                 sets: null,
@@ -533,6 +601,10 @@ const Routines: React.FC = () => {
                 feeling: 3,
                 notes: `Sesión completada: ${exercisesLogged} ejercicios guardados`,
                 phase: phaseKey,
+                source: 'session',
+                sessionId,
+                refId: refId || null,
+                refName: label.slice(0, 120),
               });
             }}
           />
@@ -551,12 +623,12 @@ const Routines: React.FC = () => {
                 <div>
                   <h2 className="text-lg font-bold text-foreground text-balance">{guidance.title}</h2>
                   <p className="text-sm font-semibold text-muted-foreground">
-                    {isGuest ? `Ejemplo: ${phaseNameEs}. Con una cuenta se adapta a tu ciclo.` : phaseNameEs}
+                    {isGuest ? (isEs ? `Ejemplo: ${phaseName}. Con una cuenta se adapta a tu ciclo.` : `Example: ${phaseName}. With an account it adapts to your cycle.`) : phaseName}
                   </p>
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed text-pretty">{guidance.desc}</p>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-bold px-3 py-1 rounded-full bg-phase-soft text-phase">Intensidad: {guidance.intensity}</span>
+                  <span className="text-xs font-bold px-3 py-1 rounded-full bg-phase-soft text-phase">{isEs ? `Intensidad: ${guidance.intensity}` : `Intensity: ${guidance.intensity}`}</span>
                   <span className="text-xs font-semibold px-3 py-1 rounded-full bg-secondary text-foreground">{guidance.focus}</span>
                 </div>
               </div>
@@ -564,7 +636,7 @@ const Routines: React.FC = () => {
           )}
           {/* Recommended Movements for Current Phase */}
           <RoutineSection
-            title={`Ejercicios recomendados para ${phaseNameEs.toLowerCase()}`}
+            title={isEs ? `Ejercicios recomendados para ${phaseName.toLowerCase()}` : `Recommended exercises for ${phaseName.toLowerCase()}`}
             description={guidance.focus}
             icon="fitness_center"
           >
@@ -574,14 +646,20 @@ const Routines: React.FC = () => {
                   <div key={i} className="h-44 rounded-2xl bg-card animate-pulse border border-border" />
                 ))
               ) : recommendedExercises.length === 0 ? (
-                <p className="text-muted-foreground text-sm col-span-full">No hay ejercicios específicos cargados para esta fase.</p>
+                <p className="text-muted-foreground text-sm col-span-full">
+                  {isEs ? 'No hay ejercicios específicos cargados para esta fase.' : 'No specific exercises loaded for this phase.'}
+                </p>
               ) : (
                 recommendedExercises.map((ex) => (
                   <ExerciseCard
                     key={ex.id}
                     exercise={ex}
                     variant="horizontal"
-                    onSave={() => openAddToRoutine({ label: exerciseNameEs(ex), suggestedName: `Rutina ${phaseNameEs}`, exercises: [{ ...ex, name: exerciseNameEs(ex) }] })}
+                    onSave={() => openAddToRoutine({
+                      label: exerciseDisplayName(ex, language),
+                      suggestedName: language === 'en' ? `Routine ${phaseKey}` : `Rutina ${phaseName}`,
+                      exercises: [{ ...ex, name: exerciseDisplayName(ex, language) }],
+                    })}
                   />
                 ))
               )}
@@ -590,32 +668,30 @@ const Routines: React.FC = () => {
 
           {/* Automatic phase playlists */}
           <RoutineSection
-            title="Playlists por fase"
-            description="Sesiones de video curadas y organizadas según el momento de tu ciclo hormonal."
+            title={isEs ? 'Playlists por fase' : 'Playlists by phase'}
+            description={isEs ? 'Sesiones de video curadas y organizadas según el momento de tu ciclo hormonal.' : 'Curated video sessions organized by the phase of your cycle.'}
             icon="queue_music"
           >
             <PhasePlaylists videos={workoutVideos} currentPhaseKey={phaseKey} onPlay={(v) => setActiveVideo(v)} />
           </RoutineSection>
 
-          {/* 1RM & Load Calculator for Female Strength */}
-          <OneRepMaxCalculator currentPhaseKey={phaseKey} />
         </div>
 
         {/* Tab 2: Videos Guiados */}
         <div role="tabpanel" id="routines-panel-videos" aria-labelledby="routines-tab-videos" className={activeTab === 'videos' ? 'flex flex-col gap-10' : 'hidden'}>
           <RoutineSection
-            title="Catálogo de videos de entrenamiento"
-            description="Sesiones completas en video adaptadas para realizar en casa o en el gimnasio."
+            title={isEs ? 'Catálogo de videos de entrenamiento' : 'Workout video catalog'}
+            description={isEs ? 'Sesiones completas en video adaptadas para realizar en casa o en el gimnasio.' : 'Full video workouts suited for home or gym.'}
             icon="videocam"
             rightElement={
               <span className="text-xs font-bold px-3 py-1 rounded-full bg-secondary text-foreground">
-                {visibleVideos.length} {visibleVideos.length === 1 ? 'video disponible' : 'videos disponibles'}
+                {visibleVideos.length} {visibleVideos.length === 1 ? (isEs ? 'video disponible' : 'video available') : (isEs ? 'videos disponibles' : 'videos available')}
               </span>
             }
           >
             {/* Controls & Filter Bar */}
             <div className="flex flex-col gap-3 bg-card/60 p-4 rounded-2xl border border-border">
-              <div role="group" aria-label="Disciplina" className="flex flex-wrap gap-1.5">
+              <div role="group" aria-label={isEs ? 'Disciplina' : 'Discipline'} className="flex flex-wrap gap-1.5">
                 {CATEGORIES.map((cat) => (
                   <button
                     key={cat.id}
@@ -635,7 +711,7 @@ const Routines: React.FC = () => {
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-3 border-t border-border/60">
                 <label className="flex items-center gap-2 text-sm font-semibold text-foreground">
-                  <span>Intensidad</span>
+                  <span>{isEs ? 'Intensidad' : 'Intensity'}</span>
                   <select
                     value={videoIntensity}
                     onChange={(e) => { setVideoIntensity(e.target.value as VideoIntensity | 'all'); setVideosShown(VIDEOS_PAGE); }}
@@ -653,7 +729,7 @@ const Routines: React.FC = () => {
                     onChange={(e) => { setOnlyPhaseVideos(e.target.checked); setVideosShown(VIDEOS_PAGE); }}
                     className="size-4 accent-primary cursor-pointer"
                   />
-                  <span>Solo ideales para mi fase</span>
+                  <span>{isEs ? 'Solo ideales para mi fase' : 'Ideal for my phase only'}</span>
                 </label>}
               </div>
             </div>
@@ -666,9 +742,9 @@ const Routines: React.FC = () => {
               ) : visibleVideos.length === 0 ? (
                 <div className="col-span-full py-12 text-center flex flex-col items-center justify-center gap-3 bg-card/40 rounded-2xl border border-dashed border-border p-6">
                   <span className="material-symbols-outlined text-muted-foreground text-4xl">search_off</span>
-                  <p className="text-foreground font-semibold text-base">No hay videos con los filtros seleccionados</p>
+                  <p className="text-foreground font-semibold text-base">{isEs ? 'No hay videos con los filtros seleccionados' : 'No videos found with selected filters'}</p>
                   <p className="text-muted-foreground text-xs max-w-sm">
-                    Prueba a quitar el filtro de fase o cambiar la categoría seleccionada.
+                    {isEs ? 'Prueba a quitar el filtro de fase o cambiar la categoría seleccionada.' : 'Try removing the phase filter or changing the category.'}
                   </p>
                   <button
                     type="button"
@@ -679,7 +755,7 @@ const Routines: React.FC = () => {
                     }}
                     className="mt-2 text-xs font-bold text-primary hover:underline cursor-pointer"
                   >
-                    Restablecer filtros
+                    {isEs ? 'Restablecer filtros' : 'Reset filters'}
                   </button>
                 </div>
               ) : (
@@ -702,7 +778,7 @@ const Routines: React.FC = () => {
                   onClick={() => setVideosShown((n) => n + VIDEOS_PAGE)}
                   className="px-6 min-h-10 rounded-xl text-sm font-bold border border-border bg-card text-foreground hover:border-primary/50 hover:bg-secondary/50 transition-all cursor-pointer shadow-sm"
                 >
-                  Cargar más videos ({visibleVideos.length - videosShown} restantes)
+                  {isEs ? `Cargar más videos (${visibleVideos.length - videosShown} restantes)` : `Load more videos (${visibleVideos.length - videosShown} remaining)`}
                 </button>
               </div>
             )}
@@ -712,51 +788,70 @@ const Routines: React.FC = () => {
         {/* Tab 3: Mis Rutinas (members only) */}
         {!isGuest && <div role="tabpanel" id="routines-panel-builder" aria-labelledby="routines-tab-builder" className={activeTab === 'builder' ? 'flex flex-col gap-10' : 'hidden'}>
           {/* Saved Routines (if any exist) */}
-          {userRoutines.length > 0 && (
-            <RoutineSection
-              title="Mis Rutinas Guardadas"
-              description="Ejercicios y entrenamientos que has guardado para consultar rápidamente."
+          <RoutineSection
+              title={isEs ? 'Mis Rutinas Guardadas' : 'My Saved Routines'}
+              description={isEs ? 'Aquí aparecen las rutinas que creas, con series, repeticiones y peso.' : 'Here you will find the routines you create, with sets, reps, and weights.'}
               icon="bookmark"
               rightElement={
                 <span className="text-xs font-bold px-3 py-1 rounded-full bg-secondary text-foreground">
-                  {userRoutines.length} {userRoutines.length === 1 ? 'rutina' : 'rutinas'}
+                  {userRoutines.length} {userRoutines.length === 1 ? (isEs ? 'rutina' : 'routine') : (isEs ? 'rutinas' : 'routines')}
                 </span>
               }
             >
+              {userRoutines.length === 0 ? (
+                <p className="text-sm text-muted-foreground">{isEs ? 'Aún no tienes rutinas guardadas. Crea una en la pestaña "Crear rutina".' : 'No saved routines yet. Create one in the "Create routine" tab.'}</p>
+              ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {[...userRoutines]
                   .sort((a, b) => (a.weekday ?? 7) - (b.weekday ?? 7))
                   .map((routine) => (
-                  <SavedRoutineCard key={routine.id} routine={routine} />
+                  <SavedRoutineCard key={routine.id} routine={routine} onWeekdayChange={updateRoutineWeekday} />
                 ))}
               </div>
+              )}
             </RoutineSection>
-          )}
 
-          {/* Custom routine builder */}
-          <RoutineSection
-            title="Crea tu Rutina Semanal"
-            description="Explora más de 1.300 ejercicios por grupo muscular y equipamiento, y arma tu rutina para cada día de la semana."
-            icon="edit_calendar"
-          >
-            <RoutineBuilder phaseKey={phaseKey} onSaved={fetchUserRoutines} />
-          </RoutineSection>
         </div>}
 
+        {/* Tab: Crear rutina (members only) */}
+        {!isGuest && <div role="tabpanel" id="routines-panel-create" aria-labelledby="routines-tab-create" className={activeTab === 'create' ? 'flex flex-col gap-10' : 'hidden'}>
+          {/* Custom routine builder */}
+          <RoutineSection
+            title={isEs ? 'Crea tu Rutina Semanal' : 'Create your Weekly Routine'}
+            description={isEs ? 'Explora más de 1.300 ejercicios por grupo muscular y equipamiento, y arma tu rutina para cada día de la semana.' : 'Browse over 1,300 exercises by muscle group and equipment, and build your routine for each day of the week.'}
+            icon="edit_calendar"
+            rightElement={
+              <button
+                type="button"
+                onClick={() => document.getElementById('calculadora-1rm')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                className="flex shrink-0 items-center gap-2 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-semibold text-foreground hover:border-primary/50 cursor-pointer"
+              >
+                <span aria-hidden className="material-symbols-outlined text-lg text-primary">calculate</span>
+                {isEs ? 'Calculadora de 1RM: saber qué peso usar' : '1RM Calculator: find your working weight'}
+                <span aria-hidden className="material-symbols-outlined text-lg">arrow_downward</span>
+              </button>
+            }
+          >
+            <RoutineBuilder phaseKey={phaseKey} onSaved={() => { void fetchUserRoutines(); setActiveTab('builder'); }} />
+          </RoutineSection>
+          <OneRepMaxCalculator currentPhaseKey={phaseKey} />
+        </div>}
         {/* Tab 4: Diario y Registro (members only) */}
         {!isGuest && <div role="tabpanel" id="routines-panel-log" aria-labelledby="routines-tab-log" className={activeTab === 'log' ? 'flex flex-col gap-10' : 'hidden'}>
           <RoutineSection
-            title="Registro de Entrenamientos"
-            description="Anota actividad fuera de un programa y revisa tu semana. Los ejercicios de un programa se guardan solos desde su guía."
+            title={isEs ? 'Diario de entrenamiento' : 'Workout journal'}
+            description={isEs ? 'Registra tus rutinas, días de programa o ejercicio libre, y revisa en el calendario qué días entrenaste. Todo se guarda en tu cuenta.' : 'Log your routines, program days, or free workouts, and review on the calendar which days you trained. Everything is saved to your account.'}
             icon="edit_note"
           >
-            <div className="flex flex-col gap-5">
-              <WeeklyGoalCard pmos={showPmos} week={week} loading={workoutLogs.loading} />
-              <div className="bg-card rounded-2xl border border-border p-4 sm:p-5 shadow-sm">
-                <TodayHistory logs={workoutLogs.logs} loading={workoutLogs.loading} />
-              </div>
-              <WorkoutLogSection phaseKey={phaseKey} state={workoutLogs} />
-            </div>
+            <WorkoutJournal
+              phaseKey={phaseKey}
+              effort={suggestion.effort}
+              state={workoutLogs}
+              routines={userRoutines}
+              week={week}
+              pmos={showPmos}
+              onCreateRoutine={() => setActiveTab('create')}
+            />
           </RoutineSection>
         </div>}
 

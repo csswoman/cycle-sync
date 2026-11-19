@@ -45,6 +45,24 @@ export const PROGRAMS: ProgramOption[] = raw.map((p) => ({
 /** Title stored on the planner entry for a program routine. */
 export const programEntryTitle = (program: ProgramOption, routine: ProgramRoutineOption) => `${program.name} · ${routine.label}`;
 
+export interface ProgramExercise { id: string; name: string; sets: number | null; reps: string | null; category: string | null }
+
+/** Exercises of a program day, for logging it in the journal. */
+export function programRoutineExercises(routineId: string): ProgramExercise[] {
+    for (const p of raw) {
+        const r = p.routines.find((x) => x.id === routineId);
+        if (!r) continue;
+        return ((r.exercises ?? []) as { id?: string; name?: string; nameEs?: string; sets?: number; reps?: string | number; category?: string }[]).map((ex, i) => ({
+            id: ex.id ?? `${routineId}-${i}`,
+            name: ex.nameEs || ex.name || `Ejercicio ${i + 1}`,
+            sets: typeof ex.sets === 'number' ? ex.sets : null,
+            reps: ex.reps != null ? String(ex.reps) : null,
+            category: ex.category ?? null,
+        }));
+    }
+    return [];
+}
+
 export function findProgramRoutine(routineId: string): { program: ProgramOption; routine: ProgramRoutineOption } | null {
     for (const program of PROGRAMS) {
         const routine = program.routines.find((r) => r.id === routineId);

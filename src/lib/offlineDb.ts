@@ -59,9 +59,17 @@ export interface OfflineWorkoutLog {
   feeling: number;
   notes: string | null;
   phase: string | null;
+  /** Origin of the row (see migration 20261126000000_workout_journal). Optional for rows saved before. */
+  source?: WorkoutSource | null;
+  refId?: string | null;
+  refName?: string | null;
+  sessionId?: string | null;
+  setDetails?: SetDetail[] | null;
   synced: boolean;
   updatedAt: string;
 }
+export type WorkoutSource = 'free' | 'routine' | 'program' | 'video' | 'quick' | 'session';
+export interface SetDetail { reps: number | null; weight: number | null }
 export interface OfflineCycleSign {
   id?: number;
   userId: string;
