@@ -298,7 +298,7 @@ export const translations: Record<Language, Translations> = {
         // Login
         welcomeBack: 'Welcome Back',
         loginDescription: 'Log in to your CycleSync account to access your personalized cycle training.',
-        emailLabel: 'Email or Username',
+        emailLabel: 'Email',
         passwordLabel: 'Password',
         forgotPassword: 'Forgot Password?',
         loginButton: 'Log In',
@@ -539,7 +539,7 @@ export const translations: Record<Language, Translations> = {
         // Login
         welcomeBack: 'Bienvenida de nuevo',
         loginDescription: 'Inicia sesión en tu cuenta de CycleSync para acceder a tu entrenamiento personalizado del ciclo.',
-        emailLabel: 'Correo o Usuario',
+        emailLabel: 'Correo electrónico',
         passwordLabel: 'Contraseña',
         forgotPassword: '¿Olvidaste tu contraseña?',
         loginButton: 'Iniciar Sesión',

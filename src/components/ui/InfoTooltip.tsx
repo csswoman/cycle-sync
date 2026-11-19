@@ -25,6 +25,7 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({ label, children, class
     const btnRef = useRef<HTMLButtonElement>(null);
     const tipRef = useRef<HTMLDivElement>(null);
     const closeTimer = useRef<number | undefined>(undefined);
+    const touch = useRef(false);
     const id = useId();
 
     const place = useCallback(() => {
@@ -81,9 +82,11 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({ label, children, class
                 aria-expanded={open}
                 aria-describedby={open ? id : undefined}
                 onClick={() => setOpen((v) => !v)}
-                onMouseEnter={show}
+                // Touch taps also fire mouseenter/focus, which would open and then the click would close it.
+                onPointerDown={(e) => { touch.current = e.pointerType !== 'mouse'; }}
+                onMouseEnter={() => { if (!touch.current) show(); }}
                 onMouseLeave={hide}
-                onFocus={show}
+                onFocus={(e) => e.currentTarget.matches(':focus-visible') && show()}
                 onBlur={hide}
                 className={`relative inline-flex items-center justify-center size-6 rounded-full align-middle text-muted-foreground transition-colors hover:text-foreground hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring before:absolute before:-inset-2 before:content-[''] ${open ? 'bg-secondary text-foreground' : ''} ${className}`}
             >

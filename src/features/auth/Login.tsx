@@ -53,7 +53,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSignUp, onUnconfirmedEmail, on
 
   const handleMagicLink = async () => {
     if (!email) {
-      setError(t.emailLabel);
+      setError(language === 'es' ? 'Escribe tu correo para enviarte el enlace.' : 'Enter your email to receive the link.');
       return;
     }
     setMagicLinkLoading(true);
@@ -94,15 +94,15 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSignUp, onUnconfirmedEmail, on
             <div className="size-20 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-2 shadow-inner ring-4 ring-primary/5">
               <span className="material-symbols-outlined" style={{ fontSize: '48px' }}>mark_email_unread</span>
             </div>
-            <h1 className="text-3xl md:text-4xl font-black leading-tight tracking-tight text-foreground">
+            <h1 className="text-3xl md:text-4xl font-semibold leading-tight tracking-[-0.025em] text-balance text-foreground">
               {t.magicLinkSent}
             </h1>
-            <p className="text-muted-foreground text-base font-normal leading-relaxed max-w-xs md:max-w-sm">
+            <p className="text-muted-foreground text-base font-normal leading-relaxed max-w-xs md:max-w-sm text-pretty">
               {t.magicLinkSentDescription}
             </p>
           </div>
 
-          <div className="w-full bg-card border-2 border-border rounded-2xl p-6 md:p-8 shadow-xl shadow-primary/5 backdrop-blur-sm text-center">
+          <div className="w-full bg-card border border-border rounded-3xl p-6 md:p-8 dark:shadow-none shadow-[0_1px_2px_color-mix(in_srgb,var(--foreground)_8%,transparent),0_16px_32px_-16px_color-mix(in_srgb,var(--foreground)_28%,transparent)] text-center">
             <div className="mb-6">
               <div className="size-16 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4 border border-border/50">
                 <span className="material-symbols-outlined text-primary" style={{ fontSize: '32px' }}>local_florist</span>
@@ -111,14 +111,14 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSignUp, onUnconfirmedEmail, on
             </div>
             <button
               onClick={() => setMagicLinkSent(false)}
-              className="w-full h-12 flex items-center justify-center rounded-xl bg-primary text-primary-foreground text-base font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] transition-all"
+              className="w-full h-12 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-base font-semibold hover:bg-primary/90 active:translate-y-px transition-colors"
             >
               {t.backToLogin}
             </button>
           </div>
 
           <div className="flex flex-col items-center gap-2">
-            <div className="flex items-center gap-2 text-muted-foreground text-xs font-medium bg-secondary/50 px-3 py-1.5 rounded-full">
+            <div className="flex items-center gap-2 text-muted-foreground text-xs font-medium bg-secondary/60 px-3 py-1.5 rounded-2xl">
               <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>info</span>
               <span>{t.checkSpamFolder}</span>
             </div>
@@ -137,31 +137,29 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSignUp, onUnconfirmedEmail, on
     >
       <div className="w-full max-w-[480px] flex flex-col gap-6 md:gap-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
         <div className="flex flex-col gap-3 text-center items-center">
-          <div className="size-12 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-1">
-            <span className="material-symbols-outlined" style={{ fontSize: '28px' }}>lock</span>
-          </div>
-          <h1 className="text-3xl md:text-4xl font-black leading-tight tracking-tight text-foreground">
+          <h1 className="text-3xl md:text-4xl font-semibold leading-tight tracking-[-0.025em] text-balance text-foreground">
             {t.welcomeBack}
           </h1>
-          <p className="text-muted-foreground text-base font-normal leading-relaxed max-w-xs md:max-w-sm">
+          <p className="text-muted-foreground text-base font-normal leading-relaxed max-w-xs md:max-w-sm text-pretty">
             {t.loginDescription}
           </p>
         </div>
 
-        <div className="w-full bg-card border-2 border-border rounded-2xl p-6 md:p-8 shadow-xl shadow-primary/5 backdrop-blur-sm">
+        <div className="w-full bg-card border border-border rounded-3xl p-6 md:p-8 dark:shadow-none shadow-[0_1px_2px_color-mix(in_srgb,var(--foreground)_8%,transparent),0_16px_32px_-16px_color-mix(in_srgb,var(--foreground)_28%,transparent)]">
           <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-bold text-foreground/80" htmlFor="email">
+              <label className="text-sm font-semibold text-foreground" htmlFor="email">
                 {t.emailLabel}
               </label>
               <div className="relative group">
-                <span className="material-symbols-outlined absolute left-3 top-3 text-muted-foreground group-focus-within:text-primary transition-colors" style={{ fontSize: '20px' }}>mail</span>
+                <span className="material-symbols-outlined absolute left-3 top-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" style={{ fontSize: '20px' }}>mail</span>
                 <input
-                  className="w-full bg-secondary border border-border rounded-xl py-2.5 pl-10 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-body"
+                  className="w-full bg-secondary border border-border rounded-xl h-12 pl-10 pr-4 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-colors font-body"
                   id="email"
                   name="email"
-                  placeholder="name@example.com"
+                  placeholder="nombre@correo.com"
                   type="email"
+                  autoComplete="email"
                   value={email}
                   onChange={(e) => { setEmail(e.target.value); setError(''); }}
                   required
@@ -171,23 +169,23 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSignUp, onUnconfirmedEmail, on
 
             <div className="flex flex-col gap-1.5">
               <div className="flex justify-between items-center">
-                <label className="text-sm font-bold text-foreground/80" htmlFor="password">
+                <label className="text-sm font-semibold text-foreground" htmlFor="password">
                   {t.passwordLabel}
                 </label>
                 <button
                   type="button"
                   onClick={onForgotPassword}
-                  className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors"
+                  className="text-sm font-semibold text-primary hover:underline underline-offset-4 py-1"
                 >
                   {t.forgotPassword}
                 </button>
               </div>
               <div className="relative group">
-                <span className="material-symbols-outlined absolute left-3 top-3 text-muted-foreground group-focus-within:text-primary transition-colors" style={{ fontSize: '20px' }}>key</span>
+                <span className="material-symbols-outlined absolute left-3 top-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" style={{ fontSize: '20px' }}>key</span>
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-3 text-muted-foreground hover:text-primary transition-colors"
+                  className="absolute right-0 top-0 size-12 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors rounded-xl"
                   aria-label={showPassword ? (language === 'es' ? 'Ocultar contraseña' : 'Hide password') : (language === 'es' ? 'Mostrar contraseña' : 'Show password')}
                 >
                   <span className="material-symbols-outlined" style={{ fontSize: '20px' }}>
@@ -195,10 +193,11 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSignUp, onUnconfirmedEmail, on
                   </span>
                 </button>
                 <input
-                  className="w-full bg-secondary border border-border rounded-xl py-2.5 pl-10 pr-10 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-body"
+                  className="w-full bg-secondary border border-border rounded-xl h-12 pl-10 pr-12 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/30 transition-colors font-body"
                   id="password"
                   name="password"
-                  placeholder="••••••••"
+                  autoComplete="current-password"
+                  placeholder=" "
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={(e) => { setPassword(e.target.value); setError(''); }}
@@ -208,13 +207,14 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSignUp, onUnconfirmedEmail, on
             </div>
 
             {error && (
-              <p className="text-destructive text-xs font-bold animate-in fade-in slide-in-from-top-1">
+              <p role="alert" className="flex items-start gap-2 rounded-xl bg-destructive/10 px-3 py-2 text-destructive text-sm font-medium">
+                <span className="material-symbols-outlined shrink-0" aria-hidden="true" style={{ fontSize: '18px', marginTop: '1px' }}>error</span>
                 {error}
               </p>
             )}
 
             <button
-              className="mt-2 w-full h-12 flex items-center justify-center rounded-xl bg-primary text-primary-foreground text-base font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 hover:scale-[1.02] active:scale-[0.98] transition-all"
+              className="mt-2 w-full h-12 flex items-center justify-center rounded-full bg-primary text-primary-foreground text-base font-semibold hover:bg-primary/90 active:translate-y-px transition-colors"
               type="submit"
             >
               {t.loginButton}
@@ -226,7 +226,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSignUp, onUnconfirmedEmail, on
               <div className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-card px-3 text-muted-foreground font-medium">{t.orContinueWith}</span>
+              <span className="bg-card px-3 text-muted-foreground text-sm">{t.orContinueWith}</span>
             </div>
           </div>
 
@@ -234,7 +234,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSignUp, onUnconfirmedEmail, on
             type="button"
             onClick={handleMagicLink}
             disabled={magicLinkLoading}
-            className="w-full h-12 flex items-center justify-center gap-2 rounded-xl border-2 border-border bg-secondary text-foreground text-base font-bold hover:bg-surface-hover hover:border-primary/30 active:scale-[0.98] transition-all disabled:opacity-50 disabled:pointer-events-none"
+            className="w-full h-12 flex items-center justify-center gap-2 rounded-full border border-border-emphasized/40 bg-transparent text-foreground text-base font-semibold hover:bg-secondary active:translate-y-px transition-colors disabled:opacity-50 disabled:pointer-events-none"
           >
             {magicLinkLoading ? (
               <span className="material-symbols-outlined animate-spin" style={{ fontSize: '20px' }}>progress_activity</span>
@@ -249,7 +249,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSignUp, onUnconfirmedEmail, on
           <div className="mt-6 text-center">
             <a
               href="/dashboard"
-              className="inline-block mb-3 text-sm font-semibold text-muted-foreground hover:text-foreground underline underline-offset-4"
+              className="inline-flex items-center min-h-10 mb-1 text-sm font-semibold text-muted-foreground hover:text-foreground underline underline-offset-4"
             >
               {t.guestExplore}
             </a>
@@ -257,7 +257,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSignUp, onUnconfirmedEmail, on
               {t.dontHaveAccount}
               <button 
                 onClick={onSignUp}
-                className="text-primary font-bold hover:underline ml-1"
+                className="text-primary font-semibold hover:underline underline-offset-4 ml-1 min-h-10"
               >
                 {t.signUp}
               </button>
@@ -266,9 +266,9 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSignUp, onUnconfirmedEmail, on
         </div>
 
         <div className="flex flex-col items-center gap-2">
-          <div className="flex items-center gap-2 text-muted-foreground text-xs font-medium bg-secondary/50 px-3 py-1.5 rounded-full">
+          <div className="flex items-center gap-2 text-muted-foreground text-xs font-medium bg-secondary/60 px-3 py-1.5 rounded-2xl">
             <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>shield_lock</span>
-            <span>{t.dataSecurityInfo}</span>
+            <span className="text-pretty">{t.dataSecurityInfo}</span>
           </div>
         </div>
       </div>
