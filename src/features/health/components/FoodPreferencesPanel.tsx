@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Icon } from '@/components/ui/Icon';
+import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { getFoodImageUrl } from '@/data/nutritionFoods';
 import {
   FOOD_CATALOG,
@@ -34,6 +35,11 @@ interface Props {
   onSeeRecipes: () => void;
   onGenerate: () => void;
 }
+
+const TIPS_PREVIEW = 5;
+
+/** Drops parenthetical asides so amounts fit one or two lines; the full text goes in a tooltip. */
+const shortAmount = (a: string) => a.replace(/\s*\([^)]*\)/g, '');
 
 const SUN_OPTIONS: { id: SunExposure; es: string; en: string }[] = [
   { id: 'daily', es: 'Casi todos los días', en: 'Almost every day' },
@@ -87,9 +93,12 @@ export const FoodPreferencesPanel: React.FC<Props> = ({
   const isEs = language === 'es';
   const t = (es: string, en: string) => (isEs ? es : en);
   const [custom, setCustom] = useState('');
+  const [compact, setCompact] = useState(false);
+  const [allTips, setAllTips] = useState(false);
 
   const suggestions = getSupplementSuggestions(prefs, language);
   const dishTips = getDishTips(prefs.likes, language);
+  const shownTips = allTips ? dishTips : dishTips.slice(0, TIPS_PREVIEW);
   const customEntries = [...prefs.likes, ...prefs.avoid].filter((e) => !getCatalogFood(e));
   const hasFoods = prefs.likes.length + prefs.avoid.length > 0;
 
@@ -162,7 +171,7 @@ export const FoodPreferencesPanel: React.FC<Props> = ({
     }`;
 
   return (
-    <section className="w-full max-w-4xl mx-auto flex flex-col gap-6">
+    <section className="w-full max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] gap-6 items-start">
       {/* Foods */}
       <div className="bg-card rounded-2xl border border-border p-6 shadow-sm flex flex-col gap-5">
         <div className="flex items-start justify-between gap-3">
@@ -176,9 +185,19 @@ export const FoodPreferencesPanel: React.FC<Props> = ({
             </p>
           </div>
           {hasFoods && (
-            <button onClick={onClearFoods} className="text-sm text-muted-foreground hover:text-foreground underline shrink-0">
-              {t('Borrar todo', 'Clear all')}
-            </button>
+            <div className="flex items-center gap-4 shrink-0">
+              <button
+                onClick={() => setCompact((c) => !c)}
+                aria-expanded={!compact}
+                className="min-h-10 flex items-center gap-1.5 text-sm font-medium text-foreground hover:text-primary"
+              >
+                <Icon name="chevron_right" size={16} weight="bold" className={`text-muted-foreground transition-transform ${compact ? '' : 'rotate-90'}`} />
+                {compact ? t('Editar', 'Edit') : t('Compactar', 'Collapse')}
+              </button>
+              <button onClick={onClearFoods} className="min-h-10 text-sm text-muted-foreground hover:text-foreground underline">
+                {t('Borrar todo', 'Clear all')}
+              </button>
+            </div>
           )}
         </div>
 
@@ -187,14 +206,26 @@ export const FoodPreferencesPanel: React.FC<Props> = ({
             {t(`${prefs.likes.length} que te gustan · ${prefs.avoid.length} que evitas`, `${prefs.likes.length} liked · ${prefs.avoid.length} avoided`)}
           </p>
         )}
-        {FOOD_CATEGORIES.map((cat) => (
-          <div key={cat}>
-            <h4 className="text-sm font-semibold text-foreground mb-3">{FOOD_CATEGORY_LABELS[cat][language]}</h4>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {FOOD_CATALOG.filter((f) => f.category === cat).map((f) => renderTile(f.id, cat === 'dish'))}
-            </div>
-          </div>
-        ))}
+        {compact && hasFoods
+          ? [
+              { state: 'like' as const, label: t('Me gustan', 'Liked'), entries: prefs.likes },
+              { state: 'avoid' as const, label: t('Evito', 'Avoided'), entries: prefs.avoid },
+            ]
+              .filter((g) => g.entries.length > 0)
+              .map((g) => (
+                <div key={g.state}>
+                  <h4 className="text-sm font-semibold text-foreground mb-3">{g.label}</h4>
+                  <div className="flex flex-wrap gap-2">{g.entries.map(renderChip)}</div>
+                </div>
+              ))
+          : FOOD_CATEGORIES.map((cat) => (
+              <div key={cat}>
+                <h4 className="text-sm font-semibold text-foreground mb-3">{FOOD_CATEGORY_LABELS[cat][language]}</h4>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-2">
+                  {FOOD_CATALOG.filter((f) => f.category === cat).map((f) => renderTile(f.id, cat === 'dish'))}
+                </div>
+              </div>
+            ))}
 
         <div>
           <h4 className="text-sm font-semibold text-foreground mb-3">
@@ -253,6 +284,7 @@ export const FoodPreferencesPanel: React.FC<Props> = ({
         </div>
       </div>
 
+      <div className="flex flex-col gap-6 min-w-0">
       {/* Habits */}
       <div className="bg-card rounded-2xl border border-border p-6 shadow-sm flex flex-col gap-5">
         <div>
@@ -299,7 +331,7 @@ export const FoodPreferencesPanel: React.FC<Props> = ({
             </p>
           </div>
           <ul className="flex flex-col divide-y divide-border">
-            {dishTips.map((d) => (
+            {shownTips.map((d) => (
               <li key={d.id} className="flex gap-3 py-4 first:pt-0 last:pb-0">
                 <span className="size-12 shrink-0 rounded-xl overflow-hidden">
                   <FoodPhoto id={d.id} dish />
@@ -314,8 +346,10 @@ export const FoodPreferencesPanel: React.FC<Props> = ({
                     >
                       {d.qualityLabel}
                     </span>
+                    <InfoTooltip label={t('Por qué', 'Why')}>
+                      <p>{d.summary}</p>
+                    </InfoTooltip>
                   </div>
-                  <p className="text-sm text-muted-foreground text-pretty">{d.summary}</p>
                   <p className="text-sm text-foreground text-pretty">
                     <strong className="font-semibold">{t('Porción: ', 'Portion: ')}</strong>
                     {d.portion}
@@ -335,6 +369,17 @@ export const FoodPreferencesPanel: React.FC<Props> = ({
               </li>
             ))}
           </ul>
+          {dishTips.length > TIPS_PREVIEW && (
+            <button
+              onClick={() => setAllTips((v) => !v)}
+              aria-expanded={allTips}
+              className="min-h-10 self-start text-sm font-medium text-foreground hover:text-primary underline"
+            >
+              {allTips
+                ? t('Ver menos', 'Show less')
+                : t(`Ver más (${dishTips.length - TIPS_PREVIEW})`, `Show more (${dishTips.length - TIPS_PREVIEW})`)}
+            </button>
+          )}
         </div>
       )}
       {/* Suggestions */}
@@ -367,13 +412,15 @@ export const FoodPreferencesPanel: React.FC<Props> = ({
                   >
                     {s.priority === 'high' ? t('Prioridad', 'Priority') : t('A considerar', 'Consider')}
                   </span>
+                  <InfoTooltip label={t('Por qué te lo sugerimos', 'Why we suggest it')}>
+                    <p>{s.reason}</p>
+                  </InfoTooltip>
                 </div>
-                <p className="text-sm text-muted-foreground text-pretty">{s.reason}</p>
                 <p className="text-sm text-foreground text-pretty">{s.target}</p>
                 {s.foods.length > 0 && (
                   <div>
                     <p className="text-sm font-semibold text-foreground mb-2">{t('Prueba con', 'Try')}</p>
-                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <ul className="grid grid-cols-1 gap-3">
                       {s.foods.map((f) => (
                         <li key={f.id} className="flex items-center gap-2.5 rounded-xl bg-secondary/40 p-1.5 pr-3 min-h-14">
                           <span className="size-11 shrink-0 rounded-lg overflow-hidden">
@@ -381,7 +428,14 @@ export const FoodPreferencesPanel: React.FC<Props> = ({
                           </span>
                           <span className="min-w-0 text-sm leading-tight">
                             <span className="block font-medium text-foreground">{f.name}</span>
-                            <span className="block text-muted-foreground">{f.amount}</span>
+                            <span className="block text-muted-foreground">
+                              {shortAmount(f.amount)}
+                              {shortAmount(f.amount) !== f.amount && (
+                                <InfoTooltip label={t('Medida completa', 'Full measure')} className="ml-1">
+                                  <p>{f.amount}</p>
+                                </InfoTooltip>
+                              )}
+                            </span>
                           </span>
                         </li>
                       ))}
@@ -412,8 +466,14 @@ export const FoodPreferencesPanel: React.FC<Props> = ({
             ))}
           </ul>
         )}
-        <p className="text-sm text-muted-foreground text-pretty border-t border-border pt-4">{MEASURE_GUIDE[language]}</p>
-        <p className="text-sm text-muted-foreground text-pretty">{SUPPLEMENT_DISCLAIMER[language]}</p>
+        <p className="text-sm text-muted-foreground text-pretty border-t border-border pt-4">
+          {t('Sugerencias generales, no consejo médico.', 'General suggestions, not medical advice.')}
+          <InfoTooltip label={t('Aviso y medidas caseras', 'Notice and household measures')} className="ml-1">
+            <p>{SUPPLEMENT_DISCLAIMER[language]}</p>
+            <p>{MEASURE_GUIDE[language]}</p>
+          </InfoTooltip>
+        </p>
+      </div>
       </div>
     </section>
   );

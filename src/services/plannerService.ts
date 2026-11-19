@@ -1,4 +1,5 @@
 import { supabase } from '@/lib/supabase';
+import { aiFetch } from '@/lib/ai/consent';
 import { addDays, weekDays, type MealSlot } from '@/lib/planner/week';
 import type { GeneratedPlan } from '@/lib/planner/plan';
 import { buildPlanFromRecipes } from '@/lib/planner/fromRecipes';
@@ -229,7 +230,7 @@ export async function requestPlan(body: {
     avoid?: string[];
     onlySlots?: { day: number; slot: MealSlot }[];
 }): Promise<GeneratedPlan & { savedRecipes?: number }> {
-    const res = await fetch('/api/planner/generate', {
+    const res = await aiFetch('/api/planner/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),

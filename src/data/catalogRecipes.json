@@ -3921,5 +3921,270 @@
       "Sin Gluten"
     ],
     "imageUrl": "/recipes/galletas-de-semillas-de-calabaza-y-girasol.webp"
+  },
+  {
+    "title": "Wrap Crocante de Pollo Especiado con Cebolla",
+    "description": "Wrap integral crujiente relleno de pechuga de pollo marinada, cebolla salteada caramelizada, aguacate y aderezo ligero de yogur griego.",
+    "category": "almuerzo",
+    "calories": 430,
+    "protein": 38,
+    "carbs": 36,
+    "fat": 14,
+    "ingredients": [
+      "150 g de pechuga de pollo en tiras",
+      "1 tortilla integral grande",
+      "1/2 cebolla en juliana",
+      "1/4 de aguacate en rebanadas",
+      "1 taza de lechuga romana o espinaca picada",
+      "2 cucharadas de yogur griego natural",
+      "1 cucharadita de mostaza Dijon",
+      "Pimenton dulce, ajo en polvo, sal marina y pimienta al gusto"
+    ],
+    "instructions": [
+      "Sazonar el pollo con pimenton, ajo en polvo, sal y pimienta.",
+      "Saltear la cebolla en sarten hasta que este tierna y dorada. Anadir el pollo y dorar bien por ambos lados.",
+      "Mezclar el yogur griego con la mostaza y untar en la tortilla integral.",
+      "Armar el wrap con la lechuga, el pollo con cebolla caliente y el aguacate.",
+      "Enrollar con firmeza y dorar 2 minutos por lado en sarten o sandwichera para un acabado crocante."
+    ],
+    "prepTime": 20,
+    "servings": 1,
+    "tags": [
+      "alta-proteina",
+      "ganar-musculo",
+      "mantener"
+    ],
+    "imageUrl": "/recipes/wrap-crocante-de-pollo-especiado.jpg"
+  },
+  {
+    "title": "Churrasco Jugoso con Pure de Papa Rustico",
+    "description": "Filete de carne vacuna magra a la plancha acompanado de pure de papa cremoso casero al ajo y perejil, con brocoli al vapor.",
+    "category": "almuerzo",
+    "calories": 480,
+    "protein": 42,
+    "carbs": 38,
+    "fat": 15,
+    "ingredients": [
+      "180 g de churrasco o lomo de res magro",
+      "2 papas medianas",
+      "2 cucharadas de leche descremada",
+      "1 cucharadita de mantequilla ligera o aceite de oliva",
+      "1 diente de ajo picado fino",
+      "Perejil fresco picado, sal marina y pimienta negra al gusto",
+      "1 taza de arbolitos de brocoli al vapor"
+    ],
+    "instructions": [
+      "Cocinar las papas con cascara en agua hirviendo con sal hasta que esten tiernas.",
+      "Pelar las papas y triturarlas en caliente con la leche tibia, el ajo, la mantequilla, sal, pimienta y perejil fresco.",
+      "Calentar una plancha a fuego fuerte y sellar el churrasco de 3 a 4 minutos por lado para que quede tierno y jugoso.",
+      "Servir el churrasco caliente junto al pure de papa y el brocoli al vapor."
+    ],
+    "prepTime": 25,
+    "servings": 1,
+    "tags": [
+      "alta-proteina",
+      "ganar-musculo",
+      "hierro"
+    ],
+    "imageUrl": "/recipes/churrasco-jugoso-con-pure-de-papa.jpg"
+  },
+  {
+    "title": "Milanesa de Pollo Crujiente con Papas al Romero",
+    "description": "Milanesa de pechuga de pollo horneada o en airfryer con rebozado crujiente ligero, servida con gajos de papa dorados al romero.",
+    "category": "almuerzo",
+    "calories": 440,
+    "protein": 40,
+    "carbs": 37,
+    "fat": 11,
+    "ingredients": [
+      "160 g de filete de pechuga de pollo fino",
+      "1 clara de huevo batida",
+      "2 cucharadas de copos de maiz sin azucar triturados o avena molida",
+      "1 cucharadita de queso parmesano rallado",
+      "1 papa mediana cortada en gajos",
+      "Romero seco, ajo en polvo, oregano, sal marina y pimienta",
+      "Aceite de oliva en spray y rodajas de limon"
+    ],
+    "instructions": [
+      "Condimentar los gajos de papa con sal, pimienta, romero y una pulverizacion de aceite. Cocinar en airfryer a 195 °C por 15 minutos o al horno a 200 °C hasta dorar.",
+      "Mezclar el cereal triturado con el parmesano, oregano, sal y ajo en polvo.",
+      "Pasar la pechuga de pollo por la clara batida y luego por la mezcla crujiente presionando bien.",
+      "Cocinar en airfryer a 190 °C durante 10-12 minutos (o al horno a 200 °C por 15 minutos), volteando a mitad de coccion.",
+      "Servir caliente con las papas gajo y rodajas de limon fresco."
+    ],
+    "prepTime": 25,
+    "servings": 1,
+    "tags": [
+      "alta-proteina",
+      "ganar-musculo",
+      "mantener"
+    ],
+    "imageUrl": "/recipes/milanesa-de-pollo-crujiente-con-papas.jpg"
+  },
+  {
+    "title": "Pizza Saludable Express de Pollo y Cebolla Morada",
+    "description": "Pizza individual saludable con masa ligera, salsa de tomate natural, pollo desmenuzado, queso fundido y cebolla morada.",
+    "category": "cena",
+    "calories": 410,
+    "protein": 36,
+    "carbs": 39,
+    "fat": 12,
+    "ingredients": [
+      "50 g de harina de avena y 60 g de yogur griego (o 1 tortilla integral gruesa)",
+      "3 cucharadas de salsa de tomate triturado natural con oregano",
+      "40 g de queso mozzarella bajo en grasa rallado",
+      "80 g de pechuga de pollo cocida y desmenuzada",
+      "1/4 de cebolla morada en aros finos",
+      "Hojas de albahaca fresca y sal al gusto"
+    ],
+    "instructions": [
+      "Mezclar la harina de avena con el yogur griego y una pizca de sal hasta formar una masa suave. Extender con rodillo entre papel manteca.",
+      "Precocinar la masa 5 minutos a 200 °C en horno o airfryer.",
+      "Distribuir la salsa de tomate, el queso mozzarella, el pollo desmenuzado y los aros de cebolla morada.",
+      "Hornear de 6 a 8 minutos a 200 °C hasta que el queso este fundido y la masa dorada.",
+      "Terminar con hojas de albahaca fresca por encima antes de cortar."
+    ],
+    "prepTime": 20,
+    "servings": 1,
+    "tags": [
+      "alta-proteina",
+      "comida-rapida-fit",
+      "mantener"
+    ],
+    "imageUrl": "/recipes/pizza-saludable-express-de-pollo.jpg"
+  },
+  {
+    "title": "Pastel Saludable de Papa y Carne Picada Gratinado",
+    "description": "Cazuela de carne vacuna magra guisada con cebolla y especias, cubierta con pure de papa cremoso y una capa dorada de queso.",
+    "category": "almuerzo",
+    "calories": 460,
+    "protein": 38,
+    "carbs": 42,
+    "fat": 13,
+    "ingredients": [
+      "300 g de carne vacuna magra picada",
+      "1 cebolla picada en cubos finos",
+      "1/2 pimiento morron en cubitos",
+      "1 diente de ajo picado",
+      "3 papas medianas para pure",
+      "3 cucharadas de leche descremada",
+      "40 g de queso mozzarella bajo en grasa",
+      "Pimenton dulce, comino molido, sal marina y perejil fresco"
+    ],
+    "instructions": [
+      "Hervir las papas y hacer un pure con la leche descremada, pizca de sal y nuez moscada.",
+      "Saltear la cebolla, el ajo y el pimiento en una sarten. Agregar la carne picada con el pimenton, comino, sal y pimienta hasta cocinar.",
+      "En una fuente para horno, colocar la base de carne jugosa.",
+      "Cubrir con el pure de papa y esparcir el queso mozzarella por encima.",
+      "Gratinar en horno a 200 °C o airfryer durante 10-12 minutos hasta dorar la superficie. Espolvorear perejil fresco."
+    ],
+    "prepTime": 30,
+    "servings": 2,
+    "tags": [
+      "alta-proteina",
+      "ganar-musculo",
+      "hierro"
+    ],
+    "imageUrl": "/recipes/cazuela-pastel-de-papa-y-carne.jpg"
+  },
+  {
+    "title": "Wrap Tostado de Atun con Aguacate y Huevo Duro",
+    "description": "Wrap crujiente relleno de ensalada cremosa de atun al natural, cebolla morada, aguacate, huevo duro y espinacas frescas.",
+    "category": "cena",
+    "calories": 420,
+    "protein": 39,
+    "carbs": 32,
+    "fat": 16,
+    "ingredients": [
+      "1 tortilla integral grande",
+      "1 lata de atun al natural bien escurrido (120 g)",
+      "1 huevo duro picado",
+      "1/4 de cebolla morada picada fina",
+      "1/3 de aguacate maduro en cubos",
+      "1 taza de hojas de espinaca fresca",
+      "1 cucharada de yogur griego natural",
+      "1 cucharadita de mostaza, gotas de limon, sal y pimienta"
+    ],
+    "instructions": [
+      "En un tazon mezclar el atun con el huevo duro, cebolla morada, aguacate, yogur griego, mostaza, limon, sal y pimienta.",
+      "Disponer las espinacas frescas sobre la tortilla integral.",
+      "Colocar el relleno cremoso en el centro, doblar los extremos y enrollar firmemente.",
+      "Tostar en una sarten caliente durante 2 minutos por lado hasta que quede dorado y crujiente.",
+      "Cortar a la mitad en diagonal y servir."
+    ],
+    "prepTime": 15,
+    "servings": 1,
+    "tags": [
+      "alta-proteina",
+      "omega-3",
+      "mantener"
+    ],
+    "imageUrl": "/recipes/wrap-tostado-de-atun-y-aguacate.jpg"
+  },
+  {
+    "title": "Burger Fitness de Carne con Cebolla Caramelizada",
+    "description": "Hamburguesa casera de carne magra a la plancha con cebolla caramelizada saludable sin azucar anadida, lechuga, tomate y papas rusticas.",
+    "category": "almuerzo",
+    "calories": 490,
+    "protein": 43,
+    "carbs": 45,
+    "fat": 14,
+    "ingredients": [
+      "160 g de carne vacuna magra molida (o pechuga de pollo molida)",
+      "1 cebolla grande cortada en aros finos",
+      "1 pan de hamburguesa integral",
+      "1 rodaja de tomate fresco y hojas de lechuga",
+      "1 papa mediana cortada en bastones",
+      "1 cucharada de yogur griego mezclado con mostaza y toque de sal",
+      "Pimenton, oregano, sal marina y pimienta"
+    ],
+    "instructions": [
+      "Cortar la papa en bastones y cocinar en airfryer a 195 °C con pimenton y pizca de sal durante 15 minutos.",
+      "Cocinar la cebolla a fuego medio-bajo con una pizca de sal y agregando cucharadas de agua poco a poco hasta que tome un color caramelo natural.",
+      "Formar la hamburguesa y sellarla en sarten o plancha bien caliente de 3 a 4 minutos por lado.",
+      "Tostar ligeramente el pan, untar con la salsa de yogur y mostaza, colocar la lechuga, tomate, la hamburguesa jugosa y coronar con la cebolla.",
+      "Acompanar con los bastones de papa rustica caliente."
+    ],
+    "prepTime": 25,
+    "servings": 1,
+    "tags": [
+      "alta-proteina",
+      "ganar-musculo",
+      "comida-rapida-fit"
+    ],
+    "imageUrl": "/recipes/burger-fit-con-cebolla-caramelizada.jpg"
+  },
+  {
+    "title": "Cheesecake Proteico en Vaso con Cacao y Frutos Rojos",
+    "description": "Postre fit en vasito por capas: base crujiente de avena tostada, mousse cremoso de yogur griego con cacao puro y frutos rojos frescos.",
+    "category": "postre",
+    "calories": 260,
+    "protein": 22,
+    "carbs": 28,
+    "fat": 5,
+    "ingredients": [
+      "180 g de yogur griego natural sin azucar",
+      "1 cucharada de cacao puro en polvo desgrasado",
+      "3 cucharadas de copos de avena tostados en sarten",
+      "1 cucharadita de mantequilla de mani",
+      "1 cucharadita de sirope sin azucar o estevia al gusto",
+      "1/2 cucharadita de esencia de vainilla",
+      "Un punado de frambuesas y moras frescas para decorar"
+    ],
+    "instructions": [
+      "Tostar la avena en una sarten limpia con la mantequilla de mani y un toque de estevia. Colocar en la base del vaso presionando ligeramente.",
+      "Separar 100 g de yogur griego y mezclarlo con el cacao en polvo y estevia hasta lograr una crema de chocolate suave.",
+      "Mezclar los 80 g restantes de yogur griego con la vainilla y estevia para la capa blanca.",
+      "Verter la capa de cacao sobre la avena y anadir por encima la capa de vainilla.",
+      "Decorar con las frambuesas y frutos rojos frescos. Enfriar en refrigerador 20 minutos antes de disfrutar."
+    ],
+    "prepTime": 15,
+    "servings": 1,
+    "tags": [
+      "postre-fit",
+      "alta-proteina",
+      "antioxidantes"
+    ],
+    "imageUrl": "/recipes/vasitos-cheesecake-proteico-de-cacao.jpg"
   }
 ]

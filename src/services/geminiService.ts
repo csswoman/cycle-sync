@@ -1,7 +1,8 @@
 // Client-side wrapper: calls our own API routes, which hold the Gemini key on the server.
 
+import { aiFetch } from '@/lib/ai/consent';
 async function postAI(path: string, body: unknown): Promise<string> {
-  const response = await fetch(path, {
+  const response = await aiFetch(path, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
@@ -30,10 +31,10 @@ export const sendChatMessage = (
 ): Promise<string> => postAI('/api/ai/chat', { message, history, language, cycle, today });
 
 /**
- * Analyzes an image (data URL) with a text prompt.
+ * Analyzes an image (data URL) with a text prompt. `format: 'json'` asks the model for a JSON reply.
  */
-export const analyzeImage = (base64Image: string, prompt: string): Promise<string> =>
-  postAI('/api/ai/analyze', { media: base64Image, prompt, kind: 'image' });
+export const analyzeImage = (base64Image: string, prompt: string, format?: 'json'): Promise<string> =>
+  postAI('/api/ai/analyze', { media: base64Image, prompt, kind: 'image', format });
 
 /**
  * Analyzes a video (data URL) with a text prompt.

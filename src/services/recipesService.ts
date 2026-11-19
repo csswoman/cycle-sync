@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
-import { titleKey, isSimilarTitle } from '@/lib/recipes/normalize';
+import { aiFetch } from '@/lib/ai/consent';
+import { titleKey, isSimilarTitle, findSimilarImage } from '@/lib/recipes/normalize';
 import type { LibraryRecipe, NewRecipe, Recipe, RecipeLanguage } from '@/types/recipes';
 import { CATALOG_RECIPES } from '@/data/seedRecipes';
 
@@ -110,7 +111,8 @@ export async function listLibrary(): Promise<LibraryRecipe[]> {
             }
         }
 
-        return merged;
+        const withPhoto = merged.filter((m) => m.imageUrl);
+        return merged.map((m) => (m.imageUrl ? m : { ...m, imageUrl: findSimilarImage(m.title, withPhoto) }));
     } catch (err) {
         console.warn('Falling back to local recipes catalog:', err);
         return [...localCustom, ...baseRecipes];
@@ -256,7 +258,7 @@ export async function generateRecipes(params: {
     /** The user tracks PMOS. */
     pmos?: boolean;
 }): Promise<GenerateResult> {
-    const response = await fetch('/api/recipes/generate', {
+    const response = await aiFetch('/api/recipes/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(params),

@@ -2,19 +2,30 @@
 
 import React, { useMemo, useState } from 'react';
 import { WorkoutVideo, VideoCategory } from '@/types/exercises';
+import { useLanguage } from '@/i18n/LanguageContext';
 
-const CATEGORY_LABELS: Record<VideoCategory, string> = {
-  yoga: 'Yoga',
-  pilates: 'Pilates',
-  gym: 'Fuerza',
-  dance: 'Danza',
+const getCategoryLabel = (category: VideoCategory, isEn: boolean): string => {
+  if (isEn) {
+    switch (category) {
+      case 'gym': return 'Strength';
+      case 'dance': return 'Dance';
+      case 'yoga': return 'Yoga';
+      case 'pilates': return 'Pilates';
+    }
+  }
+  switch (category) {
+    case 'gym': return 'Fuerza';
+    case 'dance': return 'Danza';
+    case 'yoga': return 'Yoga';
+    case 'pilates': return 'Pilates';
+  }
 };
 
-const PHASES: { key: string; label: string }[] = [
-  { key: 'menstrual', label: 'Menstrual' },
-  { key: 'follicular', label: 'Folicular' },
-  { key: 'ovulation', label: 'Ovulación' },
-  { key: 'luteal', label: 'Lútea' },
+const getPhases = (isEn: boolean) => [
+  { key: 'menstrual', label: isEn ? 'Menstrual' : 'Menstrual' },
+  { key: 'follicular', label: isEn ? 'Follicular' : 'Folicular' },
+  { key: 'ovulation', label: isEn ? 'Ovulatory' : 'Ovulación' },
+  { key: 'luteal', label: isEn ? 'Luteal' : 'Lútea' },
 ];
 
 interface Playlist {
@@ -27,7 +38,7 @@ interface Playlist {
  * Builds playlists automatically from the catalog: per phase, the two categories with
  * the most videos, e.g. "Lútea: yoga + danza". Low-intensity videos come first.
  */
-export function buildPhasePlaylist(videos: WorkoutVideo[], phaseKey: string, phaseLabel: string): Playlist | null {
+export function buildPhasePlaylist(videos: WorkoutVideo[], phaseKey: string, phaseLabel: string, isEn = false): Playlist | null {
   const inPhase = videos.filter((v) => v.phases.includes(phaseKey as any) || v.phases.includes('any'));
   const counts = new Map<VideoCategory, number>();
   inPhase.forEach((v) => counts.set(v.category, (counts.get(v.category) ?? 0) + 1));
@@ -40,7 +51,7 @@ export function buildPhasePlaylist(videos: WorkoutVideo[], phaseKey: string, pha
     .sort((a, b) => order[a.intensity] - order[b.intensity]);
   return {
     id: phaseKey,
-    title: `${phaseLabel}: ${top.map((c) => CATEGORY_LABELS[c].toLowerCase()).join(' + ')}`,
+    title: `${phaseLabel}: ${top.map((c) => getCategoryLabel(c, isEn).toLowerCase()).join(' + ')}`,
     videos: picked,
   };
 }
@@ -74,14 +85,17 @@ const VideoTile: React.FC<{ v: WorkoutVideo; onPlay: (v: WorkoutVideo) => void; 
 );
 
 const PhasePlaylists: React.FC<Props> = ({ videos, currentPhaseKey, onPlay }) => {
+  const { language } = useLanguage();
+  const isEn = language === 'en';
   // One playlist at a time can be opened as a full grid; the rest stay as rows.
   const [expanded, setExpanded] = useState<string | null>(null);
   const [gridShown, setGridShown] = useState(GRID_PAGE);
+  const phases = useMemo(() => getPhases(isEn), [isEn]);
   const playlists = useMemo(
     () =>
-      PHASES.map((p) => ({ phase: p.key, playlist: buildPhasePlaylist(videos, p.key, p.label) }))
+      phases.map((p) => ({ phase: p.key, playlist: buildPhasePlaylist(videos, p.key, p.label, isEn) }))
         .filter((x): x is { phase: string; playlist: Playlist } => x.playlist !== null),
-    [videos],
+    [videos, phases, isEn],
   );
 
   if (playlists.length === 0) return null;
@@ -95,7 +109,7 @@ const PhasePlaylists: React.FC<Props> = ({ videos, currentPhaseKey, onPlay }) =>
             <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
               <h3 className="font-bold text-sm text-foreground">
                 {playlist.title}
-                {phase === currentPhaseKey && <span className="ml-2 text-xs font-bold text-primary">Tu fase</span>}
+                {phase === currentPhaseKey && <span className="ml-2 text-xs font-bold text-primary">{isEn ? 'Your phase' : 'Tu fase'}</span>}
               </h3>
               <span className="flex items-center gap-3 shrink-0">
                 <span className="text-xs text-muted-foreground tabular-nums">
@@ -108,7 +122,7 @@ const PhasePlaylists: React.FC<Props> = ({ videos, currentPhaseKey, onPlay }) =>
                     onClick={() => { setExpanded(expanded === phase ? null : phase); setGridShown(GRID_PAGE); }}
                     className="min-h-9 px-3 rounded-lg text-sm font-semibold text-primary hover:bg-primary/10 cursor-pointer"
                   >
-                    {expanded === phase ? 'Ver menos' : 'Ver todos'}
+                    {expanded === phase ? (isEn ? 'Show less' : 'Ver menos') : (isEn ? 'View all' : 'Ver todos')}
                   </button>
                 )}
               </span>
@@ -124,7 +138,7 @@ const PhasePlaylists: React.FC<Props> = ({ videos, currentPhaseKey, onPlay }) =>
                     onClick={() => setGridShown((n) => n + GRID_PAGE)}
                     className="self-center min-h-11 px-5 rounded-xl border border-border bg-card text-sm font-semibold hover:border-primary/50 cursor-pointer tabular-nums"
                   >
-                    Cargar más ({playlist.videos.length - gridShown} restantes)
+                    {isEn ? `Load more (${playlist.videos.length - gridShown} remaining)` : `Cargar más (${playlist.videos.length - gridShown} restantes)`}
                   </button>
                 )}
               </div>
@@ -141,7 +155,7 @@ const PhasePlaylists: React.FC<Props> = ({ videos, currentPhaseKey, onPlay }) =>
                       className="w-full aspect-video rounded-lg border border-dashed border-border bg-secondary/50 hover:border-primary/50 flex flex-col items-center justify-center gap-1 text-sm font-semibold text-foreground cursor-pointer"
                     >
                       <span aria-hidden className="material-symbols-outlined text-2xl text-primary">grid_view</span>
-                      Ver los {playlist.videos.length}
+                      {isEn ? `View all ${playlist.videos.length}` : `Ver los ${playlist.videos.length}`}
                     </button>
                   </li>
                 )}

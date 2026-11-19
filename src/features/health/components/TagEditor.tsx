@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { normalizeTag } from '@/services/recipesService';
+import { useLanguage } from '@/i18n/LanguageContext';
 
 interface TagEditorProps {
   tags: string[];
@@ -10,6 +11,8 @@ interface TagEditorProps {
 }
 
 export const TagEditor: React.FC<TagEditorProps> = ({ tags, onChange, suggestions: suggested = [] }) => {
+  const { language } = useLanguage();
+  const isEn = language === 'en';
   const [input, setInput] = useState('');
 
   const add = (raw: string) => {
@@ -33,7 +36,7 @@ export const TagEditor: React.FC<TagEditorProps> = ({ tags, onChange, suggestion
             type="button"
             onClick={() => onChange(tags.filter((t) => t !== tag))}
             className="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-lg hover:bg-primary/20 transition flex items-center gap-1 font-medium"
-            aria-label={`Eliminar etiqueta ${tag}`}
+            aria-label={isEn ? `Remove tag ${tag}` : `Eliminar etiqueta ${tag}`}
           >
             {tag}
             <span className="material-symbols-outlined text-[14px]">close</span>
@@ -52,13 +55,13 @@ export const TagEditor: React.FC<TagEditorProps> = ({ tags, onChange, suggestion
           }}
           maxLength={40}
           className="flex-1 px-3 py-2 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          placeholder="Añade una etiqueta y presiona Enter..."
+          placeholder={isEn ? 'Add a tag and press Enter...' : 'Añade una etiqueta y presiona Enter...'}
         />
         <button
           type="button"
           onClick={() => add(input)}
           className="px-3 py-2 bg-secondary hover:bg-accent rounded-lg border border-border transition-colors"
-          aria-label="Añadir etiqueta"
+          aria-label={isEn ? 'Add tag' : 'Añadir etiqueta'}
         >
           <span className="material-symbols-outlined text-foreground text-[18px]">add</span>
         </button>

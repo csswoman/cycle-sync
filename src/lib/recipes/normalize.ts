@@ -43,3 +43,23 @@ export function isSimilarTitle(a: string, b: string, threshold = 0.8): boolean {
   });
   return shared / (ta.size + tb.size - shared) >= threshold;
 }
+// Dishes recognizable by name alone: a photo of "Panqueque super facil" fits "Panqueques de quinua".
+const DISH_WORDS = new Set(
+  ['arepa', 'hamburguesa', 'panqueque', 'tortilla', 'pizza', 'empanada', 'ensalada', 'sandwich', 'tostada', 'galleta', 'bowl', 'wrap', 'taco', 'burrito', 'sopa', 'crema', 'batido', 'smoothie', 'granola', 'pancake', 'waffle', 'omelette', 'pasta', 'tamal', 'noqui', 'albondiga', 'avena'].map(singular)
+);
+/** Image of the most similar title: near identical, or the same main dish (first dish word in the title: arepa, hamburguesa...). */
+export function findSimilarImage(title: string, candidates: { title: string; imageUrl?: string | null }[]): string | null {
+  const t = new Set(titleTokens(title));
+  // titleTokens sorts words, so find the main dish in the original word order ("Hamburguesa ... Ensalada" is a hamburguesa)
+  const main = title.split(/\s+/).flatMap((w) => titleTokens(w)).find((w) => DISH_WORDS.has(w));
+  let best: { url: string; score: number } | null = null;
+  for (const c of candidates) {
+    if (!c.imageUrl) continue;
+    const tc = titleTokens(c.title);
+    if (!(main && tc.includes(main)) && !isSimilarTitle(title, c.title)) continue;
+    const shared = tc.filter((w) => t.has(w)).length;
+    const score = shared / (t.size + tc.length - shared);
+    if (!best || score > best.score) best = { url: c.imageUrl, score };
+  }
+  return best?.url ?? null;
+}

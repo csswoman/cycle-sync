@@ -3,6 +3,7 @@
 import React from 'react';
 import type { LibraryRecipe } from '@/types/recipes';
 import { tagKey, tagLabel } from '@/lib/nutrition/recipeTags';
+import { useLanguage } from '@/i18n/LanguageContext';
 
 interface RecipeCardProps {
   recipe: LibraryRecipe;
@@ -12,6 +13,8 @@ interface RecipeCardProps {
 }
 
 export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe: r, onToggleFavorite, onOpen }) => {
+  const { language } = useLanguage();
+  const isEs = language === 'es';
   const allTags = Array.from(new Map([...r.tags, ...r.myTags].map((t) => [tagKey(t), tagLabel(t)])).values());
   const tags = allTags.slice(0, 3);
   const hiddenTags = allTags.length - tags.length;
@@ -27,7 +30,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe: r, onToggleFavor
           </div>
         ) : null}
         {r.ownerId && (
-          <div className="absolute top-3 left-3 z-10 bg-primary text-primary-foreground text-xs font-bold px-2 py-1 rounded shadow-lg">Mine</div>
+          <div className="absolute top-3 left-3 z-10 bg-primary text-primary-foreground text-xs font-bold px-2 py-1 rounded shadow-lg">{isEs ? 'Mía' : 'Mine'}</div>
         )}
         {onToggleFavorite && (
           <button
@@ -36,12 +39,12 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe: r, onToggleFavor
               e.stopPropagation();
               onToggleFavorite(r);
             }}
-            className={`absolute bottom-3 right-3 z-10 p-2 rounded-full backdrop-blur-sm transition-colors ${r.isFavorite ? 'bg-primary text-primary-foreground' : 'bg-black/60 text-white hover:bg-black/80'}`}
-            aria-label={r.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+            className={`absolute bottom-3 right-3 z-10 h-9 w-9 flex items-center justify-center rounded-full backdrop-blur-sm transition-colors ${r.isFavorite ? 'bg-primary text-primary-foreground' : 'bg-black/60 text-white hover:bg-black/80'}`}
+            aria-label={r.isFavorite ? (isEs ? 'Quitar de favoritos' : 'Remove from favorites') : (isEs ? 'Añadir a favoritos' : 'Add to favorites')}
             aria-pressed={r.isFavorite}
           >
             <span
-              className="material-symbols-outlined text-[18px] block"
+              className="material-symbols-outlined text-[20px] leading-none"
               style={{ fontVariationSettings: `'FILL' ${r.isFavorite ? 1 : 0}` }}
             >
               favorite
@@ -60,20 +63,20 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe: r, onToggleFavor
         <h3 className="text-lg font-semibold leading-snug text-foreground text-balance group-hover:text-primary transition-colors">{r.title}</h3>
         {r.description && <p className="text-sm text-muted-foreground line-clamp-2">{r.description}</p>}
         {r.nutrition && (
-          <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground py-0.5">
+          <div className="flex flex-wrap items-center gap-1.5 text-xs font-semibold">
             {r.nutrition.calories != null && (
-              <span className="font-bold text-foreground bg-secondary px-2 py-0.5 rounded">
+              <span className="text-foreground bg-secondary px-2 py-1 rounded-md">
                 {Math.round(r.nutrition.calories)} kcal
               </span>
             )}
             {r.nutrition.protein != null && (
-              <span className="font-bold text-primary bg-primary/10 px-2 py-0.5 rounded">
-                {Math.round(r.nutrition.protein)}g prot
+              <span className="text-primary bg-primary/10 px-2 py-1 rounded-md">
+                {Math.round(r.nutrition.protein)}g {isEs ? 'proteína' : 'protein'}
               </span>
             )}
             {r.nutrition.carbohydrates != null && (
-              <span className="text-xs text-muted-foreground">
-                {Math.round(r.nutrition.carbohydrates)}g C
+              <span className="text-muted-foreground bg-secondary/60 px-2 py-1 rounded-md">
+                {Math.round(r.nutrition.carbohydrates)}g {isEs ? 'carbohidratos' : 'carbs'}
               </span>
             )}
           </div>
@@ -81,7 +84,7 @@ export const RecipeCard: React.FC<RecipeCardProps> = ({ recipe: r, onToggleFavor
         {tags.length > 0 && (
           <div className="mt-auto pt-2 flex flex-wrap gap-2">
             {tags.map((tag) => (
-              <span key={tag} className="px-2.5 py-1 rounded-full bg-secondary text-muted-foreground text-xs font-medium">{tag}</span>
+              <span key={tag} className="px-2.5 py-1 rounded-full border border-border text-muted-foreground text-xs font-medium">{tag}</span>
             ))}
             {hiddenTags > 0 && <span className="px-1 py-1 text-xs text-muted-foreground">+{hiddenTags}</span>}
           </div>

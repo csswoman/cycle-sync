@@ -3,6 +3,8 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useRecipes, EMPTY_RECIPE_FILTERS } from '@/hooks/useRecipes';
 import { useNutritionAI } from '@/hooks/useNutritionAI';
+import { useMealAnalyses, makeThumbnail } from '@/hooks/useMealAnalyses';
+import { SavedMealAnalyses } from './components/SavedMealAnalyses';
 import { useFoodPreferences } from '@/hooks/useFoodPreferences';
 import { entriesToNames, avoidedIn } from '@/lib/nutrition/foodPreferences';
 import { toPhaseKey, rankRecipesForPhase, FOOD_FOCUS } from '@/lib/cycle/phaseSuggestions';
@@ -15,6 +17,7 @@ import { RecipeCard } from './components/RecipeCard';
 import { RecipeDetailModal } from './components/RecipeDetailModal';
 import { RecipeForm } from './components/RecipeForm';
 import { PlateBuilder } from './components/PlateBuilder';
+import { MealAnalysisResult } from './components/MealAnalysisResult';
 import { MacroWaterCalculator } from './components/MacroWaterCalculator';
 import { FoodPreferencesPanel } from './components/FoodPreferencesPanel';
 import { Icon } from '@/components/ui/Icon';
@@ -43,6 +46,8 @@ const Nutrition: React.FC = () => {
   const { hideNumbers } = useDisplayPrefs();
   const showPmos = usePmosToolsVisible();
   const { analysis, analyzePlate } = useNutritionAI(hideNumbers, showPmos);
+  const savedAnalyses = useMealAnalyses();
+  const [analysisSaved, setAnalysisSaved] = useState<boolean | null>(null);
   const { cycleInfo } = useCycleInfo();
   const { language, t } = useLanguage();
   const isEs = language === 'es';
@@ -149,12 +154,16 @@ const Nutrition: React.FC = () => {
     <div className="w-full -mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 px-1 text-sm text-muted-foreground">
       <span className="text-pretty">
         {lastLogged
-          ? `Último peso guardado: ${lastLogged.value} kg, el ${lastLogged.date.split('-').reverse().join('/')}.`
-          : 'Aún no has guardado tu peso. El primero que guardes será tu punto de inicio.'}
+          ? (isEs
+              ? `Último peso guardado: ${lastLogged.value} kg, el ${lastLogged.date.split('-').reverse().join('/')}.`
+              : `Last saved weight: ${lastLogged.value} kg, on ${lastLogged.date.split('-').reverse().join('/')}.`)
+          : (isEs
+              ? 'Aún no has guardado tu peso. El primero que guardes será tu punto de inicio.'
+              : 'You have not saved your weight yet. The first one you log will be your starting point.')}
       </span>
       {weightSaved ? (
         <span role="status" className="inline-flex items-center gap-1.5 font-medium text-leaf">
-          <Icon name="check" size={16} weight="bold" /> Guardado en tu progreso
+          <Icon name="check" size={16} weight="bold" /> {isEs ? 'Guardado en tu progreso' : 'Saved to your progress'}
         </span>
       ) : (!lastLogged || lastLogged.value !== userWeightKg || lastLogged.date !== todayLocal()) && userWeightKg >= 30 && (
         <button
@@ -164,11 +173,11 @@ const Nutrition: React.FC = () => {
           className="inline-flex items-center gap-1.5 min-h-10 px-4 rounded-full bg-secondary hover:bg-accent text-foreground font-medium transition-colors disabled:opacity-60"
         >
           <Icon name="floppy_disk" size={16} weight="bold" />
-          {metrics.saving ? 'Guardando…' : `Guardar ${userWeightKg} kg de hoy`}
+          {metrics.saving ? (isEs ? 'Guardando…' : 'Saving…') : (isEs ? `Guardar ${userWeightKg} kg de hoy` : `Save today's ${userWeightKg} kg`)}
         </button>
       )}
       <button type="button" onClick={() => setActiveTab('progress')} className="min-h-10 font-medium text-foreground underline underline-offset-4 hover:text-primary">
-        Ver mi progreso
+        {isEs ? 'Ver mi progreso' : 'View my progress'}
       </button>
       {metrics.error && <span className="w-full text-destructive">{metrics.error}</span>}
     </div>
@@ -178,13 +187,26 @@ const Nutrition: React.FC = () => {
     if (isGuest) return;
     try { localStorage.setItem(key, value); } catch { /* storage unavailable */ }
   };
+  // Meal settings also live in the account so every device splits the protein the same way.
+  const prefilledMeals = useRef(false);
+  useEffect(() => {
+    if (isGuest || prefilledMeals.current || body.loading) return;
+    prefilledMeals.current = true;
+    if (body.profile.mealsPerDay) setMealsPerDay(body.profile.mealsPerDay);
+    if (body.profile.firstMealTime) setFirstMealTime(body.profile.firstMealTime);
+  }, [isGuest, body.loading, body.profile.mealsPerDay, body.profile.firstMealTime]);
   const handleMealsPerDayChange = (n: MealsPerDay) => {
     setMealsPerDay(n);
     saveMealPref('cycle_sync_meals_per_day', String(n));
+    if (!isGuest && body.signedIn) void saveBody({ mealsPerDay: n });
   };
+  const firstMealTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const handleFirstMealTimeChange = (time: string) => {
     setFirstMealTime(time);
     saveMealPref('cycle_sync_first_meal_time', time);
+    if (isGuest || !body.signedIn || !/^\d{2}:\d{2}$/.test(time)) return;
+    if (firstMealTimer.current) clearTimeout(firstMealTimer.current);
+    firstMealTimer.current = setTimeout(() => { void saveBody({ firstMealTime: time }); }, 800);
   };
 
   // Analyze tab state
@@ -240,6 +262,7 @@ const Nutrition: React.FC = () => {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setAnalysisSaved(null);
     const reader = new FileReader();
     reader.onload = (ev) => {
       const base64 = ev.target?.result as string;
@@ -248,8 +271,13 @@ const Nutrition: React.FC = () => {
     reader.readAsDataURL(file);
   };
 
-  const handleAnalyze = () => {
-    if (previewImage) analyzePlate(previewImage, language);
+  // Every analysis is saved with a small thumbnail so it shows up in the history below.
+  const handleAnalyze = async () => {
+    if (!previewImage) return;
+    setAnalysisSaved(null);
+    const [outcome, thumbnail] = await Promise.all([analyzePlate(previewImage, language), makeThumbnail(previewImage)]);
+    if (!outcome || isGuest || !savedAnalyses.available) return;
+    setAnalysisSaved(await savedAnalyses.save({ thumbnail, ...outcome }));
   };
 
   const addIngredient = (value = ingredientInput) => {
@@ -420,7 +448,7 @@ const Nutrition: React.FC = () => {
                   onClick={() => setActiveTab('plate')}
                   className="inline-flex items-center gap-2 min-h-11 px-5 rounded-full bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors"
                 >
-                  Armar un plato con estas metas
+                  {isEs ? 'Armar un plato con estas metas' : 'Build a plate with these targets'}
                   <Icon name="arrow_forward" size={16} weight="bold" />
                 </button>
               }
@@ -435,52 +463,79 @@ const Nutrition: React.FC = () => {
             {/* Why these targets: short answer visible, detail on demand */}
             <section aria-labelledby="targets-why" className="bg-card rounded-3xl border border-border p-5 sm:p-6 shadow-sm flex flex-col gap-2">
               <h3 id="targets-why" className="text-foreground text-lg font-semibold text-balance">
-                Por qué estas metas
+                {isEs ? 'Por qué estas metas' : 'Why these targets'}
               </h3>
               <div className="divide-y divide-border">
                 {[
                   {
                     icon: 'barbell',
-                    title: 'Proteína: 1.6 a 2.2 g por kg',
+                    title: isEs ? 'Proteína: 1.6 a 2.2 g por kg' : 'Protein: 1.6 to 2.2 g per kg',
                     answer: nutritionTargets.usesAdjustedWeight
-                      ? `Para ${userWeightKg} kg y ${nutritionTargets.heightCm} cm son ${nutritionTargets.proteinRange[0]} a ${nutritionTargets.proteinRange[1]} g al día, calculados sobre ${nutritionTargets.proteinReferenceKg} kg.`
-                      : `Para ${userWeightKg} kg son ${nutritionTargets.proteinRange[0]} a ${nutritionTargets.proteinRange[1]} g al día.`,
-                    body: (
+                      ? (isEs
+                          ? `Para ${userWeightKg} kg y ${nutritionTargets.heightCm} cm son ${nutritionTargets.proteinRange[0]} a ${nutritionTargets.proteinRange[1]} g al día, calculados sobre ${nutritionTargets.proteinReferenceKg} kg.`
+                          : `For ${userWeightKg} kg and ${nutritionTargets.heightCm} cm, that is ${nutritionTargets.proteinRange[0]} to ${nutritionTargets.proteinRange[1]} g per day, calculated on ${nutritionTargets.proteinReferenceKg} kg.`)
+                      : (isEs
+                          ? `Para ${userWeightKg} kg son ${nutritionTargets.proteinRange[0]} a ${nutritionTargets.proteinRange[1]} g al día.`
+                          : `For ${userWeightKg} kg, that is ${nutritionTargets.proteinRange[0]} to ${nutritionTargets.proteinRange[1]} g per day.`),
+                    body: isEs ? (
                       <>
                         El músculo es el principal lugar donde tu cuerpo usa la glucosa, así que cuidarlo ayuda {showPmos ? 'con la resistencia a la insulina del PMOS' : 'a mantener estable tu glucosa'}. Si comes menos de lo que gastas y no recibes suficiente proteína, el cuerpo tiende a usar aminoácidos del músculo. Entre <strong>1.8 y 2.2 g/kg</strong> repara el músculo y gasta más energía al digerirse: entre 20 y 30% de las calorías de la proteína se queman al digerirla.
                         {' '}Con más peso, multiplicar por cada kilo da metas difíciles de alcanzar y que tu cuerpo no necesita, porque el tejido graso usa muy poca proteína. Si nos das tu estatura, calculamos sobre el peso que tendrías con un IMC de 25, sin bajar nunca de unos 0.9 a 1 g por kilo de tu peso actual, que es lo que protege el músculo al bajar de peso.
+                      </>
+                    ) : (
+                      <>
+                        Muscle is the primary tissue where your body utilizes glucose, so preserving it helps {showPmos ? 'with PMOS insulin resistance' : 'keep blood sugar steady'}. If you eat fewer calories than you burn and do not get enough protein, your body draws amino acids from muscle tissue. Between <strong>1.8 and 2.2 g/kg</strong> repairs muscle and has a higher thermic effect: 20 to 30% of protein calories are burned during digestion.
+                        {' '}At higher body weights, multiplying by total weight results in unrealistically high targets that your body does not require, because adipose tissue needs very little protein. With your height, we calculate based on a reference weight at a BMI of 25, while never going below 0.9 to 1.0 g per kg of current body weight to safeguard muscle during weight loss.
                       </>
                     ),
                   },
                   {
                     icon: 'drop',
-                    title: 'Agua: 35 a 40 ml por kg',
+                    title: isEs ? 'Agua: 35 a 40 ml por kg' : 'Water: 35 to 40 ml per kg',
                     answer: nutritionTargets.usesAdjustedWeight
-                      ? `Para ti son unos ${nutritionTargets.waterLiters} litros al día, calculados sobre ${nutritionTargets.adjustedWeightKg} kg.`
-                      : `Para ${userWeightKg} kg son unos ${nutritionTargets.waterLiters} litros al día.`,
-                    body: (
+                      ? (isEs
+                          ? `Para ti son unos ${nutritionTargets.waterLiters} litros al día, calculados sobre ${nutritionTargets.adjustedWeightKg} kg.`
+                          : `For you, that is about ${nutritionTargets.waterLiters} liters per day, calculated on ${nutritionTargets.adjustedWeightKg} kg.`)
+                      : (isEs
+                          ? `Para ${userWeightKg} kg son unos ${nutritionTargets.waterLiters} litros al día.`
+                          : `For ${userWeightKg} kg, that is about ${nutritionTargets.waterLiters} liters per day.`),
+                    body: isEs ? (
                       <>
                         El músculo magro es más de <strong>75% agua</strong>. Con solo 2% de deshidratación en las células, la fuerza muscular puede bajar hasta 15% y se frena la quema de grasa. Un cuerpo más grande necesita más agua, pero el tejido graso tiene menos agua que el músculo, así que con tu estatura usamos un peso ajustado: el de referencia más 40% de la diferencia. Una quinta parte del agua llega con la comida.
+                      </>
+                    ) : (
+                      <>
+                        Lean muscle is more than <strong>75% water</strong>. With just 2% intracellular dehydration, muscular strength can drop by up to 15% and fat oxidation slows down. A larger body requires more hydration, but adipose tissue contains much less water than lean mass. With your height, we use an adjusted weight: reference weight plus 40% of the difference. Roughly one-fifth of your fluid intake comes directly from food.
                       </>
                     ),
                   },
                   {
                     icon: 'flame',
-                    title: 'Comer suficiente',
-                    answer: 'La energía de referencia es una estimación, no un objetivo.',
-                    body: (
+                    title: isEs ? 'Comer suficiente' : 'Eating enough',
+                    answer: isEs ? 'La energía de referencia es una estimación, no un objetivo.' : 'Reference energy is an estimate, not a strict rule.',
+                    body: isEs ? (
                       <>
                         Comer muy por debajo de lo que gastas puede alterar la ovulación, el sueño y la tiroides. Reparte la proteína en tus comidas y deja que el hambre y la energía guíen las porciones.
+                      </>
+                    ) : (
+                      <>
+                        Eating significantly below your energy needs can disrupt ovulation, deep sleep, and thyroid hormone balance. Spread your protein across meals and let natural hunger and energy cues guide your portions.
                       </>
                     ),
                   },
                   {
                     icon: 'bowl_food',
-                    title: 'Cómo repartirla en cada plato',
-                    answer: `Para ${userWeightKg} kg, unos ${mealPlan.perMealRange[0]} a ${mealPlan.perMealRange[1]} g en cada una de ${mealPlan.mealsPerDay} comidas, cada ${mealPlan.spacingHours} horas.`,
-                    body: (
+                    title: isEs ? 'Cómo repartirla en cada plato' : 'How to distribute it per meal',
+                    answer: isEs
+                      ? `Para ${userWeightKg} kg, unos ${mealPlan.perMealRange[0]} a ${mealPlan.perMealRange[1]} g en cada una de ${mealPlan.mealsPerDay} comidas, cada ${mealPlan.spacingHours} horas.`
+                      : `For ${userWeightKg} kg, about ${mealPlan.perMealRange[0]} to ${mealPlan.perMealRange[1]} g across each of ${mealPlan.mealsPerDay} meals, every ${mealPlan.spacingHours} hours.`,
+                    body: isEs ? (
                       <>
                         Absorbes toda la proteína que comes, pero el músculo solo usa una parte de cada comida para construirse: con <strong>0.4 a 0.55 g/kg por comida</strong> esa respuesta se activa por completo. Lo que pasa de ahí no se desperdicia, se usa como energía o para otros tejidos, por eso conviene repartir la meta en 3 o 4 comidas en lugar de juntarla en una. Busca fuentes completas como pechuga, salmón, huevos, ternera magra o tofu, junto a carbohidratos complejos y fibra que te sacie.
+                      </>
+                    ) : (
+                      <>
+                        You digest all protein consumed, but muscle synthesis only utilizes a specific amount per meal: <strong>0.4 to 0.55 g/kg per meal</strong> fully triggers muscle protein synthesis. What exceeds that isn't wasted—it is used for energy or other tissues—so distributing your goal across 3 or 4 meals is far more effective than eating it all at once. Prioritize complete sources like chicken breast, salmon, eggs, lean beef, or tofu, alongside complex carbohydrates and satiating fiber.
                       </>
                     ),
                   },
@@ -499,7 +554,9 @@ const Nutrition: React.FC = () => {
                 ))}
               </div>
               <p className="text-sm text-muted-foreground pt-2 text-pretty">
-                Basado en las guías de la Sociedad Internacional de Nutrición Deportiva (ISSN) y de McMaster University.
+                {isEs
+                  ? 'Basado en las guías de la Sociedad Internacional de Nutrición Deportiva (ISSN) y de McMaster University.'
+                  : 'Based on guidelines from the International Society of Sports Nutrition (ISSN) and McMaster University.'}
               </p>
             </section>
           </section>
@@ -770,26 +827,30 @@ const Nutrition: React.FC = () => {
               </div>
             )}
 
+            {analysisSaved !== null && !analysis.loading && (
+              <p role="status" className={`-mt-2 inline-flex items-center gap-1.5 text-sm font-medium ${analysisSaved ? 'text-leaf' : 'text-destructive'}`}>
+                <Icon name={analysisSaved ? 'check' : 'close'} size={16} weight="bold" />
+                {analysisSaved
+                  ? (isEs ? 'Guardado en tus análisis' : 'Saved to your analyses')
+                  : (isEs ? 'No se pudo guardar este análisis' : 'Could not save this analysis')}
+              </p>
+            )}
+
+            {analysis.result && <MealAnalysisResult result={analysis.result} isEs={isEs} pmos={showPmos} />}
+
+            {/* Fallback when the reply could not be read as structured data. */}
             {analysis.raw && (
               <div className="bg-card rounded-xl border border-border p-6">
                 <div className="flex items-center gap-2 mb-4">
                   <span className="material-symbols-outlined text-primary">analytics</span>
                   <h3 className="text-foreground text-lg font-semibold text-balance">{isEs ? 'Resultados del análisis' : 'Analysis results'}</h3>
                 </div>
-                <div
-                  className="prose prose-sm dark:prose-invert max-w-none text-foreground [&_h1]:text-xl [&_h1]:font-bold [&_h2]:text-lg [&_h2]:font-bold [&_h3]:text-base [&_h3]:font-bold [&_strong]:text-foreground [&_li]:text-muted-foreground [&_p]:text-muted-foreground"
-                  dangerouslySetInnerHTML={{
-                    __html: analysis.raw
-                      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                      .replace(/^### (.*$)/gm, '<h3>$1</h3>')
-                      .replace(/^## (.*$)/gm, '<h2>$1</h2>')
-                      .replace(/^# (.*$)/gm, '<h1>$1</h1>')
-                      .replace(/^- (.*$)/gm, '<li>$1</li>')
-                      .replace(/^(\d+)\. (.*$)/gm, '<li>$2</li>')
-                      .replace(/\n/g, '<br />')
-                  }}
-                />
+                <p className="text-sm text-muted-foreground whitespace-pre-line text-pretty">{analysis.raw}</p>
               </div>
+            )}
+
+            {!isGuest && savedAnalyses.available && (
+              <SavedMealAnalyses items={savedAnalyses.items} isEs={isEs} pmos={showPmos} onRemove={savedAnalyses.remove} />
             )}
           </section>
         )}

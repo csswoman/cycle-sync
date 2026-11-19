@@ -15,6 +15,7 @@ const inputClass =
   'w-full px-3 py-2.5 bg-background border border-border rounded-lg text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary';
 
 export const RecipeForm: React.FC<RecipeFormProps> = ({ onSubmit, onClose, language, suggestions }) => {
+  const isEn = language === 'en';
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [minutes, setMinutes] = useState('');
@@ -33,7 +34,7 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSubmit, onClose, langu
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim()) {
-      setError('El título es obligatorio.');
+      setError(isEn ? 'Title is required.' : 'El título es obligatorio.');
       return;
     }
     setSaving(true);
@@ -52,7 +53,7 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSubmit, onClose, langu
       onClose();
     } catch (err) {
       console.error('Error saving recipe:', err);
-      setError('No se pudo guardar la receta. Intenta de nuevo.');
+      setError(isEn ? 'Could not save recipe. Please try again.' : 'No se pudo guardar la receta. Intenta de nuevo.');
       setSaving(false);
     }
   };
@@ -63,7 +64,7 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSubmit, onClose, langu
       onClick={onClose}
       role="dialog"
       aria-modal="true"
-      aria-label="Nueva receta"
+      aria-label={isEn ? 'New recipe' : 'Nueva receta'}
     >
       <form
         onSubmit={handleSubmit}
@@ -71,45 +72,45 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSubmit, onClose, langu
         className="bg-card border border-border rounded-2xl shadow-xl w-full max-w-xl max-h-[90vh] overflow-y-auto p-6 flex flex-col gap-4"
       >
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-black text-foreground">Nueva receta</h2>
-          <button type="button" onClick={onClose} className="p-2 rounded-full text-muted-foreground hover:text-foreground" aria-label="Cerrar">
+          <h2 className="text-xl font-black text-foreground">{isEn ? 'New recipe' : 'Nueva receta'}</h2>
+          <button type="button" onClick={onClose} className="p-2 rounded-full text-muted-foreground hover:text-foreground" aria-label={isEn ? 'Close' : 'Cerrar'}>
             <span className="material-symbols-outlined block">close</span>
           </button>
         </div>
 
         <label className="flex flex-col gap-1 text-sm font-bold text-foreground">
-          Título
+          {isEn ? 'Title' : 'Título'}
           <input value={title} onChange={(e) => setTitle(e.target.value)} className={inputClass} maxLength={150} required />
         </label>
 
         <div className="grid grid-cols-2 gap-3">
           <label className="flex flex-col gap-1 text-sm font-bold text-foreground">
-            Minutos
+            {isEn ? 'Minutes' : 'Minutos'}
             <input value={minutes} onChange={(e) => setMinutes(e.target.value)} className={inputClass} inputMode="numeric" />
           </label>
           <label className="flex flex-col gap-1 text-sm font-bold text-foreground">
-            Porciones
+            {isEn ? 'Servings' : 'Porciones'}
             <input value={servings} onChange={(e) => setServings(e.target.value)} className={inputClass} inputMode="numeric" />
           </label>
         </div>
 
         <label className="flex flex-col gap-1 text-sm font-bold text-foreground">
-          Descripción (opcional)
+          {isEn ? 'Description (optional)' : 'Descripción (opcional)'}
           <input value={description} onChange={(e) => setDescription(e.target.value)} className={inputClass} maxLength={500} />
         </label>
 
         <label className="flex flex-col gap-1 text-sm font-bold text-foreground">
-          Ingredientes (uno por línea)
+          {isEn ? 'Ingredients (one per line)' : 'Ingredientes (uno por línea)'}
           <textarea value={ingredients} onChange={(e) => setIngredients(e.target.value)} className={inputClass} rows={5} />
         </label>
 
         <label className="flex flex-col gap-1 text-sm font-bold text-foreground">
-          Instrucciones (una por línea)
+          {isEn ? 'Instructions (one per line)' : 'Instrucciones (una por línea)'}
           <textarea value={steps} onChange={(e) => setSteps(e.target.value)} className={inputClass} rows={5} />
         </label>
 
         <div>
-          <span className="block text-sm font-bold text-foreground mb-2">Etiquetas</span>
+          <span className="block text-sm font-bold text-foreground mb-2">{isEn ? 'Tags' : 'Etiquetas'}</span>
           <TagEditor tags={tags} onChange={setTags} suggestions={suggestions} />
         </div>
 
@@ -120,7 +121,7 @@ export const RecipeForm: React.FC<RecipeFormProps> = ({ onSubmit, onClose, langu
           disabled={saving}
           className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-3 rounded-xl transition-all disabled:opacity-50"
         >
-          {saving ? 'Guardando...' : 'Guardar receta'}
+          {saving ? (isEn ? 'Saving...' : 'Guardando...') : (isEn ? 'Save recipe' : 'Guardar receta')}
         </button>
       </form>
     </div>
