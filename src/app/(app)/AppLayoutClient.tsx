@@ -98,7 +98,7 @@ export default function AppLayoutClient({ children }: { children: React.ReactNod
   const currentTitle = getPageTitle(pathname);
 
   return (
-    <div className="garden-canvas flex h-screen w-full text-foreground font-display overflow-clip relative transition-colors duration-300">
+    <div className="garden-canvas flex h-dvh w-full text-foreground font-display overflow-clip relative transition-colors duration-300">
       {/* Background doodles */}
       <Flower
         petal="var(--leaf-soft)"
@@ -136,8 +136,8 @@ export default function AppLayoutClient({ children }: { children: React.ReactNod
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col h-full relative z-10 overflow-clip min-w-0">
         {/* TOP NAVBAR */}
-        <header className="flex items-center justify-between border-b border-border/60 bg-background/50 backdrop-blur-xl z-20 px-4 sm:px-6 py-3 sm:py-3.5 transition-colors">
-          <div className="flex items-center gap-3">
+        <header className="flex items-center justify-between border-b border-border/60 bg-background/95 backdrop-blur-xl shadow-[0_6px_12px_-8px_rgba(0,0,0,0.18)] z-20 px-4 sm:px-6 py-2 sm:py-3.5 transition-colors">
+          <div className="flex items-center gap-1.5 sm:gap-3 min-w-0">
             <button
               className="md:hidden text-foreground p-1.5 -ml-1 min-h-10 min-w-10 inline-flex items-center justify-center rounded-full hover:bg-card/70 transition-colors"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -145,18 +145,18 @@ export default function AppLayoutClient({ children }: { children: React.ReactNod
             >
               <Icon name="menu" size={24} />
             </button>
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-lg sm:text-xl text-foreground tracking-tight">
+            <div className="hidden sm:flex items-center gap-2 min-w-0">
+              <span className="font-semibold text-lg sm:text-xl text-foreground tracking-tight truncate">
                 {currentTitle}
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-3">
+          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
             {/* Language Switcher */}
             <button
               onClick={toggleLanguage}
-              className="flex items-center gap-1.5 bg-card/70 hover:bg-card backdrop-blur transition-all rounded-full px-3 sm:px-4 min-h-10 py-2 text-xs sm:text-sm font-semibold text-foreground shadow-sm border border-border/60 group"
+              className="flex items-center gap-1.5 bg-card/70 hover:bg-card backdrop-blur transition-all rounded-full px-2.5 sm:px-4 min-h-11 sm:min-h-10 py-2 text-xs sm:text-sm font-semibold text-foreground shadow-sm border border-border/60 group"
               title="Cambiar idioma / Change language"
             >
               <Icon name="language" size={18} />
@@ -166,7 +166,7 @@ export default function AppLayoutClient({ children }: { children: React.ReactNod
             {/* Dark Mode Toggle */}
             <button
               onClick={() => setTheme(isDarkMode ? 'light' : 'dark')}
-              className="flex items-center gap-1.5 bg-card/70 hover:bg-card backdrop-blur transition-all rounded-full px-3 sm:px-4 min-h-10 py-2 text-xs sm:text-sm font-semibold text-foreground shadow-sm border border-border/60 group"
+              className="flex items-center gap-1.5 bg-card/70 hover:bg-card backdrop-blur transition-all rounded-full justify-center min-w-11 px-2.5 sm:px-4 min-h-11 sm:min-h-10 py-2 text-xs sm:text-sm font-semibold text-foreground shadow-sm border border-border/60 group"
               title={isDarkMode ? t.lightMode : t.darkMode}
             >
               <Icon
@@ -178,7 +178,7 @@ export default function AppLayoutClient({ children }: { children: React.ReactNod
             </button>
 
             {/* User Info */}
-            <div className="flex items-center gap-2.5 pl-2 sm:pl-3 border-l border-border/60">
+            <div className="flex items-center gap-2.5 sm:pl-3 sm:border-l sm:border-border/60">
               <div className="text-right hidden lg:block">
                 <p className="text-foreground text-xs sm:text-sm font-bold truncate max-w-[140px]">
                   {isGuest ? t.guestUser : user?.user_metadata?.full_name || (language === 'es' ? 'Usuaria' : 'User')}
@@ -217,7 +217,7 @@ export default function AppLayoutClient({ children }: { children: React.ReactNod
               onClick={() =>
                 isGuest && !isGuestRoute(item.href) ? setSignupPromptOpen(true) : router.push(item.href)
               }
-              className={`flex flex-col items-center justify-center py-1 px-3 rounded-2xl min-w-[56px] transition-all ${
+              className={`flex flex-col items-center justify-center py-1 px-3 rounded-2xl min-w-[56px] min-h-12 transition-all ${
                 isGuest && !isGuestRoute(item.href) ? 'opacity-50' : ''
               } ${
 
@@ -236,13 +236,6 @@ export default function AppLayoutClient({ children }: { children: React.ReactNod
             </button>
           );
         })}
-        <button
-          onClick={() => setMobileMenuOpen(true)}
-          className="flex flex-col items-center justify-center py-1 px-3 rounded-2xl min-w-[56px] text-muted-foreground hover:text-foreground transition-all"
-        >
-          <Icon name="more_horiz" size={22} />
-          <span className="text-[10px] tracking-tight">{language === 'es' ? 'Más' : 'More'}</span>
-        </button>
       </nav>
 
       {/* Floating AI Assistant Button */}

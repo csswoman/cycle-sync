@@ -106,7 +106,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
   ];
 
   return (
-    <aside className={`relative z-10 w-64 h-full flex-shrink-0 border-r border-border/60 bg-card/70 backdrop-blur-xl flex flex-col justify-between p-4 transition-colors duration-300 ${onClose ? 'flex' : 'hidden md:flex'}`}>
+    <aside className={`relative z-10 ${onClose ? 'w-full' : 'w-64'} h-full flex-shrink-0 border-r border-border/60 bg-card/70 backdrop-blur-xl flex flex-col justify-between p-4 transition-colors duration-300 ${onClose ? 'flex' : 'hidden md:flex'}`}>
       {/* Top Section: Branding */}
       <div className="flex items-center justify-between px-2 pb-4 border-b border-border/40 flex-shrink-0">
         <div className="flex items-center gap-3">
@@ -126,7 +126,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
         {onClose && (
           <button
             onClick={onClose}
-            className="md:hidden text-muted-foreground hover:text-foreground p-1.5 rounded-full hover:bg-card transition-colors"
+            className="md:hidden text-muted-foreground hover:text-foreground size-11 -mr-2 inline-flex items-center justify-center rounded-full [@media(hover:hover)]:hover:bg-card transition-colors"
             aria-label={language === 'es' ? 'Cerrar menú' : 'Close menu'}
           >
             <Icon name="close" size={20} />
