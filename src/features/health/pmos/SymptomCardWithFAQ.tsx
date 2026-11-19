@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React from 'react';
+import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { PMOS_SYMPTOM_CONFIGS, SymptomConfig } from './symptomFaqData';
 
 interface SymptomCardWithFAQProps {
@@ -124,33 +125,13 @@ export const SymptomCardWithFAQ: React.FC<SymptomCardWithFAQProps> = ({
   lang,
 }) => {
   const config: SymptomConfig | undefined = PMOS_SYMPTOM_CONFIGS[symptomKey];
-  const [tooltipOpen, setTooltipOpen] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        setTooltipOpen(false);
-      }
-    };
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setTooltipOpen(false);
-    };
-    if (tooltipOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      document.addEventListener('keydown', handleKeyDown);
-    }
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [tooltipOpen]);
   if (!config) return null;
   const currentLevelLabel = config.levels[lang][value] ?? config.levels[lang][0];
   const currentLevelDesc = LEVEL_DESCRIPTIONS[symptomKey]?.[lang]?.[value] ?? '';
   const { cause, tips, doctor } = config.faqSummary;
   const panelId = `symptom-panel-${symptomKey}`;
   return (
-    <div ref={containerRef} className="relative">
+    <div className="relative">
       {/* Row header: the toggle is a real button; the FAQ button is its sibling, not nested. */}
       <div className="flex items-center gap-1 pr-2 sm:pr-3">
         <button
@@ -167,10 +148,13 @@ export const SymptomCardWithFAQ: React.FC<SymptomCardWithFAQProps> = ({
           </span>
           <span className="flex-1 min-w-0">
             <span className="block text-base font-semibold text-foreground leading-snug">{config.name[lang]}</span>
-            <span className="block text-sm text-muted-foreground leading-snug truncate">{config.tagline[lang]}</span>
+            <span className="block text-sm text-muted-foreground leading-snug line-clamp-2 sm:truncate">{config.tagline[lang]}</span>
+            <span className={`sm:hidden inline-block mt-1.5 text-sm font-semibold px-3 py-0.5 rounded-full border ${SEVERITY_BADGE_STYLES[value]}`}>
+              {currentLevelLabel}
+            </span>
           </span>
           <span
-            className={`shrink-0 text-sm font-semibold px-3 py-1 rounded-full border ${SEVERITY_BADGE_STYLES[value]}`}
+            className={`hidden sm:inline shrink-0 text-sm font-semibold px-3 py-1 rounded-full border ${SEVERITY_BADGE_STYLES[value]}`}
           >
             {currentLevelLabel}
           </span>
@@ -181,55 +165,24 @@ export const SymptomCardWithFAQ: React.FC<SymptomCardWithFAQProps> = ({
             expand_more
           </span>
         </button>
-        <button
-          type="button"
-          onClick={() => setTooltipOpen((prev) => !prev)}
-          onMouseEnter={() => setTooltipOpen(true)}
-          aria-expanded={tooltipOpen}
-          className={`size-10 rounded-full flex items-center justify-center shrink-0 transition-colors ${
-            tooltipOpen ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-primary hover:bg-primary/10'
-          }`}
-          aria-label={lang === 'es' ? `Más información sobre ${config.name.es}` : `More about ${config.name.en}`}
-        >
-          <span className="material-symbols-outlined text-[20px]" aria-hidden="true">help</span>
-        </button>
-      </div>
-      {tooltipOpen && (
-        <div
-          role="dialog"
-          aria-label={config.name[lang]}
-          className="absolute right-3 top-full -mt-1 w-[min(26rem,calc(100%-1.5rem))] p-5 rounded-2xl bg-card text-foreground border border-border shadow-2xl z-30 animate-in fade-in zoom-in-95 duration-150 flex flex-col gap-4 text-left"
-          onMouseLeave={() => setTooltipOpen(false)}
-        >
-          <div className="flex items-center justify-between gap-3">
-            <h4 className="font-semibold text-base text-foreground tracking-tight">{config.name[lang]}</h4>
-            <button
-              type="button"
-              onClick={() => setTooltipOpen(false)}
-              aria-label={lang === 'es' ? 'Cerrar' : 'Close'}
-              className="size-10 -mr-2 rounded-full flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-            >
-              <span className="material-symbols-outlined text-[20px]" aria-hidden="true">close</span>
-            </button>
-          </div>
+        <InfoTooltip label={lang === 'es' ? `Más información sobre ${config.name.es}` : `More about ${config.name.en}`} className="!size-10">
+          <h4 className="font-semibold text-base text-foreground tracking-tight">{config.name[lang]}</h4>
           <div className="flex flex-col gap-1">
             <h5 className="text-sm font-semibold text-primary">{lang === 'es' ? '¿Por qué ocurre?' : 'Why does it happen?'}</h5>
-            <p className="text-sm text-muted-foreground leading-relaxed text-pretty">{cause[lang]}</p>
+            <p className="text-sm text-muted-foreground">{cause[lang]}</p>
           </div>
           <div className="flex flex-col gap-1">
             <h5 className="text-sm font-semibold text-primary">{lang === 'es' ? 'Qué suele ayudar' : 'What often helps'}</h5>
-            <ul className="text-sm text-muted-foreground leading-relaxed space-y-1 list-disc pl-5 marker:text-primary/50">
-              {tips[lang].map((tip, idx) => (
-                <li key={idx} className="text-pretty">{tip}</li>
-              ))}
+            <ul className="text-sm text-muted-foreground space-y-1 list-disc pl-5 marker:text-primary/50">
+              {tips[lang].map((tip, idx) => <li key={idx}>{tip}</li>)}
             </ul>
           </div>
           <div className="flex flex-col gap-1 bg-secondary/50 p-3 rounded-xl">
             <h5 className="text-sm font-semibold text-foreground">{lang === 'es' ? 'Cuándo consultar a tu médica o médico' : 'When to see a doctor'}</h5>
-            <p className="text-sm text-muted-foreground leading-relaxed text-pretty">{doctor[lang]}</p>
+            <p className="text-sm text-muted-foreground">{doctor[lang]}</p>
           </div>
-        </div>
-      )}
+        </InfoTooltip>
+      </div>
       {isExpanded && (
         <div id={panelId} className="px-4 sm:px-5 pb-5 pt-1 flex flex-col gap-4 animate-in fade-in duration-200">
           <div

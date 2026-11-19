@@ -46,6 +46,9 @@ const DailyLog: React.FC = () => {
   const [sleepHours, setSleepHours] = useState<number>(7);
   const [sleepQuality, setSleepQuality] = useState<SleepQuality | null>(null);
   const [activeSymptoms, setActiveSymptoms] = useState<string[]>([]);
+  // Mobile only: the Today form is shown one section at a time. From lg all sections show.
+  const [step, setStep] = useState(0);
+  const STEPS = 3;
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const { cycleInfo, loading: cycleLoading } = useCycleInfo();
@@ -187,7 +190,7 @@ const DailyLog: React.FC = () => {
         <div
           role="tablist"
           aria-label={lang === 'es' ? 'Secciones del registro' : 'Log sections'}
-          className="-mt-3 -mx-4 px-4 sm:mx-0 sm:px-0 flex gap-2 overflow-x-auto scrollbar-hide snap-x pb-1"
+          className="-mt-3 -mx-4 px-4 sm:mx-0 sm:px-0 flex gap-2 overflow-x-auto scrollbar-hide snap-x scroll-px-4 sm:scroll-px-0 pb-1"
           onKeyDown={(e) => {
             const i = tabs.findIndex((t) => t.id === tab);
             if (e.key === 'ArrowRight') { e.preventDefault(); focusTab(tabs[(i + 1) % tabs.length].id); }
@@ -237,11 +240,17 @@ const DailyLog: React.FC = () => {
           <Medications embedded onSummary={setMedSummary} />
         </div>
         <div role="tabpanel" id="log-panel-today" aria-labelledby="log-tab-today" className={`grid grid-cols-1 lg:grid-cols-12 gap-6 items-start ${tab === 'today' ? '' : 'hidden'}`}>
-          <div className="lg:col-span-8 bg-card border border-border rounded-3xl shadow-[var(--shadow-low)] divide-y divide-border">
-            <div className="p-5 sm:p-6">
+          <div className="lg:col-span-8 bg-card border border-border rounded-2xl sm:rounded-3xl shadow-[var(--shadow-low)] divide-y divide-border lg:[&>:nth-child(2)]:!border-t-0">
+            <div className="lg:hidden p-4 pb-3 flex flex-col gap-2" role="group" aria-label={lang === 'es' ? `Paso ${step + 1} de ${STEPS}` : `Step ${step + 1} of ${STEPS}`}>
+              <p className="text-sm font-semibold text-muted-foreground">{lang === 'es' ? `Paso ${step + 1} de ${STEPS}` : `Step ${step + 1} of ${STEPS}`}</p>
+              <div className="flex gap-1.5" aria-hidden="true">
+                {Array.from({ length: STEPS }, (_, i) => <span key={i} className={`h-1.5 flex-1 rounded-full ${i <= step ? 'bg-primary' : 'bg-secondary'}`} />)}
+              </div>
+            </div>
+            <div className={`p-4 sm:p-6 ${step === 0 ? '' : 'max-lg:hidden'}`}>
               <MoodSelector lang={lang} selectedMood={selectedMood} onMoodSelect={(m) => { setSelectedMood(m); setSaved(false); }} />
             </div>
-            <div className="p-5 sm:p-6">
+            <div className={`p-4 sm:p-6 ${step === 1 ? '' : 'max-lg:hidden'}`}>
               <VitalsInputs
                 energyLevel={energyLevel}
                 onEnergyLevelChange={(v) => { setEnergyLevel(v); setSaved(false); }}
@@ -252,15 +261,28 @@ const DailyLog: React.FC = () => {
                 lang={lang}
               />
             </div>
-            <div className="p-5 sm:p-6">
+            <div className={`p-4 sm:p-6 ${step === 2 ? '' : 'max-lg:hidden'}`}>
               <SymptomGrid lang={lang} activeSymptoms={activeSymptoms} toggleSymptom={toggleSymptom} />
             </div>
-            <div className="p-5 sm:p-6">
+            <div className="p-4 sm:p-6 flex gap-3">
+              {step > 0 && (
+                <button type="button" onClick={() => setStep(step - 1)}
+                  className="lg:hidden min-h-12 px-5 rounded-full border border-border text-base font-semibold text-foreground hover:bg-secondary transition-colors">
+                  {lang === 'es' ? 'Atrás' : 'Back'}
+                </button>
+              )}
+              {step < STEPS - 1 && (
+                <button type="button" onClick={() => setStep(step + 1)}
+                  className="lg:hidden flex-1 min-h-12 bg-primary hover:bg-primary-hover text-primary-foreground text-base font-semibold px-6 rounded-full flex items-center justify-center gap-2 transition-colors">
+                  {lang === 'es' ? 'Siguiente' : 'Next'}
+                  <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+                </button>
+              )}
               <button
                 type="button"
                 onClick={handleSave}
                 disabled={saving || saved}
-                className="w-full min-h-12 bg-primary hover:bg-primary-hover text-primary-foreground text-base font-semibold px-6 rounded-full flex items-center justify-center gap-2 transition-colors shadow-[var(--shadow-low)] disabled:opacity-60"
+                className={`${step < STEPS - 1 ? 'max-lg:hidden ' : ''}flex-1 min-h-12 bg-primary hover:bg-primary-hover text-primary-foreground text-base font-semibold px-6 rounded-full flex items-center justify-center gap-2 transition-colors shadow-[var(--shadow-low)] disabled:opacity-60`}
               >
                 <span className="material-symbols-outlined" aria-hidden="true">{saved ? 'check_circle' : 'save'}</span>
                 {buttonLabel}
@@ -314,7 +336,7 @@ const DailyLog: React.FC = () => {
                   </span>
                   <span className="flex-1 min-w-0">
                     <span className="block text-sm font-semibold text-foreground">{row.label}</span>
-                    <span className="block text-sm text-muted-foreground truncate">{row.detail}</span>
+                    <span className="block text-sm text-muted-foreground sm:truncate">{row.detail}</span>
                   </span>
                   <span className="material-symbols-outlined text-[18px] text-muted-foreground" aria-hidden="true">chevron_right</span>
                 </button>

@@ -9,6 +9,7 @@ import {
 import { useCycleSigns } from '@/hooks/useCycleSigns';
 import { usePregnancies } from '@/hooks/usePregnancies';
 import { FlowFields } from './FlowFields';
+import { InfoTooltip } from '@/components/ui/InfoTooltip';
 
 type Lang = 'es' | 'en';
 
@@ -113,19 +114,41 @@ const copy = {
   },
 };
 
+// Longer explanations shown in "?" tooltips, so the form itself stays short.
+const tips = {
+  es: {
+    spotting: ['Manchado es sangrado leve fuera de la regla: unas gotas, rosado o marrón, sin necesitar compresa. No cuenta como regla ni cambia tus predicciones.', 'Puede aparecer en la ovulación, antes de la regla o al empezar o cambiar un anticonceptivo. Si es frecuente o abundante, coméntalo en consulta.'],
+    bbt: ['Tras ovular, la progesterona sube tu temperatura en reposo unos 0,2 a 0,5 °C hasta la siguiente regla.', 'Por eso la temperatura confirma la ovulación después de que ocurre; no la predice. Mide a la misma hora, antes de levantarte.'],
+    disturbed: ['Marca la lectura si dormiste poco, estuviste enferma, tomaste alcohol o mediste a otra hora. En la gráfica se muestra con un círculo vacío.'],
+    mucus: ['Obsérvalo al limpiarte, a lo largo del día. Seco o pegajoso suele ser menos fértil; cremoso, acuoso o clara de huevo se asocia a días más fértiles.', 'Con PMOS el moco fértil puede aparecer varias veces en un ciclo sin que haya ovulación.'],
+    lh: ['Las tiras miden la hormona LH, que sube justo antes de ovular. Con PMOS la LH suele estar alta, así que pueden dar positivos falsos.', 'La temperatura confirma si de verdad ovulaste.'],
+    preg: ['Anota el resultado si te hiciste una prueba. Con un positivo, confírmalo con tu médica o médico.'],
+  },
+  en: {
+    spotting: ['Spotting is light bleeding outside your period: a few drops, pink or brown, no pad needed. It does not count as a period or change your predictions.', 'It can happen around ovulation, before a period, or when starting or changing contraception. If it is frequent or heavy, mention it to your doctor.'],
+    bbt: ['After ovulation, progesterone raises your resting temperature by about 0.2 to 0.5 °C until the next period.', 'So temperature confirms ovulation after it happens; it does not predict it. Measure at the same time, before getting up.'],
+    disturbed: ['Mark the reading if you slept little, were ill, had alcohol or measured at a different time. It shows as an empty circle on the chart.'],
+    mucus: ['Check it when you wipe, through the day. Dry or sticky is usually less fertile; creamy, watery or egg-white is linked to more fertile days.', 'With PMOS fertile mucus can appear several times in a cycle without ovulation.'],
+    lh: ['LH strips measure the hormone that rises just before ovulation. With PMOS LH is often high, so they can give false positives.', 'Temperature confirms whether you really ovulated.'],
+    preg: ['Log the result if you took a test. If it is positive, confirm it with your doctor.'],
+  },
+};
+const Tip: React.FC<{ label: string; paras: string[]; className?: string }> = ({ label, paras, className }) => (
+  <InfoTooltip label={label} className={className}>{paras.map((p, i) => <p key={i}>{p}</p>)}</InfoTooltip>
+);
 const chip = (active: boolean) =>
-  `min-h-10 px-4 rounded-full text-sm font-semibold border transition-colors cursor-pointer ${
+  `min-h-11 sm:min-h-10 px-4 rounded-full text-sm font-semibold border transition-colors cursor-pointer ${
     active ? 'bg-primary text-primary-foreground border-primary' : 'bg-secondary/50 text-foreground border-transparent hover:bg-secondary'
   }`;
 
 const inputClass =
   'w-full min-h-11 rounded-xl border border-border bg-background px-3 text-base sm:text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40';
 
-const Section: React.FC<{ icon: string; title: string; help?: string; children: React.ReactNode }> = ({ icon, title, help, children }) => (
-  <section className="p-5 sm:p-6 flex flex-col gap-4">
+const Section: React.FC<{ icon: string; title: string; help?: string; cls?: string; tip?: React.ReactNode; children: React.ReactNode }> = ({ icon, title, help, cls = '', tip, children }) => (
+  <section className={`p-4 sm:p-6 flex flex-col gap-4 ${cls}`}>
     <div className="flex flex-col gap-1">
       <h2 className="text-foreground text-lg font-semibold flex items-center gap-2">
-        <span className="material-symbols-outlined text-primary text-[22px]" aria-hidden="true">{icon}</span>{title}
+        <span className="material-symbols-outlined text-primary text-[22px]" aria-hidden="true">{icon}</span>{title}{tip}
       </h2>
       {help && <p className="text-sm text-muted-foreground leading-relaxed max-w-[65ch]">{help}</p>}
     </div>
@@ -183,6 +206,12 @@ const BodySignsPanel: React.FC<Props> = ({ lang, cycleStart, hormonal, initialDa
   const [tempText, setTempText] = useState('');
   const [status, setStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
   const [showInfo, setShowInfo] = useState(false);
+  // Mobile only: the form is shown one block at a time. From lg all blocks show.
+  const STEPS = 3;
+  const [step, setStep] = useState(0);
+  const sc = (n: number) => (step === n ? '' : 'max-lg:hidden');
+  const es = lang === 'es';
+  const stepLabel = es ? `Paso ${step + 1} de ${STEPS}` : `Step ${step + 1} of ${STEPS}`;
   const { active: activePreg, start: startPregnancy } = usePregnancies();
   const [pregState, setPregState] = useState<'idle' | 'error'>('idle');
 
@@ -225,8 +254,13 @@ const BodySignsPanel: React.FC<Props> = ({ lang, cycleStart, hormonal, initialDa
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
       <div className="lg:col-span-7 flex flex-col gap-4">
         {hormonal && <p className="text-sm text-sun-ink bg-sun/10 rounded-2xl px-4 py-3">{c.hormonal}</p>}
-        <div className="bg-card border border-border rounded-3xl shadow-[var(--shadow-low)] divide-y divide-border">
-        <div className="p-5 sm:p-6 flex items-center gap-3 flex-wrap">
+        <div className="bg-card border border-border rounded-2xl sm:rounded-3xl shadow-[var(--shadow-low)] divide-y divide-border [&>:nth-child(2)]:!border-t-0">
+        <div className="lg:hidden p-4 pb-0" role="group" aria-label={stepLabel}>
+          <div className="flex gap-1.5" aria-hidden="true">
+            {Array.from({ length: STEPS }, (_, i) => <span key={i} className={`h-1.5 flex-1 rounded-full ${i <= step ? 'bg-primary' : 'bg-secondary'}`} />)}
+          </div>
+        </div>
+        <div className="p-4 sm:p-6 flex items-center gap-3 flex-wrap">
           <label className="text-sm font-semibold text-foreground flex items-center gap-3">
             {c.date}
             <input type="date" className={`${inputClass} w-auto`} value={date} max={todayIso} min={fromDate} onChange={(e) => e.target.value && setDate(e.target.value)} />
@@ -234,34 +268,35 @@ const BodySignsPanel: React.FC<Props> = ({ lang, cycleStart, hormonal, initialDa
           {date !== todayIso && (
             <button type="button" onClick={() => setDate(todayIso)} className="min-h-10 px-3 rounded-full text-sm font-semibold text-primary hover:bg-primary/10">{c.today}</button>
           )}
+          <span className="lg:hidden ml-auto text-sm font-semibold text-muted-foreground">{stepLabel}</span>
         </div>
 
-        <Section icon="monitoring" title={c.flowSectionTitle} help={c.flowSectionHelp}>
+        <Section icon="monitoring" title={c.flowSectionTitle} help={c.flowSectionHelp} cls={sc(0)}>
           <FlowFields lang={lang} value={draft} onChange={update} />
           <div className="flex flex-col gap-2 border-t border-border pt-4">
-            <h3 className="text-sm font-semibold text-foreground">{c.spottingTitle}</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed max-w-[65ch]">{c.spottingHelp}</p>
-            <label className="flex items-center gap-3 min-h-10 text-sm font-semibold text-foreground cursor-pointer">
+            <h3 className="text-sm font-semibold text-foreground flex items-center gap-1">{c.spottingTitle}<Tip label={c.spottingTitle} paras={tips[lang].spotting} /></h3>
+            <label className="flex items-center gap-3 min-h-11 sm:min-h-10 text-sm font-semibold text-foreground cursor-pointer">
               <input type="checkbox" className="size-5 accent-primary" checked={draft.spotting} onChange={(e) => update({ spotting: e.target.checked })} />
               {c.spottingToggle}
             </label>
           </div>
         </Section>
-        <Section icon="thermometer" title={c.bbtTitle} help={c.bbtHelp}>
+        <Section icon="thermometer" title={c.bbtTitle} help={c.bbtHelp} cls={sc(1)} tip={<Tip label={c.bbtTitle} paras={tips[lang].bbt} />}>
           <div className="flex flex-wrap items-center gap-x-6 gap-y-2">
           <div className="flex items-center gap-2 w-[180px]">
             <input className={`${inputClass} tabular-nums`} inputMode="decimal" placeholder="36,50" value={tempText} onChange={(e) => { setTempText(e.target.value); setStatus('idle'); }} aria-invalid={tempInvalid} />
             <span className="text-sm font-semibold text-muted-foreground">°C</span>
           </div>
-          <label className="flex items-center gap-3 min-h-10 text-sm text-muted-foreground cursor-pointer flex-1 min-w-[220px]">
+          <label className="flex items-center gap-3 min-h-11 sm:min-h-10 text-sm text-muted-foreground cursor-pointer flex-1 min-w-[220px]">
             <input type="checkbox" className="size-5 accent-primary shrink-0" checked={draft.bbtDisturbed} onChange={(e) => update({ bbtDisturbed: e.target.checked })} />
             {c.bbtDisturbed}
+            <Tip label={c.bbtDisturbed} paras={tips[lang].disturbed} className="-ml-1" />
           </label>
           </div>
           {tempInvalid && <p className="text-sm font-semibold text-destructive">{c.bbtInvalid}</p>}
         </Section>
 
-        <Section icon="opacity" title={c.mucusTitle}>
+        <Section icon="opacity" title={c.mucusTitle} cls={sc(1)} tip={<Tip label={c.mucusTitle} paras={tips[lang].mucus} />}>
           <div className="flex flex-wrap gap-2">
             {MUCUS_ORDER.map((m) => (
               <button key={m} type="button" aria-pressed={draft.cervicalMucus === m} className={chip(draft.cervicalMucus === m)}
@@ -273,12 +308,11 @@ const BodySignsPanel: React.FC<Props> = ({ lang, cycleStart, hormonal, initialDa
           {isFertileMucus(draft.cervicalMucus) && <p className="text-sm font-semibold text-sun-ink">{c.mucusFertile}</p>}
         </Section>
 
-        <Section icon="science" title={c.testsTitle}>
+        <Section icon="science" title={c.testsTitle} cls={sc(2)}>
           <div className={`grid grid-cols-1 gap-6 ${hormonal ? '' : 'md:grid-cols-2'}`}>
             {!hormonal && (
               <div className="flex flex-col gap-3">
-                <h3 className="text-sm font-semibold text-foreground">{c.lhTitle}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{c.lhHelp}</p>
+                <h3 className="text-sm font-semibold text-foreground flex items-center gap-1">{c.lhTitle}<Tip label={c.lhTitle} paras={tips[lang].lh} /></h3>
                 <div className="flex flex-wrap gap-2 mt-auto">
                   {(['negative', 'positive'] as const).map((v) => (
                     <button key={v} type="button" aria-pressed={draft.lhTest === v} className={chip(draft.lhTest === v)}
@@ -290,8 +324,7 @@ const BodySignsPanel: React.FC<Props> = ({ lang, cycleStart, hormonal, initialDa
               </div>
             )}
             <div className="flex flex-col gap-3">
-              <h3 className="text-sm font-semibold text-foreground">{c.pregTitle}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{c.pregHelp}</p>
+              <h3 className="text-sm font-semibold text-foreground flex items-center gap-1">{c.pregTitle}<Tip label={c.pregTitle} paras={tips[lang].preg} /></h3>
               <div className="flex flex-wrap gap-2 mt-auto">
                 {(['negative', 'positive'] as const).map((v) => (
                   <button key={v} type="button" aria-pressed={draft.pregnancyTest === v} className={chip(draft.pregnancyTest === v)}
@@ -317,7 +350,7 @@ const BodySignsPanel: React.FC<Props> = ({ lang, cycleStart, hormonal, initialDa
             )
           )}
         </Section>
-        <Section icon="favorite" title={c.sexTitle} help={c.sexPrivate}>
+        <Section icon="favorite" title={c.sexTitle} help={c.sexPrivate} cls={sc(2)}>
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-2">
               <span className="text-sm font-semibold text-foreground">{c.sexCount}</span>
@@ -342,13 +375,30 @@ const BodySignsPanel: React.FC<Props> = ({ lang, cycleStart, hormonal, initialDa
           </div>
         </Section>
 
-        <div className="p-5 sm:p-6 flex flex-col gap-4">
+        <div className={`p-4 sm:p-6 flex flex-col gap-4 ${sc(2)}`}>
           <label className="flex flex-col gap-2 text-sm font-semibold text-foreground">
             {c.notes}
             <input className={`${inputClass} font-normal`} maxLength={300} value={draft.notes ?? ''} onChange={(e) => update({ notes: e.target.value })} />
           </label>
 
-          <div className="lg:hidden flex flex-col gap-4">{saveBlock}</div>
+        </div>
+        <div className="lg:hidden p-4 flex flex-col gap-3">
+          {step === STEPS - 1 && saveBlock}
+          <div className="flex gap-3">
+            {step > 0 && (
+              <button type="button" onClick={() => setStep(step - 1)}
+                className={`min-h-12 px-5 rounded-full border border-border text-base font-semibold text-foreground hover:bg-secondary transition-colors ${step === STEPS - 1 ? 'flex-1' : ''}`}>
+                {es ? 'Atrás' : 'Back'}
+              </button>
+            )}
+            {step < STEPS - 1 && (
+              <button type="button" onClick={() => setStep(step + 1)}
+                className="flex-1 min-h-12 bg-primary hover:bg-primary-hover text-primary-foreground text-base font-semibold px-6 rounded-full flex items-center justify-center gap-2 transition-colors">
+                {es ? 'Siguiente' : 'Next'}
+                <span className="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+              </button>
+            )}
+          </div>
         </div>
         </div>
       </div>
@@ -358,7 +408,7 @@ const BodySignsPanel: React.FC<Props> = ({ lang, cycleStart, hormonal, initialDa
           <p className="text-sm text-muted-foreground">{c.date}: <span className="font-semibold text-foreground tabular-nums">{fmt(date)}</span></p>
           {saveBlock}
         </div>
-        <div className="bg-card border border-border rounded-3xl p-5 sm:p-6 flex flex-col gap-3 shadow-[var(--shadow-low)]">
+        <div className={`bg-card border border-border rounded-2xl sm:rounded-3xl p-4 sm:p-6 flex-col gap-3 shadow-[var(--shadow-low)] ${step === 1 ? 'flex' : 'max-lg:hidden lg:flex'}`}>
           <h2 className="text-foreground text-lg font-semibold">{c.chartTitle}</h2>
           {readings.length < 2 ? (
             <p className="text-sm text-muted-foreground">{c.chartEmpty}</p>
@@ -378,7 +428,7 @@ const BodySignsPanel: React.FC<Props> = ({ lang, cycleStart, hormonal, initialDa
           )}
         </div>
 
-        <div className="bg-card/70 border border-border rounded-3xl p-5 sm:p-6 flex flex-col gap-3">
+        <div className={`bg-card/70 border border-border rounded-2xl sm:rounded-3xl p-4 sm:p-6 flex-col gap-3 ${step === 1 ? 'flex' : 'max-lg:hidden lg:flex'}`}>
           <button type="button" onClick={() => setShowInfo((v) => !v)} aria-expanded={showInfo}
             className="flex items-center justify-between gap-2 min-h-10 text-left text-foreground font-semibold">
             <span className="flex items-center gap-2"><span className="material-symbols-outlined text-primary text-[20px]" aria-hidden="true">info</span>{c.infoTitle}</span>

@@ -35,9 +35,15 @@ export const SYMPTOMS: { key: string; es: string }[] = [
 export const SymptomGrid: React.FC<SymptomGridProps> = ({ activeSymptoms, toggleSymptom, lang = 'en' }) => {
     const [adding, setAdding] = useState(false);
     const [custom, setCustom] = useState('');
+    const [showAll, setShowAll] = useState(false);
     const known = new Set(SYMPTOMS.map((s) => s.key));
     // Custom symptoms saved earlier still show up as chips.
     const extras = activeSymptoms.filter((s) => !known.has(s));
+    // Only the most common ones show at first; anything already selected stays visible.
+    const VISIBLE = 6;
+    const all = [...SYMPTOMS.map((s) => s.key), ...extras];
+    const shown = showAll ? all : all.filter((k, i) => i < VISIBLE || activeSymptoms.includes(k));
+    const hidden = all.length - shown.length;
     const label = (key: string) => (lang === 'es' ? SYMPTOMS.find((s) => s.key === key)?.es ?? key : key);
 
     const addCustom = () => {
@@ -59,14 +65,14 @@ export const SymptomGrid: React.FC<SymptomGridProps> = ({ activeSymptoms, toggle
             </p>
             </div>
             <div className="flex flex-wrap gap-2">
-                {[...SYMPTOMS.map((s) => s.key), ...extras].map(symptom => {
+                {shown.map(symptom => {
                     const isActive = activeSymptoms.includes(symptom);
                     return (
                         <button
                             key={symptom}
                             onClick={() => toggleSymptom(symptom)}
                             aria-pressed={isActive}
-                            className={`min-h-10 px-4 py-2 rounded-full text-sm font-medium border transition-colors flex items-center gap-2
+                            className={`min-h-11 sm:min-h-10 px-4 py-2 rounded-full text-sm font-medium border transition-colors flex items-center gap-2
                 ${isActive
                                     ? 'bg-primary text-primary-foreground border-primary'
                                     : 'bg-secondary text-muted-foreground border-transparent hover:bg-surface-hover hover:text-foreground'}`}
@@ -76,6 +82,12 @@ export const SymptomGrid: React.FC<SymptomGridProps> = ({ activeSymptoms, toggle
                         </button>
                     );
                 })}
+                {(hidden > 0 || showAll) && (
+                    <button type="button" onClick={() => setShowAll((v) => !v)} aria-expanded={showAll}
+                        className="min-h-11 sm:min-h-10 px-3 rounded-full text-sm font-medium text-primary hover:bg-primary/10 transition-colors">
+                        {showAll ? (lang === 'es' ? 'Ver menos' : 'Show less') : (lang === 'es' ? `Ver ${hidden} más` : `Show ${hidden} more`)}
+                    </button>
+                )}
                 {adding ? (
                     <form onSubmit={(e) => { e.preventDefault(); addCustom(); }} className="flex items-center gap-2">
                         <input autoFocus aria-label={lang === 'es' ? 'Otro síntoma' : 'Other symptom'} value={custom} onChange={(e) => setCustom(e.target.value)} maxLength={40}

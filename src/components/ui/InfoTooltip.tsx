@@ -36,7 +36,9 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({ label, children, class
         const left = Math.max(MARGIN, Math.min(r.left + r.width / 2 - w / 2, window.innerWidth - w - MARGIN));
         const h = tipRef.current?.offsetHeight ?? 0;
         const above = r.bottom + GAP + h > window.innerHeight - MARGIN && r.top - GAP - h > MARGIN;
-        setPos({ top: above ? r.top - GAP - h : r.bottom + GAP, left, above });
+        const top = above ? r.top - GAP - h : r.bottom + GAP;
+        // Tall content that fits neither side is pinned inside the viewport and scrolls.
+        setPos({ top: Math.max(MARGIN, Math.min(top, window.innerHeight - h - MARGIN)), left, above });
     }, []);
 
     useLayoutEffect(() => {
@@ -100,7 +102,7 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({ label, children, class
                     onMouseEnter={show}
                     onMouseLeave={hide}
                     style={{ top: pos?.top ?? -9999, left: pos?.left ?? -9999, width: `min(${WIDTH}px, calc(100vw - ${MARGIN * 2}px))` }}
-                    className="fixed z-50 rounded-2xl border border-border bg-card p-4 text-sm leading-relaxed text-foreground shadow-xl text-pretty flex flex-col gap-2 animate-in fade-in zoom-in-95 duration-150"
+                    className="fixed z-50 max-h-[calc(100dvh-1.5rem)] overflow-y-auto rounded-2xl border border-border bg-card p-4 text-sm leading-relaxed text-foreground shadow-xl text-pretty flex flex-col gap-2 animate-in fade-in zoom-in-95 duration-150"
                 >
                     {children}
                 </div>,
