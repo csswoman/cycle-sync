@@ -16,6 +16,8 @@ import GuestSignupModal from '@/components/layout/GuestSignupModal';
 import { isGuestRoute } from '@/lib/guestAccess';
 import { Icon } from '@/components/ui/Icon';
 import PinLock from '@/components/layout/PinLock';
+import AiConsentDialog from '@/components/layout/AiConsentDialog';
+import { clearSyncedLocalData } from '@/lib/signOut';
 
 export default function AppLayoutClient({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -50,6 +52,8 @@ export default function AppLayoutClient({ children }: { children: React.ReactNod
       if (_event === 'SIGNED_IN') void ensureProfileLoaded();
       if (_event === 'SIGNED_OUT') {
         resetProfile();
+        // Covers sign-outs that don't go through signOutAndClearDevice (expired session, other tab).
+        void clearSyncedLocalData();
         router.push('/login');
       }
     });
@@ -137,7 +141,7 @@ export default function AppLayoutClient({ children }: { children: React.ReactNod
             <button
               className="md:hidden text-foreground p-1.5 -ml-1 min-h-10 min-w-10 inline-flex items-center justify-center rounded-full hover:bg-card/70 transition-colors"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Open menu"
+              aria-label={language === 'es' ? 'Abrir menú' : 'Open menu'}
             >
               <Icon name="menu" size={24} />
             </button>
@@ -177,7 +181,7 @@ export default function AppLayoutClient({ children }: { children: React.ReactNod
             <div className="flex items-center gap-2.5 pl-2 sm:pl-3 border-l border-border/60">
               <div className="text-right hidden lg:block">
                 <p className="text-foreground text-xs sm:text-sm font-bold truncate max-w-[140px]">
-                  {isGuest ? t.guestUser : user?.user_metadata?.full_name || 'User'}
+                  {isGuest ? t.guestUser : user?.user_metadata?.full_name || (language === 'es' ? 'Usuaria' : 'User')}
                 </p>
                 <p className="text-muted-foreground text-[11px] font-medium leading-none">{isGuest ? t.guestBrowsing : t.powerhouseArchetype}</p>
               </div>
@@ -201,6 +205,7 @@ export default function AppLayoutClient({ children }: { children: React.ReactNod
         <div className="flex-1 overflow-hidden relative">{children}</div>
       </main>
       <PinLock />
+      <AiConsentDialog />
 
       {/* Mobile Bottom Navigation Bar */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 z-30 bg-card/90 backdrop-blur-xl border-t border-border/60 py-1 px-2 flex justify-around items-center shadow-lg transition-colors">
@@ -243,7 +248,7 @@ export default function AppLayoutClient({ children }: { children: React.ReactNod
       {/* Floating AI Assistant Button */}
       <button
         onClick={() => (isGuest ? setSignupPromptOpen(true) : toggleAssistant())}
-        aria-label="Toggle assistant"
+        aria-label={language === 'es' ? 'Abrir asistente' : 'Toggle assistant'}
         className={`fixed bottom-20 right-3 md:bottom-6 md:right-6 z-40 flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-full shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 group ${
           isAssistantOpen
             ? 'bg-secondary text-foreground rotate-90 shadow-secondary/30'

@@ -7,6 +7,7 @@ import {
   type LabGroup, type LabMarker,
 } from '@/lib/pmos/metrics';
 import { convertToCanonical, unitOptions } from '@/lib/pmos/units';
+import { Icon } from '@/components/ui/Icon';
 import LabScanDialog from './LabScanDialog';
 import { INPUT_CLASS, parseNum, todayLocal } from './shared';
 
@@ -20,7 +21,7 @@ const STATUS_STYLE = {
 
 const T = {
   es: {
-    title: 'Análisis de laboratorio', test: 'Análisis', value: 'Valor', date: 'Fecha del análisis', add: 'Agregar resultado', saving: 'Guardando…',
+    title: 'Análisis de laboratorio', test: 'Análisis', value: 'Valor', date: 'Fecha del análisis', add: 'Guardar resultado', addNew: 'Agregar resultado', close: 'Cerrar', flagged: 'Fuera de rango en tu último resultado', allOk: 'Tus últimos resultados están dentro de rango.', noData: 'Sin datos en', undo: 'Deshacer', removed: 'Resultado eliminado.', saving: 'Guardando…',
     errValue: 'Escribe un valor mayor que 0.', loading: 'Cargando…', none: 'Sin resultados', results: 'Resultados', del: 'Eliminar',
     status: { ok: 'En rango', low: 'Bajo', high: 'Alto', none: 'Sin rango' },
     unit: 'Unidad', noRange: 'Sin rango de referencia en la app',
@@ -33,7 +34,7 @@ const T = {
     footer: 'La franja sombreada es un rango de referencia típico en mujeres adultas. El rango de tu laboratorio tiene prioridad, y LH/FSH cambian según la fase del ciclo. Comenta tus resultados con tu médico.',
   },
   en: {
-    title: 'Lab results', test: 'Test', value: 'Value', date: 'Lab date', add: 'Add result', saving: 'Saving…',
+    title: 'Lab results', test: 'Test', value: 'Value', date: 'Lab date', add: 'Save result', addNew: 'Add result', close: 'Close', flagged: 'Out of range in your latest result', allOk: 'Your latest results are within range.', noData: 'No data for', undo: 'Undo', removed: 'Result deleted.', saving: 'Saving…',
     errValue: 'Enter a value greater than 0.', loading: 'Loading…', none: 'No results yet', results: 'Results', del: 'Delete',
     status: { ok: 'In range', low: 'Below range', high: 'Above range', none: 'No range' },
     unit: 'Unit', noRange: 'No reference range in the app',
@@ -60,11 +61,40 @@ const LabResultsSection: React.FC<{ lang?: Lang }> = ({ lang = 'es' }) => {
   const [refHigh, setRefHigh] = useState('');
   const [formError, setFormError] = useState<string | null>(null);
   const [group, setGroup] = useState<LabGroup>('hormones');
+  const [formOpen, setFormOpen] = useState<boolean | null>(null);
+  const [undoRow, setUndoRow] = useState<(typeof results)[number] | null>(null);
 
   // HOMA-IR typed in by hand and HOMA-IR derived from same-day labs are shown together.
   const homaDerived = useMemo(() => derivedSeries(results, 'fasting_glucose', 'fasting_insulin', homaIr), [results]);
   const fai = useMemo(() => derivedSeries(results, 'testosterone', 'shbg', freeAndrogenIndex), [results]);
 
+  const tile = (info: (typeof LAB_MARKERS)[number]) => {
+    const rows = results.filter((r) => r.marker === info.key);
+    let points = rows.map((r) => ({ date: r.date, value: r.value }));
+    if (info.key === 'homa_ir') {
+      const typed = new Set(points.map((p) => p.date));
+      points = [...points, ...homaDerived.filter((p) => !typed.has(p.date))].sort((a, b) => a.date.localeCompare(b.date));
+    }
+    const latest = points[points.length - 1];
+    const latestRow = latest ? rows.filter((r) => r.date === latest.date).at(-1) : undefined;
+    const labRange = latestRow ? { low: latestRow.ref_low, high: latestRow.ref_high } : null;
+    const range = effectiveRange(info, labRange);
+    const status = latest ? markerStatus(info, latest.value, labRange) : null;
+    return { info, points, latest, range, status };
+  };
+  const tiles = LAB_MARKERS.map(tile);
+  const flagged = tiles.filter((x) => x.status === 'high' || x.status === 'low');
+  const emptyNames = [
+    ...tiles.filter((x) => x.info.group === group && x.points.length === 0).map((x) => markerLabel(x.info, lang)),
+    ...(group === 'hormones' && fai.length === 0 ? [t.fai] : []),
+  ];
+  const showForm = formOpen ?? (!loading && results.length === 0);
+  const handleRemove = async (r: (typeof results)[number]) => { await remove(r.id); setUndoRow(r); };
+  const handleUndo = async () => {
+    if (!undoRow) return;
+    await add(undoRow.marker as LabMarker, undoRow.value, undoRow.date, { low: undoRow.ref_low, high: undoRow.ref_high });
+    setUndoRow(null);
+  };
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const v = parseNum(value);
@@ -96,10 +126,17 @@ const LabResultsSection: React.FC<{ lang?: Lang }> = ({ lang = 'es' }) => {
           </span>
           {t.title}
         </h2>
-        <LabScanDialog lang={lang} saving={saving} onSave={addMany} />
+        <div className="flex flex-wrap items-center gap-2">
+          <LabScanDialog lang={lang} saving={saving} onSave={addMany} />
+          <button type="button" onClick={() => setFormOpen(!showForm)} aria-expanded={showForm} aria-controls="lab-form"
+            className="inline-flex items-center gap-1.5 min-h-10 px-4 rounded-full text-sm font-semibold text-primary border border-primary/40 hover:bg-primary/10">
+            <Icon name={showForm ? 'close' : 'add'} className="text-[18px]" />
+            {showForm ? t.close : t.addNew}
+          </button>
+        </div>
       </div>
-
-      <form onSubmit={handleSubmit} className="px-5 sm:px-6 py-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-4 gap-y-4 items-end bg-secondary/30 border-y border-border">
+      {showForm && (
+      <form id="lab-form" onSubmit={handleSubmit} className="px-5 sm:px-6 py-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[1.1fr_1.3fr_1fr_auto] gap-x-4 gap-y-4 items-end bg-secondary/30 border-y border-border">
         <label className="flex flex-col gap-1.5 text-sm font-medium text-muted-foreground sm:col-span-2 lg:col-span-1">
           {t.test}
           <select value={marker} onChange={(ev) => { setMarker(ev.target.value as LabMarker); setUnit(''); }} className={INPUT_CLASS}>
@@ -113,9 +150,9 @@ const LabResultsSection: React.FC<{ lang?: Lang }> = ({ lang = 'es' }) => {
         <label className="flex flex-col gap-1.5 text-sm font-medium text-muted-foreground">
           {t.value}
           <div className="flex gap-2">
-            <input inputMode="decimal" value={value} onChange={(ev) => setValue(ev.target.value)} className={INPUT_CLASS} />
+            <input inputMode="decimal" value={value} onChange={(ev) => setValue(ev.target.value)} className={`${INPUT_CLASS} min-w-0 flex-1`} />
             {units.length > 1 ? (
-              <select value={unit || units[0].label} onChange={(ev) => setUnit(ev.target.value)} className={`${INPUT_CLASS} w-28 shrink-0`} aria-label={t.unit}>
+              <select value={unit || units[0].label} onChange={(ev) => setUnit(ev.target.value)} className={`${INPUT_CLASS} !w-28 shrink-0`} aria-label={t.unit}>
                 {units.map((u) => <option key={u.label} value={u.label}>{u.label}</option>)}
               </select>
             ) : (
@@ -129,7 +166,7 @@ const LabResultsSection: React.FC<{ lang?: Lang }> = ({ lang = 'es' }) => {
         </label>
         <div className="flex items-end gap-2 sm:col-span-2 lg:col-span-1">
           <button type="submit" disabled={saving}
-            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold min-h-11 rounded-full disabled:opacity-60">
+            className="w-full whitespace-nowrap bg-primary hover:bg-primary/90 text-primary-foreground font-semibold min-h-11 px-6 rounded-full disabled:opacity-60">
             {saving ? t.saving : t.add}
           </button>
         </div>
@@ -149,7 +186,28 @@ const LabResultsSection: React.FC<{ lang?: Lang }> = ({ lang = 'es' }) => {
         )}
         {(formError || error) && <p className="col-span-full text-sm text-destructive">{formError ?? error}</p>}
       </form>
-
+      )}
+      {!loading && results.length > 0 && (
+        <div className="px-5 sm:px-6 pt-1 pb-1" aria-live="polite">
+          {flagged.length > 0 ? (
+            <>
+              <p className="text-sm font-semibold text-foreground mb-2">{t.flagged}</p>
+              <ul className="flex flex-wrap gap-2">
+                {flagged.map((x) => (
+                  <li key={x.info.key}>
+                    <button type="button" onClick={() => setGroup(x.info.group)}
+                      className={`inline-flex items-center min-h-10 px-3 rounded-full text-sm font-semibold ${STATUS_STYLE[x.status as 'high' | 'low']}`}>
+                      {markerLabel(x.info, lang)} · {x.latest.value} {x.info.unit} · {t.status[x.status as 'high' | 'low']}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </>
+          ) : (
+            <p className="text-sm text-muted-foreground">{t.allOk}</p>
+          )}
+        </div>
+      )}
       <div className="px-5 sm:px-6 pt-5 flex gap-2 overflow-x-auto scrollbar-hide" role="tablist">
         {GROUPS.map((g) => (
           <button key={g} role="tab" aria-selected={group === g} onClick={() => setGroup(g)}
@@ -164,41 +222,27 @@ const LabResultsSection: React.FC<{ lang?: Lang }> = ({ lang = 'es' }) => {
           <p className="text-muted-foreground text-sm">{t.loading}</p>
         ) : (
           <>
-            {LAB_MARKERS.filter((m) => m.group === group).map((info) => {
-              const rows = results.filter((r) => r.marker === info.key);
-              let points = rows.map((r) => ({ date: r.date, value: r.value }));
-              if (info.key === 'homa_ir') {
-                const typed = new Set(points.map((p) => p.date));
-                points = [...points, ...homaDerived.filter((p) => !typed.has(p.date))].sort((a, b) => a.date.localeCompare(b.date));
-              }
-              const latest = points[points.length - 1];
-              const latestRow = latest ? rows.filter((r) => r.date === latest.date).at(-1) : undefined;
-              const labRange = latestRow ? { low: latestRow.ref_low, high: latestRow.ref_high } : null;
-              const range = effectiveRange(info, labRange);
-              const status = latest ? markerStatus(info, latest.value, labRange) : null;
-              return (
-                <div key={info.key} className="flex flex-col gap-2 rounded-2xl border border-border p-4">
-                  <div className="flex justify-between items-center gap-2">
-                    <h3 className="text-sm font-semibold text-foreground">{markerLabel(info, lang)}</h3>
-                    {latest && status && status !== 'none' && (
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${STATUS_STYLE[status]}`}>
-                        {latest.value} {info.unit} · {t.status[status]}{range.source === 'lab' ? ` (${t.labRangeTag})` : ''}
-                      </span>
-                    )}
-                  </div>
-                  {latest && status === 'none' && (
-                    <p className="text-sm text-muted-foreground">{latest.value} {info.unit} · {t.noRange}</p>
+            {tiles.filter((x) => x.info.group === group && x.points.length > 0).map(({ info, points, latest, range, status }) => (
+              <div key={info.key} className="flex flex-col gap-2 rounded-2xl border border-border p-4">
+                <div className="flex justify-between items-center gap-2">
+                  <h3 className="text-sm font-semibold text-foreground">{markerLabel(info, lang)}</h3>
+                  {latest && status && status !== 'none' && (
+                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${STATUS_STYLE[status]}`}>
+                      {latest.value} {info.unit} · {t.status[status]}{range.source === 'lab' ? ` (${t.labRangeTag})` : ''}
+                    </span>
                   )}
-                  {points.length === 0 ? (
-                    <p className="text-sm text-muted-foreground">{t.none}</p>
-                  ) : (
-                    <LineChart points={points} unit={info.unit} refLow={range.low} refHigh={range.high} />
-                  )}
-                  {info.key === 'homa_ir' && <p className="text-sm text-muted-foreground">{t.homaNote}</p>}
                 </div>
-              );
-            })}
-            {group === 'hormones' && (
+                {latest && status === 'none' && (
+                  <p className="text-sm text-muted-foreground">{latest.value} {info.unit} · {t.noRange}</p>
+                )}
+                <LineChart points={points} unit={info.unit} refLow={range.low} refHigh={range.high} />
+                {info.key === 'homa_ir' && <p className="text-sm text-muted-foreground">{t.homaNote}</p>}
+              </div>
+            ))}
+            {emptyNames.length > 0 && (
+              <p className="col-span-full text-sm text-muted-foreground">{t.noData}: {emptyNames.join(', ')}.</p>
+            )}
+            {group === 'hormones' && fai.length > 0 && (
               <div className="flex flex-col gap-2 rounded-2xl border border-border p-4">
                 <div className="flex justify-between items-center gap-2">
                   <h3 className="text-sm font-semibold text-foreground">{t.fai} <span className="text-xs font-normal text-muted-foreground">· {t.derived}</span></h3>
@@ -208,7 +252,7 @@ const LabResultsSection: React.FC<{ lang?: Lang }> = ({ lang = 'es' }) => {
                     </span>
                   )}
                 </div>
-                {fai.length === 0 ? <p className="text-sm text-muted-foreground">{t.none}</p> : <LineChart points={fai} unit="" refLow={null} refHigh={FAI_HIGH} />}
+                <LineChart points={fai} unit="" refLow={null} refHigh={FAI_HIGH} />
                 <p className="text-sm text-muted-foreground">{t.faiNote}</p>
               </div>
             )}
@@ -218,8 +262,14 @@ const LabResultsSection: React.FC<{ lang?: Lang }> = ({ lang = 'es' }) => {
 
       <p className="px-5 sm:px-6 pb-5 text-sm text-muted-foreground text-pretty max-w-[70ch]">{t.footer}</p>
 
+      {undoRow && (
+        <div role="status" className="border-t border-border px-5 sm:px-6 py-2 flex items-center justify-between gap-3 text-sm text-muted-foreground">
+          {t.removed}
+          <button type="button" onClick={handleUndo} className="inline-flex items-center min-h-10 px-2 font-semibold text-primary hover:underline">{t.undo}</button>
+        </div>
+      )}
       {results.length > 0 && (
-        <details className="border-t border-border px-5 sm:px-6 py-3">
+        <details open className="border-t border-border px-5 sm:px-6 py-3">
           <summary className="cursor-pointer min-h-10 flex items-center text-sm font-semibold text-foreground">{t.results} ({results.length})</summary>
           <ul className="mt-1 flex flex-col divide-y divide-border/60 max-h-64 overflow-y-auto">
             {[...results].reverse().map((r) => (
@@ -227,7 +277,7 @@ const LabResultsSection: React.FC<{ lang?: Lang }> = ({ lang = 'es' }) => {
                 <span>
                   <strong className="text-foreground">{r.date}</strong> · {label(r.marker)}: {r.value} {markerInfo(r.marker).unit}
                 </span>
-                <button onClick={() => remove(r.id)} className="inline-flex items-center min-h-10 px-2 text-sm font-semibold text-destructive hover:underline shrink-0" aria-label={`${t.del} ${label(r.marker)} ${r.date}`}>
+                <button onClick={() => handleRemove(r)} className="inline-flex items-center min-h-10 px-2 text-sm font-semibold text-destructive hover:underline shrink-0" aria-label={`${t.del} ${label(r.marker)} ${r.date}`}>
                   {t.del}
                 </button>
               </li>

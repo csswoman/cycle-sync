@@ -6,6 +6,7 @@ import { fetchHealthArticles } from '@/services/articlesService';
 import { Article } from '@/types/articles';
 import { usePMOSSymptoms } from '@/hooks/usePMOSSymptoms';
 import { useCycleInfo } from '@/hooks/useCycleInfo';
+import { useAppStore } from '@/stores/appStore';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { GardenCorner } from '@/components/ui/Botanical';
 import PMOSMemberTools from '@/features/health/pmos/PMOSMemberTools';
@@ -20,6 +21,7 @@ export const PMOSCare: React.FC = () => {
 
   const { entries, todayEntry, loading, alerts } = usePMOSSymptoms();
   const { cycleInfo } = useCycleInfo();
+  const isGuest = useAppStore((s) => s.authReady && !s.user);
 
   const [configuredSymptoms] = useConfiguredSymptoms();
   const [articles, setArticles] = useState<Article[]>([]);
@@ -36,7 +38,15 @@ export const PMOSCare: React.FC = () => {
   const todayTotal = configuredSymptoms.reduce((sum, k) => sum + ((todayEntry as Record<string, number> | null)?.[k] ?? 0), 0);
   const maxTotal = Math.max(configuredSymptoms.length, 1) * 3;
   const severityPct = Math.round((todayTotal / maxTotal) * 100);
+  const hasToday = !!todayEntry;
   const getStatusDetails = (pct: number) => {
+    if (!hasToday) {
+      return {
+        label: lang === 'es' ? 'Sin registro hoy' : 'Nothing logged today',
+        color: 'text-foreground',
+        badge: '',
+      };
+    }
     if (pct === 0) {
       return {
         label: lang === 'es' ? 'Equilibrado / Sin síntomas' : 'Balanced / No symptoms',
@@ -77,7 +87,7 @@ export const PMOSCare: React.FC = () => {
     <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide">
       <div className="flex flex-col w-full max-w-page mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-8 gap-6 sm:gap-8 pb-32">
         <header className="relative overflow-hidden rounded-3xl garden-wash wash-leaf border border-border p-5 sm:p-8 grid gap-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
-          <GardenCorner variant="leaf" className="size-40 sm:size-56 opacity-70" />
+          <GardenCorner variant="leaf" className="size-40 sm:size-56 opacity-30 sm:opacity-70" />
           <div className="relative flex flex-col gap-3 min-w-0">
             {cycleInfo && (
               <p className="inline-flex w-fit items-center gap-2 text-sm font-medium text-muted-foreground bg-card/70 border border-border px-3 py-1 rounded-full">
@@ -88,13 +98,14 @@ export const PMOSCare: React.FC = () => {
               </p>
             )}
             <h1 className="text-foreground text-2xl sm:text-4xl font-semibold tracking-tight leading-tight text-balance">
-              {es ? 'Tu espacio PMOS' : 'Your PMOS toolkit'}
+              {es ? 'Síntomas, análisis y citas' : 'Symptoms, labs and appointments'}
             </h1>
             <p className="text-muted-foreground text-base leading-relaxed max-w-[60ch] text-pretty">
               {es
-                ? 'Sigue tus síntomas, análisis y citas en un solo lugar, y mira cómo cambian con tu ciclo.'
-                : 'Follow your symptoms, labs and appointments in one place, and see how they change with your cycle.'}
+                ? 'Todo en un solo lugar, para ver cómo cambian con tu ciclo.'
+                : 'All in one place, to see how they change with your cycle.'}
             </p>
+            {!isGuest && (
             <button
               type="button"
               onClick={() => router.push('/log?tab=symptoms')}
@@ -103,13 +114,16 @@ export const PMOSCare: React.FC = () => {
               <span className="material-symbols-outlined text-[20px]" aria-hidden="true">edit_note</span>
               {t.pmosLogMovedCta}
             </button>
+            )}
           </div>
 
-          <div className="relative flex items-center gap-4 md:flex-col md:items-start md:gap-2 p-4 sm:p-5 rounded-2xl bg-card/80 border border-border md:min-w-52">
+          {!isGuest && (
+          <div className="relative flex items-center gap-4 md:flex-col md:items-start md:gap-2 p-4 sm:p-5 rounded-2xl bg-card border border-border md:min-w-52">
             <div className="flex flex-col gap-0.5 min-w-0 flex-1">
               <p className="text-sm text-muted-foreground">{es ? 'Síntomas de hoy' : "Today's symptoms"}</p>
               <p className={`text-xl sm:text-2xl font-semibold tracking-tight ${status.color}`}>{status.label}</p>
             </div>
+            {hasToday && (
             <div className="shrink-0 md:w-full flex flex-col gap-1.5 items-end md:items-stretch">
               <div
                 className="hidden md:block h-2 rounded-full bg-secondary overflow-hidden"
@@ -128,7 +142,9 @@ export const PMOSCare: React.FC = () => {
                 {todayTotal} / {maxTotal} {es ? 'puntos' : 'pts'}
               </p>
             </div>
+            )}
           </div>
+          )}
         </header>
 
         {alerts.length > 0 && (
@@ -159,6 +175,12 @@ export const PMOSCare: React.FC = () => {
 
         <PMOSMemberTools />
 
+        {!loading && entries.length === 0 ? isGuest ? null : (
+          <p className="order-last flex items-center gap-2 text-sm text-muted-foreground bg-secondary/30 rounded-2xl p-4">
+            <span className="material-symbols-outlined text-[20px]" aria-hidden="true">query_stats</span>
+            {es ? 'Cuando registres síntomas durante varios días, aquí verás tu promedio y la severidad por día.' : 'Once you log symptoms for a few days, your averages and daily severity will show here.'}
+          </p>
+        ) : (
         <section aria-labelledby="pmos-trends-title" className="bg-card rounded-3xl border border-border shadow-[var(--shadow-low)] grid lg:grid-cols-2 lg:divide-x divide-y lg:divide-y-0 divide-border">
           <div className="p-5 sm:p-6 flex flex-col gap-5 min-w-0">
             <div>
@@ -260,6 +282,7 @@ export const PMOSCare: React.FC = () => {
             )}
           </div>
         </section>
+        )}
 
         <section aria-labelledby="pmos-articles-title" className="flex flex-col gap-4">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
@@ -298,7 +321,7 @@ export const PMOSCare: React.FC = () => {
                     aria-hidden="true"
                   />
                   <div className="p-4 flex flex-col gap-1.5 flex-1 min-w-0">
-                    <p className="text-xs text-muted-foreground truncate">
+                    <p className="text-sm text-muted-foreground">
                       {article.source} &bull; {new Date(article.publishedAt).toLocaleDateString(es ? 'es' : 'en')}
                     </p>
                     <h3 className="text-foreground text-base font-semibold leading-snug line-clamp-3 md:line-clamp-2 text-balance">

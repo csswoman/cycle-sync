@@ -27,6 +27,7 @@ const TABS: { id: Tab; icon: string; es: string; en: string }[] = [
 
 const MemberContent: React.FC<{ lang: 'es' | 'en' }> = ({ lang }) => {
   const [tab, setTab] = useState<Tab>('summary');
+  const [labsView, setLabsView] = useState<'labs' | 'body'>('labs');
   const { data, loading } = usePMOSOverview();
 
   useEffect(() => {
@@ -95,8 +96,15 @@ const MemberContent: React.FC<{ lang: 'es' | 'en' }> = ({ lang }) => {
       )}
       {tab === 'labs' && (
         <div className="flex flex-col gap-6">
-          <LabResultsSection lang={lang} />
-          <BodyMetricsSection lang={lang} />
+          <div role="group" aria-label={lang === 'es' ? 'Sección' : 'Section'} className="flex gap-6 border-b border-border">
+            {([['labs', 'biotech', 'Análisis de laboratorio', 'Lab results'], ['body', 'monitor_weight', 'Medidas del cuerpo', 'Body measurements']] as const).map(([id, icon, es, en]) => (
+              <button key={id} type="button" aria-pressed={labsView === id} onClick={() => setLabsView(id)}
+                className={`inline-flex items-center gap-2 min-h-11 -mb-px text-sm font-semibold border-b-2 ${labsView === id ? 'border-primary text-foreground' : 'border-transparent text-muted-foreground hover:text-foreground'}`}>
+                <Icon name={icon} size={18} /> {lang === 'es' ? es : en}
+              </button>
+            ))}
+          </div>
+          {labsView === 'labs' ? <LabResultsSection lang={lang} /> : <BodyMetricsSection lang={lang} />}
         </div>
       )}
       {tab === 'skin' && (
@@ -124,10 +132,27 @@ const PMOSMemberTools: React.FC = () => {
 
   if (!user) {
     return (
+      <>
+      <div className="relative -mx-4 sm:mx-0">
+      <div className="flex gap-2 overflow-x-auto px-4 sm:px-0 pb-1 scrollbar-hide" aria-label={lang === 'es' ? 'Secciones de PMOS' : 'PMOS sections'}>
+        {TABS.map((t) => (
+          t.id === 'summary' ? (
+            <span key={t.id} aria-current="page" className="shrink-0 flex items-center gap-2 min-h-11 px-4 rounded-full text-sm font-semibold whitespace-nowrap border bg-primary text-primary-foreground border-primary">
+              <Icon name={t.icon} size={18} /> {t[lang]}
+            </span>
+          ) : (
+          <button key={t.id} type="button" onClick={() => setSignupPromptOpen(true)}
+            className="shrink-0 flex items-center gap-2 min-h-11 px-4 rounded-full text-sm font-semibold whitespace-nowrap border bg-card text-muted-foreground border-border hover:border-primary/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary">
+            <Icon name={t.icon} size={18} /> {t[lang]} <Icon name="lock" size={16} />
+          </button>
+          )
+        ))}
+      </div>
+      <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background to-transparent sm:hidden" aria-hidden="true" />
+      </div>
       <section className="bg-card rounded-2xl border border-border p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
           <h2 className="text-foreground text-lg font-semibold tracking-tight flex items-center gap-2 text-balance">
-            <span className="material-symbols-outlined text-primary" aria-hidden="true">lock</span>
             {lang === 'es' ? 'Sigue tu glucosa, análisis y ciclo' : 'Track glucose, labs and your cycle range'}
           </h2>
           <p className="text-muted-foreground text-sm sm:text-base text-pretty max-w-[60ch]">
@@ -135,12 +160,21 @@ const PMOSMemberTools: React.FC = () => {
               ? 'Crea una cuenta gratis para registrar glucosa, insulina, presión, medidas y análisis, ver si tu tratamiento funciona y recibir una predicción basada en tus propios ciclos.'
               : 'Create a free account to log glucose, insulin, blood pressure, measurements and lab results, see whether your treatment is working and get a prediction based on your own cycles.'}
           </p>
+          <ul className="flex flex-wrap gap-2 pt-2" aria-label={lang === 'es' ? 'Qué verás en tu resumen' : 'What your summary shows'}>
+            {(lang === 'es'
+              ? ['Estado del ciclo', 'Pronóstico del periodo', 'Glucosa tras comidas']
+              : ['Cycle status', 'Period forecast', 'Glucose after meals']
+            ).map((l) => (
+              <li key={l} className="text-sm text-muted-foreground bg-secondary/50 border border-border rounded-full px-3 py-1">{l}</li>
+            ))}
+          </ul>
         </div>
         <button onClick={() => setSignupPromptOpen(true)}
           className="shrink-0 min-h-11 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-semibold px-6 rounded-full">
           {lang === 'es' ? 'Crear cuenta' : 'Create account'}
         </button>
       </section>
+      </>
     );
   }
 

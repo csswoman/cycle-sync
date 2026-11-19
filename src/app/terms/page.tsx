@@ -2,51 +2,50 @@ export default function TermsPage() {
   return (
     <div className="min-h-screen bg-background p-6 md:p-12">
       <div className="max-w-[700px] mx-auto">
-        <h1 className="text-3xl font-black text-foreground mb-6">Terms of Service</h1>
+        <h1 className="text-3xl font-black text-foreground mb-6">Términos del Servicio</h1>
         <div className="prose prose-sm dark:prose-invert text-muted-foreground flex flex-col gap-4">
-          <p><strong>Last updated:</strong> March 18, 2026</p>
+          <p><strong>Última actualización:</strong> 18 de marzo de 2026</p>
 
-          <h2 className="text-lg font-bold text-foreground mt-4">1. Acceptance of Terms</h2>
+          <h2 className="text-lg font-bold text-foreground mt-4">1. Aceptación de los Términos</h2>
           <p>
-            By accessing and using CycleSync, you agree to be bound by these Terms of Service.
-            If you do not agree, please do not use the application.
+            Al acceder y utilizar CycleSync, aceptas quedar vinculada por estos Términos del Servicio.
+            Si no estás de acuerdo, te pedimos que no utilices la aplicación.
           </p>
 
-          <h2 className="text-lg font-bold text-foreground mt-4">2. Description of Service</h2>
+          <h2 className="text-lg font-bold text-foreground mt-4">2. Descripción del Servicio</h2>
           <p>
-            CycleSync is a holistic health application designed for menstrual cycle tracking,
-            wellness recommendations, and integration with wearable health devices. The app
-            provides personalized insights based on cycle phases, nutrition, exercise, and
-            health data from connected devices.
+            CycleSync es una aplicación de bienestar y salud integral diseñada para el registro y seguimiento
+            del ciclo menstrual, hábitos diarios, nutrición, entrenamiento y soporte específico para PMOS,
+            con integración opcional de dispositivos de salud. La app ofrece sugerencias basadas en fases del ciclo
+            y datos autorregistrados.
           </p>
 
-          <h2 className="text-lg font-bold text-foreground mt-4">3. Health Disclaimer</h2>
+          <h2 className="text-lg font-bold text-foreground mt-4">3. Descargo de Responsabilidad Médica</h2>
           <p>
-            CycleSync is not a medical device and is intended for informational and wellness
-            purposes only. Data from wearable devices (including Samsung Health) is
-            not intended for the diagnosis, treatment, or prevention of any medical condition.
-            Always consult a healthcare professional for medical advice.
+            CycleSync no es un dispositivo médico y está destinada exclusivamente a fines informativos, de registro
+            y bienestar personal. La app no proporciona diagnósticos ni tratamientos médicos.
+            Los datos procedentes de wearables o estimaciones de ciclo no sustituyen la consulta, diagnóstico ni indicación
+            de un profesional de la salud cualificado.
           </p>
 
-          <h2 className="text-lg font-bold text-foreground mt-4">4. Third-Party Integrations</h2>
+          <h2 className="text-lg font-bold text-foreground mt-4">4. Integraciones de Terceros</h2>
           <p>
-            CycleSync may integrate with third-party services such as Health Connect. Your use of these
-            integrations is subject to the respective third-party terms of service and privacy
-            policies. CycleSync is not responsible for the availability or accuracy of
-            third-party data.
+            CycleSync puede integrarse con servicios de terceros como Health Connect y Google Gemini (funciones de IA, solo con tu permiso). El uso de dichas
+            integraciones está sujeto a los términos del servicio y políticas de privacidad correspondientes de dichos terceros.
+            CycleSync no se hace responsable de la disponibilidad o exactitud de datos proporcionados por servicios externos.
           </p>
 
-          <h2 className="text-lg font-bold text-foreground mt-4">5. User Data</h2>
+          <h2 className="text-lg font-bold text-foreground mt-4">5. Datos de la Usuaria</h2>
           <p>
-            You retain ownership of all health data you provide or sync through CycleSync.
-            You may disconnect third-party integrations and delete your data at any time
-            through the Settings page.
+            Conservas en todo momento la titularidad de los datos que ingreses o sincronices en CycleSync.
+            Puedes desconectar integraciones y exportar o eliminar tu cuenta y tus datos en cualquier momento
+            desde la sección de Configuración.
           </p>
 
-          <h2 className="text-lg font-bold text-foreground mt-4">6. Changes to Terms</h2>
+          <h2 className="text-lg font-bold text-foreground mt-4">6. Modificaciones de los Términos</h2>
           <p>
-            We reserve the right to modify these terms at any time. Continued use of CycleSync
-            after changes constitutes acceptance of the updated terms.
+            Nos reservamos el derecho de actualizar o modificar estos términos cuando sea necesario. El uso continuado
+            de CycleSync tras la publicación de cambios constituye la aceptación de los términos actualizados.
           </p>
         </div>
       </div>

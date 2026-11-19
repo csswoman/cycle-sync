@@ -6,10 +6,10 @@ import '@/styles/globals.css';
 export const metadata: Metadata = {
   applicationName: 'CycleSync',
   title: {
-    default: 'CycleSync - Holistic Health',
+    default: 'CycleSync - Salud Integral',
     template: '%s | CycleSync',
   },
-  description: 'Track your cycle, sync your life. Holistic health for regular cycles, irregular cycles and PMOS.',
+  description: 'Sincroniza tu ciclo, tu nutrición y tu bienestar. Salud integral para ciclos regulares, irregulares y PMOS.',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
@@ -40,7 +40,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     // data-astryx-theme / data-theme are set here for SSR so tokens resolve on
     // first paint; the Astryx <Theme> keeps them in sync on the client.
-    <html lang="en" data-astryx-theme="neutral" data-theme="dark" suppressHydrationWarning>
+    <html lang="es" data-astryx-theme="neutral" data-theme="dark" suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

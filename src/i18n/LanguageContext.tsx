@@ -16,13 +16,12 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        const saved = localStorage.getItem('language');
-        if (saved === 'en' || saved === 'es') {
-            setLanguageState(saved);
-        } else if (navigator.language?.toLowerCase().startsWith('en')) {
-            setLanguageState('en');
+        const explicit = localStorage.getItem('user_explicit_language');
+        if (explicit === 'en' || explicit === 'es') {
+            setLanguageState(explicit);
         } else {
             setLanguageState('es');
+            localStorage.setItem('language', 'es');
         }
         setMounted(true);
     }, []);
@@ -30,6 +29,7 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     const setLanguage = (lang: Language) => {
         setLanguageState(lang);
         localStorage.setItem('language', lang);
+        localStorage.setItem('user_explicit_language', lang);
     };
 
     useEffect(() => {

@@ -1,5 +1,6 @@
 'use client';
 import React, { useRef, useState } from 'react';
+import { aiFetch, AiConsentDeclinedError } from '@/lib/ai/consent';
 import { markerInfo, markerLabel, markerStatus } from '@/lib/pmos/metrics';
 import type { ExtractedLab } from '@/lib/pmos/labExtract';
 import { todayLocal } from './shared';
@@ -91,7 +92,7 @@ const LabScanDialog: React.FC<Props> = ({ lang, saving, onSave }) => {
       const media = isPdf ? await readAsDataUrl(file) : await prepareImage(file);
       // Base64 adds a third; the server limit is on the encoded string.
       if (media.length * 0.75 > MAX_BYTES) { setError(t.errSize); return; }
-      const res = await fetch('/api/labs/extract', {
+      const res = await aiFetch('/api/labs/extract', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ media, today: todayLocal() }),
@@ -99,7 +100,8 @@ const LabScanDialog: React.FC<Props> = ({ lang, saving, onSave }) => {
       if (!res.ok) { setError(res.status === 413 ? t.errSize : t.errRead); return; }
       const data = (await res.json()) as { rows?: ExtractedLab[] };
       setRows((data.rows ?? []).map((r) => ({ ...r, on: !r.doubtful })));
-    } catch {
+    } catch (e) {
+      if (e instanceof AiConsentDeclinedError) { reset(); return; }
       setError(t.errRead);
     } finally {
       setBusy(false);

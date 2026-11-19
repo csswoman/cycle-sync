@@ -72,7 +72,7 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ onClose }) => {
       const result = await handleImageAnalysis(selectedImage, imagePrompt);
       setImageResult(result);
     } catch (error) {
-      setImageResult("Failed to analyze image.");
+      setImageResult(language === 'es' ? 'No se pudo analizar la imagen.' : 'Failed to analyze image.');
     }
   };
 
@@ -80,7 +80,7 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ onClose }) => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 10 * 1024 * 1024) {
-        alert("Video file too large for this demo. Please use a clip under 10MB.");
+        alert(language === 'es' ? 'El video es demasiado grande para la demo. Por favor usa un clip de menos de 10 MB.' : 'Video file too large for this demo. Please use a clip under 10MB.');
         return;
       }
       const reader = new FileReader();
@@ -101,7 +101,7 @@ const SmartAssistant: React.FC<SmartAssistantProps> = ({ onClose }) => {
       const result = await handleVideoAnalysis(selectedVideo, videoPrompt);
       setVideoResult(result);
     } catch (error) {
-      setVideoResult("Failed to analyze video.");
+      setVideoResult(language === 'es' ? 'No se pudo analizar el video.' : 'Failed to analyze video.');
     }
   };
 

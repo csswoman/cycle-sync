@@ -9,16 +9,16 @@ export default function OfflinePage() {
         <div className="p-4 rounded-full bg-primary/10">
           <Icon name="wifi_off" size={48} weight="duotone" className="text-primary" />
         </div>
-        <h1 className="text-foreground text-2xl font-bold">You&apos;re Offline</h1>
+        <h1 className="text-foreground text-2xl font-bold">Estás sin conexión</h1>
         <p className="text-muted-foreground text-base leading-relaxed">
-          It looks like you&apos;ve lost your internet connection. Don&apos;t worry — your logged data is
-          saved locally and will sync when you&apos;re back online.
+          Parece que perdiste tu conexión a internet. No te preocupes: tus registros se guardan
+          de forma local en tu dispositivo y se sincronizarán en cuanto vuelvas a tener conexión.
         </p>
         <button
           onClick={() => window.location.reload()}
-          className="px-6 py-3 bg-primary text-primary-foreground rounded-xl font-bold text-sm hover:bg-primary-hover transition-colors"
+          className="px-6 py-3 bg-primary text-primary-foreground rounded-xl font-bold text-sm hover:bg-primary-hover transition-colors cursor-pointer"
         >
-          Try Again
+          Reintentar
         </button>
       </div>
     </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname, useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { signOutAndClearDevice } from '@/lib/signOut';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { useAppStore } from '@/stores/appStore';
 import { isGuestRoute } from '@/lib/guestAccess';
@@ -178,7 +178,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onClose }) => {
         <NavItem href="/settings" label={t.settings} icon="settings" locked={isGuest} onClose={onClose} />
 
         <button
-          onClick={() => (isGuest ? router.push('/login') : supabase.auth.signOut())}
+          onClick={() => (isGuest ? router.push('/login') : void signOutAndClearDevice(language === 'es'))}
           className={`flex items-center gap-3 px-4 min-h-10 py-2 rounded-full transition-all cursor-pointer group w-full text-muted-foreground ${isGuest ? 'hover:bg-card hover:text-foreground' : 'hover:bg-destructive/10 hover:text-destructive'}`}
         >
           <Icon

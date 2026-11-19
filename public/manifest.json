@@ -1,7 +1,7 @@
 {
-  "name": "CycleSync - Holistic Health",
+  "name": "CycleSync - Salud Integral",
   "short_name": "CycleSync",
-  "description": "Track your cycle, sync your life. Holistic health for women with PMOS.",
+  "description": "Sincroniza tu ciclo, tu nutrición y tu bienestar. Salud integral con soporte para PMOS.",
   "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#fbf3ea",

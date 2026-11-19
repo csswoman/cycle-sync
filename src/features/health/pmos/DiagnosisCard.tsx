@@ -46,6 +46,7 @@ const T = {
     evidence: 'Lo que muestra tu registro', evidenceNote: 'Solo describe tus datos. Si algo no coincide con lo que marcaste, coméntalo con tu médica.',
     exclusions: 'Otras causas que se descartan', exclusionsNote: 'Para el diagnóstico también se revisan otras causas con síntomas parecidos.',
     exMissing: 'Sin registro', exOk: 'En rango', exAbnormal: 'Fuera de rango: coméntalo',
+    del: 'Eliminar',
   },
   en: {
     title: 'My diagnosis', sub: 'Tick what your doctor told you. The app only names the phenotype from what is ticked; it does not diagnose.',
@@ -56,6 +57,7 @@ const T = {
     evidence: 'What your log shows', evidenceNote: 'This only describes your data. If it does not match what you ticked, mention it to your doctor.',
     exclusions: 'Other causes that are ruled out', exclusionsNote: 'Diagnosis also checks other causes with similar symptoms.',
     exMissing: 'Not logged', exOk: 'In range', exAbnormal: 'Out of range: mention it',
+    del: 'Delete',
   },
 };
 /** Diagnosis card with ultrasounds and other events. Hidden when the tables do not exist yet. */
@@ -188,7 +190,7 @@ export const DiagnosisCard: React.FC<{ lang: Lang; data?: PMOSOverviewData | nul
             {events.map((x) => (
               <li key={x.id} className="text-sm flex items-start justify-between gap-2">
                 <span><span className="font-semibold">{fmt(x.date)} · {KINDS[x.kind][lang]}</span>: {x.summary}</span>
-                <button onClick={() => removeEvent(x.id)} aria-label="delete" className="size-10 -my-2 -mr-2 inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-destructive hover:bg-secondary shrink-0"><Icon name="close" size={16} /></button>
+                <button onClick={() => removeEvent(x.id)} aria-label={t.del} className="size-10 -my-2 -mr-2 inline-flex items-center justify-center rounded-full text-muted-foreground hover:text-destructive hover:bg-secondary shrink-0"><Icon name="close" size={16} /></button>
               </li>
             ))}
           </ul>

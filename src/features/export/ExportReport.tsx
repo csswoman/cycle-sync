@@ -15,13 +15,13 @@ const TEXT = {
   es: {
     title: 'Reporte Médico',
     subtitle: 'Genera un reporte PDF completo para compartir con tu profesional de la salud.',
-    cardTitle: 'Reporte de Salud CycleSync',
+    cardTitle: 'Reporte de salud CycleSync',
     cardSubtitle: 'Datos integrales de ciclo y bienestar',
-    reportContents: 'Contenido del Reporte',
-    dailyLogs: 'Registros Diarios',
+    reportContents: 'Contenido del reporte',
+    dailyLogs: 'Registros diarios',
     pmosEntries: 'Registros de síntomas hormonales',
-    activeHabits: 'Hábitos Activos',
-    includedSections: 'Secciones Incluidas',
+    activeHabits: 'Hábitos activos',
+    includedSections: 'Secciones incluidas',
     sections: [
       { icon: 'water_drop', label: 'Resumen de fase, día y duración del ciclo', color: 'text-primary' },
       { icon: 'monitoring', label: 'Tendencias de energía, sueño y estado de ánimo (30 días)', color: 'text-moss' },
@@ -179,7 +179,7 @@ export default function ExportReport() {
 
   return (
     <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-8 pb-32">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-10 flex flex-col gap-10 pb-32">
         {/* Header */}
         <section className="relative overflow-hidden rounded-3xl garden-wash border border-border/80 shadow-sm p-6 sm:p-8">
           <GardenCorner variant="blossom" className="size-32 sm:size-44 opacity-80" />
@@ -194,107 +194,80 @@ export default function ExportReport() {
           </div>
         </section>
 
-        {/* Preview Card */}
-        <div className="bg-card rounded-2xl border border-border overflow-hidden shadow-sm">
-          <div className="bg-primary p-6 text-primary-foreground">
-            <div className="flex items-center gap-3">
-              <span className="material-symbols-outlined text-3xl">description</span>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Contents */}
+          <div className="lg:col-span-8 bg-card rounded-2xl border border-border shadow-sm divide-y divide-border">
+            <section className="p-6 sm:p-8 flex flex-col gap-5">
+              <h2 className="text-foreground font-semibold text-base">{tx.reportContents}</h2>
+              <dl className="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6">
+                {[
+                  { icon: 'calendar_today', color: 'text-moss', value: stats.dailyLogCount, label: tx.dailyLogs },
+                  { icon: 'medical_services', color: 'text-blossom', value: stats.pmosEntryCount, label: tx.pmosEntries },
+                  { icon: 'check_circle', color: 'text-leaf', value: stats.habitCount, label: tx.activeHabits },
+                ].map((s) => (
+                  <div key={s.label} className="flex items-start gap-3 min-w-0">
+                    <span className="size-10 shrink-0 rounded-full bg-muted flex items-center justify-center" aria-hidden>
+                      <span className={`material-symbols-outlined text-[22px] ${s.color}`}>{s.icon}</span>
+                    </span>
+                    <div className="flex flex-col min-w-0">
+                      <dd className="text-foreground font-semibold text-2xl tabular-nums leading-tight order-first">{isLoading ? '...' : s.value}</dd>
+                      <dt className="text-muted-foreground text-sm leading-snug">{s.label}</dt>
+                    </div>
+                  </div>
+                ))}
+              </dl>
+            </section>
+
+            <section className="p-6 sm:p-8 flex flex-col gap-5">
+              <h2 className="text-foreground font-semibold text-base">{tx.includedSections}</h2>
+              <ul className="flex flex-col gap-4">
+                {tx.sections.filter((item) => showPmos || item.icon !== 'spa').map((item) => (
+                  <li key={item.label} className="flex items-start gap-3">
+                    <span className={`material-symbols-outlined text-[20px] shrink-0 ${item.color}`} aria-hidden>{item.icon}</span>
+                    <span className="text-foreground text-sm leading-snug">{item.label}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          </div>
+
+          {/* Action panel */}
+          <aside className="lg:col-span-4 lg:sticky lg:top-6 bg-card rounded-2xl border border-border shadow-sm divide-y divide-border">
+            <div className="p-6 sm:p-8 flex flex-col gap-5">
               <div>
-                <h2 className="text-lg font-bold">{tx.cardTitle}</h2>
-                <p className="text-sm opacity-90">{tx.cardSubtitle}</p>
+                <h2 className="text-foreground font-semibold text-base">{tx.cardTitle}</h2>
+                <p className="text-muted-foreground text-sm">{tx.cardSubtitle}</p>
               </div>
+              <label className="flex items-start gap-3 text-sm text-foreground cursor-pointer min-h-10">
+                <input type="checkbox" className="size-5 mt-0.5 shrink-0 accent-primary" checked={includeWellbeing} onChange={(e) => setIncludeWellbeing(e.target.checked)} />
+                <span>
+                  {tx.includeWellbeing}
+                  <span className="block text-sm text-muted-foreground mt-1">{tx.includeWellbeingSubtext}</span>
+                </span>
+              </label>
+              <button
+                onClick={handleGenerate}
+                disabled={isLoading || generating || !reportData}
+                className="w-full min-h-12 flex items-center justify-center gap-2 bg-primary text-primary-foreground rounded-full px-4 font-semibold text-base hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {generating ? (
+                  <>
+                    <span className="material-symbols-outlined animate-spin" aria-hidden>progress_activity</span>
+                    {tx.generating}
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined" aria-hidden>download</span>
+                    {tx.downloadPdf}
+                  </>
+                )}
+              </button>
             </div>
-          </div>
-
-          <div className="p-6 flex flex-col gap-5">
-            <h3 className="text-foreground font-bold text-sm uppercase tracking-wider">
-              {tx.reportContents}
-            </h3>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="flex items-center gap-3 p-4 rounded-xl bg-secondary/50 border border-border/50">
-                <div className="p-2 rounded-lg bg-sage/10">
-                  <span className="material-symbols-outlined text-moss">calendar_today</span>
-                </div>
-                <div>
-                  <p className="text-foreground font-bold text-lg">
-                    {isLoading ? '...' : stats.dailyLogCount}
-                  </p>
-                  <p className="text-muted-foreground text-xs">{tx.dailyLogs}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 p-4 rounded-xl bg-secondary/50 border border-border/50">
-                <div className="p-2 rounded-lg bg-blossom/10">
-                  <span className="material-symbols-outlined text-blossom">medical_services</span>
-                </div>
-                <div>
-                  <p className="text-foreground font-bold text-lg">
-                    {isLoading ? '...' : stats.pmosEntryCount}
-                  </p>
-                  <p className="text-muted-foreground text-xs">{tx.pmosEntries}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 p-4 rounded-xl bg-secondary/50 border border-border/50">
-                <div className="p-2 rounded-lg bg-leaf/10">
-                  <span className="material-symbols-outlined text-leaf">check_circle</span>
-                </div>
-                <div>
-                  <p className="text-foreground font-bold text-lg">
-                    {isLoading ? '...' : stats.habitCount}
-                  </p>
-                  <p className="text-muted-foreground text-xs">{tx.activeHabits}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-3 mt-2">
-              <h3 className="text-foreground font-bold text-sm uppercase tracking-wider">
-                {tx.includedSections}
-              </h3>
-              {tx.sections.filter((item) => showPmos || item.icon !== 'spa').map((item) => (
-                <div key={item.label} className="flex items-center gap-3">
-                  <span className={`material-symbols-outlined text-[18px] ${item.color}`}>{item.icon}</span>
-                  <span className="text-foreground text-sm">{item.label}</span>
-                </div>
-              ))}
-            </div>
-
-            <label className="flex items-start gap-3 text-sm text-foreground cursor-pointer bg-secondary/40 rounded-xl p-3">
-              <input type="checkbox" className="size-4 mt-0.5 accent-primary" checked={includeWellbeing} onChange={(e) => setIncludeWellbeing(e.target.checked)} />
-              <span>
-                {tx.includeWellbeing}
-                <span className="block text-xs text-muted-foreground">{tx.includeWellbeingSubtext}</span>
-              </span>
-            </label>
-
-            <button
-              onClick={handleGenerate}
-              disabled={isLoading || generating || !reportData}
-              className="mt-4 w-full flex items-center justify-center gap-3 bg-primary text-primary-foreground rounded-xl px-6 py-4 font-bold text-base hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-primary/20"
-            >
-              {generating ? (
-                <>
-                  <span className="material-symbols-outlined animate-spin">progress_activity</span>
-                  {tx.generating}
-                </>
-              ) : (
-                <>
-                  <span className="material-symbols-outlined">download</span>
-                  {tx.downloadPdf}
-                </>
-              )}
-            </button>
-          </div>
-        </div>
-
-        {/* Disclaimer */}
-        <div className="flex items-start gap-3 p-4 rounded-xl bg-secondary/50 border border-border/50">
-          <span className="material-symbols-outlined text-muted-foreground text-[20px] mt-0.5">info</span>
-          <p className="text-muted-foreground text-xs leading-relaxed">
-            {tx.disclaimer}
-          </p>
+            <p className="p-6 sm:p-8 text-muted-foreground text-sm leading-relaxed flex items-start gap-3">
+              <span className="material-symbols-outlined text-[20px] shrink-0" aria-hidden>info</span>
+              <span>{tx.disclaimer}</span>
+            </p>
+          </aside>
         </div>
       </div>
     </div>
