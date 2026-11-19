@@ -279,17 +279,17 @@ const PeriodHistory: React.FC = () => {
 
     return (
         <div className="flex-1 overflow-y-auto h-full scrollbar-hide">
-            <div className="max-w-page mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-8 pb-32">
+            <div className="max-w-page mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 flex flex-col gap-5 sm:gap-8 pb-32">
                 {/* Header with inline regularity indicator */}
-                <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-2 border-b border-border/50">
+                <header className="flex flex-col sm:flex-row sm:items-end justify-between gap-3 sm:gap-4 sm:pb-2 sm:border-b border-border/50">
                     <div className="flex flex-col gap-1.5">
-                        <h1 className="text-foreground text-3xl md:text-4xl font-semibold tracking-tight"><TitleSprig />{t.cycleHistoryTitle}</h1>
+                        <h1 className="text-foreground text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight"><TitleSprig />{t.cycleHistoryTitle}</h1>
                         <p className="text-muted-foreground text-sm max-w-xl">
                             {locale === 'es' ? 'Analiza la duración de tus ciclos y predice tus próximas fases.' : t.markDaysDescription}
                         </p>
                     </div>
 
-                    <div className="flex items-center gap-2.5 self-start sm:self-auto px-3.5 py-1.5 rounded-full bg-secondary/60 border border-border/70 text-xs font-medium shrink-0">
+                    <div className="flex items-center gap-2.5 self-start sm:self-auto px-3.5 py-2 sm:py-1.5 rounded-full bg-card border border-border/70 text-sm sm:text-xs font-medium shrink-0">
                         <span className={`size-2.5 rounded-full shrink-0 ${
                             regularity === 'regular' ? 'bg-leaf' :
                             regularity === 'irregular' ? 'bg-sun' :
@@ -315,10 +315,10 @@ const PeriodHistory: React.FC = () => {
 
                 {/* Forecast Hero: clean typographic metrics with rhythm instead of generic cards */}
                 {next && (
-                    <section className="relative overflow-hidden rounded-3xl garden-wash border border-border/80 p-4 sm:p-5 shadow-sm">
-                        <GardenCorner variant="blossom" className="size-20 sm:size-24 opacity-60" />
+                    <section className="max-lg:order-last relative overflow-hidden rounded-2xl sm:rounded-3xl garden-wash border border-border/80 p-4 sm:p-5 shadow-sm">
+                        <GardenCorner variant="blossom" className="hidden sm:block size-24 opacity-60" />
 
-                        <div className="relative z-10 flex flex-col gap-3">
+                        <div className="relative z-10 flex flex-col gap-2.5 sm:gap-3">
                             <div className="flex flex-wrap items-center justify-between gap-2">
                                 <div className="flex items-center gap-1">
                                     <h2 className="text-foreground font-bold text-base md:text-lg tracking-tight">{t.forecastTitle}</h2>
@@ -331,12 +331,12 @@ const PeriodHistory: React.FC = () => {
                                 </div>
                                 <div className="flex items-center gap-1">
                                     {estimate.irregular && (
-                                        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-sun-ink bg-sun/15 border border-sun/30 rounded-full px-2.5 py-0.5">
+                                        <span className="inline-flex items-center gap-1 text-xs font-semibold text-sun-ink bg-sun/15 border border-sun/30 rounded-full px-2.5 py-0.5">
                                             <span className="material-symbols-outlined text-[14px]">warning</span>
                                             {locale === 'es' ? 'Ciclos variables' : 'Variable cycles'}
                                         </span>
                                     )}
-                                    <span className="text-[11px] font-semibold text-primary bg-primary/10 border border-primary/20 rounded-full px-2.5 py-0.5">
+                                    <span className="text-xs font-semibold text-primary bg-primary/10 border border-primary/20 rounded-full px-2.5 py-0.5">
                                         {t.confidenceLabel}: {estimate.confidence === 'high' ? t.confidenceHigh : estimate.confidence === 'medium' ? t.confidenceMedium : t.confidenceLow}
                                     </span>
                                     <InfoTooltip label={locale === 'es' ? 'Qué significa la confianza' : 'What confidence means'}>
@@ -348,9 +348,9 @@ const PeriodHistory: React.FC = () => {
                                 </div>
                             </div>
 
-                            <dl className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                                <div className="rounded-2xl bg-primary/10 border border-primary/20 px-3.5 py-2.5 flex flex-col gap-0.5">
-                                    <dt className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
+                            <dl className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-2.5">
+                                <div className="col-span-2 sm:col-span-1 rounded-xl sm:rounded-2xl bg-primary/10 border border-primary/20 px-3.5 py-2.5 flex flex-wrap items-baseline gap-x-3 gap-y-0.5 sm:flex-col sm:items-stretch">
+                                    <dt className="flex w-full items-center gap-1 text-xs font-medium text-muted-foreground">
                                         <span className="size-2 rounded-full bg-primary" />
                                         {t.nextPeriodLabel}
                                         <InfoTooltip label={locale === 'es' ? 'Sobre la próxima menstruación' : 'About the next period'} className="-my-1 size-5">
@@ -359,7 +359,7 @@ const PeriodHistory: React.FC = () => {
                                                 : 'The days your next period is most likely to start. The more your cycles vary, the wider it gets.'}</p>
                                         </InfoTooltip>
                                     </dt>
-                                    <dd className="text-xl md:text-2xl font-semibold text-foreground tracking-tight leading-tight">
+                                    <dd className="text-2xl sm:text-xl md:text-2xl font-semibold text-foreground tracking-tight leading-tight">
                                         {next.periodEarliest.getTime() === next.periodLatest.getTime()
                                             ? fmt(next.periodStart)
                                             : `${fmt(next.periodEarliest)} – ${fmt(next.periodLatest)}`}
@@ -370,7 +370,7 @@ const PeriodHistory: React.FC = () => {
                                         </dd>
                                     )}
                                 </div>
-                                <div className="rounded-2xl bg-card/70 border border-border/60 px-3.5 py-2.5 flex flex-col gap-0.5">
+                                <div className="rounded-xl sm:rounded-2xl bg-card/70 border border-border/60 px-3 sm:px-3.5 py-2.5 flex flex-col gap-0.5">
                                     <dt className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
                                         <span className="size-2 rounded-full bg-sun" />
                                         {t.ovulationLabel}
@@ -380,10 +380,10 @@ const PeriodHistory: React.FC = () => {
                                                 : 'Estimated peak day: usually about 14 days before the next period. Logging basal temperature lets us confirm it.'}</p>
                                         </InfoTooltip>
                                     </dt>
-                                    <dd className="text-xl md:text-2xl font-semibold text-foreground tracking-tight leading-tight">~{fmt(next.ovulation)}</dd>
-                                    <dd className="text-xs font-medium text-sun-ink">{locale === 'es' ? 'Día pico estimado' : 'Estimated peak day'}</dd>
+                                    <dd className="text-base sm:text-xl md:text-2xl font-semibold text-foreground tracking-tight leading-tight">~{fmt(next.ovulation)}</dd>
+                                    <dd className="hidden sm:block text-xs font-medium text-sun-ink">{locale === 'es' ? 'Día pico estimado' : 'Estimated peak day'}</dd>
                                 </div>
-                                <div className="rounded-2xl bg-card/70 border border-border/60 px-3.5 py-2.5 flex flex-col gap-0.5">
+                                <div className="rounded-xl sm:rounded-2xl bg-card/70 border border-border/60 px-3 sm:px-3.5 py-2.5 flex flex-col gap-0.5">
                                     <dt className="flex items-center gap-1 text-xs font-medium text-muted-foreground">
                                         <span className="size-2 rounded-full bg-sun/40" />
                                         {t.fertileWindowLabel}
@@ -394,8 +394,8 @@ const PeriodHistory: React.FC = () => {
                                             {answers.goal === 'fertility' && <p className="text-xs">{t.forecastFertilityTip}</p>}
                                         </InfoTooltip>
                                     </dt>
-                                    <dd className="text-xl md:text-2xl font-semibold text-foreground tracking-tight leading-tight">{fmt(next.fertileStart)} – {fmt(next.fertileEnd)}</dd>
-                                    <dd className="text-xs font-medium text-muted-foreground">{locale === 'es' ? 'Mayor probabilidad' : 'Highest chance'}</dd>
+                                    <dd className="text-base sm:text-xl md:text-2xl font-semibold text-foreground tracking-tight leading-tight">{fmt(next.fertileStart)} – {fmt(next.fertileEnd)}</dd>
+                                    <dd className="hidden sm:block text-xs font-medium text-muted-foreground">{locale === 'es' ? 'Mayor probabilidad' : 'Highest chance'}</dd>
                                 </div>
                             </dl>
 
@@ -420,7 +420,7 @@ const PeriodHistory: React.FC = () => {
                     <button
                         type="button"
                         role="tab" aria-selected={mobileTab === 'log'} onClick={() => setMobileTab('log')}
-                        className={`flex-1 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
+                        className={`flex-1 min-h-11 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
                             mobileTab === 'log'
                                 ? 'bg-card text-foreground shadow-sm'
                                 : 'text-muted-foreground hover:text-foreground'
@@ -435,7 +435,7 @@ const PeriodHistory: React.FC = () => {
                     <button
                         type="button"
                         role="tab" aria-selected={mobileTab === 'history'} onClick={() => setMobileTab('history')}
-                        className={`flex-1 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
+                        className={`flex-1 min-h-11 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
                             mobileTab === 'history'
                                 ? 'bg-card text-foreground shadow-sm'
                                 : 'text-muted-foreground hover:text-foreground'
@@ -450,7 +450,7 @@ const PeriodHistory: React.FC = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                     {/* Column 1: Interactive Period Logger (Desktop Left, Mobile when mobileTab === 'log') */}
                     <aside className={`lg:col-span-5 xl:col-span-5 lg:sticky lg:top-6 lg:max-h-[calc(100vh-3rem)] lg:overflow-y-auto scrollbar-hide ${mobileTab === 'log' ? 'block' : 'hidden lg:block'}`}>
-                        <div className="bg-card border border-border/80 rounded-3xl p-5 shadow-sm flex flex-col gap-4">
+                        <div className="bg-card border border-border/80 rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-sm flex flex-col gap-4">
                             <div className="flex flex-col gap-1">
                                 <div className="flex items-center gap-2">
                                     <span className="size-8 rounded-xl bg-primary/10 text-primary inline-flex items-center justify-center">
@@ -490,7 +490,7 @@ const PeriodHistory: React.FC = () => {
                                         role="radio"
                                         aria-checked={calendarMode === m.id}
                                         onClick={() => setCalendarMode(m.id)}
-                                        className={`flex items-center justify-center gap-1.5 h-9 rounded-lg text-xs font-bold transition-all ${calendarMode === m.id ? 'bg-card text-foreground shadow-sm ring-1 ring-border/70' : 'text-muted-foreground hover:text-foreground'}`}
+                                        className={`flex items-center justify-center gap-1 sm:gap-1.5 h-11 sm:h-9 rounded-lg text-xs sm:text-xs font-bold transition-all ${calendarMode === m.id ? 'bg-card text-foreground shadow-sm ring-1 ring-border/70' : 'text-muted-foreground hover:text-foreground'}`}
                                     >
                                         <span
                                             className={`material-symbols-outlined text-[16px] ${calendarMode === m.id ? m.tint : ''}`}
@@ -539,7 +539,7 @@ const PeriodHistory: React.FC = () => {
                                         <button
                                             type="button"
                                             onClick={() => setSelectedDays([])}
-                                            className="text-muted-foreground hover:text-foreground font-semibold transition-colors"
+                                            className="text-muted-foreground hover:text-foreground font-semibold transition-colors py-2.5 -my-2.5 sm:py-0 sm:my-0"
                                         >
                                             {t.clearSelection}
                                         </button>
@@ -562,11 +562,11 @@ const PeriodHistory: React.FC = () => {
                     </aside>
 
                     {/* Column 2: Analysis & Connected Timeline (Desktop Right, Mobile when mobileTab === 'history') */}
-                    <div className={`lg:col-span-7 xl:col-span-7 flex flex-col gap-8 ${mobileTab === 'history' ? 'block' : 'hidden lg:block'}`}>
+                    <div className={`lg:col-span-7 xl:col-span-7 flex flex-col gap-5 sm:gap-8 ${mobileTab === 'history' ? 'block' : 'hidden lg:block'}`}>
                         {/* Logged periods: first in the column, it is what the page is for */}
                         <section ref={listRef} className="flex flex-col gap-4 scroll-mt-4">
                             <div className="flex items-center justify-between px-1">
-                                <h3 className="text-foreground font-bold text-xl">
+                                <h3 className="text-foreground font-bold text-lg sm:text-xl">
                                     {locale === 'es' ? 'Períodos registrados' : 'Logged periods'}
                                 </h3>
                                 <span className="text-xs font-semibold text-muted-foreground bg-secondary/80 px-2.5 py-1 rounded-full">
@@ -574,7 +574,7 @@ const PeriodHistory: React.FC = () => {
                                 </span>
                             </div>
                             {periods.length === 0 ? (
-                                <div className="p-8 text-center bg-card/60 border border-border/80 rounded-3xl flex flex-col items-center gap-3 shadow-sm">
+                                <div className="p-8 text-center bg-card border border-border/80 rounded-3xl flex flex-col items-center gap-3 shadow-sm">
                                     <div className="flex flex-col gap-1 max-w-sm">
                                         <h4 className="font-bold text-foreground text-base">
                                             {locale === 'es' ? 'Comienza registrando tu último período' : t.noPeriodsYet}
@@ -602,7 +602,7 @@ const PeriodHistory: React.FC = () => {
                                                         role="tab"
                                                         aria-selected={on}
                                                         onClick={() => pickYear(year)}
-                                                        className={`shrink-0 min-h-10 inline-flex items-center gap-2 rounded-full border px-4 text-sm font-semibold tabular-nums transition-colors ${on ? 'bg-primary text-primary-foreground border-primary' : 'bg-card/70 text-foreground border-border/70 hover:border-primary/40'}`}
+                                                        className={`shrink-0 min-h-10 inline-flex items-center gap-2 rounded-full border px-4 text-sm font-semibold tabular-nums transition-colors ${on ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-foreground border-border/70 hover:border-primary/40'}`}
                                                     >
                                                         {year}
                                                         <span className={`text-xs font-medium ${on ? 'text-primary-foreground/80' : 'text-muted-foreground'}`}>{yp.length}</span>
@@ -635,9 +635,9 @@ const PeriodHistory: React.FC = () => {
                                                             <div className={`absolute -left-6 top-4 size-3 rounded-full ring-4 ring-background transition-colors ${
                                                                 isLatest ? 'bg-primary ring-primary/20' : 'bg-muted-foreground/40 group-hover:bg-primary/70'
                                                             }`} />
-                                                            <div className="bg-card/70 hover:bg-card border border-border/70 hover:border-primary/40 rounded-2xl p-4 sm:p-5 transition-all shadow-sm">
-                                                                <div className="flex items-start justify-between gap-3">
-                                                                    <div className="flex flex-col gap-1">
+                                                            <div className="bg-card border border-border/70 hover:border-primary/40 rounded-2xl p-4 sm:p-5 transition-all shadow-sm">
+                                                                <div className="flex flex-wrap items-start justify-between gap-3">
+                                                                    <div className="flex min-w-0 basis-40 grow flex-col gap-1">
                                                                         <div className="flex flex-wrap items-center gap-2">
                                                                             <p className="text-foreground font-bold text-base sm:text-lg">
                                                                                 {end ? `${start} – ${end}` : start}
@@ -720,7 +720,7 @@ const PeriodHistory: React.FC = () => {
                                     {pageCount > 1 && (
                                         <nav aria-label={locale === 'es' ? 'Paginación de períodos' : 'Period pages'} className="flex items-center justify-between gap-3">
                                             <button type="button" onClick={() => goPage(currentPage - 1)} disabled={currentPage === 0}
-                                                className="min-h-10 inline-flex items-center gap-1 rounded-full border border-border/70 bg-card/70 pl-3 pr-4 text-sm font-medium text-foreground transition-colors hover:border-primary/40 disabled:opacity-40 disabled:pointer-events-none">
+                                                className="min-h-10 inline-flex items-center gap-1 rounded-full border border-border/70 bg-card pl-3 pr-4 text-sm font-medium text-foreground transition-colors hover:border-primary/40 disabled:opacity-40 disabled:pointer-events-none">
                                                 <span className="material-symbols-outlined text-[18px]" aria-hidden="true">chevron_left</span>
                                                 {locale === 'es' ? 'Anterior' : 'Previous'}
                                             </button>
@@ -728,7 +728,7 @@ const PeriodHistory: React.FC = () => {
                                                 {currentPage * PAGE_SIZE + 1}–{currentPage * PAGE_SIZE + pagePeriods.length} {locale === 'es' ? 'de' : 'of'} {activePeriods.length}
                                             </span>
                                             <button type="button" onClick={() => goPage(currentPage + 1)} disabled={currentPage >= pageCount - 1}
-                                                className="min-h-10 inline-flex items-center gap-1 rounded-full border border-border/70 bg-card/70 pl-4 pr-3 text-sm font-medium text-foreground transition-colors hover:border-primary/40 disabled:opacity-40 disabled:pointer-events-none">
+                                                className="min-h-10 inline-flex items-center gap-1 rounded-full border border-border/70 bg-card pl-4 pr-3 text-sm font-medium text-foreground transition-colors hover:border-primary/40 disabled:opacity-40 disabled:pointer-events-none">
                                                 {locale === 'es' ? 'Siguiente' : 'Next'}
                                                 <span className="material-symbols-outlined text-[18px]" aria-hidden="true">chevron_right</span>
                                             </button>
