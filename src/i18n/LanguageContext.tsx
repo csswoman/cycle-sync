@@ -20,8 +20,9 @@ export const LanguageProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         if (explicit === 'en' || explicit === 'es') {
             setLanguageState(explicit);
         } else {
-            setLanguageState('es');
-            localStorage.setItem('language', 'es');
+            const detected: Language = navigator.language.toLowerCase().startsWith('en') ? 'en' : 'es';
+            setLanguageState(detected);
+            localStorage.setItem('language', detected);
         }
         setMounted(true);
     }, []);

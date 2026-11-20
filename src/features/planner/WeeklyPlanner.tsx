@@ -95,6 +95,7 @@ const TEXT = {
         deleteMeal: 'Eliminar comida',
         mealRemoved: 'Plato eliminado.',
         undo: 'Deshacer',
+        mealsRemoved: (n: number) => `${n} platos eliminados.`,
         aiMenu: 'Más opciones',
         expandAll: 'Expandir todo',
         collapseAll: 'Contraer todo',
@@ -104,6 +105,12 @@ const TEXT = {
         repeatDone: (n: number) => `${n} ${n === 1 ? 'elemento copiado' : 'elementos copiados'} de la semana pasada.`,
         repeatNone: 'No hay nada que copiar: la semana pasada está vacía o esta ya tiene todo.',
         mealCopied: (d: string) => `Plato copiado al ${d}.`,
+        copyDay: 'Copiar al día siguiente',
+        viewWeek: 'Ver semana',
+        backWeek: 'Volver a la semana anterior',
+        clearDay: 'Vaciar el día',
+        dayCopied: (n: number, d: string) => (n > 0 ? `${n} elementos copiados al ${d}.` : `Nada que copiar: ${d} ya tiene esos platos.`),
+        dayProgress: (a: number, b: number) => `${a} de ${b} hechas`,
         retry: 'Reintentar',
         dayN: (n: number) => `Día ${n}`,
         pantryEmpty: 'Tu despensa está vacía. Agrega lo que tienes en cocina para que la IA lo use primero.',
@@ -166,6 +173,7 @@ const TEXT = {
         deleteMeal: 'Remove meal',
         mealRemoved: 'Meal removed.',
         undo: 'Undo',
+        mealsRemoved: (n: number) => `${n} meals removed.`,
         aiMenu: 'More options',
         expandAll: 'Expand all',
         collapseAll: 'Collapse all',
@@ -175,6 +183,12 @@ const TEXT = {
         repeatDone: (n: number) => `${n} ${n === 1 ? 'item' : 'items'} copied from last week.`,
         repeatNone: 'Nothing to copy: last week is empty or this one is already full.',
         mealCopied: (d: string) => `Meal copied to ${d}.`,
+        copyDay: 'Copy to next day',
+        viewWeek: 'View week',
+        backWeek: 'Back to previous week',
+        clearDay: 'Clear day',
+        dayCopied: (n: number, d: string) => (n > 0 ? `${n} items copied to ${d}.` : `Nothing to copy: ${d} already has those meals.`),
+        dayProgress: (a: number, b: number) => `${a} of ${b} done`,
         retry: 'Retry',
         dayN: (n: number) => `Day ${n}`,
         pantryEmpty: 'Your pantry is empty. Add what you have at home so the AI uses it first.',
@@ -202,7 +216,7 @@ const PHASE_NAMES: Record<string, { es: string; en: string }> = {
 const QUICK_PANTRY_SUGGESTIONS = ['Avena', 'Huevos', 'Arroz integral', 'Espinacas', 'Semillas de chía', 'Aceite de oliva'];
 
 // Day label | workout | 4 meal slots. Only applies from lg up; below that each day stacks.
-const ROW_COLS = 'lg:grid-cols-[7.5rem_minmax(0,0.9fr)_repeat(4,minmax(0,1fr))]';
+const ROW_COLS = 'lg:grid-cols-[7rem_8rem_repeat(4,minmax(12rem,1fr))]';
 
 const collectPhotos = (recipes: { title: string; imageUrl?: string | null }[]) =>
     recipes.filter((r) => r.imageUrl).map((r) => ({ title: r.title, key: titleKey(r.title), url: r.imageUrl as string }));
@@ -250,6 +264,31 @@ const WeeklyPlanner: React.FC = () => {
     const [draft, setDraft] = useState({ title: '', ingredients: '' });
     const [pantryInput, setPantryInput] = useState('');
     const [notice, setNotice] = useState<string | null>(null);
+    const [noticeGo, setNoticeGo] = useState<{ text: string; week: string; label: string } | null>(null);
+    const [workingDate, setWorkingDate] = useState<string | null>(null);
+    useEffect(() => {
+        if (!busy) setWorkingDate(null);
+    }, [busy]);
+    const scrollRef = useRef<HTMLDivElement>(null);
+    const [moreRight, setMoreRight] = useState(false);
+    const updateMore = useCallback(() => {
+        const el = scrollRef.current;
+        setMoreRight(!!el && el.scrollWidth - el.clientWidth - el.scrollLeft > 4);
+    }, []);
+    useEffect(() => {
+        updateMore();
+        const el = scrollRef.current;
+        const ro = typeof ResizeObserver !== 'undefined' && el ? new ResizeObserver(updateMore) : null;
+        if (el && ro) {
+            ro.observe(el);
+            if (el.firstElementChild) ro.observe(el.firstElementChild);
+        }
+        window.addEventListener('resize', updateMore);
+        return () => {
+            ro?.disconnect();
+            window.removeEventListener('resize', updateMore);
+        };
+    }, [updateMore, weekStart]);
     const [gaps, setGaps] = useState<{ day: number; slot: MealSlot }[]>([]);
     const foodPrefs = useFoodPreferences();
     const [mealCols, setMealCols] = useState(false);
@@ -270,7 +309,7 @@ const WeeklyPlanner: React.FC = () => {
     });
     const lastGen = useRef<(() => void) | null>(null);
     const [brokenImages, setBrokenImages] = useState<Set<string>>(new Set());
-    const [undo, setUndo] = useState<{ date: string; slot: MealSlot; title: string; ingredients: string[] } | null>(null);
+    const [undo, setUndo] = useState<{ date: string; slot: MealSlot; title: string; ingredients: string[] }[] | null>(null);
 
     const days = useMemo(() => weekDays(weekStart), [weekStart]);
     const todayISO = toISODate(new Date());
@@ -522,14 +561,44 @@ const WeeklyPlanner: React.FC = () => {
             setNotice(tx.mealCopied(dayLabel(date)));
         });
     };
+    const copyDayNext = (date: string) => {
+        const next = addDays(date, 1);
+        setWorkingDate(next);
+        run(async () => {
+            let n = 0;
+            for (const slot of MEAL_SLOTS) {
+                const m = mealAt(date, slot);
+                if (!m || mealAt(next, slot)) continue;
+                await saveMeal({ date: next, slot, title: m.title, ingredients: m.ingredients });
+                n++;
+            }
+            const w = workoutAt(date);
+            if (w && !workoutAt(next)) {
+                await saveWorkout({ date: next, kind: w.kind, videoId: w.videoId, title: w.title, durationMinutes: w.durationMinutes });
+                n++;
+            }
+            const text = tx.dayCopied(n, dayLabel(next));
+            setNotice(text);
+            setNoticeGo(n > 0 && !days.includes(next) ? { text, week: next, label: tx.viewWeek } : null);
+        });
+    };
+    const clearDay = (date: string) => {
+        const list = MEAL_SLOTS.map((slot) => mealAt(date, slot)).filter((m): m is MealEntry => !!m);
+        if (list.length === 0) return;
+        setWorkingDate(date);
+        setUndo(list.map((m) => ({ date: m.date, slot: m.slot, title: m.title, ingredients: m.ingredients })));
+        run(async () => {
+            for (const m of list) await deleteEntry('meal', m.id);
+        });
+    };
     const removeMeal = (m: MealEntry) => {
-        setUndo({ date: m.date, slot: m.slot, title: m.title, ingredients: m.ingredients });
+        setUndo([{ date: m.date, slot: m.slot, title: m.title, ingredients: m.ingredients }]);
         remove('meal', m.id);
     };
     const undoRemove = () => {
         const u = undo;
         setUndo(null);
-        if (u) run(async () => { await saveMeal(u); });
+        if (u) run(async () => { for (const m of u) await saveMeal(m); });
     };
     useEffect(() => {
         if (!undo) return;
@@ -613,25 +682,25 @@ const WeeklyPlanner: React.FC = () => {
                     </div>
 
                     {/* One sprout per day; they bloom as the planned items get done. */}
-                    <div className="relative flex items-center gap-4 shrink-0">
+                    <div className="relative flex items-center gap-4 md:shrink-0 max-md:w-full">
                     <WeekSprouts
                         bloomed={planned > 0 ? Math.round((completed / planned) * 7) : 0}
                         className="hidden sm:block h-12"
                     />
                     {/* WEEKLY PROGRESS METRIC */}
                     {planned > 0 && (
-                        <div className="flex items-center gap-3 bg-card/80 backdrop-blur-sm border border-border/70 rounded-xl px-3 py-2 shadow-xs shrink-0">
+                        <div className="flex items-center gap-3 bg-card/80 backdrop-blur-sm border border-border/70 rounded-xl px-3 py-2 shadow-xs md:shrink-0 max-md:w-full">
                             <div className="flex items-center justify-center size-8 rounded-lg bg-primary/10 text-primary shrink-0">
                                 <Icon name="task_alt" size={16} weight="bold" />
                             </div>
-                            <div className="flex flex-col gap-1">
+                            <div className="flex flex-col gap-1 max-md:flex-1 min-w-0">
                                 <div className="flex items-center justify-between gap-3 text-xs">
                                     <span className="font-semibold text-muted-foreground">{tx.progress}</span>
                                     <span className="font-bold text-foreground tabular-nums">
                                         {completed} / {planned} <span className="text-xs font-normal text-muted-foreground">({progressPercent}%)</span>
                                     </span>
                                 </div>
-                                <div className="w-36 sm:w-44 bg-muted rounded-full h-1.5 overflow-hidden">
+                                <div className="w-full md:w-44 bg-muted rounded-full h-1.5 overflow-hidden">
                                     <div
                                         className="bg-garden h-full rounded-full transition-all duration-500"
                                         style={{ width: `${progressPercent}%` }}
@@ -646,8 +715,8 @@ const WeeklyPlanner: React.FC = () => {
                 {/* CONTROLS & ACTION TOOLBAR */}
                 <div className="relative z-20 flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3.5 bg-card/60 backdrop-blur-sm border border-border/70 rounded-2xl p-3 sm:p-4 shadow-xs">
                     {/* Date Navigation */}
-                    <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
-                        <div className="flex items-center bg-background rounded-xl border border-border/80 shadow-xs p-0.5">
+                    <div className="flex items-center gap-2">
+                        <div className="flex flex-1 lg:flex-none min-w-0 items-center bg-background rounded-xl border border-border/80 shadow-xs p-0.5">
                             <button
                                 type="button"
                                 onClick={() => setWeekStart(addDays(weekStart, -7))}
@@ -657,8 +726,8 @@ const WeeklyPlanner: React.FC = () => {
                             >
                                 <Icon name="chevron_left" size={18} weight="bold" />
                             </button>
-                            <div className="flex items-center gap-1.5 px-3 py-1 text-sm font-semibold text-foreground min-w-[13rem] justify-center capitalize select-none shrink-0">
-                                <Icon name="calendar" size={15} className="text-primary/80" />
+                            <div className="flex items-center gap-1.5 px-1 sm:px-3 py-1 text-sm font-semibold text-foreground flex-1 sm:min-w-[13rem] min-w-0 whitespace-nowrap justify-center capitalize select-none">
+                                <Icon name="calendar" size={15} className="text-primary/80 max-sm:hidden" />
                                 <span>{rangeLabel}</span>
                             </div>
                             <button
@@ -683,20 +752,21 @@ const WeeklyPlanner: React.FC = () => {
                     </div>
 
                     {/* AI Actions & Clear */}
-                    <div className="flex items-center gap-2 flex-wrap justify-end">
+                    <div className="flex items-center gap-2 flex-wrap lg:justify-end">
                         <Button
                             size="sm"
                             icon="menu_book"
                             disabled={busy}
                             onClick={planFromRecipes}
-                            className="shadow-sm"
+                            className="shadow-sm max-sm:flex-1 max-sm:min-w-[12rem]"
                         >
                             {busy ? tx.fromRecipesBusy : tx.fromRecipes}
                         </Button>
-                        <div className="relative" onKeyDown={(e) => e.key === 'Escape' && setAiMenuOpen(false)}>
+                        <div className="relative max-sm:flex-1" onKeyDown={(e) => e.key === 'Escape' && setAiMenuOpen(false)}>
                             <Button
                                 size="sm"
                                 variant="secondary"
+                                className="max-sm:w-full"
                                 icon={aiBusy ? 'auto_awesome' : 'more_horiz'}
                                 disabled={busy}
                                 aria-haspopup="menu"
@@ -742,7 +812,19 @@ const WeeklyPlanner: React.FC = () => {
                     </div>
                 )}
                 {notice && (
-                    <div className="p-3 rounded-xl bg-muted/50 border border-border text-sm text-muted-foreground">{notice}</div>
+                    <div className="p-3 rounded-xl bg-muted/50 border border-border text-sm text-muted-foreground flex flex-wrap items-center gap-x-3">
+                        {notice}
+                        {noticeGo && noticeGo.text === notice && (
+                            <button type="button" className="min-h-10 font-semibold text-primary cursor-pointer" onClick={() => {
+                                const back = weekStart;
+                                setWeekStart(weekStartOf(parseISODate(noticeGo.week)));
+                                setNotice(tx.backWeek);
+                                setNoticeGo(noticeGo.label === tx.backWeek ? null : { text: tx.backWeek, week: back, label: tx.backWeek });
+                            }}>
+                                {noticeGo.label}
+                            </button>
+                        )}
+                    </div>
                 )}
 
                 {undo && (
@@ -751,7 +833,7 @@ const WeeklyPlanner: React.FC = () => {
                         className="fixed bottom-24 sm:bottom-6 left-1/2 -translate-x-1/2 z-[56] max-w-[calc(100vw-2rem)] pl-4 pr-2 py-2 rounded-2xl border border-sun/50 bg-card shadow-[var(--shadow-med)] flex items-center gap-3 text-sm font-medium text-sun-ink"
                     >
                         <Icon name="delete" size={16} />
-                        <span>{tx.mealRemoved}</span>
+                        <span>{undo.length > 1 ? tx.mealsRemoved(undo.length) : tx.mealRemoved}</span>
                         <button
                             type="button"
                             disabled={busy}
@@ -776,16 +858,18 @@ const WeeklyPlanner: React.FC = () => {
                 )}
 
                 {/* WEEK AGENDA: one row per day on wide screens, one block per day on small ones */}
-                <div className="flex flex-col gap-3">
+                <div className="relative">
+                <div ref={scrollRef} onScroll={updateMore} aria-busy={busy} className={`flex flex-col gap-3 lg:overflow-x-auto lg:pb-3 `}>
                     <button
                         type="button"
                         onClick={() => setOpenDays(allOpen ? new Set() : new Set(days))}
-                        className="lg:hidden self-end inline-flex items-center gap-1.5 min-h-10 px-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
+                        className="lg:hidden self-start -ml-3 inline-flex items-center gap-1.5 min-h-10 px-3 rounded-xl text-sm font-medium text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
                     >
                         <Icon name={allOpen ? 'expand_less' : 'expand_more'} size={18} />
                         {allOpen ? tx.collapseAll : tx.expandAll}
                     </button>
-                    <div className={`hidden lg:grid ${ROW_COLS} gap-3 px-4 text-xs font-semibold text-muted-foreground`} aria-hidden="true">
+                    <div className="flex flex-col gap-3 lg:min-w-[68rem]">
+                    <div className={`hidden lg:grid ${ROW_COLS} gap-3 px-4 text-xs font-semibold text-muted-foreground`}>
                         <span />
                         <span>{tx.workout}</span>
                         {MEAL_SLOTS.map((slot) => (
@@ -811,27 +895,26 @@ const WeeklyPlanner: React.FC = () => {
                                 key={date}
                                 aria-label={toneName ? `${dayNameShort(date)}, ${toneName}` : dayNameShort(date)}
                                 data-phase={tone ?? undefined}
-                                className={`relative overflow-hidden rounded-2xl border bg-card p-3.5 sm:p-4 grid grid-cols-1 sm:grid-cols-2 ${ROW_COLS} gap-x-3 gap-y-3 items-start shadow-xs ${
+                                className={`group/day relative transition-opacity ${workingDate === date ? 'opacity-60' : ''} overflow-clip rounded-2xl border bg-card p-3.5 sm:p-4 grid grid-cols-1 ${ROW_COLS} gap-x-3 gap-y-3 items-start shadow-xs ${
                                     isToday ? 'ring-2 ring-primary/60 border-primary/40' : 'border-border/80'
                                 }`}
                             >
-                                {tone && <span aria-hidden="true" title={toneName} className="absolute inset-y-0 left-0 w-1.5 bg-phase" />}
                                 {/* DAY LABEL */}
-                                <div className="relative sm:col-span-2 lg:col-span-1 flex lg:flex-col items-center lg:items-start justify-between lg:justify-start gap-1 lg:pt-2">
-                                    <div className="flex lg:flex-col items-baseline lg:items-start gap-2 lg:gap-0">
+                                <div className="relative lg:col-span-1 flex max-lg:flex-wrap lg:flex-col items-center lg:items-start justify-between lg:justify-start gap-x-2 gap-y-1 lg:pt-2 lg:sticky lg:left-2 lg:z-10 lg:bg-card lg:pr-2">
+                                    <div className="flex lg:flex-col items-baseline lg:items-start gap-2 lg:gap-0 whitespace-nowrap">
                                         <span className="text-base font-semibold text-foreground capitalize leading-tight">
                                             {dayNameShort(date)}
                                         </span>
                                         <span className="text-sm text-muted-foreground capitalize">{dayDateNum(date)}</span>
                                     </div>
-                                    <div className="flex items-center gap-1.5 lg:mt-1.5">
+                                    <div className="flex max-lg:flex-nowrap flex-wrap items-center gap-1.5 lg:mt-1.5">
                                         {isToday && (
                                             <span className="px-2 py-0.5 rounded-full text-xs font-semibold bg-primary text-primary-foreground">
                                                 {tx.today}
                                             </span>
                                         )}
                                         {dayPlanned > 0 && (
-                                            <span className="text-xs font-semibold tabular-nums text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
+                                            <span title={tx.dayProgress(dayDone, dayPlanned)} aria-label={tx.dayProgress(dayDone, dayPlanned)} className="text-xs font-semibold tabular-nums text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
                                                 {dayDone}/{dayPlanned}
                                             </span>
                                         )}
@@ -845,11 +928,37 @@ const WeeklyPlanner: React.FC = () => {
                                             <Icon name={open ? 'expand_less' : 'expand_more'} size={20} />
                                         </button>
                                     </div>
+                                    {dayMeals.length > 0 && (
+                                        <div className={`${open ? "flex" : "max-lg:hidden flex"} items-center gap-0.5 -ml-2.5 max-lg:w-full max-lg:ml-0 max-lg:gap-2 lg:[@media(hover:hover)]:opacity-0 lg:group-hover/day:opacity-100 lg:group-focus-within/day:opacity-100 transition-opacity`}>
+                                            {<button type="button" disabled={busy} title={tx.copyDay} aria-label={tx.copyDay} onClick={() => copyDayNext(date)} className="grid max-lg:grid-flow-col max-lg:gap-2 max-lg:px-3 max-lg:rounded-xl max-lg:border max-lg:border-border size-10 max-lg:w-auto place-items-center rounded-full text-muted-foreground hover:text-primary cursor-pointer">
+                                                <Icon name="content_copy" size={16} />
+                                                <span className="lg:hidden text-sm font-medium">{tx.copyDay}</span>
+                                            </button>}
+                                            <button type="button" disabled={busy} title={`${tx.clearDay} (${dayMeals.length})`} aria-label={`${tx.clearDay} (${dayMeals.length})`} onClick={() => clearDay(date)} className="lg:ml-1 grid max-lg:grid-flow-col max-lg:gap-2 max-lg:px-3 max-lg:rounded-xl max-lg:border max-lg:border-border size-10 max-lg:w-auto place-items-center rounded-full text-muted-foreground hover:text-destructive cursor-pointer">
+                                                <Icon name="delete" size={16} />
+                                                <span className="lg:hidden text-sm font-medium">{tx.clearDay}</span>
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
+
+                                {!open && dayMeals.length > 0 && (
+                                    <ul className="lg:hidden -mt-1 flex flex-col gap-0.5 text-sm text-muted-foreground">
+                                        {MEAL_SLOTS.map((slot) => {
+                                            const m = mealAt(date, slot);
+                                            return m ? (
+                                                <li key={slot} className="flex items-center gap-1.5 min-w-0">
+                                                    <Icon name={tx.slotIcons[slot]} size={13} className="opacity-70 shrink-0" />
+                                                    <span className={`truncate ${m.done ? "line-through" : ""}`}>{m.title}</span>
+                                                </li>
+                                            ) : null;
+                                        })}
+                                    </ul>
+                                )}
 
                                 {/* WORKOUT */}
                                 <div className={`flex flex-col gap-1.5 min-w-0 ${open ? '' : 'max-lg:hidden'}`}>
-                                    <span className="lg:hidden flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+                                    <span className="flex lg:sr-only items-center gap-1.5 text-xs font-semibold text-muted-foreground">
                                         <Icon name="fitness_center" size={13} className="text-primary" />
                                         {tx.workout}
                                         {w && w.durationMinutes ? <span className="font-normal tabular-nums">· {w.durationMinutes}′</span> : null}
@@ -885,7 +994,7 @@ const WeeklyPlanner: React.FC = () => {
 
                                     return (
                                         <div key={slot} className={`flex flex-col gap-1.5 min-w-0 ${open ? '' : 'max-lg:hidden'}`}>
-                                            <span className="lg:hidden flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+                                            <span className={`flex lg:sr-only items-center gap-1.5 text-xs font-semibold text-muted-foreground ${!m && !isEditing ? 'max-lg:hidden' : ''}`}>
                                                 <Icon name={tx.slotIcons[slot]} size={13} className="opacity-70" />
                                                 {tx.slots[slot]}
                                             </span>
@@ -932,7 +1041,7 @@ const WeeklyPlanner: React.FC = () => {
                                                 </div>
                                             ) : m ? (
                                                 <>
-                                                    <div className="group flex items-center gap-2 p-1.5 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors min-h-[4.5rem]">
+                                                    <div className="group relative flex items-center gap-2 p-1.5 rounded-xl bg-muted/30 hover:bg-muted/50 transition-colors min-h-[4.5rem]">
                                                         <label className="grid size-10 -mx-2.5 place-items-center cursor-pointer shrink-0">
                                                             <input
                                                                 type="checkbox"
@@ -944,26 +1053,31 @@ const WeeklyPlanner: React.FC = () => {
                                                         </label>
                                                         <button
                                                             type="button"
-                                                            className="flex-1 min-w-0 min-h-10 flex items-center gap-2 cursor-pointer text-left"
+                                                            className="relative flex-1 min-w-0 min-h-10 flex items-center gap-2 cursor-pointer text-left"
                                                             onClick={() => setPicking({ date, slot })}
-                                                            title={m.ingredients.length > 0 ? m.ingredients.join(', ') : undefined}
+                                                            title={m.ingredients.length > 0 ? `${m.title}: ${m.ingredients.join(', ')}` : m.title}
                                                         >
                                                             {image && !brokenImages.has(image) ? (
                                                                 // eslint-disable-next-line @next/next/no-img-element
+                                                                <>
+                                                                <span aria-hidden="true" className="absolute -left-1 -top-1 z-10 hidden lg:grid size-5 place-items-center rounded-full bg-card shadow-xs text-muted-foreground">
+                                                                    <Icon name={tx.slotIcons[slot]} size={11} />
+                                                                </span>
                                                                 <img
                                                                     src={image}
                                                                     alt=""
                                                                     loading="lazy"
-                                                                    className={`size-10 xl:size-14 rounded-xl object-cover shrink-0 bg-muted ${m.done ? 'opacity-60' : ''}`}
+                                                                    className={`size-10 rounded-xl object-cover shrink-0 bg-muted`}
                                                                     onError={() => setBrokenImages((prev) => new Set(prev).add(image))}
                                                                 />
+                                                                </>
                                                             ) : (
-                                                                <span className="size-10 xl:size-14 rounded-xl shrink-0 bg-muted flex items-center justify-center text-muted-foreground/70">
+                                                                <span className="size-10 rounded-xl shrink-0 bg-muted flex items-center justify-center text-muted-foreground/70">
                                                                     <Icon name={tx.slotIcons[slot]} size={22} />
                                                                 </span>
                                                             )}
                                                             <span
-                                                                className={`block text-sm font-medium leading-snug line-clamp-2 hyphens-auto transition-colors group-hover:text-primary ${
+                                                                className={`block text-sm font-medium leading-snug line-clamp-3 break-words transition-colors group-hover:text-primary ${
                                                                     m.done ? 'line-through text-muted-foreground' : 'text-foreground'
                                                                 }`}
                                                             >
@@ -975,7 +1089,7 @@ const WeeklyPlanner: React.FC = () => {
                                                                 type="button"
                                                                 aria-label={tx.addGlucose}
                                                                 title={tx.addGlucose}
-                                                                className="grid size-10 -mx-2 place-items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer shrink-0"
+                                                                className="grid size-10 -mx-2 place-items-center text-muted-foreground hover:text-primary transition-colors cursor-pointer shrink-0 lg:absolute lg:top-1 lg:m-0 lg:rounded-full lg:bg-card/90 lg:shadow-xs lg:[@media(hover:hover)]:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100 lg:right-11"
                                                                 onClick={() => {
                                                                     setGlucoseFor(glucoseFor === m.id ? null : m.id);
                                                                     setGlucoseError(null);
@@ -989,7 +1103,7 @@ const WeeklyPlanner: React.FC = () => {
                                                             type="button"
                                                             aria-label={tx.deleteMeal}
                                                             title={tx.deleteMeal}
-                                                            className="grid size-10 -mx-2 place-items-center text-muted-foreground hover:text-destructive transition-colors cursor-pointer shrink-0"
+                                                            className="grid size-10 -mx-2 place-items-center text-muted-foreground hover:text-destructive transition-colors cursor-pointer shrink-0 lg:absolute lg:top-1 lg:m-0 lg:rounded-full lg:bg-card/90 lg:shadow-xs lg:[@media(hover:hover)]:opacity-0 lg:group-hover:opacity-100 lg:group-focus-within:opacity-100 lg:right-1"
                                                             onClick={() => removeMeal(m)}
                                                         >
                                                             <Icon name="close" size={16} />
@@ -1029,11 +1143,11 @@ const WeeklyPlanner: React.FC = () => {
                                             ) : (
                                                 <button
                                                     type="button"
-                                                    className="w-full min-h-14 px-2 rounded-xl border border-dashed border-border hover:border-primary/50 hover:bg-primary/5 text-muted-foreground hover:text-primary text-sm font-medium flex items-center justify-center gap-1.5 transition-colors cursor-pointer group"
+                                                    className="w-full min-h-14 px-2 rounded-xl border border-dashed border-border/50 hover:border-primary/50 hover:bg-primary/5 text-muted-foreground hover:text-primary text-sm flex items-center justify-center gap-1.5 transition-colors cursor-pointer group"
                                                     onClick={() => setPicking({ date, slot })}
                                                 >
-                                                    <Icon name="plus" size={12} className="opacity-70 group-hover:opacity-100 transition-opacity" />
-                                                    <span>{tx.addMealPrompt}</span>
+                                                    <Icon name={tx.slotIcons[slot]} size={14} className="opacity-70" />
+                                                    <span><span className="lg:hidden">{tx.slots[slot]} · </span>{tx.addMealPrompt}</span>
                                                 </button>
                                             )}
                                         </div>
@@ -1042,6 +1156,9 @@ const WeeklyPlanner: React.FC = () => {
                             </section>
                         );
                     })}
+                    </div>
+                </div>
+                {moreRight && <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 right-0 hidden lg:block w-6 bg-gradient-to-l from-background to-transparent" />}
                 </div>
 
                 <MealPicker
@@ -1090,13 +1207,13 @@ const WeeklyPlanner: React.FC = () => {
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mt-2">
                     {/* GROCERY LIST CARD */}
                     <Card hoverable={false} className="p-5 flex flex-col gap-4 border border-border/70 shadow-xs">
-                        <div className="flex items-center justify-between pb-3 border-b border-border/60">
-                            <div className="flex items-center gap-2.5">
-                                <div className="flex items-center justify-center size-8 rounded-xl bg-primary/10 text-primary">
+                        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2.5 pb-3 border-b border-border/60">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                                <div className="flex items-center justify-center size-8 rounded-xl bg-primary/10 text-primary shrink-0">
                                     <Icon name="task_alt" size={17} weight="bold" />
                                 </div>
                                 <div>
-                                    <h2 className="text-base font-bold text-foreground leading-tight">{tx.grocery}</h2>
+                                    <h2 className="text-base font-bold text-foreground leading-tight whitespace-nowrap">{tx.grocery}</h2>
                                     {grocery.length > 0 && (
                                         <p className="text-xs text-muted-foreground mt-0.5">
                                             {groceryCheckedCount === grocery.length
@@ -1106,19 +1223,19 @@ const WeeklyPlanner: React.FC = () => {
                                     )}
                                 </div>
                             </div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 max-sm:w-full max-sm:justify-between">
                                 {grocery.length > 0 && (
                                     <>
                                         <button
                                             type="button"
                                             onClick={copyGroceryList}
-                                            className="inline-flex items-center gap-1.5 min-h-10 px-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/80 rounded-lg transition-colors cursor-pointer border border-border/60"
+                                            className="inline-flex items-center gap-1.5 min-h-10 px-3 text-sm font-medium whitespace-nowrap text-muted-foreground hover:text-foreground hover:bg-muted/80 rounded-lg transition-colors cursor-pointer border border-border/60"
                                             title={tx.groceryCopy}
                                         >
                                             <Icon name={copied ? 'check' : 'content_copy'} size={14} />
                                             <span>{copied ? tx.groceryCopied : tx.groceryCopy}</span>
                                         </button>
-                                        <span className="text-xs font-semibold tabular-nums text-muted-foreground bg-muted px-2.5 py-1 rounded-full">
+                                        <span className="text-xs font-semibold tabular-nums whitespace-nowrap text-muted-foreground bg-muted px-2.5 py-1 rounded-full">
                                             {groceryCheckedCount} / {grocery.length}
                                         </span>
                                     </>
@@ -1147,13 +1264,13 @@ const WeeklyPlanner: React.FC = () => {
                                 </p>
                             </div>
                         ) : (
-                            <ul className="flex flex-col gap-1.5 max-h-80 overflow-y-auto pr-1">
-                                {grocery.map((item) => {
+                            <ul className="flex flex-col gap-1.5 max-h-[26rem] overflow-y-auto pr-1 overscroll-contain">
+                                {[...grocery].sort((a, b) => Number(checked.has(a.key)) - Number(checked.has(b.key))).map((item) => {
                                     const isItemChecked = checked.has(item.key);
                                     return (
                                         <li
                                             key={item.key}
-                                            className={`flex items-center justify-between gap-3 px-3 py-2 rounded-xl transition-all ${
+                                            className={`flex items-center justify-between gap-3 px-3 py-0.5 rounded-xl transition-all ${
                                                 isItemChecked
                                                     ? 'bg-muted/25 opacity-60'
                                                     : 'hover:bg-muted/40 bg-card border border-border/40'
@@ -1170,7 +1287,7 @@ const WeeklyPlanner: React.FC = () => {
                                                     <FoodThumb name={item.label} />
                                                 </span>
                                                 <span
-                                                    className={`font-medium transition-all ${
+                                                    className={`font-medium leading-snug min-w-0 transition-all ${
                                                         isItemChecked
                                                             ? 'line-through decoration-muted-foreground/50 text-muted-foreground'
                                                             : 'text-foreground'

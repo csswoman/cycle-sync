@@ -94,8 +94,10 @@ const PhasePlaylists: React.FC<Props> = ({ videos, currentPhaseKey, onPlay }) =>
   const playlists = useMemo(
     () =>
       phases.map((p) => ({ phase: p.key, playlist: buildPhasePlaylist(videos, p.key, p.label, isEn) }))
-        .filter((x): x is { phase: string; playlist: Playlist } => x.playlist !== null),
-    [videos, phases, isEn],
+        .filter((x): x is { phase: string; playlist: Playlist } => x.playlist !== null)
+        // The current phase leads; Array.sort is stable, so the rest keep cycle order.
+        .sort((a, b) => Number(b.phase === currentPhaseKey) - Number(a.phase === currentPhaseKey)),
+    [videos, phases, isEn, currentPhaseKey],
   );
 
   if (playlists.length === 0) return null;

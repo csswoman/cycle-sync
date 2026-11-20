@@ -148,7 +148,7 @@ const getCategories = (isEs: boolean): { id: VideoCategory | 'all'; label: strin
 ];
 
 const getIntensities = (isEs: boolean): { id: VideoIntensity | 'all'; label: string }[] => [
-  { id: 'all', label: isEs ? 'Cualquier intensidad' : 'Any intensity' },
+  { id: 'all', label: isEs ? 'Todas' : 'Any' },
   { id: 'low', label: isEs ? 'Suave' : 'Gentle' },
   { id: 'medium', label: isEs ? 'Moderada' : 'Moderate' },
   { id: 'high', label: isEs ? 'Intensa' : 'Intense' },
@@ -192,6 +192,8 @@ const Routines: React.FC = () => {
   const [videoIntensity, setVideoIntensity] = useState<VideoIntensity | 'all'>('all');
   const [onlyPhaseVideos, setOnlyPhaseVideos] = useState(false);
   const [videosShown, setVideosShown] = useState(VIDEOS_PAGE);
+  const [showAllPhaseEx, setShowAllPhaseEx] = useState(false);
+  const [todayLogOpen, setTodayLogOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
@@ -251,11 +253,22 @@ const Routines: React.FC = () => {
     })();
   }, []);
 
-  const visibleVideos = workoutVideos
+  const filteredVideos = workoutVideos
     .filter((v) => videoCategory === 'all' || v.category === videoCategory)
     .filter((v) => videoIntensity === 'all' || v.intensity === videoIntensity)
     .filter((v) => !onlyPhaseVideos || v.phases.includes(phaseKey as any))
     .sort((a, b) => Number(b.phases.includes(phaseKey as any)) - Number(a.phases.includes(phaseKey as any)));
+  // Without a category filter, alternate categories so the first page is not one channel's strength series.
+  const visibleVideos = videoCategory === 'all'
+    ? (() => {
+        const groups = new Map<string, WorkoutVideo[]>();
+        filteredVideos.forEach((v) => groups.set(v.category, [...(groups.get(v.category) ?? []), v]));
+        const lists = [...groups.values()];
+        const mixed: WorkoutVideo[] = [];
+        for (let i = 0; mixed.length < filteredVideos.length; i++) lists.forEach((l) => { if (l[i]) mixed.push(l[i]); });
+        return mixed;
+      })()
+    : filteredVideos;
 
   useEffect(() => {
     const loadData = async () => {
@@ -362,17 +375,17 @@ const Routines: React.FC = () => {
 
   return (
     <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide">
-      <div className="w-full max-w-page mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 flex flex-col gap-8 pb-32">
+      <div className="w-full max-w-page mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8 flex flex-col gap-5 sm:gap-8 pb-40">
 
         {/* Hero Section */}
-        <section className="flex flex-col gap-4">
+        <section className="flex flex-col gap-3 sm:gap-4">
           {/* Compact header: the routines are the content, the header only orients */}
           <header className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-2">
             <div className="flex flex-col gap-1 min-w-0">
-              <h1 className="text-foreground text-2xl md:text-3xl font-bold tracking-tight text-balance">
+              <h1 className="text-foreground text-xl sm:text-2xl md:text-3xl font-bold tracking-tight text-balance">
                 <TitleSprig />{isEs ? 'Rutinas y Entrenamiento' : 'Workouts & Training'}
               </h1>
-              <p className="text-muted-foreground text-sm leading-relaxed text-pretty max-w-2xl">
+              <p className={`text-muted-foreground text-sm leading-relaxed text-pretty max-w-2xl ${isGuest ? '' : 'max-sm:hidden'}`}>
                 {isGuest
                   ? (isEs ? 'Programas por lugar y nivel. Con una cuenta, tu fase y tu energía ajustan la sugerencia.' : 'Programs by location and level. With an account, your phase and energy adjust suggestions.')
                   : (isEs ? 'Tu fase orienta y tu energía de hoy decide.' : 'Your phase guides and today’s energy decides.')}
@@ -380,7 +393,6 @@ const Routines: React.FC = () => {
             </div>
             {!isGuest && !cycleLoading && !paused && (
               <span data-phase={phaseKey} className="self-start sm:mt-1 inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full bg-phase-soft text-phase shrink-0">
-                <span aria-hidden className="material-symbols-outlined text-base">{guidance.icon}</span>
                 {periodLate ? (isEs ? 'Regla con retraso' : 'Late period') : phaseName}{cycleInfo?.cycleDay ? ` · ${isEs ? 'Día' : 'Day'} ${cycleInfo.cycleDay}` : ''}
               </span>
             )}
@@ -389,15 +401,15 @@ const Routines: React.FC = () => {
           {!isGuest && (
           <>
           {/* Status & Daily Activity Cards */}
-          <div className="grid grid-cols-1 xl:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 xl:grid-cols-5 gap-4 max-sm:gap-0">
             {/* Phase Status Card */}
-            <div data-phase={phaseKey} className="xl:col-span-2 bg-card rounded-2xl border border-border p-4 sm:p-5 shadow-sm flex flex-col gap-4">
+            <div data-phase={phaseKey} className="xl:col-span-2 bg-card rounded-2xl max-sm:rounded-b-none border border-border max-sm:border-b-0 p-3 sm:p-5 shadow-sm flex flex-col gap-2.5 sm:gap-4">
               <div className="flex items-start gap-3 sm:gap-4">
-                <div className="size-12 rounded-2xl bg-phase-soft flex items-center justify-center text-phase shrink-0">
+                <div className="size-9 sm:size-12 rounded-xl sm:rounded-2xl bg-phase-soft flex items-center justify-center text-phase shrink-0">
                   <span aria-hidden className="material-symbols-outlined text-2xl">{paused ? 'pregnant_woman' : guidance.icon}</span>
                 </div>
                 <div className="min-w-0">
-                  <h2 className="text-xl font-bold leading-tight text-foreground text-balance">
+                  <h2 className="text-base sm:text-xl font-bold leading-tight text-foreground text-balance">
                     {cycleLoading ? (isEs ? 'Cargando…' : 'Loading…') : paused ? (isEs ? 'Modo embarazo' : 'Pregnancy mode') : effort.label}
                     {!paused && !cycleLoading && (
                       <InfoTooltip label={`${isEs ? 'Sobre tu fase' : 'About your phase'}: ${guidance.title}`} className="ml-1.5 -translate-y-0.5">
@@ -416,8 +428,8 @@ const Routines: React.FC = () => {
                     </p>
                   ) : (
                     <>
-                      <p className="text-base font-medium text-foreground mt-1">{effort.examples}</p>
-                      <p className="text-sm text-muted-foreground leading-relaxed mt-1 max-w-prose text-pretty">
+                      <p className="text-sm sm:text-base font-medium text-foreground mt-0.5 sm:mt-1">{effort.examples}</p>
+                      <p className="text-sm text-muted-foreground leading-relaxed mt-1 max-w-prose text-pretty max-sm:hidden">
                         {periodLate ? `${isEs ? 'Día' : 'Day'} ${cycleInfo?.cycleDay ?? '?'}. ` : ''}{effortReason(suggestion.reason, energyToday, isEs)}
                       </p>
                     </>
@@ -428,7 +440,7 @@ const Routines: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setActiveTab(mainCtaTab)}
-                  className="w-full sm:w-auto sm:self-start max-w-full min-h-12 px-5 rounded-xl font-bold text-sm flex items-center justify-center gap-2 bg-primary text-primary-foreground shadow-md hover:bg-primary/90 hover:shadow-lg transition-all cursor-pointer"
+                  className="w-full sm:w-auto sm:self-start max-w-full min-h-11 sm:min-h-12 px-4 sm:px-5 rounded-xl font-semibold sm:font-bold text-sm flex items-center justify-center gap-2 bg-primary text-primary-foreground sm:shadow-md hover:bg-primary/90 hover:shadow-lg transition-all cursor-pointer"
                 >
                   <span aria-hidden className="material-symbols-outlined text-lg">{todayRoutine ? 'event_available' : 'play_arrow'}</span>
                   <span className="truncate">{todayRoutine ? `${isEs ? 'Tu rutina de hoy' : "Today's routine"}: ${todayRoutine.name}` : (isEs ? 'Ver ejercicios de tu fase' : 'See phase exercises')}</span>
@@ -437,7 +449,24 @@ const Routines: React.FC = () => {
             </div>
 
             {/* Daily Movement Check-in (secondary) */}
-            <div className="xl:col-span-3 bg-card rounded-2xl border border-border p-4 sm:p-5 shadow-sm grid lg:grid-cols-2 gap-x-6 gap-y-4">
+            <div className="xl:col-span-3 bg-card rounded-2xl max-sm:rounded-t-none border border-border max-sm:border-t-border/50 p-4 sm:p-5 max-sm:py-1 shadow-sm grid lg:grid-cols-2 gap-x-6 gap-y-4 max-sm:gap-y-0">
+              {/* On phones the log folds into one summary row, so the phase content stays within reach */}
+              <button
+                type="button"
+                aria-expanded={todayLogOpen}
+                aria-controls="routines-today-log"
+                onClick={() => setTodayLogOpen((v) => !v)}
+                className="sm:hidden flex items-center justify-between gap-3 w-full min-h-11 text-left cursor-pointer"
+              >
+                <span className="min-w-0">
+                  <span className="block text-sm font-bold text-foreground">{isEs ? 'Registro de hoy' : "Today's log"}</span>
+                  <span className="block text-xs text-muted-foreground tabular-nums">
+                    {week.minutes} / 150 min · {streak.current} {isEs ? (streak.current === 1 ? 'día seguido' : 'días seguidos') : (streak.current === 1 ? 'day streak' : 'days streak')}
+                  </span>
+                </span>
+                <span aria-hidden className="material-symbols-outlined text-2xl text-muted-foreground shrink-0">{todayLogOpen ? 'expand_less' : 'expand_more'}</span>
+              </button>
+              <div id="routines-today-log" className={`${todayLogOpen ? 'grid gap-4 pt-3 mt-3 border-t border-border' : 'hidden'} sm:contents`}>
               <div className="flex flex-col gap-3 min-w-0">
                 <div>
                   <h3 className="text-base font-bold text-foreground">{isEs ? 'Registro de hoy' : "Today's log"}</h3>
@@ -505,6 +534,7 @@ const Routines: React.FC = () => {
                 </button>
               )}
               </div>
+              </div>
             </div>
           </div>
           </>
@@ -535,12 +565,12 @@ const Routines: React.FC = () => {
         )}
         {/* Sticky Tab Navigation */}
         {/* Opaque strip behind the card so scrolled content never shows around it */}
-        <div className="sticky top-0 z-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-2 bg-background">
-        <div data-phase={phaseKey} className="px-3 sm:px-4 rounded-2xl bg-card border border-border shadow-sm">
+        <div className="sticky top-0 z-20 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-2 max-sm:bg-transparent bg-background">
+        <div data-phase={phaseKey} className="px-1.5 sm:px-4 rounded-2xl bg-card border border-border shadow-sm">
           <div
             role="tablist"
             aria-label="Secciones de rutinas"
-            className="flex overflow-x-auto scrollbar-hide gap-1 -mb-px [mask-image:linear-gradient(to_right,black_calc(100%-2rem),transparent)] xl:[mask-image:none]"
+            className="flex overflow-x-auto scrollbar-hide gap-0.5 sm:gap-1 -mb-px max-[380px]:[mask-image:linear-gradient(to_right,black_calc(100%-2rem),transparent)] sm:[mask-image:linear-gradient(to_right,black_calc(100%-2rem),transparent)] xl:[mask-image:none]"
           >
             {TABS.map((tab) => {
               const isActive = activeTab === tab.id;
@@ -554,7 +584,7 @@ const Routines: React.FC = () => {
                   aria-selected={isActive}
                   aria-controls={`routines-panel-${tab.id}`}
                   onClick={() => (locked ? promptSignup() : setActiveTab(tab.id))}
-                  className={`relative flex items-center justify-center gap-1.5 px-1.5 sm:px-3 lg:px-4 min-h-12 shrink-0 text-sm font-semibold whitespace-nowrap border-b-2 transition-colors cursor-pointer ${
+                  className={`relative flex items-center justify-center gap-1.5 px-1.5 sm:px-3 lg:px-4 min-h-12 shrink-0 max-sm:flex-1 max-sm:px-1 max-sm:text-[13px] text-sm font-semibold whitespace-nowrap border-b-2 transition-colors cursor-pointer ${
                     isActive
                       ? 'border-primary text-foreground'
                       : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
@@ -650,20 +680,31 @@ const Routines: React.FC = () => {
                   {isEs ? 'No hay ejercicios específicos cargados para esta fase.' : 'No specific exercises loaded for this phase.'}
                 </p>
               ) : (
-                recommendedExercises.map((ex) => (
-                  <ExerciseCard
-                    key={ex.id}
-                    exercise={ex}
-                    variant="horizontal"
-                    onSave={() => openAddToRoutine({
-                      label: exerciseDisplayName(ex, language),
-                      suggestedName: language === 'en' ? `Routine ${phaseKey}` : `Rutina ${phaseName}`,
-                      exercises: [{ ...ex, name: exerciseDisplayName(ex, language) }],
-                    })}
-                  />
+                recommendedExercises.map((ex, i) => (
+                  <div key={ex.id} className={i >= 3 && !showAllPhaseEx ? 'max-sm:hidden' : ''}>
+                    <ExerciseCard
+                      exercise={ex}
+                      variant="horizontal"
+                      onSave={() => openAddToRoutine({
+                        label: exerciseDisplayName(ex, language),
+                        suggestedName: language === 'en' ? `Routine ${phaseKey}` : `Rutina ${phaseName}`,
+                        exercises: [{ ...ex, name: exerciseDisplayName(ex, language) }],
+                      })}
+                    />
+                  </div>
                 ))
               )}
             </div>
+            {!loading && recommendedExercises.length > 3 && (
+              <button
+                type="button"
+                aria-expanded={showAllPhaseEx}
+                onClick={() => setShowAllPhaseEx((v) => !v)}
+                className="sm:hidden self-center min-h-11 px-5 rounded-xl border border-border bg-card text-sm font-semibold cursor-pointer"
+              >
+                {showAllPhaseEx ? (isEs ? 'Ver menos' : 'Show less') : (isEs ? `Ver los ${recommendedExercises.length} ejercicios` : `Show all ${recommendedExercises.length} exercises`)}
+              </button>
+            )}
           </RoutineSection>
 
           {/* Automatic phase playlists */}
@@ -680,25 +721,26 @@ const Routines: React.FC = () => {
         {/* Tab 2: Videos Guiados */}
         <div role="tabpanel" id="routines-panel-videos" aria-labelledby="routines-tab-videos" className={activeTab === 'videos' ? 'flex flex-col gap-10' : 'hidden'}>
           <RoutineSection
+            compactOnMobile
             title={isEs ? 'Catálogo de videos de entrenamiento' : 'Workout video catalog'}
             description={isEs ? 'Sesiones completas en video adaptadas para realizar en casa o en el gimnasio.' : 'Full video workouts suited for home or gym.'}
             icon="videocam"
             rightElement={
-              <span className="text-xs font-bold px-3 py-1 rounded-full bg-secondary text-foreground">
+              <span className="self-start md:self-auto text-xs font-bold px-3 py-1 rounded-full bg-secondary text-foreground">
                 {visibleVideos.length} {visibleVideos.length === 1 ? (isEs ? 'video disponible' : 'video available') : (isEs ? 'videos disponibles' : 'videos available')}
               </span>
             }
           >
             {/* Controls & Filter Bar */}
-            <div className="flex flex-col gap-3 bg-card/60 p-4 rounded-2xl border border-border">
-              <div role="group" aria-label={isEs ? 'Disciplina' : 'Discipline'} className="flex flex-wrap gap-1.5">
+            <div className="flex flex-col gap-3 bg-card/60 p-3 sm:p-4 rounded-2xl border border-border max-sm:bg-card max-sm:rounded-t-none max-sm:-mt-4">
+              <div role="group" aria-label={isEs ? 'Disciplina' : 'Discipline'} className="flex gap-1.5 overflow-x-auto scrollbar-hide -mx-1 px-1 [mask-image:linear-gradient(to_right,black_calc(100%-2rem),transparent)] sm:[mask-image:none] sm:flex-wrap sm:overflow-visible sm:mx-0 sm:px-0">
                 {CATEGORIES.map((cat) => (
                   <button
                     key={cat.id}
                     type="button"
                     aria-pressed={videoCategory === cat.id}
                     onClick={() => { setVideoCategory(cat.id); setVideosShown(VIDEOS_PAGE); }}
-                    className={`inline-flex items-center gap-1.5 px-3.5 min-h-10 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
+                    className={`inline-flex shrink-0 items-center gap-1.5 px-3.5 min-h-10 rounded-xl text-sm font-semibold transition-all cursor-pointer ${
                       videoCategory === cat.id
                         ? 'bg-primary text-primary-foreground shadow-sm'
                         : 'bg-secondary/70 hover:bg-secondary text-foreground'
@@ -709,7 +751,7 @@ const Routines: React.FC = () => {
                   </button>
                 ))}
               </div>
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3 pt-3 border-t border-border/60">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 sm:gap-3 pt-3 border-t border-border/60">
                 <label className="flex items-center gap-2 text-sm font-semibold text-foreground">
                   <span>{isEs ? 'Intensidad' : 'Intensity'}</span>
                   <select
@@ -729,7 +771,7 @@ const Routines: React.FC = () => {
                     onChange={(e) => { setOnlyPhaseVideos(e.target.checked); setVideosShown(VIDEOS_PAGE); }}
                     className="size-4 accent-primary cursor-pointer"
                   />
-                  <span>{isEs ? 'Solo ideales para mi fase' : 'Ideal for my phase only'}</span>
+                  <span><span className="sm:hidden">{isEs ? 'Solo mi fase' : 'My phase only'}</span><span className="max-sm:hidden">{isEs ? 'Solo ideales para mi fase' : 'Ideal for my phase only'}</span></span>
                 </label>}
               </div>
             </div>
@@ -799,7 +841,7 @@ const Routines: React.FC = () => {
               }
             >
               {userRoutines.length === 0 ? (
-                <p className="text-sm text-muted-foreground">{isEs ? 'Aún no tienes rutinas guardadas. Crea una en la pestaña "Crear rutina".' : 'No saved routines yet. Create one in the "Create routine" tab.'}</p>
+                <p className="text-sm text-muted-foreground max-sm:bg-card max-sm:border max-sm:border-border max-sm:rounded-2xl max-sm:p-3">{isEs ? 'Aún no tienes rutinas guardadas. Crea una en la pestaña "Crear rutina".' : 'No saved routines yet. Create one in the "Create routine" tab.'}</p>
               ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {[...userRoutines]

@@ -26,7 +26,7 @@ export default function GuestPreviewBanner({ message, className = '' }: GuestPre
         </span>
         <div className="min-w-0">
           <p className="text-sm font-bold text-foreground">{t.guestPreviewTitle}</p>
-          <p className="text-sm text-muted-foreground leading-relaxed">{message}</p>
+          <p className="text-sm text-muted-foreground leading-relaxed max-sm:line-clamp-2">{message}</p>
         </div>
       </div>
       <button

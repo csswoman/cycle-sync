@@ -8,6 +8,7 @@ import { usePMOSSymptoms } from '@/hooks/usePMOSSymptoms';
 import { useCycleInfo } from '@/hooks/useCycleInfo';
 import { useAppStore } from '@/stores/appStore';
 import { useLanguage } from '@/i18n/LanguageContext';
+import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { GardenCorner } from '@/components/ui/Botanical';
 import PMOSMemberTools from '@/features/health/pmos/PMOSMemberTools';
 import { useConfiguredSymptoms } from '@/features/health/pmos/useConfiguredSymptoms';
@@ -49,7 +50,7 @@ export const PMOSCare: React.FC = () => {
     }
     if (pct === 0) {
       return {
-        label: lang === 'es' ? 'Equilibrado / Sin síntomas' : 'Balanced / No symptoms',
+        label: lang === 'es' ? 'Sin síntomas' : 'No symptoms',
         color: 'text-leaf',
         badge: 'bg-leaf/10 text-leaf border-leaf/30',
       };
@@ -78,6 +79,7 @@ export const PMOSCare: React.FC = () => {
   const status = getStatusDetails(severityPct);
 
   const es = lang === 'es';
+  const sub = es ? 'Síntomas, análisis y citas en un solo lugar.' : 'Symptoms, labs and appointments in one place.';
   const openArticle = (url: string) => {
     if (url.startsWith('/')) router.push(url);
     else window.open(url, '_blank', 'noopener,noreferrer');
@@ -86,8 +88,8 @@ export const PMOSCare: React.FC = () => {
   return (
     <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide">
       <div className="flex flex-col w-full max-w-page mx-auto px-4 sm:px-6 lg:px-8 py-5 sm:py-8 gap-6 sm:gap-8 pb-32">
-        <header className="relative overflow-hidden rounded-3xl garden-wash wash-leaf border border-border p-5 sm:p-8 grid gap-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
-          <GardenCorner variant="leaf" className="size-40 sm:size-56 opacity-30 sm:opacity-70" />
+        <header className="relative overflow-hidden rounded-3xl garden-wash wash-leaf border border-border p-4 sm:p-8 grid gap-4 sm:gap-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+          <GardenCorner variant="leaf" className="max-sm:hidden size-56 opacity-70" />
           <div className="relative flex flex-col gap-3 min-w-0">
             {cycleInfo && (
               <p className="inline-flex w-fit items-center gap-2 text-sm font-medium text-muted-foreground bg-card/70 border border-border px-3 py-1 rounded-full">
@@ -97,13 +99,16 @@ export const PMOSCare: React.FC = () => {
                   : <>{cycleInfo.phase} &bull; {es ? 'Día' : 'Day'} {cycleInfo.cycleDay}</>}
               </p>
             )}
-            <h1 className="text-foreground text-2xl sm:text-4xl font-semibold tracking-tight leading-tight text-balance">
-              {es ? 'Síntomas, análisis y citas' : 'Symptoms, labs and appointments'}
-            </h1>
-            <p className="text-muted-foreground text-base leading-relaxed max-w-[60ch] text-pretty">
-              {es
-                ? 'Todo en un solo lugar, para ver cómo cambian con tu ciclo.'
-                : 'All in one place, to see how they change with your cycle.'}
+            <div className="flex items-start gap-1">
+              <h1 className="text-foreground text-2xl sm:text-4xl font-semibold tracking-tight leading-tight text-balance">
+                {es ? 'Cómo cambia tu PMOS con tu ciclo' : 'How your PMOS changes with your cycle'}
+              </h1>
+              <InfoTooltip label={es ? 'Qué incluye esta página' : 'What this page covers'} className="sm:hidden mt-0.5">
+                {sub}
+              </InfoTooltip>
+            </div>
+            <p className="max-sm:hidden text-muted-foreground text-base leading-relaxed max-w-[60ch] text-pretty">
+              {sub}
             </p>
             {!isGuest && (
             <button
@@ -118,10 +123,10 @@ export const PMOSCare: React.FC = () => {
           </div>
 
           {!isGuest && (
-          <div className="relative flex items-center gap-4 md:flex-col md:items-start md:gap-2 p-4 sm:p-5 rounded-2xl bg-card border border-border md:min-w-52">
+          <div className="relative flex items-center gap-4 md:flex-col md:items-start md:gap-2 px-4 py-2.5 sm:p-5 rounded-2xl bg-card border border-border md:min-w-52">
             <div className="flex flex-col gap-0.5 min-w-0 flex-1">
-              <p className="text-sm text-muted-foreground">{es ? 'Síntomas de hoy' : "Today's symptoms"}</p>
-              <p className={`text-xl sm:text-2xl font-semibold tracking-tight ${status.color}`}>{status.label}</p>
+              <p className="text-sm text-muted-foreground max-sm:sr-only">{es ? 'Síntomas de hoy' : "Today's symptoms"}</p>
+              <p className={`text-base sm:text-2xl font-semibold tracking-tight ${status.color}`}>{status.label}</p>
             </div>
             {hasToday && (
             <div className="shrink-0 md:w-full flex flex-col gap-1.5 items-end md:items-stretch">
@@ -322,7 +327,7 @@ export const PMOSCare: React.FC = () => {
                   />
                   <div className="p-4 flex flex-col gap-1.5 flex-1 min-w-0">
                     <p className="text-sm text-muted-foreground">
-                      {article.source} &bull; {new Date(article.publishedAt).toLocaleDateString(es ? 'es' : 'en')}
+                      {new Date(article.publishedAt).toLocaleDateString(es ? 'es' : 'en')}
                     </p>
                     <h3 className="text-foreground text-base font-semibold leading-snug line-clamp-3 md:line-clamp-2 text-balance">
                       <button

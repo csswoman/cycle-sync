@@ -50,7 +50,7 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, onSave, sa
     if (variant === 'horizontal') {
         return (
             <div className="flex flex-row items-stretch rounded-2xl shadow-sm bg-card overflow-hidden hover:shadow-md transition-all border border-border group h-full">
-                <div className="w-28 sm:w-40 md:w-48 h-auto overflow-hidden bg-white dark:brightness-90 shrink-0">
+                <div className="w-24 sm:w-40 md:w-48 h-auto overflow-hidden bg-white dark:brightness-90 shrink-0">
                     <img
                         src={exercise.gifUrl || '/exercise-fallback.png'}
                         alt={displayName}
@@ -60,8 +60,8 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, onSave, sa
                 </div>
                 <div className="flex flex-1 min-w-0 flex-col justify-between p-3 sm:p-5 gap-3 sm:gap-4">
                     <div>
-                        <h3 className="text-foreground text-xl font-bold leading-tight line-clamp-2 mb-2">{displayName}</h3>
-                        <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
+                        <h3 className="text-foreground text-base sm:text-xl font-bold leading-tight line-clamp-2 mb-2">{displayName}</h3>
+                        <p className="max-sm:hidden text-muted-foreground text-sm mb-3 line-clamp-2">
                             {exercise.instructions[0] || (isEn ? `Focus on your ${targetLabel} using ${equipmentLabel}.` : `Enfócate en tu ${targetLabel} usando ${equipmentLabel}.`)}
                         </p>
                         <div className="flex flex-wrap gap-2">
@@ -79,10 +79,11 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, onSave, sa
                                 type="button"
                                 disabled={saving}
                                 onClick={() => onSave()}
-                                className="cursor-pointer flex items-center justify-center gap-1.5 rounded-xl min-h-11 px-4 bg-secondary hover:bg-accent text-foreground border border-border text-sm font-semibold transition-colors disabled:opacity-50"
+                                aria-label={isEn ? 'Add to my routine' : 'Agregar a mi rutina'}
+                                className="cursor-pointer flex items-center justify-center gap-1.5 rounded-xl min-h-11 max-sm:min-w-11 px-4 max-sm:px-2.5 bg-secondary hover:bg-accent text-foreground border border-border text-sm font-semibold transition-colors disabled:opacity-50"
                             >
                                 <span aria-hidden className="material-symbols-outlined text-lg">playlist_add</span>
-                                {isEn ? 'Add to my routine' : 'Agregar a mi rutina'}
+                                <span className="max-sm:hidden">{isEn ? 'Add to my routine' : 'Agregar a mi rutina'}</span>
                             </button>
                         )}
                     </div>
@@ -146,22 +147,24 @@ interface RoutineSectionProps {
     icon?: string;
     children: React.ReactNode;
     rightElement?: React.ReactNode;
+    /** Drops the description below sm, for sections whose title and content already explain themselves. */
+    compactOnMobile?: boolean;
 }
 
-export const RoutineSection: React.FC<RoutineSectionProps> = ({ title, description, icon, children, rightElement }) => {
+export const RoutineSection: React.FC<RoutineSectionProps> = ({ title, description, icon, children, rightElement, compactOnMobile }) => {
     return (
-        <section className="flex flex-col gap-6 w-full">
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border pb-6">
+        <section className="flex flex-col gap-4 sm:gap-6 w-full">
+            <div className={`flex flex-col md:flex-row md:items-end justify-between gap-3 sm:gap-4 border-b border-border pb-4 sm:pb-6 max-sm:bg-card max-sm:border max-sm:border-border max-sm:rounded-2xl max-sm:p-3 ${compactOnMobile ? 'max-sm:border-b-0 max-sm:rounded-b-none' : ''}`}>
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-3">
                         {icon && (
-                            <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                            <div className="size-8 sm:size-10 rounded-lg sm:rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 max-sm:[&_.material-symbols-outlined]:text-xl">
                                 <span className="material-symbols-outlined">{icon}</span>
                             </div>
                         )}
-                        <h3 className="text-2xl font-black text-foreground tracking-tight">{title}</h3>
+                        <h3 className="text-lg sm:text-2xl font-black text-foreground tracking-tight text-balance">{title}</h3>
                     </div>
-                    {description && <p className="text-muted-foreground text-sm max-w-xl">{description}</p>}
+                    {description && <p className={`text-muted-foreground text-sm max-w-xl ${compactOnMobile ? 'max-sm:hidden' : ''}`}>{description}</p>}
                 </div>
                 {rightElement}
             </div>
@@ -329,7 +332,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video, isPhaseRecommended,
 
     return (
         <div className="flex flex-row sm:flex-col gap-3 group bg-card rounded-2xl border border-border p-3 sm:p-3.5 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300">
-            <div className="relative aspect-video w-36 sm:w-full shrink-0 self-start rounded-xl overflow-hidden bg-black shadow-sm">
+            <div className="relative aspect-video w-32 sm:w-full shrink-0 self-start rounded-xl overflow-hidden bg-black shadow-sm">
                 {playingInline ? (
                     <iframe
                         src={youtubeEmbedUrl(video.videoId, true)}
@@ -357,9 +360,9 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video, isPhaseRecommended,
 
                         {/* Phase recommendation badge */}
                         {isPhaseRecommended && (
-                            <div className="absolute top-2.5 left-2.5 z-10">
-                                <span className="inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full bg-primary/90 text-primary-foreground backdrop-blur-md shadow-md border border-white/20">
-                                    <span className="material-symbols-outlined text-[13px]">auto_awesome</span>
+                            <div className="absolute top-1.5 left-1.5 sm:top-2.5 sm:left-2.5 z-10">
+                                <span className="inline-flex items-center gap-1 text-xs font-semibold px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-primary/90 text-primary-foreground backdrop-blur-md shadow-md border border-white/20">
+                                    <span aria-hidden className="material-symbols-outlined text-[13px] max-sm:!hidden">auto_awesome</span>
                                     {isEn ? 'Your phase' : 'Tu fase'}
                                 </span>
                             </div>
@@ -367,7 +370,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video, isPhaseRecommended,
 
                         {/* Play button */}
                         <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="size-9 sm:size-12 rounded-full bg-white/95 text-primary shadow-xl flex items-center justify-center transition-all duration-300 group-hover/btn:scale-110 group-hover/btn:bg-primary group-hover/btn:text-primary-foreground">
+                            <div className="size-8 sm:size-12 rounded-full bg-white/95 text-primary shadow-xl flex items-center justify-center transition-all duration-300 group-hover/btn:scale-110 group-hover/btn:bg-primary group-hover/btn:text-primary-foreground">
                                 <span className="material-symbols-outlined text-2xl ml-0.5">play_arrow</span>
                             </div>
                         </div>
@@ -383,8 +386,8 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video, isPhaseRecommended,
                             }`}>
                                 {intensityMap[video.intensity]}
                             </span>
-                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-sm font-medium">
-                                <span className="material-symbols-outlined text-[12px]">schedule</span>
+                            <span className="inline-flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded-md bg-black/75 backdrop-blur-sm font-medium">
+                                <span aria-hidden className="material-symbols-outlined text-[12px] max-sm:!hidden">schedule</span>
                                 {video.durationMinutes} min
                             </span>
                         </div>
@@ -395,16 +398,16 @@ export const VideoCard: React.FC<VideoCardProps> = ({ video, isPhaseRecommended,
             <div className="flex flex-col max-sm:justify-center min-w-0 flex-1 gap-1.5 px-0.5">
                 <h4 
                     onClick={handlePlayClick}
-                    className="text-foreground font-semibold text-sm line-clamp-2 leading-snug cursor-pointer group-hover:text-primary transition-colors"
+                    className="text-foreground font-semibold text-sm line-clamp-3 sm:line-clamp-2 leading-snug cursor-pointer group-hover:text-primary transition-colors"
                     title={video.title}
                 >
                     {video.title}
                 </h4>
                 <div className="flex items-center justify-between max-sm:flex-wrap max-sm:gap-y-1 gap-x-2 text-xs text-muted-foreground mt-0.5">
                     <span className="truncate max-w-[65%] max-sm:max-w-full" title={video.channelName}>{video.channelName}</span>
-                    <span className="sm:hidden font-semibold text-foreground/80">{intensityMap[video.intensity]}</span>
-                    <span className="px-2 py-0.5 rounded-md bg-secondary text-xs font-medium text-foreground/80">
+                    <span className="sm:px-2 sm:py-0.5 sm:rounded-md sm:bg-secondary text-xs font-medium text-foreground/80">
                         {categoryMap[video.category] || video.category}
+                        <span className="sm:hidden"> · {isEn ? `${intensityMap[video.intensity].toLowerCase()} intensity` : `intensidad ${intensityMap[video.intensity].toLowerCase()}`}</span>
                     </span>
                 </div>
             </div>

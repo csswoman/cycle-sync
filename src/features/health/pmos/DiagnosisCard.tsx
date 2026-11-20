@@ -1,5 +1,6 @@
 'use client';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { InfoTooltip } from '@/components/ui/InfoTooltip';
 import { Icon } from '@/components/ui/Icon';
 import { supabase } from '@/lib/supabase';
 import {
@@ -117,8 +118,10 @@ export const DiagnosisCard: React.FC<{ lang: Lang; data?: PMOSOverviewData | nul
       <div className="flex items-start gap-3">
         <div className="size-10 shrink-0 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary"><Icon name="clinical_notes" size={20} /></div>
         <div>
-          <h2 className="text-foreground text-lg font-semibold tracking-tight text-balance">{t.title}</h2>
-          <p className="text-sm text-muted-foreground text-pretty">{t.sub}</p>
+          <h2 className="text-foreground text-lg font-semibold tracking-tight text-balance flex items-center gap-1">{t.title}
+            <InfoTooltip label={t.title} className="sm:hidden">{t.sub}</InfoTooltip>
+          </h2>
+          <p className="text-sm text-muted-foreground max-sm:hidden text-pretty">{t.sub}</p>
         </div>
       </div>
       <div className="flex flex-col gap-2">
@@ -133,7 +136,7 @@ export const DiagnosisCard: React.FC<{ lang: Lang; data?: PMOSOverviewData | nul
       </p>
       {Object.keys(evidence).length > 0 && (
         <div className="flex flex-col gap-1.5 rounded-xl border border-border p-3">
-          <p className="text-sm font-semibold text-foreground">{t.evidence}</p>
+          <p className="text-sm font-semibold text-foreground flex items-center gap-1">{t.evidence}<InfoTooltip label={t.evidence}>{t.evidenceNote}</InfoTooltip></p>
           <ul className="flex flex-col gap-1 text-sm text-foreground">
             {CRITERIA.filter((c) => evidence[c.key]?.length).map((c) => (
               <li key={c.key} className="flex items-start gap-2">
@@ -142,13 +145,11 @@ export const DiagnosisCard: React.FC<{ lang: Lang; data?: PMOSOverviewData | nul
               </li>
             ))}
           </ul>
-          <p className="text-sm text-muted-foreground">{t.evidenceNote}</p>
         </div>
       )}
       {exclusions.length > 0 && (
         <div className="flex flex-col gap-1.5 rounded-xl border border-border p-3">
-          <p className="text-sm font-semibold text-foreground">{t.exclusions}</p>
-          <p className="text-sm text-muted-foreground">{t.exclusionsNote}</p>
+          <p className="text-sm font-semibold text-foreground flex items-center gap-1">{t.exclusions}<InfoTooltip label={t.exclusions}>{t.exclusionsNote}</InfoTooltip></p>
           <ul className="flex flex-col divide-y divide-border/60">
             {exclusions.map((x) => (
               <li key={x.key} className="flex items-center justify-between gap-3 py-1.5 text-sm">
