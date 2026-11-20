@@ -208,16 +208,17 @@ export const TodayPlanCard: React.FC<{ embedded?: boolean }> = ({ embedded = fal
         );
     }
 
-    // Guests: a sample day (catalog recipes) so the card shows what the planner gives them.
-    if (isGuest && !workout && meals.length === 0) {
+    // No plan yet (guests and new accounts): a sample day (catalog recipes) so the card shows what the planner gives them.
+    if (!workout && meals.length === 0) {
+        const open = () => (isGuest ? promptSignup() : router.push('/planner'));
         const tags = { breakfast: 'Desayuno', lunch: 'Almuerzo', snack: 'Snack', dinner: 'Cena' } as const;
         const sample = MEAL_SLOTS.map((slot) => ({ slot, recipe: CATALOG_RECIPES.find((r) => r.imageUrl && r.tags.includes(tags[slot])) }));
         return (
             <div className={embedded ? 'flex flex-col gap-4' : 'bg-card rounded-3xl border border-border shadow-sm p-5 sm:p-6 flex flex-col gap-4'}>
                 <div className="flex items-center justify-between gap-3 flex-wrap">
-                    <p className="text-sm text-muted-foreground">{copy.guestEmpty}</p>
+                    <p className="text-sm text-muted-foreground">{isGuest ? copy.guestEmpty : copy.empty}</p>
                     <button
-                        onClick={promptSignup}
+                        onClick={open}
                         className="shrink-0 inline-flex items-center gap-1 px-3.5 min-h-10 rounded-full text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer"
                     >
                         <Icon name="add" size={14} />{copy.emptyCta}

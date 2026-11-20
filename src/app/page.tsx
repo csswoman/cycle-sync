@@ -14,7 +14,7 @@ export default async function RootPage() {
   // The landing page is for visitors; signed-in users go straight to the app.
   // Supabase stores the session in a cookie named sb-*-auth-token.
   const cookieStore = await cookies();
-  const hasSession = cookieStore.getAll().some((c) => c.name.includes('-auth-token') && Boolean(c.value?.trim()));
+  const hasSession = cookieStore.getAll().some((c) => c.name.includes('-auth-token') && !c.name.endsWith('-code-verifier') && Boolean(c.value?.trim()));
   if (hasSession) redirect('/dashboard');
 
   return <Landing />;

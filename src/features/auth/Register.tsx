@@ -43,10 +43,32 @@ const Register: React.FC<RegisterProps> = ({ onRegister, onBackToLogin, isDarkMo
           }
         }
       });
-      if (error) throw error;
+      if (error) {
+        const code = error.code ?? '';
+        // Same screen as a new signup, so the form never reveals which emails have an account.
+        if (code === 'user_already_exists' || code === 'email_exists' || /already registered/i.test(error.message)) {
+          onRegister({ hasSession: false });
+          return;
+        }
+        if (code === 'weak_password') {
+          setError(t.weakPassword);
+          return;
+        }
+        if (error.status === 429 || code.startsWith('over_')) {
+          setError(t.tooManyAttempts);
+          return;
+        }
+        throw error;
+      }
       onRegister({ ...data.user, hasSession: !!data.session });
     } catch (err: any) {
-      setError(err.message);
+      const message = err?.message ?? String(err);
+      if (message === 'Failed to fetch' || message.includes('fetch failed')) {
+        setError(t.connectionError);
+      } else {
+        console.error('signUp failed:', err);
+        setError(t.registerError);
+      }
     }
   };
 

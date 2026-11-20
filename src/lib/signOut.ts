@@ -11,6 +11,7 @@ const PERSONAL_STORAGE_KEYS = [
   'cycle_sync_meals_per_day',
   'cycle_sync_user_height_cm',
   'cycle_sync_user_weight_kg',
+  'cs_onboarding_answers',
 ];
 
 function clearPersonalStorage() {

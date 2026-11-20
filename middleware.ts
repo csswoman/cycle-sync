@@ -34,8 +34,8 @@ export async function middleware(request: NextRequest) {
     !pathname.startsWith('/favicon') &&
     pathname !== '/';
 
-  // Supabase stores the session in a cookie named sb-*-auth-token
-  const hasSession = request.cookies.getAll().some((c) => c.name.includes('-auth-token') && Boolean(c.value?.trim()));
+  // Supabase stores the session in a cookie named sb-*-auth-token; the PKCE *-code-verifier cookie (set on signup) is not a session.
+  const hasSession = request.cookies.getAll().some((c) => c.name.includes('-auth-token') && !c.name.endsWith('-code-verifier') && Boolean(c.value?.trim()));
 
   if (isAppRoute && !hasSession && !isGuestRoute(pathname)) {
     const url = request.nextUrl.clone();

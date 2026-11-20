@@ -1,5 +1,5 @@
 'use client';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View } from '@/types';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { useCycleOverview } from '@/hooks/useCycleOverview';
@@ -30,7 +30,10 @@ const Dashboard: React.FC<DashboardProps> = ({ userName }) => {
     const text = dashboardText[lang];
     const overview = useCycleOverview();
     const explore = !overview.loading && !overview.paused && !overview.info;
-    const today = new Intl.DateTimeFormat(lang, { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
+    // Formatted after mount: server and client timezones differ, which caused hydration error #418.
+    const [now, setNow] = useState<Date | null>(null);
+    useEffect(() => setNow(new Date()), []);
+    const today = now ? new Intl.DateTimeFormat(lang, { weekday: 'long', day: 'numeric', month: 'long' }).format(now) : '';
 
     return (
         <div className="flex-1 overflow-y-auto h-full relative scrollbar-hide">
@@ -39,7 +42,7 @@ const Dashboard: React.FC<DashboardProps> = ({ userName }) => {
                     <h1 className="text-foreground text-3xl sm:text-4xl font-semibold leading-tight tracking-tight text-balance">
                         {text.greeting(userName?.split(' ')[0])}
                     </h1>
-                    <p className="text-muted-foreground text-sm sm:text-base text-pretty first-letter:uppercase">{today}. {text.subtitle}</p>
+                    <p className="text-muted-foreground text-sm sm:text-base text-pretty first-letter:uppercase">{today ? `${today}. ` : ''}{text.subtitle}</p>
                 </header>
 
                 <AppointmentBanner />

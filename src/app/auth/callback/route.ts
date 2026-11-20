@@ -18,5 +18,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  return NextResponse.redirect(`${origin}/login`);
+  // shortcut: exchange fails when the link opens in another browser/app than the signup (no PKCE verifier cookie);
+  // Supabase already confirmed the email by then, so tell the user to sign in instead of failing silently.
+  return NextResponse.redirect(`${origin}/login${type === 'recovery' ? '' : '?confirmed=1'}`);
 }

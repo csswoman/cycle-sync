@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { supabase } from '@/lib/supabase';
 import AuthLayout from './components/AuthLayout';
@@ -19,6 +19,9 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSignUp, onUnconfirmedEmail, on
   const [magicLinkLoading, setMagicLinkLoading] = useState(false);
   const [magicLinkSent, setMagicLinkSent] = useState(false);
   const [error, setError] = useState('');
+  // Set by /auth/callback when the confirm link opened where the session could not be created.
+  const [confirmed, setConfirmed] = useState(false);
+  useEffect(() => setConfirmed(new URLSearchParams(window.location.search).has('confirmed')), []);
   const { t, language } = useLanguage();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -206,6 +209,11 @@ const Login: React.FC<LoginProps> = ({ onLogin, onSignUp, onUnconfirmedEmail, on
               </div>
             </div>
 
+            {confirmed && !error && (
+              <p role="status" className="rounded-xl bg-primary/10 px-3 py-2 text-foreground text-sm font-medium">
+                {language === 'es' ? 'Tu correo está confirmado. Inicia sesión para entrar.' : 'Your email is confirmed. Sign in to continue.'}
+              </p>
+            )}
             {error && (
               <p role="alert" className="flex items-start gap-2 rounded-xl bg-destructive/10 px-3 py-2 text-destructive text-sm font-medium">
                 <span className="material-symbols-outlined shrink-0" aria-hidden="true" style={{ fontSize: '18px', marginTop: '1px' }}>error</span>

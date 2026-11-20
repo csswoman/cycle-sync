@@ -86,6 +86,9 @@ export interface Translations {
     registerButton: string;
     alreadyHaveAccount: string;
     passwordsDoNotMatch: string;
+    weakPassword: string;
+    tooManyAttempts: string;
+    registerError: string;
     checkEmailTitle: string;
     checkEmailDescription: string;
     backToLogin: string;
@@ -328,6 +331,9 @@ export const translations: Record<Language, Translations> = {
         registerButton: 'Create Account',
         alreadyHaveAccount: 'Already have an account?',
         passwordsDoNotMatch: 'Passwords do not match',
+        weakPassword: 'This password is too weak. Use a longer one that mixes letters, numbers and symbols.',
+        tooManyAttempts: 'Too many attempts. Please wait a few minutes and try again.',
+        registerError: 'We could not create your account. Please check your details and try again.',
         checkEmailTitle: 'Check your email',
         checkEmailDescription: 'We have sent a confirmation link to your email. Please verify your account to start your personalized journey.',
         backToLogin: 'Back to Log In',
@@ -569,6 +575,9 @@ export const translations: Record<Language, Translations> = {
         registerButton: 'Crear cuenta',
         alreadyHaveAccount: '¿Ya tienes una cuenta?',
         passwordsDoNotMatch: 'Las contraseñas no coinciden',
+        weakPassword: 'Esta contraseña es demasiado débil. Usa una más larga que combine letras, números y símbolos.',
+        tooManyAttempts: 'Demasiados intentos. Espera unos minutos y vuelve a intentarlo.',
+        registerError: 'No pudimos crear tu cuenta. Revisa tus datos e inténtalo de nuevo.',
         checkEmailTitle: 'Confirma tu correo',
         checkEmailDescription: 'Hemos enviado un enlace de confirmación a tu correo electrónico. Por favor, verifica tu cuenta para comenzar tu viaje personalizado.',
         backToLogin: 'Volver al Inicio de Sesión',
