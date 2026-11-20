@@ -188,6 +188,23 @@ export const HabitsProgress: React.FC<{ embedded?: boolean }> = ({ embedded = fa
           <HabitGarden items={[]} />
           <span aria-hidden className="absolute bottom-0 inset-x-0 h-1.5 bg-leaf/25" />
         </div>
+        {isGuest && (
+          // Sample rows (not real data) so guests see what the tracker looks like.
+          <ul aria-hidden className="flex flex-col gap-1.5 opacity-70">
+            {([['water', 5, 8], ['sleep', 6, 8], ['mindfulness', 1, 3]] as const).map(([type, done, total]) => (
+              <li key={type} className="flex items-center gap-3 rounded-lg bg-secondary/40 px-3 py-2">
+                <Icon name={HABIT_ICONS[type]} size={18} weight="duotone" className="text-leaf shrink-0" />
+                <span className="text-sm text-foreground w-24 truncate">{copy.names[type]}</span>
+                <span className="flex-1 flex gap-1">
+                  {Array.from({ length: total }, (_, i) => (
+                    <span key={i} className={`h-2 flex-1 rounded-sm ${i < done ? 'bg-leaf' : 'bg-leaf/20'}`} />
+                  ))}
+                </span>
+                <span className="text-sm tabular-nums text-muted-foreground">{done}/{total}</span>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     );
   }

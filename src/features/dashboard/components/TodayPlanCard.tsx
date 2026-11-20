@@ -21,6 +21,8 @@ const COPY = {
         empty: 'Aún no hay nada planeado para hoy.',
         emptyCta: 'Planear mi día',
         guestEmpty: 'Con una cuenta organizas comidas y entrenos de la semana según tu fase.',
+        example: 'Ejemplo de un día',
+        sampleWorkout: 'Fuerza suave 30 min',
         slotHint: 'Sin plan',
         minutes: 'min',
         slots: { breakfast: 'Desayuno', lunch: 'Almuerzo', snack: 'Snack', dinner: 'Cena' },
@@ -33,6 +35,8 @@ const COPY = {
         empty: 'Nothing planned for today yet.',
         emptyCta: 'Plan my day',
         guestEmpty: "With an account you can plan the week's meals and workouts around your phase.",
+        example: 'Example day',
+        sampleWorkout: 'Gentle strength, 30 min',
         slotHint: 'Not planned',
         minutes: 'min',
         slots: { breakfast: 'Breakfast', lunch: 'Lunch', snack: 'Snack', dinner: 'Dinner' },
@@ -204,6 +208,50 @@ export const TodayPlanCard: React.FC<{ embedded?: boolean }> = ({ embedded = fal
         );
     }
 
+    // Guests: a sample day (catalog recipes) so the card shows what the planner gives them.
+    if (isGuest && !workout && meals.length === 0) {
+        const tags = { breakfast: 'Desayuno', lunch: 'Almuerzo', snack: 'Snack', dinner: 'Cena' } as const;
+        const sample = MEAL_SLOTS.map((slot) => ({ slot, recipe: CATALOG_RECIPES.find((r) => r.imageUrl && r.tags.includes(tags[slot])) }));
+        return (
+            <div className={embedded ? 'flex flex-col gap-4' : 'bg-card rounded-3xl border border-border shadow-sm p-5 sm:p-6 flex flex-col gap-4'}>
+                <div className="flex items-center justify-between gap-3 flex-wrap">
+                    <p className="text-sm text-muted-foreground">{copy.guestEmpty}</p>
+                    <button
+                        onClick={promptSignup}
+                        className="shrink-0 inline-flex items-center gap-1 px-3.5 min-h-10 rounded-full text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors cursor-pointer"
+                    >
+                        <Icon name="add" size={14} />{copy.emptyCta}
+                    </button>
+                </div>
+                <div className="flex flex-col gap-2 opacity-90" aria-label={copy.example}>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{copy.example}</p>
+                    <ul className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 xl:grid-cols-4 gap-x-3 gap-y-4">
+                        {sample.map(({ slot, recipe }) => recipe && (
+                            <li key={slot} className="min-w-0 flex flex-col gap-2">
+                                <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-muted">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img src={recipe.imageUrl as string} alt="" loading="lazy" className="size-full object-cover" />
+                                </div>
+                                <div className="min-w-0">
+                                    <p className="text-sm text-muted-foreground">{copy.slots[slot]}</p>
+                                    <p className="text-sm font-medium leading-snug line-clamp-2 text-pretty text-foreground">{recipe.title}</p>
+                                </div>
+                            </li>
+                        ))}
+                    </ul>
+                    <div className="flex items-center gap-3 pt-1">
+                        <div className="size-9 rounded-full bg-blossom-soft text-blossom flex items-center justify-center shrink-0">
+                            <Icon name="fitness_center" size={18} weight="duotone" />
+                        </div>
+                        <div>
+                            <p className="text-sm text-muted-foreground">{copy.workout}</p>
+                            <p className="text-sm font-medium text-foreground">{copy.sampleWorkout}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
     // No plan yet: show the day's empty slots so the space reads as "fill me in", not as missing.
     if (!workout && meals.length === 0) {
         const open = () => (isGuest ? promptSignup() : router.push('/planner'));

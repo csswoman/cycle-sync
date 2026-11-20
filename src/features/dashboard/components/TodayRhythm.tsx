@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Icon } from '@/components/ui/Icon';
+import { CardFlowers } from '@/components/ui/CardFlowers';
 import { useLanguage } from '@/i18n/LanguageContext';
 import { TodayTabs } from './DashboardGroups';
 import { DailyGuide, PhaseSubtitle } from './DailyGuide';
@@ -31,8 +32,9 @@ export const TodayRhythm: React.FC<{ overview: CycleOverview }> = ({ overview })
             aria-labelledby="today-rhythm-title"
             className="relative isolate overflow-hidden bg-card rounded-2xl sm:rounded-3xl border border-border shadow-sm p-4 sm:p-6"
         >
+            <CardFlowers variant="rhythm" />
             {/* Left: title + Hoy/Plan/Registro tabs. Right: cycle numbers as a compact side column. */}
-            <div className="flex flex-col gap-5 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:gap-6 lg:items-start">
+            <div className={`flex flex-col gap-5 ${overview.estimate ? 'lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:gap-6 lg:items-start' : ''}`}>
                 <div className="min-w-0">
                     <TodayTabs
                         header={(id) => (
