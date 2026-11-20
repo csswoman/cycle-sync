@@ -35,7 +35,7 @@ Popular cycle apps treat PMOS (polycystic ovarian metabolic syndrome, formerly P
 
 It is designed as a **daily log**: every screen helps record something quickly and shows progress over time.
 
-**Try it without an account:** the dashboard, routines, nutrition, PMOS and articles sections open in guest mode. Logging data requires signing up.
+**Try it without an account:** a public landing page explains the product, and the dashboard, routines, nutrition, PMOS and articles sections open in guest mode with a preview banner. Logging data requires signing up.
 
 ---
 
@@ -43,22 +43,23 @@ It is designed as a **daily log**: every screen helps record something quickly a
 
 **Cycle & daily log**
 - Period history, bleeding intensity, cycle signs and a calendar with phase predictions (Menstrual, Follicular, Ovulatory, Luteal).
-- Quick daily check-in for mood, energy, sleep, cravings and symptoms.
+- Quick daily check-in for mood, energy, sleep, cravings and symptoms, and a "today at a glance" summary on the dashboard.
 - Trends across cycles to spot hormonal patterns, plus habit tracking.
 
 **PMOS care**
 - Symptom scoring, including hirsutism with the Ferriman-Gallwey scale.
 - Lab results with reference ranges, which can be **read automatically from a photo or PDF** of the report.
-- Glucose, insulin, weight, waist and blood pressure; medication schedules, dose changes and side effects.
+- Glucose, insulin, weight, waist and blood pressure, plus body goals and measurements; medication schedules, dose changes and side effects.
 - Appointments, questions for the doctor and private progress photos.
 
 **Nutrition & planning**
 - Recipe library: a shared catalog (imported from PDFs or generated with AI, deduplicated by title) plus your own recipes, favorites and pantry.
 - Weekly planner for meals and workouts, filled from the library first and with AI only for the gaps.
 - Grocery list built from the plan.
+- Meal analysis from a photo (saved to your history), a macro and water calculator, a plate builder and food preferences that filter recipes.
 
 **Training**
-- Routines and programs with an exercise dataset (GIFs © [Gym visual](https://gymvisual.com/)), guided YouTube workouts and a workout journal.
+- Routines and programs with an exercise dataset (GIFs © [Gym visual](https://gymvisual.com/)), guided YouTube workouts and a workout journal with a training calendar, history and session logger.
 - Readiness-based daily suggestions and a one-rep-max calculator.
 
 **AI assistant (Google Gemini)**
@@ -83,7 +84,7 @@ It is designed as a **daily log**: every screen helps record something quickly a
 | Area | Approach |
 | --- | --- |
 | **Offline-first** | Daily logs, habits, PMOS entries, workouts and cycle signs are written to IndexedDB (Dexie) first and synced to Supabase when online (`useOfflineSync`). Sign-out uploads pending entries before wiping the device. |
-| **Security by design** | RLS on all 36 tables, server-only secrets, hashed webhook tokens, CSP and HSTS headers, generic API errors. See [Security & privacy](#security--privacy). |
+| **Security by design** | RLS on all 37 tables, server-only secrets, hashed webhook tokens, CSP and HSTS headers, generic API errors. See [Security & privacy](#security--privacy). |
 | **Responsible AI** | Explicit consent enforced on the server, data minimization with explicit column lists, and a per-user daily quota enforced in Postgres. |
 | **Cost-aware AI** | The planner fills meals from the recipe library before calling the model, and AI-generated recipes are saved to a shared, deduplicated catalog so they are reused instead of regenerated. |
 | **Testable domain logic** | Cycle prediction, PMOS metrics, nutrition targets, exercise math and data export are pure functions in `src/lib/`, covered by **360+ Vitest tests**. |
@@ -187,7 +188,7 @@ CycleSync stores sensitive health data (menstrual cycle, sexual activity, lab re
 
 ## Database
 
-All **36 tables** use Row Level Security. Tables with user data are restricted to their owner (`auth.uid() = user_id`); the recipe and video catalogs are shared and read-only for users.
+All **37 tables** use Row Level Security. Tables with user data are restricted to their owner (`auth.uid() = user_id`); the recipe and video catalogs are shared and read-only for users.
 
 | Area | Tables |
 | --- | --- |
@@ -195,7 +196,7 @@ All **36 tables** use Row Level Security. Tables with user data are restricted t
 | PMOS & health | `pcos_symptoms`, `pmos_metrics`, `pmos_diagnosis`, `lab_results`, `hirsutism_scores`, `wellbeing_checks`, `progress_photos`, `appointments`, `doctor_questions`, `health_events` |
 | Medication | `medications`, `medication_logs`, `medication_dose_changes`, `medication_side_effects` |
 | Habits & training | `habits`, `habit_logs`, `routines`, `workout_logs`, `workout_plan_entries`, `workout_videos` |
-| Nutrition | `recipes`, `user_recipes`, `meal_plan_entries`, `grocery_checks`, `pantry_items`, `user_food_preferences` |
+| Nutrition | `recipes`, `user_recipes`, `meal_plan_entries`, `grocery_checks`, `pantry_items`, `user_food_preferences`, `meal_analyses` |
 | Wearables | `health_data`, `health_records`, `health_webhook_tokens`, `fitbit_tokens` |
 | Internal | `ai_usage` |
 
