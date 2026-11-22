@@ -139,6 +139,7 @@ export const DailyGuide: React.FC<{ state: TodayCheckinState; overview: CycleOve
                 <p className="min-w-0 text-sm font-semibold text-foreground text-pretty">{plan.focus[lang]}</p>
                 <InfoTooltip label={copy.helpLabel}><p>{copy.help}</p></InfoTooltip>
             </div>
+            <p className="px-1 text-sm text-muted-foreground text-pretty">{plan.why[lang]}</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:[&>*:last-child:nth-child(odd)]:col-span-2">
                 <Tile icon="fitness_center" label={copy.move} tip={`${plan.move[lang]} ${plan.why[lang]}`}>
                     <div className="flex flex-1 flex-col justify-between gap-3">

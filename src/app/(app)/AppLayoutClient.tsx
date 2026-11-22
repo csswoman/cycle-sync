@@ -18,6 +18,12 @@ import { Icon } from '@/components/ui/Icon';
 import PinLock from '@/components/layout/PinLock';
 import AiConsentDialog from '@/components/layout/AiConsentDialog';
 import { clearSyncedLocalData } from '@/lib/signOut';
+import { useOnboardingAnswers } from '@/hooks/useOnboardingAnswers';
+
+const GOAL_LABEL = {
+  es: { performance: 'Enfoque: rendimiento', pmos: 'Enfoque: PMOS', fertility: 'Enfoque: fertilidad', wellness: 'Enfoque: bienestar' },
+  en: { performance: 'Focus: performance', pmos: 'Focus: PMOS', fertility: 'Focus: fertility', wellness: 'Focus: wellness' },
+};
 
 export default function AppLayoutClient({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -25,6 +31,7 @@ export default function AppLayoutClient({ children }: { children: React.ReactNod
   const { theme, setTheme } = useTheme();
   const isDarkMode = theme === 'dark';
   const { language, setLanguage, t } = useLanguage();
+  const goal = useOnboardingAnswers().goal;
   const {
     mobileMenuOpen,
     setMobileMenuOpen,
@@ -183,7 +190,7 @@ export default function AppLayoutClient({ children }: { children: React.ReactNod
                 <p className="text-foreground text-xs sm:text-sm font-bold truncate max-w-[140px]">
                   {isGuest ? t.guestUser : user?.user_metadata?.full_name || (language === 'es' ? 'Usuaria' : 'User')}
                 </p>
-                <p className="text-muted-foreground text-[11px] font-medium leading-none">{isGuest ? t.guestBrowsing : t.powerhouseArchetype}</p>
+                <p className="text-muted-foreground text-[11px] font-medium leading-none">{isGuest ? t.guestBrowsing : goal ? GOAL_LABEL[language === 'es' ? 'es' : 'en'][goal] : ''}</p>
               </div>
               <div
                 className="bg-center bg-no-repeat bg-cover rounded-full size-9 sm:size-10 border-2 border-card shadow-sm ring-2 ring-blossom-soft flex items-center justify-center bg-blossom-soft flex-shrink-0"
