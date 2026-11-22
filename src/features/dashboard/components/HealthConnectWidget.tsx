@@ -199,7 +199,7 @@ const HealthConnectWidget: React.FC<{ quiet?: boolean; bare?: boolean; footerAct
   const guestCopy = COPY[es ? 'es' : 'en'];
 
   const goalLine = (progress: number | null, goal: string) =>
-    progress === null ? (es ? `Meta: ${goal}` : `Goal: ${goal}`) : `${Math.round(progress * 100)} % ${es ? 'de' : 'of'} ${goal}`;
+    progress === null ? (es ? `${isGuest ? '' : 'Toca para registrar hoy · '}Meta: ${goal}` : `${isGuest ? '' : 'Tap to log today · '}Goal: ${goal}`) : `${Math.round(progress * 100)} % ${es ? 'de' : 'of'} ${goal}`;
 
   return (
     <section

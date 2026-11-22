@@ -122,7 +122,7 @@ export const TodayChecklist: React.FC<{ embedded?: boolean }> = ({ embedded = fa
                         <Head
                             icon="medication"
                             title={text.medsTitle}
-                            detail={medsLoading ? '...' : totalDoses ? text.medsProgress(takenDoses, totalDoses) : text.medsNone}
+                            detail={medsLoading ? '\u00A0' : totalDoses ? text.medsProgress(takenDoses, totalDoses) : text.medsNone}
                             done={medsDone}
                             cta={totalDoses ? text.medsCta : copy.addMed}
                             onClick={() => router.push(totalDoses ? '/log?tab=meds' : '/medications')}
