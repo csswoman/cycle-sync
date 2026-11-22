@@ -10,7 +10,14 @@ import { AppointmentBanner } from './components/AppointmentBanner';
 import { ProfileNudge } from './components/ProfileNudge';
 import { FertilityWindowCard, PregnancyHero } from '@/features/pregnancy/PregnancyCards';
 import { PhaseExplorer } from './components/PhaseExplorer';
+import Link from 'next/link';
+import { Icon } from '@/components/ui/Icon';
 import { dashboardText } from './dashboardText';
+
+const TRUST = {
+    es: { text: 'Herramienta de apoyo, no diagnostica. Tus datos son privados y no se venden.', link: 'Cómo los cuidamos' },
+    en: { text: 'A support tool, not a diagnosis. Your data is private and never sold.', link: 'How we protect it' },
+};
 
 interface DashboardProps {
     onNavigate: (view: View) => void;
@@ -43,6 +50,11 @@ const Dashboard: React.FC<DashboardProps> = ({ userName }) => {
                         {text.greeting(userName?.split(' ')[0])}
                     </h1>
                     <p className="text-muted-foreground text-sm sm:text-base text-pretty first-letter:uppercase">{today ? `${today}. ` : ''}{text.subtitle}</p>
+                    <p className="flex flex-wrap items-center gap-x-1.5 text-sm text-muted-foreground">
+                        <Icon name="lock" size={16} className="shrink-0" />
+                        {TRUST[lang].text}
+                        <Link href="/privacy" className="font-medium text-foreground underline underline-offset-2 hover:text-primary">{TRUST[lang].link}</Link>
+                    </p>
                 </header>
 
                 <AppointmentBanner />
