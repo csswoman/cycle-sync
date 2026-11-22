@@ -29,7 +29,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
   };
 
   return (
-    <div className="relative bg-background text-foreground font-display min-h-screen flex flex-col w-full overflow-y-auto transition-colors duration-300 [background-image:radial-gradient(60rem_30rem_at_85%_-10%,color-mix(in_srgb,var(--blossom-soft)_35%,transparent),transparent),radial-gradient(50rem_30rem_at_0%_105%,color-mix(in_srgb,var(--sage)_30%,transparent),transparent)]">
+    <div className="relative bg-background text-foreground font-display h-dvh flex flex-col w-full overflow-y-auto overscroll-contain transition-colors duration-300 [background-image:radial-gradient(60rem_30rem_at_85%_-10%,color-mix(in_srgb,var(--blossom-soft)_35%,transparent),transparent),radial-gradient(50rem_30rem_at_0%_105%,color-mix(in_srgb,var(--sage)_30%,transparent),transparent)]">
       <header className="w-full border-b border-border bg-background/80 backdrop-blur z-10 sticky top-0">
         <div className="px-4 md:px-10 py-3 flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center gap-2 shrink-0">
